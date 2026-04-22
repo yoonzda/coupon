@@ -1,0 +1,54 @@
+name: ongjin-coupon-platform
+services:
+  # 데이터베이스: MySQL 8.0
+  db:
+    image: mysql:8.0
+    container_name: ongjin-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ongjin_coupon_db
+      MYSQL_ROOT_PASSWORD: root_password_here
+      MYSQL_USER: ongjin_user
+      MYSQL_PASSWORD: ongjin_password_here
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./database/migrations:/docker-entrypoint-initdb.d # 초기 SQL 실행
+      - db_data:/var/lib/mysql
+
+  # 백엔드: Node.js (Port 3010)
+  backend:
+    build: ./backend
+    container_name: ongjin-backend
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_USER: ongjin_user
+      DB_PASSWORD: ongjin_password_here
+      DB_NAME: ongjin_coupon_db
+      PORT: 3010
+      SESSION_SECRET: your_secret_vibe_coding
+      KAKAO_CLIENT_ID: dummy_id
+      KAKAO_CLIENT_SECRET: dummy_secret
+      NAVER_CLIENT_ID: dummy_id
+      NAVER_CLIENT_SECRET: dummy_secret
+      GOOGLE_CLIENT_ID: dummy_id
+      GOOGLE_CLIENT_SECRET: dummy_secret
+      CALLBACK_URL: http://localhost:8080/tourist/auth-callback.html
+    depends_on:
+      - db
+    ports:
+      - "3010:3010"
+
+  # 프론트엔드: Nginx (Port 80)
+  frontend:
+    build: ./frontend
+    container_name: ongjin-frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

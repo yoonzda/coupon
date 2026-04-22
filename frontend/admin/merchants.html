@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>가맹점 관리 | 옹진관광 쿠폰</title>
+  <link rel="stylesheet" href="../shared/css/main.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0 !important; padding: 0 !important; 
+      width: 100% !important; max-width: none !important; 
+      overflow-x: hidden; background: #f1f5f9;
+      font-family: var(--font-main); color: #1e293b; 
+    }
+    .app-shell { display: flex !important; flex-direction: column; min-height: 100vh; width: 100% !important; max-width: none !important; }
+    @media (min-width: 1024px) {
+      .app-shell { flex-direction: row !important; }
+      .admin-sidebar { width: 240px !important; min-width: 240px; height: 100vh; background: #0f172a; color: #fff; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; }
+      .admin-content { flex: 1 !important; padding: 40px; background: #f1f5f9; min-width: 0; }
+    }
+    .admin-sidebar .logo { padding: 24px; font-size: 1.1rem; font-weight: 900; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; color: #fff; }
+    .admin-nav { padding: 16px 0; flex: 1; }
+    .admin-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 24px; color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s; }
+    .admin-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .admin-nav a.active { color: #fff; background: var(--primary); font-weight: 700; }
+    .tabs { display: flex; gap: 32px; border-bottom: 1px solid #e2e8f0; margin-bottom: 32px; }
+    .tab { padding: 12px 4px; color: #64748b; cursor: pointer; font-weight: 600; position: relative; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .tab .count { font-size: 0.7rem; background: #e2e8f0; color: #64748b; padding: 2px 6px; border-radius: 10px; min-width: 20px; text-align: center; }
+    .tab.active { color: var(--primary); }
+    .tab.active .count { background: var(--primary); color: #fff; }
+    .tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary); }
+    .merchant-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+    .merchant-table { width: 100%; border-collapse: collapse; }
+    .merchant-table th { background: #f8fafc; padding: 16px 24px; text-align: left; font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+    .merchant-table td { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .status-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
+    .status-approved { background: #dcfce7; color: #166534; }
+    .status-pending { background: #fef9c3; color: #854d0e; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .action-btns { display: flex; gap: 8px; }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-outline { background: #fff; border: 1px solid #e2e8f0; color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="admin-sidebar">
+      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
+      <nav class="admin-nav">
+        <a href="/admin/index.html">대시보드</a>
+        <a href="/admin/merchants.html" class="active">가맹점 관리</a>
+        <a href="/admin/settlement.html">정산 관리</a>
+        <a href="/admin/fds.html">FDS 모니터링</a>
+      </nav>
+    </aside>
+
+    <main class="admin-content">
+      <header style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1 style="font-size: 1.5rem; font-weight: 900;">가맹점 관리</h1>
+          <p style="color: #64748b;">신규 입점 신청 확인 및 승인/반려 처리를 관리합니다.</p>
+        </div>
+        <button class="btn-sm btn-outline" onclick="window.resetData()">데이터 초기화</button>
+      </header>
+
+      <div class="tabs">
+        <div class="tab active" data-status="pending">승인 대기 <span class="count" id="count-pending">0</span></div>
+        <div class="tab" data-status="approved">승인 완료 <span class="count" id="count-approved">0</span></div>
+        <div class="tab" data-status="rejected">반려/중지 <span class="count" id="count-rejected">0</span></div>
+      </div>
+
+      <div class="merchant-card">
+        <table class="merchant-table">
+          <thead>
+            <tr>
+              <th>상점명</th>
+              <th>연락처</th>
+              <th>주소</th>
+              <th>신청일</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="merchant-list">
+            <tr><td colspan="5" class="text-center" style="padding: 40px;">데이터 로드 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { api, showToast, fmtDate } from '../shared/js/api.js'
+
+    const STORAGE_KEY = 'admin_mock_merchants_v2';
+    let currentStatus = 'pending';
+
+    const initialMock = [
+      { id: 101, business_name: '백령도 사곶 냉면', category: '음식점', contact: '010-1234-5678', address: '인천광역시 옹진군 백령면 사곶로 123', applied_at: new Date(Date.now() - 86400000).toISOString(), status: 'pending' },
+      { id: 102, business_name: '연안부두 회센터', category: '음식점', contact: '010-9876-5432', address: '인천광역시 중구 연안부두로 45', applied_at: new Date(Date.now() - 172800000).toISOString(), status: 'pending' },
+      { id: 103, business_name: '덕적도 솔숲 민박', category: '숙박업', contact: '010-5555-4444', address: '인천광역시 옹진군 덕적면 솔밭길 89', applied_at: new Date(Date.now() - 259200000).toISOString(), status: 'pending' },
+      { id: 104, business_name: '대청도 모래사막 카페', category: '관광·레저', contact: '010-1111-2222', address: '인천광역시 옹진군 대청면 대청북로 200', applied_at: new Date(Date.now() - 3600000).toISOString(), status: 'pending' },
+      { id: 105, business_name: '연평도 꽃게 전문점', category: '음식점', contact: '010-3333-7777', address: '인천광역시 옹진군 연평면 연평로 55', applied_at: new Date(Date.now() - 7200000).toISOString(), status: 'pending' },
+      { id: 106, business_name: '영흥도 캠핑장', category: '숙박업', contact: '010-8888-9999', address: '인천광역시 옹진군 영흥면 영흥남로 321', applied_at: new Date(Date.now() - 14400000).toISOString(), status: 'pending' }
+    ];
+
+    function getMockData() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMock));
+        return initialMock;
+      }
+      return JSON.parse(saved);
+    }
+    
+    window.resetData = () => {
+      if(confirm('데이터를 초기화하시겠습니까?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      }
+    }
+
+    function renderMerchants(data) {
+      const list = document.getElementById('merchant-list');
+      if (!data || data.length === 0) {
+        list.innerHTML = `<tr><td colspan="5" class="text-center" style="padding: 40px; color: #64748b;">내역이 없습니다.</td></tr>`;
+        return;
+      }
+
+      list.innerHTML = data.map(m => {
+        const date = m.applied_at ? fmtDate(m.applied_at) : '-';
+        const displayStatus = m.status || currentStatus;
+        return `
+          <tr id="row-${m.id}">
+            <td>
+              <div style="font-weight:700; font-size:1rem; color: #1e293b;">${m.business_name || m.name || '이름 없음'}</div>
+              <div style="font-size:0.8rem; color:#64748b; margin-top:4px;">${m.category || '-'}</div>
+            </td>
+            <td>${m.contact || m.phone || '-'}</td>
+            <td style="color: #64748b; font-size: 0.85rem; max-width: 250px;">
+              ${m.address || '-'}
+              ${displayStatus === 'rejected' && m.rejection_reason ? `
+                <div style="margin-top:8px; padding:8px; background:#fff1f2; border-radius:4px; color:#e11d48; font-size:0.75rem;">
+                  <strong>반려 사유:</strong> ${m.rejection_reason}
+                </div>
+              ` : ''}
+            </td>
+            <td>${date}</td>
+            <td>
+              <div class="action-btns">
+                ${currentStatus === 'pending' ? `
+                  <button class="btn-sm btn-primary" onclick="window.updateMerchantStatus(${m.id}, 'approved')">승인</button>
+                  <button class="btn-sm btn-outline" style="color:#ef4444; border-color:#fee2e2" onclick="window.updateMerchantStatus(${m.id}, 'rejected')">반려</button>
+                ` : `
+                  <span class="status-badge status-${displayStatus}">
+                    ${displayStatus === 'approved' ? '승인완료' : '반려됨'}
+                  </span>
+                `}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    window.updateMerchantStatus = async (id, status) => {
+      const numId = Number(id);
+      const label = status === 'approved' ? '승인' : '반려';
+      let reason = '';
+
+      if (status === 'rejected') {
+        reason = prompt('반려 사유를 입력해주세요:', '서류 미비 (사업자등록증 확인 불가)');
+        if (!reason) return;
+      } else {
+        if (!confirm(`가맹점을 ${label} 처리하시겠습니까?`)) return;
+      }
+
+      try {
+        if (numId >= 100) {
+          const data = getMockData();
+          const idx = data.findIndex(m => m.id === numId);
+          if (idx > -1) {
+            data[idx].status = status;
+            if (status === 'rejected') data[idx].rejection_reason = reason;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            showToast(`${label} 처리가 완료되었습니다.`, 'success');
+            loadMerchants();
+          }
+          return;
+        }
+        await api.patch(`/admin/merchants/${numId}/status`, { status, reason });
+        showToast(`${label} 처리가 완료되었습니다.`, 'success');
+        loadMerchants();
+      } catch (err) {
+        showToast(`처리 실패: ${err.message}`, 'error');
+      }
+    };
+
+    async function loadMerchants() {
+      const data = getMockData();
+      document.getElementById('count-pending').textContent = data.filter(m => m.status === 'pending').length;
+      document.getElementById('count-approved').textContent = data.filter(m => m.status === 'approved').length;
+      document.getElementById('count-rejected').textContent = data.filter(m => m.status === 'rejected').length;
+
+      const filtered = data.filter(m => m.status === currentStatus);
+      renderMerchants(filtered);
+
+      try {
+        const res = await api.get(`/admin/merchants?status=${currentStatus}`);
+        if (res.data) renderMerchants([...filtered, ...res.data]);
+      } catch (e) { console.warn('API load skipped'); }
+    }
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.onclick = () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentStatus = tab.dataset.status;
+        loadMerchants();
+      };
+    });
+
+    loadMerchants();
+  </script>
+</body>
+</html>

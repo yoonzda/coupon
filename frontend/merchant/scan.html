@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="QR 스캔 결제 — 옹진관광 쿠폰 가맹점" />
+  <title>쿠폰 스캔 | 옹진관광 가맹점</title>
+  <link rel="stylesheet" href="../shared/css/main.css" />
+  <style>
+    /* 스캔 영역 */
+    .scan-zone {
+      background: linear-gradient(160deg, #065f46 0%, #059669 100%);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .scan-frame {
+      width: 220px; height: 220px;
+      border-radius: var(--radius-lg);
+      border: 3px solid rgba(255,255,255,.4);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: rgba(0,0,0,.3);
+    }
+    /* 모서리 마커 */
+    .scan-frame::before, .scan-frame::after,
+    .scan-frame > span::before, .scan-frame > span::after {
+      content: '';
+      position: absolute;
+      width: 24px; height: 24px;
+      border-color: #fff;
+      border-style: solid;
+    }
+    .scan-frame::before  { top:8px; left:8px;   border-width: 3px 0 0 3px; }
+    .scan-frame::after   { top:8px; right:8px;  border-width: 3px 3px 0 0; }
+    .scan-frame > span::before { bottom:8px; left:8px;  border-width: 0 0 3px 3px; }
+    .scan-frame > span::after  { bottom:8px; right:8px; border-width: 0 3px 3px 0; }
+
+    .scan-line {
+      position: absolute;
+      width: 80%; height: 2px;
+      background: linear-gradient(90deg, transparent, #34d399, transparent);
+      animation: scanMove 2s ease-in-out infinite;
+    }
+    @keyframes scanMove {
+      0%  { top: 20%; }
+      50% { top: 80%; }
+      100%{ top: 20%; }
+    }
+
+    .scan-placeholder {
+      font-size: 3rem;
+      opacity: .5;
+    }
+
+    .scan-label {
+      color: rgba(255,255,255,.9);
+      font-size: .88rem;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    /* 결제 결과 */
+    .result-card {
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      animation: popIn .3s var(--ease);
+    }
+    @keyframes popIn {
+      from { transform: scale(.92); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .result-card.success { background: #dcfce7; border: 2px solid #86efac; }
+    .result-card.error   { background: #fee2e2; border: 2px solid #fca5a5; }
+    .result-icon { font-size: 3rem; }
+    .result-amount { font-size: 2rem; font-weight: 900; color: #15803d; }
+    .result-msg    { font-size: .9rem; color: var(--text-secondary); }
+
+    /* 오프라인 배너 */
+    .offline-banner {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      padding: 10px 16px;
+      font-size: .82rem;
+      color: #92400e;
+      font-weight: 600;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .offline-banner.hidden { display: none; }
+
+    /* 수동 입력 */
+    .manual-section {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="logo">🏪 쿠폰 스캔</div>
+      <a href="/merchant/history.html" style="font-size:.8rem;color:var(--text-secondary);">거래 내역</a>
+    </header>
+
+    <!-- 오프라인 배너 -->
+    <div class="offline-banner hidden" id="offline-banner">
+      📡 오프라인 상태 — 스캔 결과가 임시 저장됩니다
+    </div>
+
+    <!-- 스캔 존 -->
+    <div class="scan-zone">
+      <!-- 카메라 촬영 트리거 -->
+      <label class="scan-frame" for="camera-input" style="cursor:pointer;">
+        <span></span><!-- 모서리 마커용 -->
+        <div class="scan-line"></div>
+        <div id="scan-placeholder" class="scan-placeholder">📷</div>
+      </label>
+      <input type="file" accept="image/*" capture="camera"
+        id="camera-input" style="display:none;" />
+      <p class="scan-label">카메라 아이콘을 눌러 QR / 바코드를 스캔하세요</p>
+    </div>
+
+    <!-- 결과 카드 -->
+    <div id="result-area" style="padding:16px;display:none;"></div>
+
+    <!-- 수동 입력 -->
+    <div class="manual-section">
+      <p class="section-title" style="margin-bottom:0;">수동 입력</p>
+      <div style="display:flex;gap:8px;">
+        <input class="form-input" id="manual-code" type="text"
+          placeholder="쿠폰 번호 직접 입력" style="flex:1;"
+          autocomplete="off" />
+        <button class="btn btn-primary" id="btn-manual" style="padding:12px 16px;flex-shrink:0;">
+          확인
+        </button>
+      </div>
+    </div>
+
+    <!-- 오프라인 대기열 현황 -->
+    <div style="padding: 0 20px 16px;">
+      <div class="card card-p" id="queue-card" style="display:none;">
+        <p style="font-size:.82rem;color:var(--text-secondary);">
+          📦 오프라인 임시 저장: <strong id="queue-count">0</strong>건
+          <button id="btn-sync" style="margin-left:8px;font-size:.78rem;color:var(--primary);font-weight:600;text-decoration:underline;background:none;border:none;cursor:pointer;">
+            지금 동기화
+          </button>
+        </p>
+      </div>
+    </div>
+
+    <!-- 바텀 네비 -->
+    <nav class="bottom-nav">
+      <a href="/merchant/scan.html" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/>
+          <rect x="2" y="14" width="8" height="8" rx="1"/>
+          <path d="M14 14h2v2h-2zm4 0h2v2h-2zm0 4h2v2h-2zm-4 0h2v4h-2z"/>
+        </svg>
+        스캔
+      </a>
+      <a href="/merchant/history.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <path d="M9 12h6M9 16h4"/>
+        </svg>
+        거래 내역
+      </a>
+      <a href="/merchant/index.html" id="nav-logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        로그아웃
+      </a>
+    </nav>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <!-- jsQR CDN (QR 디코딩) -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
+  <script type="module">
+    import { api, requireAuth, showToast, fmtMoney, clearTokens } from '../shared/js/api.js'
+
+    if (!requireAuth('/merchant/index.html')) throw new Error('not authenticated')
+
+    // ── 오프라인 큐 (LocalStorage, AES 암호화 생략 → 개발 단계) ──
+    const QUEUE_KEY = 'ongjin_scan_queue'
+
+    function getQueue() {
+      try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]') } catch { return [] }
+    }
+    function saveQueue(q) { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)) }
+    function enqueue(couponCode) {
+      const q = getQueue()
+      q.push({ couponCode, scannedAt: new Date().toISOString(), isOffline: true })
+      saveQueue(q)
+      updateQueueBadge()
+    }
+    function updateQueueBadge() {
+      const q = getQueue()
+      const card = document.getElementById('queue-card')
+      document.getElementById('queue-count').textContent = q.length
+      card.style.display = q.length > 0 ? 'block' : 'none'
+    }
+
+    // ── 오프라인 감지 ────────────────────────────────
+    function updateOnlineStatus() {
+      document.getElementById('offline-banner').classList.toggle('hidden', navigator.onLine)
+    }
+    window.addEventListener('online',  updateOnlineStatus)
+    window.addEventListener('offline', updateOnlineStatus)
+    updateOnlineStatus()
+
+    // ── 서버 전송 (온라인 복귀 시 자동) ─────────────
+    async function syncQueue() {
+      if (!navigator.onLine) return
+      const q = getQueue()
+      if (!q.length) return
+
+      let synced = 0
+      const remaining = []
+      for (const item of q) {
+        try {
+          await api.post('/merchant/scan', item)
+          synced++
+        } catch {
+          remaining.push(item)
+        }
+      }
+      saveQueue(remaining)
+      updateQueueBadge()
+      if (synced > 0) showToast(`${synced}건 오프라인 스캔 동기화 완료`, 'success')
+    }
+
+    window.addEventListener('online', syncQueue)
+    document.getElementById('btn-sync').onclick = syncQueue
+
+    // ── 결제 처리 ────────────────────────────────────
+    function showResult(type, amount, msg, detail = '') {
+      const area = document.getElementById('result-area')
+      area.style.display = 'block'
+      area.innerHTML = `
+        <div class="result-card ${type}">
+          <div class="result-icon">${type === 'success' ? '✅' : '❌'}</div>
+          ${type === 'success' ? `<div class="result-amount">${fmtMoney(amount)}</div>` : ''}
+          <div class="result-msg">${msg}</div>
+          ${detail ? `<div style="font-size:0.75rem; color:#b91c1c; margin-top:8px; line-height:1.4;">${detail}</div>` : ''}
+        </div>`
+      setTimeout(() => { area.style.display = 'none' }, 5000)
+    }
+
+    async function processCoupon(couponCode) {
+      if (!couponCode) return
+
+      // [DEV] 테스트용 결제 시뮬레이션 (PASS일 경우 성공, DUP일 경우 중복 에러 재현)
+      if (localStorage.getItem('ongjin_token') === 'test_dummy_merchant_token') {
+        if (couponCode === 'PASS') {
+          showResult('success', 5000, '테스트 결제 완료 (Dev)');
+          showToast('5,000원 결제 완료', 'success');
+          return;
+        }
+        if (couponCode === 'DUP') {
+          showResult('error', 0, '이미 사용된 쿠폰입니다.', '[옹진 수산물 직판장]에서 2024-04-22 10:30에 이미 결제되었습니다.');
+          showToast('이미 사용된 쿠폰입니다.', 'error');
+          return;
+        }
+      }
+
+      if (!navigator.onLine) {
+        enqueue(couponCode)
+        showToast('오프라인: 임시 저장 후 복구 시 자동 정산됩니다.', '')
+        return
+      }
+
+      try {
+        const res = await api.post('/merchant/scan', { couponCode })
+        showResult('success', res.amount, '결제 완료')
+        showToast(`${fmtMoney(res.amount)} 결제 완료`, 'success')
+      } catch (e) {
+        // e.detail 은 api.js 에서 파싱되어 넘어와야 함. 현재 api.js는 message만 처리하므로 보강 필요
+        showResult('error', 0, e.message, e.detail || '')
+        showToast(e.message, 'error')
+      }
+    }
+
+    // ── 카메라 → jsQR 디코딩 ────────────────────────
+    document.getElementById('camera-input').addEventListener('change', async e => {
+      const file = e.target.files[0]
+      if (!file) return
+
+      const img = new Image()
+      img.src = URL.createObjectURL(file)
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width; canvas.height = img.height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0)
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const code = jsQR(imageData.data, imageData.width, imageData.height)
+
+        if (code) {
+          processCoupon(code.data)
+        } else {
+          showToast('QR을 인식하지 못했습니다. 다시 시도해 주세요.', 'error')
+        }
+        URL.revokeObjectURL(img.src)
+        e.target.value = ''
+      }
+    })
+
+    // ── 수동 입력 ────────────────────────────────────
+    document.getElementById('btn-manual').onclick = () => {
+      const code = document.getElementById('manual-code').value.trim()
+      if (!code) return showToast('쿠폰 번호를 입력해 주세요.', 'error')
+      processCoupon(code)
+      document.getElementById('manual-code').value = ''
+    }
+    document.getElementById('manual-code').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-manual').click()
+    })
+
+    // ── 로그아웃 ─────────────────────────────────────
+    document.getElementById('nav-logout').onclick = e => {
+      e.preventDefault()
+      clearTokens()
+      window.location.href = '/merchant/index.html'
+    }
+
+    // ── 초기 큐 확인 ─────────────────────────────────
+    updateQueueBadge()
+    if (navigator.onLine) syncQueue()
+  </script>
+</body>
+</html>

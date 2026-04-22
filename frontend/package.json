@@ -1,0 +1,14 @@
+{
+  "name": "ongjin-coupon-frontend",
+  "version": "1.0.0",
+  "description": "옹진관광 쿠폰 플랫폼 프론트엔드 (Vite MPA)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0"
+  }
+}

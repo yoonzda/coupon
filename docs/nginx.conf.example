@@ -1,0 +1,70 @@
+# =============================================
+# Nginx 설정 — 옹진관광 쿠폰 플랫폼
+# 서버: 121.125.61.114
+# 파일 위치: /etc/nginx/sites-available/ongjin.conf
+# =============================================
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name 121.125.61.114;  # 도메인 확보 시 교체
+
+    # HTTPS 리다이렉트 (Let's Encrypt 설정 후 활성화)
+    # return 301 https://$host$request_uri;
+
+    # 관광객 포털
+    location /tourist/ {
+        alias /var/www/ongjin-coupon/tourist/;
+        index index.html;
+        try_files $uri $uri/ /tourist/index.html;
+    }
+
+    # 가맹점 포털
+    location /merchant/ {
+        alias /var/www/ongjin-coupon/merchant/;
+        index index.html;
+        try_files $uri $uri/ /merchant/index.html;
+    }
+
+    # 관리자 포털
+    location /admin/ {
+        alias /var/www/ongjin-coupon/admin/;
+        index index.html;
+        try_files $uri $uri/ /admin/index.html;
+        # 관리자 포털은 서버 IP 접근 제한 권장
+        # allow 관리자IP;
+        # deny all;
+    }
+
+    # 공유 정적 자산
+    location /shared/ {
+        alias /var/www/ongjin-coupon/shared/;
+    }
+
+    # API 프록시 (포트 3010)
+    # ⚠️ trailing slash 없음 — /api/ prefix를 백엔드가 그대로 수신
+    location /api/ {
+        proxy_pass http://127.0.0.1:3010;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # OAuth 콜백 (소셜 로그인)
+    location /auth/ {
+        proxy_pass http://127.0.0.1:3010;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # 헬스체크
+    location /health {
+        proxy_pass http://127.0.0.1:3010;
+    }
+}

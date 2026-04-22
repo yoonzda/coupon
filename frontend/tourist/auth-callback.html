@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>로그인 처리 중 | 옹진관광 쿠폰</title>
+  <link rel="stylesheet" href="../shared/css/main.css" />
+  <style>
+    .loading-screen {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+    .loading-logo { font-size: 3rem; animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+    .loading-text { font-size: 1rem; color: var(--text-secondary); font-weight: 500; }
+    .loading-bar {
+      width: 200px; height: 4px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .loading-bar::after {
+      content: '';
+      display: block;
+      width: 60%;
+      height: 100%;
+      background: var(--primary);
+      border-radius: 999px;
+      animation: slide 1s ease-in-out infinite alternate;
+    }
+    @keyframes slide { from{transform:translateX(-100%)} to{transform:translateX(200%)} }
+  </style>
+</head>
+<body>
+  <div class="loading-screen">
+    <div class="loading-logo">🏝️</div>
+    <p class="loading-text">로그인 처리 중...</p>
+    <div class="loading-bar"></div>
+  </div>
+
+  <script type="module">
+    import { setTokens, showToast } from '../shared/js/api.js'
+
+    const params = new URLSearchParams(window.location.search)
+    const token   = params.get('token')
+    const refresh  = params.get('refresh')
+    const error    = params.get('error')
+
+    if (error) {
+      showToast('소셜 로그인에 실패했습니다. 다시 시도해 주세요.', 'error')
+      setTimeout(() => window.location.href = '/tourist/index.html', 2000)
+    } else if (token) {
+      setTokens(token, refresh)
+      // 전화번호 미등록 사용자는 프로필 완성 페이지로
+      window.location.href = '/tourist/mypage.html'
+    } else {
+      window.location.href = '/tourist/index.html'
+    }
+  </script>
+</body>
+</html>

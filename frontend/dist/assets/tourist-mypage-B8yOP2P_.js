@@ -1,0 +1,16 @@
+import{r as p,a as r,s as c,f as v,b as d,c as g}from"./api-vtkRPzLV.js";if(!p())throw new Error("not authenticated");let s="available";async function u(){if(localStorage.getItem("ongjin_token")==="test_dummy_jwt_token"){const e=[{id:999,coupon_type:"digital",status:"available",face_value:5e3,expires_at:"2026-12-31"},{id:998,coupon_type:"paper",status:"available",face_value:5e3,expires_at:"2026-10-15"}];o=e,document.getElementById("balance").textContent=d(1e4),document.getElementById("wallet-user").textContent="옹진여행자 님, 환영합니다! 🏝️",i(e,s);return}try{const{data:e}=await r.get("/coupon/my");o=e;const t=e.filter(n=>n.status==="available").reduce((n,l)=>n+l.face_value,0);document.getElementById("balance").textContent=d(t),document.getElementById("wallet-user").textContent="쿠폰함에 담긴 혜택을 확인하세요.",i(e,s)}catch{c("쿠폰 정보를 불러오지 못했습니다.","error")}}function i(e,t){const n=document.getElementById("coupon-list"),l=e.filter(a=>a.status===t);if(l.length===0){n.innerHTML=`
+          <div class="empty-state">
+            <div class="emoji">${t==="available"?"🎟️":t==="used"?"✅":"⏰"}</div>
+            <p>${t==="available"?"사용 가능한 쿠폰이 없습니다.":t==="used"?"사용 완료된 쿠폰이 없습니다.":"만료된 쿠폰이 없습니다."}</p>
+          </div>`;return}n.innerHTML=l.map(a=>`
+        <div class="coupon-item">
+          <div class="coupon-icon">${a.coupon_type==="paper"?"📄":"🎟️"}</div>
+          <div class="coupon-info">
+            <div class="coupon-name">${a.coupon_type==="paper"?"종이쿠폰":"디지털쿠폰"}</div>
+            <div class="coupon-meta">
+              ${a.expires_at?"만료: "+v(a.expires_at):"기간 제한 없음"}
+            </div>
+          </div>
+          <div class="coupon-value">${d(a.face_value)}</div>
+        </div>
+      `).join("")}let o=[];document.getElementById("tab-bar").addEventListener("click",async e=>{const t=e.target.closest(".tab-item");if(t){if(document.querySelectorAll(".tab-item").forEach(n=>n.classList.remove("active")),t.classList.add("active"),s=t.dataset.status,!o.length&&localStorage.getItem("ongjin_token")!=="test_dummy_jwt_token")try{const{data:n}=await r.get("/coupon/my");o=n}catch{}i(o,s)}});document.getElementById("btn-add-paper").onclick=()=>document.getElementById("paper-modal").classList.remove("hidden");document.getElementById("btn-close-modal").onclick=()=>document.getElementById("paper-modal").classList.add("hidden");document.getElementById("scan-input").addEventListener("change",async e=>{e.target.files[0]&&c("바코드 스캔 기능은 ZXing.js 연동 후 사용 가능합니다.","")});document.getElementById("btn-convert").addEventListener("click",async()=>{const e=document.getElementById("paper-code").value.trim();if(!e){c("쿠폰 번호를 입력해 주세요.","error");return}const t=document.getElementById("btn-convert");t.disabled=!0,t.innerHTML='<span class="spinner"></span>';try{const n=await r.post("/coupon/convert-paper",{code:e});c(n.message,"success"),document.getElementById("paper-modal").classList.add("hidden"),document.getElementById("paper-code").value="",o=[],await u()}catch(n){c(n.message,"error")}finally{t.disabled=!1,t.textContent="쿠폰 등록하기"}});function m(){g(),window.location.href="/tourist/index.html"}document.getElementById("btn-logout").onclick=m;document.getElementById("nav-logout").onclick=e=>{e.preventDefault(),m()};u().then(({data:e}={})=>{e&&(o=e)});

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>가맹점 관리 | 옹진관광 쿠폰</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0 !important; padding: 0 !important; 
+      width: 100% !important; max-width: none !important; 
+      overflow-x: hidden; background: #f1f5f9;
+      font-family: var(--font-main); color: #1e293b; 
+    }
+    .app-shell { display: flex !important; flex-direction: column; min-height: 100vh; width: 100% !important; max-width: none !important; }
+    @media (min-width: 1024px) {
+      .app-shell { flex-direction: row !important; }
+      .admin-sidebar { width: 240px !important; min-width: 240px; height: 100vh; background: #0f172a; color: #fff; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; }
+      .admin-content { flex: 1 !important; padding: 40px; background: #f1f5f9; min-width: 0; }
+    }
+    .admin-sidebar .logo { padding: 24px; font-size: 1.1rem; font-weight: 900; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; color: #fff; }
+    .admin-nav { padding: 16px 0; flex: 1; }
+    .admin-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 24px; color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s; }
+    .admin-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .admin-nav a.active { color: #fff; background: var(--primary); font-weight: 700; }
+    .tabs { display: flex; gap: 32px; border-bottom: 1px solid #e2e8f0; margin-bottom: 32px; }
+    .tab { padding: 12px 4px; color: #64748b; cursor: pointer; font-weight: 600; position: relative; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .tab .count { font-size: 0.7rem; background: #e2e8f0; color: #64748b; padding: 2px 6px; border-radius: 10px; min-width: 20px; text-align: center; }
+    .tab.active { color: var(--primary); }
+    .tab.active .count { background: var(--primary); color: #fff; }
+    .tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary); }
+    .merchant-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+    .merchant-table { width: 100%; border-collapse: collapse; }
+    .merchant-table th { background: #f8fafc; padding: 16px 24px; text-align: left; font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+    .merchant-table td { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .status-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
+    .status-approved { background: #dcfce7; color: #166534; }
+    .status-pending { background: #fef9c3; color: #854d0e; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .action-btns { display: flex; gap: 8px; }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-outline { background: #fff; border: 1px solid #e2e8f0; color: #64748b; }
+  </style>
+  <script type="module" crossorigin src="/assets/admin-merchants-CrMEDWPb.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/api-vtkRPzLV.js">
+  <link rel="stylesheet" crossorigin href="/assets/api-BkjUHGKL.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="admin-sidebar">
+      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
+      <nav class="admin-nav">
+        <a href="/admin/index.html">대시보드</a>
+        <a href="/admin/merchants.html" class="active">가맹점 관리</a>
+        <a href="/admin/settlement.html">정산 관리</a>
+        <a href="/admin/fds.html">FDS 모니터링</a>
+      </nav>
+    </aside>
+
+    <main class="admin-content">
+      <header style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1 style="font-size: 1.5rem; font-weight: 900;">가맹점 관리</h1>
+          <p style="color: #64748b;">신규 입점 신청 확인 및 승인/반려 처리를 관리합니다.</p>
+        </div>
+        <button class="btn-sm btn-outline" onclick="window.resetData()">데이터 초기화</button>
+      </header>
+
+      <div class="tabs">
+        <div class="tab active" data-status="pending">승인 대기 <span class="count" id="count-pending">0</span></div>
+        <div class="tab" data-status="approved">승인 완료 <span class="count" id="count-approved">0</span></div>
+        <div class="tab" data-status="rejected">반려/중지 <span class="count" id="count-rejected">0</span></div>
+      </div>
+
+      <div class="merchant-card">
+        <table class="merchant-table">
+          <thead>
+            <tr>
+              <th>상점명</th>
+              <th>연락처</th>
+              <th>주소</th>
+              <th>신청일</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="merchant-list">
+            <tr><td colspan="5" class="text-center" style="padding: 40px;">데이터 로드 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+</body>
+</html>

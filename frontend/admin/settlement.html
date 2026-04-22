@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>정산 관리 | 옹진관광 쿠폰</title>
+  <link rel="stylesheet" href="../shared/css/main.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0 !important; padding: 0 !important; 
+      width: 100% !important; max-width: none !important; 
+      overflow-x: hidden;
+      background: #f1f5f9;
+      font-family: var(--font-main); color: #1e293b; 
+    }
+    
+    .app-shell { 
+      display: flex !important; flex-direction: column; 
+      min-height: 100vh; width: 100% !important; max-width: none !important;
+    }
+    
+    @media (min-width: 1024px) {
+      .app-shell { flex-direction: row !important; }
+      .admin-sidebar { 
+        width: 240px !important; 
+        min-width: 240px;
+        height: 100vh;
+        background: #0f172a;
+        color: #fff;
+        position: sticky;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+      }
+      .admin-content { 
+        flex: 1 !important; 
+        padding: 40px; 
+        background: #f1f5f9; 
+        min-width: 0;
+      }
+      .bottom-nav { display: none; }
+    }
+    .admin-sidebar .logo {
+      padding: 24px; font-size: 1.1rem; font-weight: 900; 
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; gap: 10px; color: #fff;
+      white-space: nowrap;
+    }
+    .admin-nav { padding: 16px 0; flex: 1; }
+    .admin-nav a {
+      display: flex; align-items: center; gap: 12px; padding: 12px 24px;
+      color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s;
+      white-space: nowrap; font-size: 0.95rem;
+    }
+    .admin-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .admin-nav a.active { color: #fff; background: var(--primary); font-weight: 700; }
+
+    .admin-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; }
+    .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th { background: var(--surface-2); padding: 12px 24px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+    .admin-table td { padding: 16px 24px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+
+    .filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="admin-sidebar">
+      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
+      <nav class="admin-nav">
+        <a href="/admin/index.html">대시보드</a>
+        <a href="/admin/merchants.html">가맹점 관리</a>
+        <a href="/admin/settlement.html" class="active">정산 관리</a>
+        <a href="/admin/fds.html">FDS 모니터링</a>
+      </nav>
+    </aside>
+
+    <main class="admin-content">
+      <header style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+          <h1 style="font-size: 1.5rem; font-weight: 900;">정산 관리</h1>
+          <p style="color: var(--text-secondary);">월별 가맹점 정산 내역 및 XML 파일 생성을 관리합니다.</p>
+        </div>
+        <button class="btn btn-primary" id="btn-generate-file">📁 이달의 정산파일 생성</button>
+      </header>
+
+      <div class="filter-bar">
+        <select class="form-input" style="width: 150px;" id="filter-year">
+          <option>2026년</option>
+          <option>2025년</option>
+        </select>
+        <select class="form-input" style="width: 120px;" id="filter-month">
+          <option value="04">4월</option>
+          <option value="03">3월</option>
+          <option value="02">2월</option>
+          <option value="01">1월</option>
+        </select>
+        <button class="btn btn-outline" id="btn-search">검색</button>
+      </div>
+
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>가맹점명</th>
+              <th>정산 기간</th>
+              <th>총 결제 금액</th>
+              <th>상태</th>
+              <th>파일</th>
+            </tr>
+          </thead>
+          <tbody id="settlement-list">
+            <tr><td colspan="5" class="text-center" style="padding: 40px;">정산 기간을 선택해 주세요.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { api, showToast, fmtMoney } from '../shared/js/api.js'
+
+    async function loadSettlements() {
+      const year = document.getElementById('filter-year').value.replace('년', '');
+      const month = document.getElementById('filter-month').value;
+      const period = `${year}-${month}`;
+
+      try {
+        const { data } = await api.get(`/admin/settlements?period=${period}`);
+        const list = document.getElementById('settlement-list');
+        if (data.length === 0) {
+          list.innerHTML = '<tr><td colspan="5" class="text-center" style="padding: 40px;">내역이 없습니다.</td></tr>';
+          return;
+        }
+        list.innerHTML = data.map(s => `
+          <tr>
+            <td><strong>${s.merchant_name}</strong></td>
+            <td>${s.period}</td>
+            <td>${fmtMoney(s.total_amount)}</td>
+            <td>
+              <span class="badge ${s.status === 'transferred' ? 'badge-success' : 'badge-warning'}">
+                ${s.status === 'pending' ? '대기' : s.status === 'file_generated' ? '파일생성됨' : '지급완료'}
+              </span>
+            </td>
+            <td>
+              ${s.file_path ? `<a href="${s.file_path}" class="btn btn-outline btn-xs" download>XML 다운로드</a>` : '-'}
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        showToast('정산 내역을 불러오지 못했습니다.', 'error');
+      }
+    }
+
+    document.getElementById('btn-search').onclick = loadSettlements;
+
+    document.getElementById('btn-generate-file').onclick = async () => {
+      if (!confirm('현재 기간의 가맹점 정산 파일을 일괄 생성하시겠습니까?')) return;
+      try {
+        const res = await api.post('/admin/settlements/generate');
+        showToast(res.message, 'success');
+        loadSettlements();
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    };
+
+    loadSettlements();
+  </script>
+</body>
+</html>

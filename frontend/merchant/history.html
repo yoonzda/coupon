@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>거래 내역 | 옹진관광 가맹점</title>
+  <link rel="stylesheet" href="../shared/css/main.css" />
+  <style>
+    .summary-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .summary-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      text-align: center;
+    }
+    .summary-value { font-size: 1.3rem; font-weight: 900; color: var(--primary-dark); }
+    .summary-label { font-size: .72rem; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+
+    .tx-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tx-item:last-child { border-bottom: none; }
+    .tx-icon {
+      width: 40px; height: 40px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .tx-icon.offline { background: #fef9c3; }
+    .tx-info { flex: 1; min-width: 0; }
+    .tx-type { font-size: .82rem; font-weight: 700; color: var(--text-primary); }
+    .tx-date { font-size: .72rem; color: var(--text-muted); margin-top: 2px; }
+    .tx-amount { font-size: 1rem; font-weight: 800; color: var(--success); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <button onclick="history.back()" style="padding:8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+      </button>
+      <div class="logo">📋 거래 내역</div>
+    </header>
+
+    <main class="page-content">
+      <!-- 요약 -->
+      <div class="summary-row" id="summary-row">
+        <div class="summary-box skeleton" style="height:72px;"></div>
+        <div class="summary-box skeleton" style="height:72px;"></div>
+      </div>
+
+      <!-- 목록 -->
+      <div class="card" style="overflow:hidden;">
+        <div id="tx-list">
+          <div class="tx-item"><div class="skeleton" style="height:40px;width:100%;"></div></div>
+          <div class="tx-item"><div class="skeleton" style="height:40px;width:100%;"></div></div>
+          <div class="tx-item"><div class="skeleton" style="height:40px;width:100%;"></div></div>
+        </div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <a href="/merchant/scan.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/>
+          <rect x="2" y="14" width="8" height="8" rx="1"/>
+          <path d="M14 14h2v2h-2zm4 0h2v2h-2zm0 4h2v2h-2zm-4 0h2v4h-2z"/>
+        </svg>
+        스캔
+      </a>
+      <a href="/merchant/history.html" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
+        </svg>
+        거래 내역
+      </a>
+      <a href="/merchant/index.html" id="nav-logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        로그아웃
+      </a>
+    </nav>
+  </div>
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { api, requireAuth, showToast, fmtMoney, fmtDate, clearTokens } from '../shared/js/api.js'
+
+    if (!requireAuth('/merchant/index.html')) throw new Error('not auth')
+
+    async function load() {
+      // [DEV] 테스트용 더미 데이터 주입
+      if (localStorage.getItem('ongjin_token') === 'test_dummy_merchant_token') {
+        const dummyData = [
+          { id: 1, amount: 10000, coupon_type: 'digital', scanned_at: new Date().toISOString(), is_offline: false },
+          { id: 2, amount: 5000,  coupon_type: 'digital', scanned_at: new Date(Date.now() - 3600000).toISOString(), is_offline: false },
+          { id: 3, amount: 10000, coupon_type: 'paper',   scanned_at: new Date(Date.now() - 7200000).toISOString(), is_offline: true }
+        ];
+        renderHistory(dummyData);
+        return;
+      }
+
+      try {
+        const { data } = await api.get('/merchant/transactions')
+        renderHistory(data);
+      } catch (e) {
+        showToast(e.message, 'error')
+      }
+    }
+
+    function renderHistory(data) {
+        // 요약
+        const total = data.reduce((s, r) => s + r.amount, 0)
+        const offline = data.filter(r => r.is_offline).length
+        document.getElementById('summary-row').innerHTML = `
+          <div class="summary-box">
+            <div class="summary-value">${fmtMoney(total)}</div>
+            <div class="summary-label">총 정산 금액</div>
+          </div>
+          <div class="summary-box">
+            <div class="summary-value">${data.length}건</div>
+            <div class="summary-label">총 거래 (오프라인 ${offline}건)</div>
+          </div>`
+
+        // 목록
+        if (data.length === 0) {
+          document.getElementById('tx-list').innerHTML =
+            '<div style="padding:32px;text-align:center;color:var(--text-muted);">거래 내역이 없습니다.</div>'
+          return
+        }
+        document.getElementById('tx-list').innerHTML = data.map(t => `
+          <div class="tx-item">
+            <div class="tx-icon ${t.is_offline ? 'offline' : ''}">
+              ${t.is_offline ? '📡' : '✅'}
+            </div>
+            <div class="tx-info">
+              <div class="tx-type">${t.coupon_type === 'paper' ? '종이쿠폰' : '디지털쿠폰'} 사용</div>
+              <div class="tx-date">${fmtDate(t.scanned_at)} ${t.is_offline ? '(오프라인)' : ''}</div>
+            </div>
+            <div class="tx-amount">+${fmtMoney(t.amount)}</div>
+          </div>`).join('')
+    }
+
+    document.getElementById('nav-logout').onclick = e => {
+      e.preventDefault(); clearTokens(); window.location.href = '/merchant/index.html'
+    }
+
+    load()
+  </script>
+</body>
+</html>

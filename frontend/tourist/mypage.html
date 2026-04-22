@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="내 쿠폰 지갑 — 옹진관광 쿠폰 마이페이지" />
+  <title>내 쿠폰 지갑 | 옹진관광 쿠폰</title>
+  <link rel="stylesheet" href="../shared/css/main.css" />
+  <style>
+    /* 지갑 카드 */
+    .wallet-card {
+      background: linear-gradient(135deg, #0369a1 0%, #0ea5e9 60%, #38bdf8 100%);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(14,165,233,.4);
+    }
+    .wallet-card::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+    }
+    .wallet-card::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: -20px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+    }
+    .wallet-label { font-size: .78rem; opacity: .8; font-weight: 500; letter-spacing: .5px; }
+    .wallet-balance {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin: 6px 0 4px;
+    }
+    .wallet-sub { font-size: .8rem; opacity: .75; }
+    .wallet-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .wallet-btn {
+      background: rgba(255,255,255,.18);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      text-align: center;
+      font-size: .8rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      transition: background var(--dur) var(--ease);
+      border: 1px solid rgba(255,255,255,.2);
+    }
+    .wallet-btn:hover { background: rgba(255,255,255,.28); }
+
+    /* 탭 */
+    .tab-bar {
+      display: flex;
+      background: var(--surface-2);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      gap: 2px;
+    }
+    .tab-item {
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      font-size: .82rem;
+      font-weight: 600;
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--dur) var(--ease);
+    }
+    .tab-item.active {
+      background: var(--surface);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* 쿠폰 카드 */
+    .coupon-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    }
+    .coupon-item:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+    .coupon-icon {
+      width: 48px; height: 48px;
+      background: var(--primary-light);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .coupon-info { flex: 1; min-width: 0; }
+    .coupon-name {
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .coupon-meta { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
+    .coupon-value {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--primary-dark);
+      flex-shrink: 0;
+    }
+
+    /* 종이쿠폰 모달 */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 500;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn .2s var(--ease);
+    }
+    .modal-backdrop.hidden { display: none; }
+    .modal-sheet {
+      background: var(--surface);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      width: 100%;
+      max-width: 480px;
+      padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+      animation: slideUp .25s var(--ease);
+    }
+    .modal-handle {
+      width: 40px; height: 4px;
+      background: var(--border);
+      border-radius: 999px;
+      margin: 0 auto 20px;
+    }
+    @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+
+    /* 빈 상태 */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .emoji { font-size: 3rem; margin-bottom: 12px; }
+    .empty-state p { font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 헤더 -->
+    <header class="app-header">
+      <div class="logo">🏝️ 옹진관광 <span>쿠폰</span></div>
+      <button id="btn-logout" style="font-size:.8rem;color:var(--text-muted);">로그아웃</button>
+    </header>
+
+    <!-- 컨텐츠 -->
+    <main class="page-content">
+      <!-- 지갑 카드 -->
+      <div class="wallet-card">
+        <p class="wallet-label">내 쿠폰 잔액</p>
+        <p class="wallet-balance" id="balance">—</p>
+        <p class="wallet-sub" id="wallet-user">불러오는 중...</p>
+        <div class="wallet-actions">
+          <button class="wallet-btn" id="btn-add-paper">
+            📄 종이쿠폰 등록
+          </button>
+          <a href="/tourist/map.html" class="wallet-btn" style="text-align:center;">
+            📍 가맹점 지도
+          </a>
+        </div>
+      </div>
+
+      <!-- 쿠폰 탭 -->
+      <div>
+        <div class="tab-bar" id="tab-bar">
+          <div class="tab-item active" data-status="available">사용 가능</div>
+          <div class="tab-item" data-status="used">사용 완료</div>
+          <div class="tab-item" data-status="expired">만료</div>
+        </div>
+      </div>
+
+      <!-- 쿠폰 목록 -->
+      <div id="coupon-list" style="display:flex;flex-direction:column;gap:10px;">
+        <!-- JS로 렌더링 -->
+        <div class="skeleton" style="height:76px;"></div>
+        <div class="skeleton" style="height:76px;"></div>
+        <div class="skeleton" style="height:76px;"></div>
+      </div>
+    </main>
+
+    <!-- 바텀 네비 -->
+    <nav class="bottom-nav">
+      <a href="/tourist/mypage.html" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18"/>
+        </svg>
+        내 쿠폰
+      </a>
+      <a href="/tourist/map.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+          <circle cx="12" cy="9" r="2.5"/>
+        </svg>
+        지도
+      </a>
+      <a href="/tourist/apply-merchant.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        입점신청
+      </a>
+      <a href="/tourist/index.html" id="nav-logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        로그아웃
+      </a>
+    </nav>
+  </div>
+
+  <!-- 종이쿠폰 등록 모달 -->
+  <div class="modal-backdrop hidden" id="paper-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">종이쿠폰 등록</h2>
+      <p style="font-size:.83rem;color:var(--text-secondary);margin-bottom:20px;">
+        쿠폰 뒷면의 번호를 입력하거나 바코드를 스캔하세요.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="form-group">
+          <label class="form-label">쿠폰 번호</label>
+          <input class="form-input" id="paper-code" type="text"
+            placeholder="예: AB1234-5678" autocomplete="off"
+            inputmode="text" style="text-transform:uppercase;letter-spacing:1px;" />
+        </div>
+        <div style="text-align:center;color:var(--text-muted);font-size:.8rem;">또는</div>
+        <label class="btn btn-outline btn-full" style="cursor:pointer;">
+          📷 카메라로 바코드 스캔
+          <input type="file" accept="image/*" capture="camera" id="scan-input" class="hidden" />
+        </label>
+        <button class="btn btn-primary btn-full" id="btn-convert">
+          쿠폰 등록하기
+        </button>
+        <button class="btn btn-outline btn-full" id="btn-close-modal">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { api, requireAuth, showToast, fmtMoney, fmtDate, clearTokens } from '../shared/js/api.js'
+
+    if (!requireAuth()) throw new Error('not authenticated')
+
+    let currentStatus = 'available'
+
+    // ── 사용자 정보 & 잔액 로드 ──────────────────────
+    async function loadWallet() {
+      // [DEV] 테스트용 더미 데이터 주입
+      if (localStorage.getItem('ongjin_token') === 'test_dummy_jwt_token') {
+        const dummyData = [
+          { id: 999, coupon_type: 'digital', status: 'available', face_value: 5000, expires_at: '2026-12-31' },
+          { id: 998, coupon_type: 'paper', status: 'available', face_value: 5000, expires_at: '2026-10-15' }
+        ];
+        allCoupons = dummyData;
+        document.getElementById('balance').textContent = fmtMoney(10000);
+        document.getElementById('wallet-user').textContent = '옹진여행자 님, 환영합니다! 🏝️';
+        renderCoupons(dummyData, currentStatus);
+        return;
+      }
+
+      try {
+        const { data } = await api.get('/coupon/my')
+        allCoupons = data;
+        // 잔액은 available 쿠폰 합산
+        const balance = data
+          .filter(c => c.status === 'available')
+          .reduce((sum, c) => sum + c.face_value, 0)
+        document.getElementById('balance').textContent = fmtMoney(balance)
+        document.getElementById('wallet-user').textContent = '쿠폰함에 담긴 혜택을 확인하세요.';
+        renderCoupons(data, currentStatus)
+      } catch (e) {
+        showToast('쿠폰 정보를 불러오지 못했습니다.', 'error')
+      }
+    }
+
+    // ── 쿠폰 렌더링 ─────────────────────────────────
+    function renderCoupons(data, status) {
+      const list = document.getElementById('coupon-list')
+      const filtered = data.filter(c => c.status === status)
+
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="emoji">${status === 'available' ? '🎟️' : status === 'used' ? '✅' : '⏰'}</div>
+            <p>${status === 'available' ? '사용 가능한 쿠폰이 없습니다.' : status === 'used' ? '사용 완료된 쿠폰이 없습니다.' : '만료된 쿠폰이 없습니다.'}</p>
+          </div>`
+        return
+      }
+
+      list.innerHTML = filtered.map(c => `
+        <div class="coupon-item">
+          <div class="coupon-icon">${c.coupon_type === 'paper' ? '📄' : '🎟️'}</div>
+          <div class="coupon-info">
+            <div class="coupon-name">${c.coupon_type === 'paper' ? '종이쿠폰' : '디지털쿠폰'}</div>
+            <div class="coupon-meta">
+              ${c.expires_at ? '만료: ' + fmtDate(c.expires_at) : '기간 제한 없음'}
+            </div>
+          </div>
+          <div class="coupon-value">${fmtMoney(c.face_value)}</div>
+        </div>
+      `).join('')
+    }
+
+    // ── 탭 전환 ─────────────────────────────────────
+    let allCoupons = []
+    document.getElementById('tab-bar').addEventListener('click', async e => {
+      const tab = e.target.closest('.tab-item')
+      if (!tab) return
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'))
+      tab.classList.add('active')
+      currentStatus = tab.dataset.status
+
+      if (!allCoupons.length) {
+        // [DEV] 테스트용일 경우 빈 값 유지 방지
+        if (localStorage.getItem('ongjin_token') === 'test_dummy_jwt_token') {
+           // 이미 loadWallet에서 채워졌을 것이므로 추가 작업 없음
+        } else {
+          try {
+            const { data } = await api.get('/coupon/my')
+            allCoupons = data
+          } catch (e) {}
+        }
+      }
+      renderCoupons(allCoupons, currentStatus)
+    })
+
+    // ── 종이쿠폰 모달 ────────────────────────────────
+    document.getElementById('btn-add-paper').onclick = () =>
+      document.getElementById('paper-modal').classList.remove('hidden')
+    document.getElementById('btn-close-modal').onclick = () =>
+      document.getElementById('paper-modal').classList.add('hidden')
+
+    // 카메라 스캔
+    document.getElementById('scan-input').addEventListener('change', async e => {
+      const file = e.target.files[0]
+      if (!file) return
+      showToast('바코드 스캔 기능은 ZXing.js 연동 후 사용 가능합니다.', '')
+      // TODO: ZXing.js 바코드 디코딩 연동
+    })
+
+    // 쿠폰 등록
+    document.getElementById('btn-convert').addEventListener('click', async () => {
+      const code = document.getElementById('paper-code').value.trim()
+      if (!code) { showToast('쿠폰 번호를 입력해 주세요.', 'error'); return }
+
+      const btn = document.getElementById('btn-convert')
+      btn.disabled = true
+      btn.innerHTML = '<span class="spinner"></span>'
+
+      try {
+        const res = await api.post('/coupon/convert-paper', { code })
+        showToast(res.message, 'success')
+        document.getElementById('paper-modal').classList.add('hidden')
+        document.getElementById('paper-code').value = ''
+        allCoupons = []
+        await loadWallet()
+      } catch (e) {
+        showToast(e.message, 'error')
+      } finally {
+        btn.disabled = false
+        btn.textContent = '쿠폰 등록하기'
+      }
+    })
+
+    // ── 로그아웃 ─────────────────────────────────────
+    function logout() {
+      clearTokens()
+      window.location.href = '/tourist/index.html'
+    }
+    document.getElementById('btn-logout').onclick = logout
+    document.getElementById('nav-logout').onclick = e => { e.preventDefault(); logout() }
+
+    // ── 초기 로드 ────────────────────────────────────
+    loadWallet().then(({ data } = {}) => {
+      if (data) allCoupons = data
+    })
+  </script>
+</body>
+</html>

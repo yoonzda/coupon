@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="가맹점 로그인 — 옹진관광 쿠폰 플랫폼" />
+  <title>가맹점 로그인 | 옹진관광 쿠폰</title>
+  <style>
+    .merchant-hero {
+      background: linear-gradient(160deg, #064e3b 0%, #059669 60%, #34d399 100%);
+      padding: 44px 24px 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .merchant-hero::before {
+      content: '🏪';
+      position: absolute;
+      font-size: 8rem;
+      opacity: .06;
+      top: -10px; right: -10px;
+      line-height: 1;
+    }
+    .merchant-hero h1 {
+      color: #fff;
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+    .merchant-hero p {
+      color: rgba(255,255,255,.8);
+      font-size: .88rem;
+      margin-top: 6px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: .75rem;
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .login-card {
+      margin: -20px 16px 0;
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: var(--shadow-lg);
+      padding: 24px;
+      position: relative;
+      z-index: 10;
+    }
+    .step-label {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .otp-inputs {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+    .otp-digit {
+      aspect-ratio: 1;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      outline: none;
+      background: var(--surface-2);
+      caret-color: var(--primary);
+      transition: border-color var(--dur) var(--ease);
+    }
+    .otp-digit:focus { border-color: var(--primary); background: #fff; }
+    .otp-digit.filled { border-color: var(--primary); background: var(--primary-light); }
+
+    .resend-btn {
+      font-size: .82rem;
+      color: var(--primary);
+      font-weight: 600;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .resend-btn:disabled { color: var(--text-muted); text-decoration: none; cursor: not-allowed; }
+
+    .timer {
+      font-size: .82rem;
+      color: var(--danger);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .notice {
+      background: var(--surface-2);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-size: .8rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-top: 16px;
+    }
+    .notice strong { color: var(--text-primary); }
+
+    .rejection-alert {
+      background: #fff1f2;
+      border: 1px solid #fee2e2;
+      color: #e11d48;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      margin-top: 16px;
+      font-size: 0.85rem;
+      display: none;
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/merchant-login-Be8YOC6-.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/api-vtkRPzLV.js">
+  <link rel="stylesheet" crossorigin href="/assets/api-BkjUHGKL.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 히어로 -->
+    <div class="merchant-hero">
+      <div class="hero-badge">🔐 Zero-Password 로그인</div>
+      <h1>가맹점 로그인</h1>
+      <p>상점명 + 휴대폰 번호 인증만으로<br>안전하게 로그인합니다</p>
+    </div>
+
+    <!-- 로그인 카드 -->
+    <div class="login-card">
+      <!-- 반려 사유 알림 영역 -->
+      <div id="rejection-box" class="rejection-alert">
+        <strong>⚠️ 입점 신청 반려 안내</strong><br>
+        <span id="rejection-msg"></span>
+      </div>
+
+      <!-- STEP 1: 정보 입력 -->
+      <div id="step1">
+        <p class="step-label">Step 1 / 2 — 상점 정보 입력</p>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="form-group">
+            <label class="form-label">상점명</label>
+            <input class="form-input" id="shop-name" type="text"
+              placeholder="예: 옹진 수산물 직판장" autocomplete="organization" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">대표자 휴대폰 번호</label>
+            <input class="form-input" id="shop-phone" type="tel"
+              placeholder="01012345678" inputmode="numeric" maxlength="11" />
+          </div>
+          <button class="btn btn-primary btn-full" id="btn-send-otp">
+            인증번호 받기
+          </button>
+          
+          <div class="divider">또는</div>
+          
+          <button class="btn btn-outline btn-full" id="btn-merchant-test" style="border-color: var(--primary); color: var(--primary);">
+            테스트 가맹점으로 로그인 (Dev)
+          </button>
+        </div>
+      </div>
+
+      <script>
+        document.getElementById('btn-merchant-test').onclick = function() {
+          const shopName = document.getElementById('shop-name').value.trim();
+          const phone = document.getElementById('shop-phone').value.trim();
+          const rejBox = document.getElementById('rejection-box');
+          const rejMsg = document.getElementById('rejection-msg');
+          
+          rejBox.style.display = 'none';
+
+          // LocalStorage에서 관리자 페이지의 목업 데이터 확인
+          const saved = localStorage.getItem('admin_mock_merchants');
+          if (saved && shopName && phone) {
+            const merchants = JSON.parse(saved);
+            const found = merchants.find(m => m.business_name === shopName || m.contact === phone);
+            
+            if (found && found.status === 'rejected') {
+              rejBox.style.display = 'block';
+              rejMsg.textContent = found.rejection_reason || '서류 미비로 인해 반려되었습니다.';
+              return;
+            }
+            
+            if (found && found.status === 'pending') {
+              alert('아직 승인 대기 중인 가맹점입니다. 승인 후 이용 가능합니다.');
+              return;
+            }
+          }
+
+          localStorage.setItem('ongjin_token', 'test_dummy_merchant_token');
+          localStorage.setItem('ongjin_user', JSON.stringify({ id: 101, shopName: shopName || '옹진 맛집 본점', role: 'merchant' }));
+          window.location.href = '/merchant/scan.html';
+        };
+      </script>
+
+      <!-- STEP 2: OTP 입력 -->
+      <div id="step2" class="hidden">
+        <p class="step-label">Step 2 / 2 — 인증번호 입력</p>
+        <p style="font-size:.88rem;color:var(--text-secondary);margin-bottom:16px;" id="otp-desc">
+          휴대폰으로 발송된 6자리 번호를 입력해 주세요.
+        </p>
+        <div class="otp-inputs" id="otp-inputs">
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">
+          <span class="timer" id="timer">03:00</span>
+          <button class="resend-btn" id="btn-resend" disabled>재전송</button>
+        </div>
+        <button class="btn btn-primary btn-full" style="margin-top:16px;" id="btn-verify">
+          로그인
+        </button>
+        <button class="btn btn-outline btn-full" style="margin-top:8px;" id="btn-back">
+          이전으로
+        </button>
+      </div>
+    </div>
+
+    <!-- 안내 -->
+    <div style="padding: 20px 16px;">
+      <div class="notice">
+        <strong>처음 오셨나요?</strong><br>
+        입점 신청은 <a href="/tourist/apply-merchant.html" style="color:var(--primary);font-weight:700;">여기</a>에서 하실 수 있습니다.<br>
+        관리자 승인 후 이 화면에서 로그인 가능합니다.
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+</body>
+</html>
