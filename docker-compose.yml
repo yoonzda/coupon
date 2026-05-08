@@ -1,54 +1,71 @@
 name: ongjin-coupon-platform
+
 services:
-  # 데이터베이스: MySQL 8.0
+  # ── MySQL 8.0 ────────────────────────────────────────
   db:
     image: mysql:8.0
     container_name: ongjin-db
-    restart: always
+    restart: unless-stopped
     environment:
       MYSQL_DATABASE: ongjin_coupon_db
-      MYSQL_ROOT_PASSWORD: root_password_here
-      MYSQL_USER: ongjin_user
-      MYSQL_PASSWORD: ongjin_password_here
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_local_pass}
+      MYSQL_USER: ${MYSQL_USER:-ongjin_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-ongjin_local_pass}
     ports:
-      - "3307:3306"
+      - "3307:3306"   # 로컬 3307 → 컨테이너 3306 (기존 MySQL 충돌 방지)
     volumes:
-      - ./database/migrations:/docker-entrypoint-initdb.d # 초기 SQL 실행
+      - ./database/migrations:/docker-entrypoint-initdb.d   # 초기 SQL 자동 실행
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_local_pass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
-  # 백엔드: Node.js (Port 3010)
+  # ── Node.js Backend (Port 3010) ───────────────────────
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: ongjin-backend
-    restart: always
+    restart: unless-stopped
+    env_file:
+      - .env.local        # 로컬 시크릿 (git 제외)
     environment:
       DB_HOST: db
-      DB_USER: ongjin_user
-      DB_PASSWORD: ongjin_password_here
+      DB_PORT: 3306
+      DB_USER: ${MYSQL_USER:-ongjin_user}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-ongjin_local_pass}
       DB_NAME: ongjin_coupon_db
       PORT: 3010
-      SESSION_SECRET: your_secret_vibe_coding
-      KAKAO_CLIENT_ID: dummy_id
-      KAKAO_CLIENT_SECRET: dummy_secret
-      NAVER_CLIENT_ID: dummy_id
-      NAVER_CLIENT_SECRET: dummy_secret
-      GOOGLE_CLIENT_ID: dummy_id
-      GOOGLE_CLIENT_SECRET: dummy_secret
+      NODE_ENV: development
       CALLBACK_URL: http://localhost:8080/tourist/auth-callback.html
     depends_on:
-      - db
+      db:
+        condition: service_healthy   # DB 준비 완료 후 기동
     ports:
       - "3010:3010"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3010/health', (r)=>{ process.exit(r.statusCode===200?0:1) }).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
-  # 프론트엔드: Nginx (Port 80)
+  # ── Nginx + Vite 빌드 프론트엔드 (Port 8080) ──────────
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: ongjin-frontend
-    restart: always
+    restart: unless-stopped
     ports:
-      - "8080:80"
+      - "8080:80"       # http://localhost:8080 으로 접속
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy   # 백엔드 헬스 확인 후 기동
 
 volumes:
   db_data:
+    name: ongjin_db_data

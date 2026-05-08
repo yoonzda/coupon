@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const db = require('../config/database');
 
 /**
  * 가맹점 쿠폰 스캔 및 결제 처리
