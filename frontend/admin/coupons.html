@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>쿠폰 및 발행처 관리 | 옹진관광 관리자</title>
+  <link rel="stylesheet" href="../shared/css/main.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0 !important; padding: 0 !important; 
+      width: 100% !important; max-width: none !important; 
+      overflow-x: hidden; background: #f1f5f9;
+      font-family: var(--font-main); color: #1e293b; 
+    }
+    
+    .app-shell { 
+      display: flex !important; flex-direction: column; 
+      min-height: 100vh; width: 100% !important; max-width: none !important;
+    }
+
+    @media (min-width: 1024px) {
+      .app-shell { flex-direction: row !important; }
+      .admin-sidebar {
+        width: 240px !important; min-width: 240px; height: 100vh;
+        background: #0f172a; color: #fff; position: sticky; top: 0;
+        display: flex; flex-direction: column; flex-shrink: 0;
+      }
+      .admin-content {
+        flex: 1 !important; background: #f1f5f9; min-height: 100vh;
+        padding: 40px; min-width: 0;
+      }
+    }
+
+    .admin-sidebar .logo {
+      padding: 24px; font-size: 1.1rem; font-weight: 900; 
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; gap: 10px; color: #fff; white-space: nowrap;
+    }
+    .admin-nav { padding: 16px 0; flex: 1; }
+    .admin-nav a {
+      display: flex; align-items: center; gap: 12px; padding: 12px 24px;
+      color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s;
+      white-space: nowrap; font-size: 0.95rem;
+    }
+    .admin-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .admin-nav a.active { color: #fff; background: var(--primary); font-weight: 700; }
+
+    .dashboard-header { margin-bottom: 32px; }
+
+    /* Card Layouts */
+    .admin-card {
+      background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 32px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .card-title { font-size: 1.1rem; font-weight: 700; }
+    .card-body { padding: 24px; }
+
+    /* Forms */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; }
+    .form-group select, .form-group input { 
+      width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem;
+    }
+    .form-row { display: flex; gap: 16px; align-items: flex-end; }
+    .form-row > div { flex: 1; }
+    
+    .btn-generate {
+      padding: 10px 24px; background: var(--primary); color: white; border: none; border-radius: 6px;
+      font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; height: 42px;
+    }
+    .btn-generate:hover { background: #2563eb; }
+
+    /* Data Table */
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th { background: var(--surface-2); padding: 12px 24px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+    .admin-table td { padding: 16px 24px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+    .admin-table tr:hover { background: var(--surface-2); }
+    
+    .btn-download {
+      padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 4px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; text-decoration: none;
+    }
+    .btn-download:hover { background: #059669; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="admin-sidebar">
+      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
+      <nav class="admin-nav">
+        <a href="/admin/index.html" data-i18n="nav_dashboard">대시보드</a>
+        <a href="/admin/merchants.html" data-i18n="nav_merchant">가맹점 관리</a>
+        <a href="/admin/settlement.html" data-i18n="nav_settlement">정산 관리</a>
+        <a href="/admin/fds.html" data-i18n="nav_fds">FDS 모니터링</a>
+        <a href="/admin/coupons.html" class="active" data-i18n="nav_coupons">쿠폰 및 발행처 관리</a>
+        <a href="/admin/statistics.html" data-i18n="nav_statistics">통계 및 보고서</a>
+      </nav>
+      <div style="padding: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div style="margin-bottom: 16px;">
+          <select id="lang-switcher" style="width: 100%; padding: 6px; background: #1e293b; color: #fff; border: 1px solid #334155; border-radius: 4px;">
+            <option value="ko" data-i18n="lang_ko">한국어</option>
+            <option value="en" data-i18n="lang_en">English</option>
+            <option value="zh" data-i18n="lang_zh">中文</option>
+          </select>
+        </div>
+        <button id="btn-logout" data-i18n="logout" style="color: #94a3b8; font-size: 0.9rem; background: transparent; border: none; cursor: pointer; padding: 0;">로그아웃</button>
+      </div>
+    </aside>
+
+    <main class="admin-content">
+      <header class="dashboard-header">
+        <h1 style="font-size: 1.5rem; font-weight: 900; margin: 0 0 8px 0;">쿠폰 및 발행처 관리</h1>
+        <p style="color: var(--text-secondary); margin: 0;">유료 관광지 키오스크용 쿠폰 난수를 대량 발행하고 관리합니다.</p>
+      </header>
+
+      <!-- 쿠폰 대량 발행 폼 -->
+      <div class="admin-card">
+        <div class="card-header">
+          <div class="card-title">✨ 신규 난수 쿠폰 발행</div>
+        </div>
+        <div class="card-body">
+          <form id="form-generate-coupons" onsubmit="generateCoupons(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="issuer-select">발행처 (관광지 키오스크)</label>
+                <select id="issuer-select" required>
+                  <option value="">발행처를 선택하세요</option>
+                  <option value="LOC-001">백령도 유람선 매표소</option>
+                  <option value="LOC-002">덕적도 해변 관광안내소</option>
+                  <option value="LOC-003">영흥도 에너지파크</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="coupon-type">권종 (액면가)</label>
+                <select id="coupon-type" required>
+                  <option value="5000">5,000원권</option>
+                  <option value="10000">10,000원권</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="issue-qty">발행 수량 (장)</label>
+                <input type="number" id="issue-qty" min="10" max="1000" step="10" value="100" required>
+              </div>
+              <div class="form-group" style="flex: 0.5;">
+                <button type="submit" class="btn-generate" id="btn-submit">발행하기</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- 발행 내역 테이블 -->
+      <div class="admin-card">
+        <div class="card-header">
+          <div class="card-title">📜 최근 발행 내역</div>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>배치 ID</th>
+              <th>발행 일시</th>
+              <th>발행처</th>
+              <th>권종</th>
+              <th>발행 수량</th>
+              <th>다운로드 (Excel)</th>
+            </tr>
+          </thead>
+          <tbody id="batch-list">
+            <!-- Mock Data -->
+            <tr>
+              <td><strong>BATCH-20260504-01</strong></td>
+              <td>2026-05-04 10:30</td>
+              <td>백령도 유람선 매표소</td>
+              <td>5,000원권</td>
+              <td>500장</td>
+              <td><button class="btn-download" onclick="alert('엑셀 다운로드 시작')">⬇️ 난수 추출</button></td>
+            </tr>
+            <tr>
+              <td><strong>BATCH-20260503-02</strong></td>
+              <td>2026-05-03 14:15</td>
+              <td>영흥도 에너지파크</td>
+              <td>10,000원권</td>
+              <td>200장</td>
+              <td><button class="btn-download" onclick="alert('엑셀 다운로드 시작')">⬇️ 난수 추출</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { api, showToast } from '../shared/js/api.js'
+    import { t, bindLanguageSwitcher } from '../shared/js/i18n.js';
+    bindLanguageSwitcher('lang-switcher');
+
+    window.generateCoupons = async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit');
+      const originalText = btn.innerHTML;
+      
+      const issuerInput = document.getElementById('issuer-select');
+      const issuer = issuerInput.options[issuerInput.selectedIndex].text;
+      const qty = document.getElementById('issue-qty').value;
+      const type = document.getElementById('coupon-type').value;
+
+      btn.innerHTML = '생성 중...';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+
+      try {
+        const res = await api.post('/admin/coupons/generate', { issuer, type: parseInt(type), quantity: parseInt(qty) });
+        
+        showToast(res.message, 'success');
+        
+        // 테이블 상단에 새 행 추가
+        const tbody = document.getElementById('batch-list');
+        const tr = document.createElement('tr');
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        
+        // CSV 데이터 생성용
+        const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
+          + "발행처,권종(원),쿠폰번호\n"
+          + res.data.map(e => `${e.issuer},${e.faceValue},${e.code}`).join("\n");
+        const encodedUri = encodeURI(csvContent);
+
+        const batchId = `BATCH-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*1000)}`;
+
+        tr.innerHTML = `
+          <td><strong>${batchId}</strong></td>
+          <td>${dateStr}</td>
+          <td>${issuer}</td>
+          <td>${Number(type).toLocaleString()}원권</td>
+          <td>${qty}장</td>
+          <td><a href="${encodedUri}" download="coupons_${batchId}.csv" class="btn-download" style="text-decoration:none; display:inline-block;">⬇️ 난수 추출 (CSV)</a></td>
+        `;
+        tbody.insertBefore(tr, tbody.firstChild);
+
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
+  </script>
+</body>
+</html>

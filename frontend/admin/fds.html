@@ -72,10 +72,12 @@
     <aside class="admin-sidebar">
       <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
       <nav class="admin-nav">
-        <a href="/admin/index.html">대시보드</a>
-        <a href="/admin/merchants.html">가맹점 관리</a>
-        <a href="/admin/settlement.html">정산 관리</a>
-        <a href="/admin/fds.html" class="active">FDS 모니터링</a>
+        <a href="/admin/index.html">📊 대시보드</a>
+        <a href="/admin/merchants.html">🏪 가맹점 관리</a>
+        <a href="/admin/settlement.html">💰 정산 관리</a>
+        <a href="/admin/fds.html" class="active">🔍 FDS 모니터링</a>
+        <a href="/admin/coupons.html">🎟️ 쿠폰 및 발행처 관리</a>
+        <a href="/admin/statistics.html">📈 통계 및 보고서</a>
       </nav>
     </aside>
 
@@ -106,13 +108,21 @@
 
   <script type="module">
     import { api, showToast, fmtDate } from '../shared/js/api.js'
+    import { requireAdminAuth } from '../shared/js/admin-guard.js'
+
+    // 관리자 인증 체크 (실패 시 login.html로 자동 리다이렉트)
+    await requireAdminAuth();
 
     async function loadFDS() {
+      const list = document.getElementById('fds-list');
       try {
         const { data } = await api.get('/admin/fds');
-        const list = document.getElementById('fds-list');
-        if (data.length === 0) {
-          list.innerHTML = '<tr><td colspan="5" class="text-center" style="padding: 40px;">탐지된 이상 거래가 없습니다.</td></tr>';
+        if (!data || data.length === 0) {
+          list.innerHTML = `
+            <tr><td colspan="5" style="padding: 60px; text-align: center; color: #64748b;">
+              <div style="font-size: 2rem; margin-bottom: 8px;">✅</div>
+              탐지된 이상 거래가 없습니다.
+            </td></tr>`;
           return;
         }
         list.innerHTML = data.map(item => `
@@ -122,10 +132,10 @@
               <small>${fmtDate(item.detected_at)}</small>
             </td>
             <td>
-              <strong>${item.merchant_name}</strong><br>
+              <strong>${item.merchant_name || '-'}</strong><br>
               <small>${item.user_nickname || '익명 사용자'}</small>
             </td>
-            <td>${item.description}</td>
+            <td>${item.description || '-'}</td>
             <td>
               <span class="badge ${item.resolved ? 'badge-success' : 'badge-danger'}">
                 ${item.resolved ? '해결됨' : '미결'}
@@ -137,7 +147,16 @@
           </tr>
         `).join('');
       } catch (e) {
-        showToast('FDS 내역을 불러오지 못했습니다.', 'error');
+        console.error('[FDS] 로드 실패:', e);
+        // 인증 오류(401)인 경우 로그인 안내, 그 외엔 오류 표시
+        const isAuth = e.message?.includes('인증') || e.message?.includes('토큰');
+        list.innerHTML = `
+          <tr><td colspan="5" style="padding: 60px; text-align: center; color: #ef4444;">
+            <div style="font-size: 2rem; margin-bottom: 8px;">${isAuth ? '🔐' : '⚠️'}</div>
+            <strong>${isAuth ? '로그인이 필요합니다' : 'FDS 데이터 로드 실패'}</strong><br>
+            <small style="color: #94a3b8; margin-top: 8px; display: block;">${e.message}</small>
+            ${isAuth ? `<a href="/tourist/index.html" style="margin-top:16px; display:inline-block; padding: 8px 20px; background:#3b82f6; color:#fff; border-radius:8px; text-decoration:none;">로그인 페이지로</a>` : ''}
+          </td></tr>`;
       }
     }
 

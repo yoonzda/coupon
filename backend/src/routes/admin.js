@@ -43,6 +43,63 @@ router.get('/dashboard', authenticate, authorize('admin'), async (req, res, next
   } catch (err) { next(err); }
 });
 
+// ── 대시보드 요약 통계 (index.html용) ───────────────
+router.get('/stats/summary', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const now = new Date();
+    const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const [[txStats]] = await pool.execute(
+      `SELECT COALESCE(SUM(amount), 0) AS totalAmount, COUNT(*) AS txCount
+       FROM coupon_transactions
+       WHERE DATE_FORMAT(scanned_at, '%Y-%m') = ?`, [ym]
+    );
+    const [[{ userCount }]] = await pool.execute(
+      `SELECT COUNT(*) AS userCount FROM users`
+    );
+    const [[{ merchantCount }]] = await pool.execute(
+      `SELECT COUNT(*) AS merchantCount FROM merchants WHERE status = 'approved'`
+    );
+    const [[{ fdsCount }]] = await pool.execute(
+      `SELECT COUNT(*) AS fdsCount FROM fds_alerts WHERE resolved = 0`
+    );
+    const [[{ couponIssued }]] = await pool.execute(
+      `SELECT COUNT(*) AS couponIssued FROM coupons`
+    );
+    const [[{ couponUsed }]] = await pool.execute(
+      `SELECT COUNT(*) AS couponUsed FROM coupons WHERE status = 'used'`
+    );
+
+    res.json({
+      success: true,
+      totalAmount: Number(txStats.totalAmount),
+      txCount: txStats.txCount,
+      userCount,
+      merchantCount,
+      fdsCount,
+      couponIssued,
+      couponUsed,
+    });
+  } catch (err) { next(err); }
+});
+
+// ── 최근 FDS 알림 (대시보드 테이블용) ───────────────
+router.get('/fds/recent', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT f.id, f.rule_id, f.description, f.detected_at, f.resolved,
+              m.name AS merchant_name, u.nickname
+       FROM fds_alerts f
+       LEFT JOIN merchants m ON f.merchant_id = m.id
+       LEFT JOIN users u ON f.user_id = u.id
+       ORDER BY f.detected_at DESC LIMIT 10`
+    );
+    // 배열을 직접 반환 (프론트에서 배열로 처리)
+    res.json(rows);
+  } catch (err) { next(err); }
+});
+
+
 // ── 가맹점 승인/반려 ───────────────────────────────
 router.patch('/merchants/:id/status', authenticate, authorize('admin'), async (req, res, next) => {
   const { status, reason } = req.body; // 'approved' | 'rejected', 'reason' (반려 시)
@@ -111,6 +168,87 @@ router.get('/merchants', authenticate, authorize('admin'), async (req, res, next
   } catch (err) { next(err); }
 });
 
+// ── 정산 목록 조회 ────────────────────────────────
+router.get('/settlements', authenticate, authorize('admin'), async (req, res, next) => {
+  const { period } = req.query; // 'YYYY-MM'
+  if (!period || !/^\d{4}-\d{2}$/.test(period)) {
+    return res.status(400).json({ success: false, message: 'period 파라미터가 필요합니다. (예: 2026-04)' });
+  }
+  try {
+    const [rows] = await pool.execute(
+      `SELECT s.*, m.name AS merchant_name
+       FROM settlements s
+       JOIN merchants m ON s.merchant_id = m.id
+       WHERE s.period = ?
+       ORDER BY s.generated_at DESC`,
+      [period]
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) { next(err); }
+});
+
+// ── 정산 파일 일괄 생성 ───────────────────────────
+router.post('/settlements/generate', authenticate, authorize('admin'), async (req, res, next) => {
+  const now = new Date();
+  // 전월 정산 기간
+  const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const period = `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, '0')}`;
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 전월 쿠폰 사용 내역 집계
+    const [merchants] = await connection.execute(
+      `SELECT ct.merchant_id, m.name AS merchant_name,
+              SUM(ct.amount) AS total_amount, COUNT(*) AS tx_count
+       FROM coupon_transactions ct
+       JOIN merchants m ON ct.merchant_id = m.id
+       WHERE DATE_FORMAT(ct.scanned_at, '%Y-%m') = ?
+       GROUP BY ct.merchant_id, m.name`,
+      [period]
+    );
+
+    if (merchants.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: `${period} 정산 대상 내역이 없습니다.` });
+    }
+
+    let created = 0;
+    for (const m of merchants) {
+      await connection.execute(
+        `INSERT INTO settlements (merchant_id, period, total_amount, status, generated_at)
+         VALUES (?, ?, ?, 'file_generated', NOW())
+         ON DUPLICATE KEY UPDATE total_amount = VALUES(total_amount), status = 'file_generated', generated_at = NOW()`,
+        [m.merchant_id, period, m.total_amount]
+      );
+      created++;
+    }
+
+    await connection.commit();
+    res.json({ success: true, message: `${period} 정산 파일 ${created}건 생성 완료` });
+  } catch (err) {
+    await connection.rollback();
+    next(err);
+  } finally {
+    connection.release();
+  }
+});
+
+// ── FDS 알림 목록 조회 ──────────────────────────────
+router.get('/fds', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT f.*, m.name as merchant_name, u.nickname as user_nickname 
+       FROM fds_alerts f
+       LEFT JOIN merchants m ON f.merchant_id = m.id
+       LEFT JOIN users u ON f.user_id = u.id
+       ORDER BY f.detected_at DESC LIMIT 50`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) { next(err); }
+});
+
 // ── FDS 알림 해결 ─────────────────────────────────
 router.patch('/fds/:id/resolve', authenticate, authorize('admin'), async (req, res, next) => {
   try {
@@ -120,6 +258,51 @@ router.patch('/fds/:id/resolve', authenticate, authorize('admin'), async (req, r
     );
     res.json({ success: true });
   } catch (err) { next(err); }
+});
+
+// ── 쿠폰(난수) 일괄 발행 ───────────────────────────
+const crypto = require('crypto');
+const { hashCouponCode } = require('../utils/crypto');
+
+router.post('/coupons/generate', authenticate, authorize('admin'), async (req, res, next) => {
+  const { issuer, type, quantity } = req.body;
+  if (!issuer || !type || !quantity || quantity < 1) {
+    return res.status(400).json({ success: false, message: '발행처, 권종, 수량을 올바르게 입력해주세요.' });
+  }
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const newCoupons = [];
+    const values = [];
+    
+    // 난수 생성 로직: OJC-랜덤8자리
+    for (let i = 0; i < quantity; i++) {
+      const randomStr = crypto.randomBytes(4).toString('hex').toUpperCase();
+      const code = `OJC-${randomStr}`;
+      const codeHash = hashCouponCode(code);
+      
+      newCoupons.push({ code, faceValue: type, issuer });
+      values.push([codeHash, type, issuer]);
+    }
+
+    // 벌크 인서트 (mysql2 에서는 배열의 배열을 사용)
+    await connection.query(
+      `INSERT INTO paper_coupons (random_code_hash, face_value, issued_by_location) VALUES ?`,
+      [values]
+    );
+
+    await connection.commit();
+
+    // 생성된 쿠폰 원본 코드 반환 (이후 프론트에서 엑셀로 다운로드)
+    res.json({ success: true, message: `${quantity}장 발행 완료`, data: newCoupons });
+  } catch (err) {
+    await connection.rollback();
+    next(err);
+  } finally {
+    connection.release();
+  }
 });
 
 module.exports = router;

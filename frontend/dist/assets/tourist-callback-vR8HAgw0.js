@@ -1,1 +1,0 @@
-import{s as t,d as r}from"./api-vtkRPzLV.js";const o=new URLSearchParams(window.location.search),e=o.get("token"),s=o.get("refresh"),n=o.get("error");n?(t("소셜 로그인에 실패했습니다. 다시 시도해 주세요.","error"),setTimeout(()=>window.location.href="/tourist/index.html",2e3)):e?(r(e,s),window.location.href="/tourist/mypage.html"):window.location.href="/tourist/index.html";

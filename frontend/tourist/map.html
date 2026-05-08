@@ -239,8 +239,7 @@
     })
 
     // ── 지도 초기화 ─────────────────────────────────
-    // kakao.maps.load 는 SDK가 비동기 로드될 때 사용
-    if (window.kakao?.maps) {
+    if (window.kakao && window.kakao.maps) {
       kakao.maps.load(() => {
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
@@ -250,8 +249,30 @@
         } else { initMap() }
       })
     } else {
-      document.getElementById('map').innerHTML =
-        '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:.9rem;">카카오맵 API 키를 설정해 주세요.</div>'
+      // 카카오맵 키가 없을 때 테스트용(Mock) 지도 화면 표시
+      document.getElementById('map').innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#475569; font-size:1rem; background: #e2e8f0; border: 2px dashed #cbd5e1; border-radius: 8px; margin: 10px;">
+          <div style="font-size: 2rem; margin-bottom: 10px;">🗺️</div>
+          <div style="font-weight:bold;">[테스트 모드] 지도 영역</div>
+          <div style="font-size:0.8rem; margin-top:5px;">실제 지도를 보려면 카카오맵 API 키가 필요합니다.</div>
+          <button id="btn-test-marker" style="margin-top:16px; padding:8px 16px; background:#3b82f6; color:white; border:none; border-radius:4px; cursor:pointer;">테스트 마커 클릭해보기</button>
+        </div>
+      `;
+      // 테스트용 가상 이벤트 바인딩
+      setTimeout(() => {
+        const btn = document.getElementById('btn-test-marker');
+        if(btn) {
+          btn.addEventListener('click', () => {
+            openSheet({
+              name: "테스트 가맹점 (API 연결 시 실제 식당 표시)",
+              address: "인천광역시 옹진군 가상면 가상리 123",
+              category: "음식점",
+              lat: 37.4553,
+              lng: 126.4344
+            });
+          });
+        }
+      }, 500);
     }
   </script>
 </body>

@@ -321,6 +321,14 @@
       <div class="star" style="width:2px;height:2px;top:5%;left:85%;animation-delay:1.8s"></div>
       <div class="star" style="width:3px;height:3px;top:18%;left:28%;animation-delay:2.2s"></div>
 
+      <div style="position: absolute; top: 16px; right: 16px; z-index: 10;">
+        <select id="lang-switcher-tourist" style="padding: 4px 8px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; backdrop-filter: blur(4px);">
+          <option value="ko" style="color:#000">한국어</option>
+          <option value="en" style="color:#000">English</option>
+          <option value="zh" style="color:#000">中文</option>
+        </select>
+      </div>
+
       <!-- 섬 실루엣 SVG -->
       <svg class="hero-islands" viewBox="0 0 480 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <!-- 멀리 있는 섬 (어둡게) -->
@@ -449,6 +457,8 @@
 
     <script type="module">
       import { getToken } from '../shared/js/api.js'
+      import { t, bindLanguageSwitcher } from '../shared/js/i18n.js';
+      bindLanguageSwitcher('lang-switcher-tourist');
       if (getToken()) window.location.href = '/tourist/mypage.html'
     </script>
   </div>

@@ -19,14 +19,18 @@ export default defineConfig({
         'merchant-history': resolve(__dirname, 'merchant/history.html'),
 
         // 관리자 포털
+        'admin-login':      resolve(__dirname, 'admin/login.html'),
         'admin-index':      resolve(__dirname, 'admin/index.html'),
         'admin-merchants':  resolve(__dirname, 'admin/merchants.html'),
         'admin-settlement': resolve(__dirname, 'admin/settlement.html'),
         'admin-fds':        resolve(__dirname, 'admin/fds.html'),
+        'admin-statistics': resolve(__dirname, 'admin/statistics.html'),
+        'admin-coupons':    resolve(__dirname, 'admin/coupons.html'),
       },
     },
     outDir: 'dist',      // 빌드 결과 → dist/ 폴더 (도커 빌드용)
     emptyOutDir: true,
+    target: 'esnext',   // top-level await 지원
   },
   server: {
     port: 5173,

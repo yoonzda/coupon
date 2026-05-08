@@ -15,6 +15,7 @@ const authRouter = require('./routes/auth');
 const couponRouter = require('./routes/coupon');
 const merchantRouter = require('./routes/merchant');
 const adminRouter = require('./routes/admin');
+const adminAuthRouter = require('./routes/adminAuth');
 const settlementRouter = require('./routes/settlement');
 const mapRouter = require('./routes/map');
 
@@ -65,6 +66,7 @@ app.use('/admin', express.static(path.join(__dirname, '../../frontend/admin')));
 app.use('/api/auth', authRouter);
 app.use('/api/coupon', couponRouter);
 app.use('/api/merchant', merchantRouter);
+app.use('/api/admin/auth', adminAuthRouter);  // 관리자 인증 (인증 미들웨어 없음)
 app.use('/api/admin', adminRouter);
 app.use('/api/settlement', settlementRouter);
 app.use('/api/merchant', mapRouter);  // /api/merchant/map (인증 불필요)
