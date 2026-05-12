@@ -6,7 +6,7 @@ module.exports = {
   apps: [{
     name: 'ongjin-backend',
     script: 'src/app.js',
-    cwd: '/root/ongjin-coupon',
+    cwd: '/home/www/Ongjin_coupon/backend',
     instances: 2,                // CPU 코어 수에 맞게 조정
     exec_mode: 'cluster',
     watch: false,
@@ -18,8 +18,8 @@ module.exports = {
       NODE_ENV: 'production',
       PORT: 3010,
     },
-    error_file: '/root/ongjin-coupon/logs/pm2-error.log',
-    out_file:   '/root/ongjin-coupon/logs/pm2-out.log',
+    error_file: '/home/www/Ongjin_coupon/logs/pm2-error.log',
+    out_file:   '/home/www/Ongjin_coupon/logs/pm2-out.log',
     log_date_format: 'YYYY-MM-DD HH:mm:ss',
     max_memory_restart: '512M',
     restart_delay: 3000,
