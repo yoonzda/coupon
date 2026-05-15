@@ -88,8 +88,8 @@
     }
     .map-relative { position: relative; }
   </style>
-  <!-- 카카오맵 API (실제 키로 교체 필요) -->
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=__KAKAO_MAP_KEY__&libraries=services"></script>
+  <!-- 네이버 지도 API (NCP Client ID 적용 완료) -->
+  <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=x0h48m56fw"></script>
 </head>
 <body>
   <div class="app-shell" style="max-width:100%;margin:0;">
@@ -167,9 +167,9 @@
     // ── 지도 초기화 ─────────────────────────────────
     function initMap(lat = 37.4553, lng = 126.4344) {
       const container = document.getElementById('map')
-      map = new kakao.maps.Map(container, {
-        center: new kakao.maps.LatLng(lat, lng),
-        level: 7,
+      map = new naver.maps.Map(container, {
+        center: new naver.maps.LatLng(lat, lng),
+        zoom: 11, // 카카오 레벨 7과 유사한 축척
       })
       loadMerchants()
     }
@@ -184,10 +184,10 @@
 
         data.forEach(merchant => {
           if (!merchant.lat || !merchant.lng) return
-          const pos = new kakao.maps.LatLng(merchant.lat, merchant.lng)
-          const marker = new kakao.maps.Marker({ position: pos, map })
+          const pos = new naver.maps.LatLng(merchant.lat, merchant.lng)
+          const marker = new naver.maps.Marker({ position: pos, map })
 
-          kakao.maps.event.addListener(marker, 'click', () => {
+          naver.maps.Event.addListener(marker, 'click', () => {
             openSheet(merchant)
           })
           markers.push(marker)
@@ -208,13 +208,14 @@
       document.getElementById('merchant-sheet').classList.add('open')
 
       // 지도 중심 이동
-      map.setCenter(new kakao.maps.LatLng(merchant.lat, merchant.lng))
+      map.setCenter(new naver.maps.LatLng(merchant.lat, merchant.lng))
     }
 
-    // ── 길찾기 ───────────────────────────────────────
+    // ── 길찾기 (네이버 지도) ─────────────────────────────────
     document.getElementById('btn-navi').addEventListener('click', () => {
       if (!selectedMerchant) return
-      const url = `https://map.kakao.com/link/to/${encodeURIComponent(selectedMerchant.name)},${selectedMerchant.lat},${selectedMerchant.lng}`
+      // 출발지는 빈칸(-), 도착지는 경도,위도,이름 순
+      const url = `https://map.naver.com/p/directions/-/${selectedMerchant.lng},${selectedMerchant.lat},${encodeURIComponent(selectedMerchant.name)}/-/transit`
       window.open(url, '_blank')
     })
 
@@ -223,9 +224,9 @@
       if (!navigator.geolocation) return showToast('위치 정보를 사용할 수 없습니다.', 'error')
       navigator.geolocation.getCurrentPosition(
         ({ coords }) => {
-          const pos = new kakao.maps.LatLng(coords.latitude, coords.longitude)
+          const pos = new naver.maps.LatLng(coords.latitude, coords.longitude)
           map.setCenter(pos)
-          map.setLevel(5)
+          map.setZoom(15) // 더 가까이 확대
         },
         () => showToast('위치 접근 권한을 허용해 주세요.', 'error')
       )
@@ -238,23 +239,21 @@
       searchTimer = setTimeout(() => loadMerchants(e.target.value), 400)
     })
 
-    // ── 지도 초기화 ─────────────────────────────────
-    if (window.kakao && window.kakao.maps) {
-      kakao.maps.load(() => {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            ({ coords }) => initMap(coords.latitude, coords.longitude),
-            () => initMap()
-          )
-        } else { initMap() }
-      })
+    // ── 지도 API 초기화 ─────────────────────────────────
+    if (window.naver && window.naver.maps) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          ({ coords }) => initMap(coords.latitude, coords.longitude),
+          () => initMap()
+        )
+      } else { initMap() }
     } else {
-      // 카카오맵 키가 없을 때 테스트용(Mock) 지도 화면 표시
+      // API 키가 없을 때 테스트용(Mock) 지도 화면 표시
       document.getElementById('map').innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#475569; font-size:1rem; background: #e2e8f0; border: 2px dashed #cbd5e1; border-radius: 8px; margin: 10px;">
           <div style="font-size: 2rem; margin-bottom: 10px;">🗺️</div>
-          <div style="font-weight:bold;">[테스트 모드] 지도 영역</div>
-          <div style="font-size:0.8rem; margin-top:5px;">실제 지도를 보려면 카카오맵 API 키가 필요합니다.</div>
+          <div style="font-weight:bold;">[테스트 모드] 네이버 지도 영역</div>
+          <div style="font-size:0.8rem; margin-top:5px;">실제 지도를 보려면 NCP Client ID가 필요합니다.</div>
           <button id="btn-test-marker" style="margin-top:16px; padding:8px 16px; background:#3b82f6; color:white; border:none; border-radius:4px; cursor:pointer;">테스트 마커 클릭해보기</button>
         </div>
       `;
