@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>가맹점 관리 | 옹진관광 쿠폰</title>
+  <title>가맹점 관리 | 옹진 관광 쿠폰</title>
   <link rel="stylesheet" href="../shared/css/main.css" />
   <style>
     * { box-sizing: border-box; }
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      overflow-x: hidden; background: #f1f5f9;
+       background: #f1f5f9;
       font-family: var(--font-main); color: #1e293b; 
     }
     .app-shell { display: flex !important; flex-direction: column; min-height: 100vh; width: 100% !important; max-width: none !important; }
     @media (min-width: 1024px) {
-      .app-shell { flex-direction: row !important; }
-      .admin-sidebar { width: 240px !important; min-width: 240px; height: 100vh; background: #0f172a; color: #fff; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; }
-      .admin-content { flex: 1 !important; padding: 40px; background: #f1f5f9; min-width: 0; }
+      .app-shell { display: block !important; }
+      .admin-sidebar { width: 240px !important; min-width: 240px; height: 100vh; background: #0f172a; color: #fff; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; display: flex; flex-direction: column; flex-shrink: 0; }
+      .admin-content { margin-left: 240px;  flex: 1 !important; padding: 40px; background: #f1f5f9; min-width: 0; }
     }
-    .admin-sidebar .logo { padding: 24px; font-size: 1.1rem; font-weight: 900; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; color: #fff; }
+    .admin-sidebar .logo { padding: 24px; font-size: 1.1rem; font-weight: 900; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; color: #fff; white-space: nowrap; }
     .admin-nav { padding: 16px 0; flex: 1; }
-    .admin-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 24px; color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s; }
+    .admin-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 24px; color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s; white-space: nowrap; font-size: 0.95rem; }
     .admin-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
     .admin-nav a.active { color: #fff; background: var(--primary); font-weight: 700; }
     .tabs { display: flex; gap: 32px; border-bottom: 1px solid #e2e8f0; margin-bottom: 32px; }
@@ -47,22 +47,22 @@
 <body>
   <div class="app-shell">
     <aside class="admin-sidebar">
-      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
+      <div class="logo">옹진 관광 <span>ADMIN</span></div>
       <nav class="admin-nav">
-        <a href="/admin/index.html">📊 대시보드</a>
-        <a href="/admin/merchants.html" class="active">🏪 가맹점 관리</a>
-        <a href="/admin/settlement.html">💰 정산 관리</a>
-        <a href="/admin/fds.html">🔍 FDS 모니터링</a>
-        <a href="/admin/coupons.html">🎟️ 쿠폰 및 발행처 관리</a>
-        <a href="/admin/statistics.html">📈 통계 및 보고서</a>
+        <a href="/admin/index.html">대시보드</a>
+        <a href="/admin/merchants.html" class="active">가맹점 관리</a>
+        <a href="/admin/settlement.html">정산 관리</a>
+        <a href="/admin/fds.html">FDS 모니터링</a>
+        <a href="/admin/coupons.html">쿠폰 및 발행처 관리</a>
+        <a href="/admin/statistics.html">통계 및 보고서</a>
       </nav>
     </aside>
 
     <main class="admin-content">
       <header style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
-          <h1 style="font-size: 1.5rem; font-weight: 900;">가맹점 관리</h1>
-          <p style="color: #64748b;">신규 입점 신청 확인 및 승인/반려 처리를 관리합니다.</p>
+          <h1 style="font-size: 1.5rem; font-weight: 900; margin: 0 0 8px 0;">가맹점 관리</h1>
+          <p style="color: #64748b; margin: 0;">신규 입점 신청 확인 및 승인/반려 처리를 관리합니다.</p>
         </div>
         <button class="btn-sm btn-outline" onclick="window.resetData()">데이터 초기화</button>
       </header>

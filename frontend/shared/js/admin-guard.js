@@ -70,11 +70,13 @@ export async function requireAdminAuth() {
 
     // 사이드바 하단에 관리자 정보 + 로그아웃 버튼 렌더링
     renderAdminFooter(admin);
+    initSidebarToggle();
     return true;
   } catch {
     // 네트워크 오류 시 토큰만 있으면 일단 통과 (오프라인 대비)
     const info = getAdminInfo();
     renderAdminFooter(info);
+    initSidebarToggle();
     return true;
   }
 }
@@ -98,15 +100,18 @@ function renderAdminFooter(admin) {
       padding: 16px 20px;
       border-top: 1px solid rgba(255,255,255,0.08);
       margin-top: auto;
+      transition: opacity 0.2s;
     ">
-      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
         <div style="
           width: 36px; height: 36px;
-          background: linear-gradient(135deg, #3b82f6, #6366f1);
-          border-radius: 50%;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
           display: flex; align-items: center; justify-content: center;
-          font-size: 1rem; flex-shrink: 0;
-        ">👤</div>
+          flex-shrink: 0;
+        ">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="square"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </div>
         <div style="min-width: 0;">
           <div style="color: #fff; font-weight: 700; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
             ${admin.name || admin.username || '관리자'}
@@ -117,21 +122,20 @@ function renderAdminFooter(admin) {
       <button
         id="btn-admin-logout"
         style="
-          width: 100%; padding: 9px;
-          background: rgba(239,68,68,0.12);
-          color: #f87171;
-          border: 1px solid rgba(239,68,68,0.2);
-          border-radius: 8px;
+          width: 100%; padding: 10px;
+          background: transparent;
+          color: #94a3b8;
+          border: 1px solid #334155;
           cursor: pointer;
           font-size: 0.8rem;
           font-weight: 600;
           transition: all 0.2s;
           font-family: inherit;
         "
-        onmouseover="this.style.background='rgba(239,68,68,0.25)'"
-        onmouseout="this.style.background='rgba(239,68,68,0.12)'"
+        onmouseover="this.style.background='#1e293b'; this.style.color='#fff';"
+        onmouseout="this.style.background='transparent'; this.style.color='#94a3b8';"
       >
-        🚪 로그아웃
+        로그아웃
       </button>
     </div>
   `;
@@ -140,4 +144,74 @@ function renderAdminFooter(admin) {
   document.getElementById('btn-admin-logout').addEventListener('click', () => {
     if (confirm('로그아웃 하시겠습니까?')) adminLogout();
   });
+}
+
+/**
+ * 사이드바 열고 접기 기능 초기화 (반원 화살표 토글)
+ */
+function initSidebarToggle() {
+  const sidebar = document.querySelector('.admin-sidebar');
+  if (!sidebar || sidebar.querySelector('.sidebar-toggle-btn')) return;
+
+  if (!document.getElementById('admin-sidebar-style')) {
+    const style = document.createElement('style');
+    style.id = 'admin-sidebar-style';
+    style.innerHTML = `
+      .admin-sidebar {
+        transition: width 0.3s ease, min-width 0.3s ease;
+        position: relative;
+      }
+      .admin-sidebar.collapsed {
+        width: 0 !important;
+        min-width: 0 !important;
+      }
+      .admin-sidebar.collapsed .logo,
+      .admin-sidebar.collapsed .admin-nav,
+      .admin-sidebar.collapsed #admin-sidebar-footer {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .sidebar-toggle-btn {
+        position: absolute;
+        right: -24px;
+        top: 40px;
+        width: 24px; height: 64px;
+        background: #0f172a;
+        color: #cbd5e1;
+        border: none;
+        border-radius: 0 32px 32px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100;
+        transition: background 0.2s, color 0.2s;
+        padding: 0;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+      }
+      .sidebar-toggle-btn:hover {
+        background: #1e293b;
+        color: #fff;
+      }
+      .sidebar-toggle-btn svg {
+        transition: transform 0.3s ease;
+      }
+      .admin-sidebar.collapsed .sidebar-toggle-btn svg {
+        transform: rotate(180deg);
+      }
+      .admin-sidebar > * {
+        transition: opacity 0.2s ease;
+        white-space: nowrap;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // 기존 헤더 토글 버튼이 있다면 제거
+  const oldBtn = document.querySelector('.admin-header-row .sidebar-toggle-btn');
+  if (oldBtn) oldBtn.remove();
+
+  if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+    sidebar.classList.add('collapsed');
+  }
 }

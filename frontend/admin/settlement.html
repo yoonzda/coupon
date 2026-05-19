@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>정산 관리 | 옹진관광 쿠폰</title>
+  <title>정산 관리 | 옹진 관광 쿠폰</title>
   <link rel="stylesheet" href="../shared/css/main.css" />
   <style>
     * { box-sizing: border-box; }
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      overflow-x: hidden;
+      
       background: #f1f5f9;
       font-family: var(--font-main); color: #1e293b; 
     }
@@ -21,20 +21,19 @@
     }
     
     @media (min-width: 1024px) {
-      .app-shell { flex-direction: row !important; }
+      .app-shell { display: block !important; }
       .admin-sidebar { 
         width: 240px !important; 
         min-width: 240px;
         height: 100vh;
         background: #0f172a;
         color: #fff;
-        position: sticky;
-        top: 0;
+        position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
         display: flex;
         flex-direction: column;
         flex-shrink: 0;
       }
-      .admin-content { 
+      .admin-content { margin-left: 240px;  
         flex: 1 !important; 
         padding: 40px; 
         background: #f1f5f9; 
@@ -69,14 +68,14 @@
 <body>
   <div class="app-shell">
     <aside class="admin-sidebar">
-      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
+      <div class="logo">옹진 관광 <span>ADMIN</span></div>
       <nav class="admin-nav">
-        <a href="/admin/index.html">📊 대시보드</a>
-        <a href="/admin/merchants.html">🏪 가맹점 관리</a>
-        <a href="/admin/settlement.html" class="active">💰 정산 관리</a>
-        <a href="/admin/fds.html">🔍 FDS 모니터링</a>
-        <a href="/admin/coupons.html">🎟️ 쿠폰 및 발행처 관리</a>
-        <a href="/admin/statistics.html">📈 통계 및 보고서</a>
+        <a href="/admin/index.html">대시보드</a>
+        <a href="/admin/merchants.html">가맹점 관리</a>
+        <a href="/admin/settlement.html" class="active">정산 관리</a>
+        <a href="/admin/fds.html">FDS 모니터링</a>
+        <a href="/admin/coupons.html">쿠폰 및 발행처 관리</a>
+        <a href="/admin/statistics.html">통계 및 보고서</a>
       </nav>
     </aside>
 
@@ -86,7 +85,7 @@
           <h1 style="font-size: 1.5rem; font-weight: 900;">정산 관리</h1>
           <p style="color: var(--text-secondary);">월별 가맹점 정산 내역 및 XML 파일 생성을 관리합니다.</p>
         </div>
-        <button class="btn btn-primary" id="btn-generate-file">📁 이달의 정산파일 생성</button>
+        <button class="btn btn-primary" id="btn-generate-file"> 이달의 정산파일 생성</button>
       </header>
 
       <div class="filter-bar">
@@ -138,7 +137,7 @@
         const list = document.getElementById('settlement-list');
         if (!data || data.length === 0) {
           list.innerHTML = `<tr><td colspan="5" style="padding: 60px; text-align: center; color: #64748b;">
-            <div style="font-size: 2rem; margin-bottom: 8px;">📂</div>
+            <div style="font-size: 2rem; margin-bottom: 8px;"></div>
             ${period} 정산 내역이 없습니다.
           </td></tr>`;
           return;
@@ -161,7 +160,7 @@
       } catch (e) {
         const list = document.getElementById('settlement-list');
         list.innerHTML = `<tr><td colspan="5" style="padding: 60px; text-align: center; color: #ef4444;">
-          <div style="font-size: 2rem; margin-bottom: 8px;">⚠️</div>
+          <div style="font-size: 2rem; margin-bottom: 8px;">️</div>
           <strong>정산 내역 조회 실패</strong><br>
           <small style="color: #94a3b8; margin-top: 8px; display:block;">${e.message}</small>
         </td></tr>`;
