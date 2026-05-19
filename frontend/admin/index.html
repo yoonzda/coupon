@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>관리자 대시보드 | 옹진관광 쿠폰</title>
+  <title>관리자 대시보드 | 옹진 관광 쿠폰</title>
   <link rel="stylesheet" href="../shared/css/main.css" />
   <style>
     * { box-sizing: border-box; }
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      overflow-x: hidden;
+      
       background: #f1f5f9;
       font-family: var(--font-main); color: #1e293b; 
     }
@@ -23,7 +23,7 @@
     /* 관리자 전용 레이아웃 (데스크톱 우선) */
     @media (min-width: 1024px) {
       .app-shell {
-        flex-direction: row !important;
+        display: block !important;
       }
       .admin-sidebar {
         width: 240px !important;
@@ -31,13 +31,12 @@
         height: 100vh;
         background: #0f172a;
         color: #fff;
-        position: sticky;
-        top: 0;
+        position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
         display: flex;
         flex-direction: column;
         flex-shrink: 0;
       }
-      .admin-content {
+      .admin-content { margin-left: 240px; 
         flex: 1 !important;
         background: #f1f5f9;
         min-height: 100vh;
@@ -120,7 +119,7 @@
   <div class="app-shell">
     <!-- 사이드바 -->
     <aside class="admin-sidebar">
-      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
+      <div class="logo">옹진 관광 <span>ADMIN</span></div>
       <nav class="admin-nav">
         <a href="/admin/index.html" class="active" data-i18n="nav_dashboard">대시보드</a>
         <a href="/admin/merchants.html" data-i18n="nav_merchant">가맹점 관리</a>
@@ -129,16 +128,7 @@
         <a href="/admin/coupons.html" data-i18n="nav_coupons">쿠폰 및 발행처 관리</a>
         <a href="/admin/statistics.html" data-i18n="nav_statistics">통계 및 보고서</a>
       </nav>
-      <div style="padding: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <div style="margin-bottom: 16px;">
-          <select id="lang-switcher" style="width: 100%; padding: 6px; background: #1e293b; color: #fff; border: 1px solid #334155; border-radius: 4px;">
-            <option value="ko" data-i18n="lang_ko">한국어</option>
-            <option value="en" data-i18n="lang_en">English</option>
-            <option value="zh" data-i18n="lang_zh">中文</option>
-          </select>
-        </div>
-        <button id="btn-logout" data-i18n="logout" style="color: #94a3b8; font-size: 0.9rem; background: transparent; border: none; cursor: pointer; padding: 0;">로그아웃</button>
-      </div>
+      
     </aside>
 
     <!-- 메인 컨텐츠 -->
@@ -180,7 +170,7 @@
       <!-- 최근 FDS 알림 -->
       <div class="admin-card">
         <div class="card-header">
-          <div class="card-title" data-i18n="fds_recent_title">⚠️ 최근 이상거래 의심 내역 (FDS)</div>
+          <div class="card-title" data-i18n="fds_recent_title">️ 최근 이상거래 의심 내역 (FDS)</div>
           <a href="/admin/fds.html" class="btn btn-outline" data-i18n="btn_view_all" style="padding: 6px 12px; font-size: 0.8rem;">전체보기</a>
         </div>
         <table class="admin-table">
@@ -211,7 +201,7 @@
     await requireAdminAuth();
 
     // 언어 선택기 이벤트 바인딩
-    bindLanguageSwitcher('lang-switcher');
+    
 
     async function loadDashboard() {
       try {
@@ -237,7 +227,7 @@
         const fds  = await api.get('/admin/fds/recent');
         const list = document.getElementById('fds-recent-list');
         if (!fds || fds.length === 0) {
-          list.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:40px; color:var(--text-muted);">✅ 이상 거래가 탐지되지 않았습니다.</td></tr>`;
+          list.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:40px; color:var(--text-muted);"> 이상 거래가 탐지되지 않았습니다.</td></tr>`;
           return;
         }
         list.innerHTML = fds.map(item => `
@@ -246,7 +236,7 @@
             <td>${item.merchant_name || '—'}</td>
             <td>${item.nickname || '익명'}</td>
             <td><span class="badge badge-danger">${item.rule_id}</span></td>
-            <td>${item.resolved ? '✅ 해결됨' : '<span style="color:#ef4444;">⚠️ 미해결</span>'}</td>
+            <td>${item.resolved ? ' 해결됨' : '<span style="color:#ef4444;">️ 미해결</span>'}</td>
           </tr>
         `).join('');
       } catch (e) {
