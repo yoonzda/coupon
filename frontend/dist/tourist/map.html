@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="description" content="내 주변 가맹점 찾기 — 옹진관광 쿠폰 지도" />
-  <title>가맹점 지도 | 옹진관광 쿠폰</title>
+  <title>가맹점 지도 | 옹진관광 쿠폰</title>
   <style>
     #map {
       width: 100%;
@@ -87,12 +87,12 @@
     }
     .map-relative { position: relative; }
   </style>
-  <!-- 카카오맵 API (실제 키로 교체 필요) -->
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=__KAKAO_MAP_KEY__&libraries=services"></script>
-  <script type="module" crossorigin src="/assets/tourist-map-D-yMtYJT.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/main-9hPShMGN.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-CHX2GdQ8.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BkjUHGKL.css">
+  <!-- 네이버 지도 API (NCP Client ID 적용 완료) -->
+  <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=x0h48m56fw"></script>
+  <script type="module" crossorigin src="/assets/tourist-map-BJHpS2Lw.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
 </head>
 <body>
   <div class="app-shell" style="max-width:100%;margin:0;">
@@ -161,6 +161,6 @@
   </div>
 
   <div id="toast-container"></div>
-
+
 </body>
 </html>

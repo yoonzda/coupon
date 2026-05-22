@@ -64,6 +64,7 @@ body {
   line-height: 1.6;
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
 }
 
 img, svg { display: block; max-width: 100%; }
@@ -230,6 +231,14 @@ input, select, textarea { font-family: inherit; }
   background: #fff;
 }
 
+/* IE/Edge reveal eye icon and clear button disable globally */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* ── 뱃지 / 상태 ─────────────────────────────────── */
 .badge {
   display: inline-flex;
@@ -313,6 +322,7 @@ input, select, textarea { font-family: inherit; }
 }
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
+
 /* ── 유틸 ───────────────────────────────────────── */
 .text-center { text-align: center; }
 .mt-4  { margin-top: 4px;  }
@@ -325,3 +335,439 @@ input, select, textarea { font-family: inherit; }
 .flex-col { flex-direction: column; }
 .w-full { width: 100%; }
 .hidden { display: none !important; }
+
+/* ── 관리자 레이아웃 및 사이드바 ───────────────────── */
+.app-shell:has(.admin-sidebar),
+.app-shell:has(.admin-content) {
+  display: block !important;
+  max-width: none !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  min-width: 1024px !important;
+}
+.admin-sidebar {
+  width: 240px !important;
+  min-width: 240px !important;
+  height: 100vh !important;
+  background: #0f172a !important;
+  color: #fff !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  z-index: 100 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+.admin-sidebar.ready {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 로고 스타일 정의 */
+.admin-sidebar .logo {
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  padding: 0 20px !important;
+  gap: 12px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  margin: 0 !important;
+  height: 120px !important;
+  min-height: 120px !important;
+  transition: all 0.3s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.admin-sidebar .logo .nav-toggle-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #cbd5e1 !important;
+  cursor: pointer !important;
+  padding: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  transition: background 0.2s, color 0.2s !important;
+  outline: none !important;
+  flex-shrink: 0 !important;
+}
+
+.admin-sidebar .logo-text-group {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  transition: opacity 0.3s ease, max-width 0.3s ease, visibility 0.3s ease !important;
+  overflow: hidden !important;
+  max-width: 160px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.admin-sidebar .logo-text-group .logo-text {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  letter-spacing: -0.02em !important;
+  white-space: nowrap !important;
+}
+
+.admin-sidebar .logo-text-group .logo-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #cbd5e1 !important;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  padding: 6px 10px !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.05em !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+}
+
+.admin-content {
+  margin-left: 240px !important;
+  flex: 1 !important;
+  background: #f1f5f9 !important;
+  min-height: 100vh !important;
+  padding: 40px !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+.admin-content.ready {
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 네비게이션 메뉴 기본 디자인 */
+.admin-sidebar .admin-nav {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 16px 0 !important;
+  gap: 4px !important;
+  flex: 1 !important;
+  position: relative !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+.admin-sidebar .admin-nav::-webkit-scrollbar {
+  width: 5px !important;
+}
+.admin-sidebar .admin-nav::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.admin-sidebar .admin-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-radius: 99px !important;
+}
+.admin-sidebar .admin-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+.admin-sidebar .admin-nav a {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 26px !important;
+  color: #94a3b8 !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  transition: gap 0.3s ease, background 0.2s ease, color 0.2s ease !important;
+  white-space: nowrap !important;
+  font-size: 0.95rem !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+.admin-sidebar .admin-nav a span {
+  transition: opacity 0.3s ease, max-width 0.3s ease, margin 0.3s ease, visibility 0.3s ease !important;
+  display: inline-block !important;
+  max-width: 150px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  overflow: hidden !important;
+  vertical-align: middle !important;
+}
+.admin-sidebar .admin-nav a:hover {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+.admin-sidebar .admin-nav a.active {
+  color: #fff !important;
+  background: var(--primary, #0ea5e9) !important;
+  font-weight: 700 !important;
+}
+.admin-sidebar .admin-nav:has(.admin-nav-indicator) a.active {
+  background: transparent !important;
+}
+.admin-nav-indicator {
+  position: absolute !important;
+  left: 0 !important;
+  width: 100% !important;
+  background: var(--primary, #0ea5e9) !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  opacity: 0;
+  transition: top 0.45s cubic-bezier(0.25, 1, 0.5, 1), height 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease !important;
+}
+.admin-sidebar .admin-nav a .nav-icon {
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0 !important;
+  color: inherit !important;
+  transition: color 0.2s ease !important;
+}
+
+/* 사이드바 접힘 상태 즉각 반영 (Flicker 방지) */
+html.sidebar-collapsed .admin-sidebar {
+  width: 72px !important;
+  min-width: 72px !important;
+}
+html.sidebar-collapsed .admin-content {
+  margin-left: 72px !important;
+}
+
+/* 접힌 상태 로고 및 텍스트 숨김 */
+html.sidebar-collapsed .admin-sidebar .logo {
+  gap: 0 !important;
+}
+html.sidebar-collapsed .admin-sidebar .logo-text-group {
+  opacity: 0 !important;
+  max-width: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 접힌 상태 네비게이션 링크 */
+html.sidebar-collapsed .admin-sidebar .admin-nav a {
+  gap: 0 !important;
+}
+html.sidebar-collapsed .admin-sidebar .admin-nav a span {
+  opacity: 0 !important;
+  max-width: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 접힌 상태 푸터 */
+html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer > div {
+  padding: 16px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 0 !important;
+}
+html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer .footer-info-row {
+  display: none !important;
+}
+html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer button {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer button span {
+  display: none !important;
+}
+html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer button .logout-icon {
+  display: block !important;
+}
+
+/* ── 헤더 글로벌 오버라이드 및 슬림화 (CSS Grid 구조) ── */
+.dashboard-header {
+  height: 120px !important;
+  margin: -40px -40px 24px -40px !important;
+  padding: 0 40px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
+}
+.dashboard-header .header-title-area {
+  display: grid !important;
+  grid-template-areas: 
+    "category category"
+    "title desc" !important;
+  grid-template-columns: auto 1fr !important;
+  align-items: end !important;
+  row-gap: 2px !important;
+  column-gap: 12px !important;
+}
+.dashboard-header .header-category {
+  grid-area: category !important;
+  display: flex !important;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  color: var(--primary-dark, #0369a1) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.12em !important;
+}
+.dashboard-header h1 {
+  grid-area: title !important;
+  font-size: 1.85rem !important;
+  margin: 0 !important;
+  color: #0f172a !important;
+  display: inline-block !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em !important;
+  line-height: 1.2 !important;
+}
+.dashboard-header .header-desc {
+  grid-area: desc !important;
+  font-size: 0.8rem !important;
+  color: #64748b !important;
+  margin: 0 !important;
+  display: inline-block !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+}
+
+#admin-sidebar-footer {
+  flex-shrink: 0 !important;
+}
+
+
+/* ── 소형 버튼 규격 ──────────────────────────────── */
+.btn-sm {
+  padding: 8px 16px !important;
+  font-size: 0.85rem !important;
+  border-radius: 6px !important;
+}
+.btn-xs {
+  padding: 6px 12px !important;
+  font-size: 0.75rem !important;
+  border-radius: 4px !important;
+}
+
+/* ── 무채색 (Neutral) 버튼 스타일 추가 ────────────────── */
+.btn-neutral {
+  background: #334155 !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(51, 65, 85, 0.15) !important;
+}
+.btn-neutral:hover {
+  background: #1e293b !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(30, 41, 59, 0.25) !important;
+}
+.btn-neutral:active {
+  transform: translateY(0) !important;
+}
+
+.btn-neutral-outline {
+  background: transparent !important;
+  border: 1.5px solid #64748b !important;
+  color: #475569 !important;
+}
+.btn-neutral-outline:hover {
+  background: #f8fafc !important;
+  border-color: #475569 !important;
+  color: #1e293b !important;
+}
+
+/* ── 서브페이지 뒤로가기 및 서브타이틀 프리미엄 스타일 ── */
+.subpage-title-area {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  margin-bottom: 24px !important;
+}
+
+.subpage-title-area .back-link-container {
+  margin: 0 !important;
+}
+
+.subpage-title-area .page-subtitle {
+  font-size: 1.55rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* ── 어드민 폼 컨테이너 (좌측 정렬 카드 구조) ── */
+.form-container {
+  background: #fff !important; 
+  border-radius: 8px !important; 
+  border: 1px solid rgba(226, 232, 240, 0.8) !important; 
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important; 
+  padding: 40px !important;
+  margin-bottom: 32px !important;
+  max-width: 720px !important; /* 너비를 720px로 제한하여 시선의 분산을 방지 */
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.form-container form {
+  width: 100% !important;
+}
+
+.form-container .form-group {
+  margin-bottom: 24px !important;
+}
+
+.form-container .form-group label {
+  display: block !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  font-size: 0.88rem !important;
+  color: #334155 !important;
+}
+
+.form-container .form-group input,
+.form-container .form-group select {
+  width: 100% !important;
+  padding: 12px 16px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  font-size: 0.95rem !important;
+  outline: none !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  box-sizing: border-box !important;
+}
+
+.form-container .form-group input:focus,
+.form-container .form-group select:focus {
+  border-color: var(--primary, #0ea5e9) !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+  background: #fff !important;
+}
+
+.form-container .form-group select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'%3E%3C/path%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 16px center !important;
+  background-size: 16px !important;
+  padding-right: 40px !important;
+}
+
+.form-container .form-actions {
+  display: flex !important;
+  gap: 12px !important;
+  margin-top: 32px !important;
+}
+
+

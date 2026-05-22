@@ -3,49 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>쿠폰 및 발행처 관리 | 옹진관광 관리자</title>
+  <title>쿠폰 관리 | 옹진 관광 관리자</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    })();
+  </script>
   <style>
-    * { box-sizing: border-box; }
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      overflow-x: hidden; background: #f1f5f9;
-      font-family: var(--font-main); color: #1e293b; 
+      background: #f1f5f9;
+      color: #1e293b; 
     }
-    
-    .app-shell { 
-      display: flex !important; flex-direction: column; 
-      min-height: 100vh; width: 100% !important; max-width: none !important;
-    }
-
-    @media (min-width: 1024px) {
-      .app-shell { flex-direction: row !important; }
-      .admin-sidebar {
-        width: 240px !important; min-width: 240px; height: 100vh;
-        background: #0f172a; color: #fff; position: sticky; top: 0;
-        display: flex; flex-direction: column; flex-shrink: 0;
-      }
-      .admin-content {
-        flex: 1 !important; background: #f1f5f9; min-height: 100vh;
-        padding: 40px; min-width: 0;
-      }
-    }
-
-    .admin-sidebar .logo {
-      padding: 24px; font-size: 1.1rem; font-weight: 900; 
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex; align-items: center; gap: 10px; color: #fff; white-space: nowrap;
-    }
-    .admin-nav { padding: 16px 0; flex: 1; }
-    .admin-nav a {
-      display: flex; align-items: center; gap: 12px; padding: 12px 24px;
-      color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s;
-      white-space: nowrap; font-size: 0.95rem;
-    }
-    .admin-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
-    .admin-nav a.active { color: #fff; background: var(--primary); font-weight: 700; }
-
-    .dashboard-header { margin-bottom: 32px; }
 
     /* Card Layouts */
     .admin-card {
@@ -66,10 +38,11 @@
     .form-row > div { flex: 1; }
     
     .btn-generate {
-      padding: 10px 24px; background: var(--primary); color: white; border: none; border-radius: 6px;
+      padding: 10px 24px; background: #334155; color: white; border: none; border-radius: 6px;
       font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; height: 42px;
+      transition: background 0.2s;
     }
-    .btn-generate:hover { background: #2563eb; }
+    .btn-generate:hover { background: #1e293b; }
 
     /* Data Table */
     .admin-table { width: 100%; border-collapse: collapse; }
@@ -78,51 +51,42 @@
     .admin-table tr:hover { background: var(--surface-2); }
     
     .btn-download {
-      padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 4px;
+      padding: 6px 12px; background: transparent; color: #475569; border: 1.5px solid #64748b; border-radius: 4px;
       font-size: 0.8rem; font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: all 0.2s;
     }
-    .btn-download:hover { background: #059669; }
+    .btn-download:hover { background: #f8fafc; color: #1e293b; border-color: #475569; }
+    
+    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
   </style>
-  <script type="module" crossorigin src="/assets/admin-coupons-s3udJMvc.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/main-9hPShMGN.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-CHX2GdQ8.js">
-  <link rel="modulepreload" crossorigin href="/assets/i18n-DJszV0mx.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BkjUHGKL.css">
+  <script type="module" crossorigin src="/assets/admin-coupons-BMv1Qs88.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-BQDM6Pi8.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
 </head>
 <body>
   <div class="app-shell">
-    <aside class="admin-sidebar">
-      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
-      <nav class="admin-nav">
-        <a href="/admin/index.html" data-i18n="nav_dashboard">대시보드</a>
-        <a href="/admin/merchants.html" data-i18n="nav_merchant">가맹점 관리</a>
-        <a href="/admin/settlement.html" data-i18n="nav_settlement">정산 관리</a>
-        <a href="/admin/fds.html" data-i18n="nav_fds">FDS 모니터링</a>
-        <a href="/admin/coupons.html" class="active" data-i18n="nav_coupons">쿠폰 및 발행처 관리</a>
-        <a href="/admin/statistics.html" data-i18n="nav_statistics">통계 및 보고서</a>
-      </nav>
-      <div style="padding: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <div style="margin-bottom: 16px;">
-          <select id="lang-switcher" style="width: 100%; padding: 6px; background: #1e293b; color: #fff; border: 1px solid #334155; border-radius: 4px;">
-            <option value="ko" data-i18n="lang_ko">한국어</option>
-            <option value="en" data-i18n="lang_en">English</option>
-            <option value="zh" data-i18n="lang_zh">中文</option>
-          </select>
-        </div>
-        <button id="btn-logout" data-i18n="logout" style="color: #94a3b8; font-size: 0.9rem; background: transparent; border: none; cursor: pointer; padding: 0;">로그아웃</button>
-      </div>
-    </aside>
+    <aside class="admin-sidebar"></aside>
 
     <main class="admin-content">
       <header class="dashboard-header">
-        <h1 style="font-size: 1.5rem; font-weight: 900; margin: 0 0 8px 0;">쿠폰 및 발행처 관리</h1>
-        <p style="color: var(--text-secondary); margin: 0;">유료 관광지 키오스크용 쿠폰 난수를 대량 발행하고 관리합니다.</p>
+        <div class="header-title-area">
+          <span class="header-category">Coupon Management</span>
+          <h1>쿠폰 관리</h1>
+          <p class="header-desc">종이 쿠폰용 난수 일괄 발행과 함께 전체 디지털/종이 쿠폰의 실시간 발급 및 사용(결제) 현황을 모니터링합니다.</p>
+        </div>
       </header>
+
+      <!-- 쿠폰 조작 버튼 영역 -->
+      <div class="table-actions-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; justify-content: flex-start;">
+        <button class="btn btn-neutral btn-sm" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer;" onclick="location.href='allocate-coupon.html'">쿠폰 배정하기</button>
+      </div>
 
       <!-- 쿠폰 대량 발행 폼 -->
       <div class="admin-card">
         <div class="card-header">
-          <div class="card-title">✨ 신규 난수 쿠폰 발행</div>
+          <div class="card-title"> 신규 난수 쿠폰 발행</div>
         </div>
         <div class="card-body">
           <form id="form-generate-coupons" onsubmit="generateCoupons(event)">
@@ -158,7 +122,7 @@
       <!-- 발행 내역 테이블 -->
       <div class="admin-card">
         <div class="card-header">
-          <div class="card-title">📜 최근 발행 내역</div>
+          <div class="card-title"> 최근 발행 내역 (종이 난수)</div>
         </div>
         <table class="admin-table">
           <thead>
@@ -172,14 +136,13 @@
             </tr>
           </thead>
           <tbody id="batch-list">
-            <!-- Mock Data -->
             <tr>
               <td><strong>BATCH-20260504-01</strong></td>
               <td>2026-05-04 10:30</td>
               <td>백령도 유람선 매표소</td>
               <td>5,000원권</td>
               <td>500장</td>
-              <td><button class="btn-download" onclick="alert('엑셀 다운로드 시작')">⬇️ 난수 추출</button></td>
+              <td><button class="btn-download" onclick="alert('엑셀 다운로드 시작')">️ 난수 추출</button></td>
             </tr>
             <tr>
               <td><strong>BATCH-20260503-02</strong></td>
@@ -187,8 +150,45 @@
               <td>영흥도 에너지파크</td>
               <td>10,000원권</td>
               <td>200장</td>
-              <td><button class="btn-download" onclick="alert('엑셀 다운로드 시작')">⬇️ 난수 추출</button></td>
+              <td><button class="btn-download" onclick="alert('엑셀 다운로드 시작')">️ 난수 추출</button></td>
             </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 전체 쿠폰 발급 및 사용 현황 -->
+      <div class="admin-card">
+        <div class="card-header" style="flex-wrap: wrap; gap: 16px;">
+          <div class="card-title">💵 전체 쿠폰 발급 및 사용 현황</div>
+          <div style="display: flex; gap: 8px;">
+            <select id="filter-status" onchange="window.filterCoupons()" style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
+              <option value="all">전체 상태</option>
+              <option value="available">사용 가능</option>
+              <option value="used">사용 완료</option>
+              <option value="expired">기간 만료</option>
+            </select>
+            <select id="filter-type" onchange="window.filterCoupons()" style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
+              <option value="all">전체 구분</option>
+              <option value="digital">디지털 쿠폰</option>
+              <option value="paper">종이 쿠폰</option>
+            </select>
+          </div>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>쿠폰 ID</th>
+              <th>구분</th>
+              <th>액면가</th>
+              <th>수령인 (관광객)</th>
+              <th>발행처 / 출처</th>
+              <th>상태</th>
+              <th>발급일시</th>
+              <th>사용일시</th>
+            </tr>
+          </thead>
+          <tbody id="coupon-status-list">
+            <tr><td colspan="8" class="text-center" style="padding: 30px; color:#64748b;">데이터를 불러오는 중입니다...</td></tr>
           </tbody>
         </table>
       </div>

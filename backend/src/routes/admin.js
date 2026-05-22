@@ -305,4 +305,182 @@ router.post('/coupons/generate', authenticate, authorize('admin'), async (req, r
   }
 });
 
+// ── 관리자 계정 목록 ──────────────────────────────
+router.get('/managers', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT id, username, name, role, created_at FROM admins ORDER BY created_at ASC`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) { next(err); }
+});
+
+// ── 관리자 계정 등록 ──────────────────────────────
+router.post('/managers', authenticate, authorize('admin'), async (req, res, next) => {
+  if (req.user.adminRole !== 'super') {
+    return res.status(403).json({ success: false, message: '최고 관리자만 접근 가능합니다.' });
+  }
+
+  const { username, password, name, role } = req.body;
+  if (!username || !password || !name || !role) {
+    return res.status(400).json({ success: false, message: '모든 필드를 입력해주세요.' });
+  }
+
+  try {
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await pool.execute(
+      `INSERT INTO admins (username, password_hash, name, role) VALUES (?, ?, ?, ?)`,
+      [username, hashedPassword, name, role]
+    );
+    res.json({ success: true, message: '관리자가 등록되었습니다.' });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ success: false, message: '이미 존재하는 아이디입니다.' });
+    }
+    next(err);
+  }
+});
+
+// ── 관리자 계정 다중 삭제 ───────────────────────────
+router.delete('/managers', authenticate, authorize('admin'), async (req, res, next) => {
+  if (req.user.adminRole !== 'super') {
+    return res.status(403).json({ success: false, message: '최고 관리자만 접근 가능합니다.' });
+  }
+
+  const { ids } = req.body;
+  if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ success: false, message: '삭제할 관리자를 선택해주세요.' });
+  }
+
+  // 본인 계정 삭제 방지
+  if (ids.includes(req.user.id)) {
+    return res.status(400).json({ success: false, message: '본인 계정은 삭제할 수 없습니다.' });
+  }
+
+  try {
+    const placeholders = ids.map(() => '?').join(',');
+    await pool.execute(
+      `DELETE FROM admins WHERE id IN (${placeholders})`,
+      ids
+    );
+    res.json({ success: true, message: '선택한 관리자가 삭제되었습니다.' });
+  } catch (err) { next(err); }
+});
+
+// ── 관광객 회원 목록 조회 ───────────────────────────────────
+router.get('/users', authenticate, async (req, res, next) => {
+  try {
+    // Both super and operator can access this route
+    const [rows] = await pool.execute(
+      `SELECT id, social_provider, nickname, email, coupon_balance, status, created_at 
+       FROM users 
+       WHERE role = 'tourist' 
+       ORDER BY created_at DESC`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) { next(err); }
+});
+
+// ── 관광객 회원 탈퇴 처리 (완전 삭제) ─────────────────────────
+router.delete('/users/:id', authenticate, async (req, res, next) => {
+  const userId = req.params.id;
+
+  try {
+    const [result] = await pool.execute(
+      `DELETE FROM users WHERE id = ? AND role = 'tourist'`,
+      [userId]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: '해당 회원을 찾을 수 없습니다.' });
+    }
+    
+    res.json({ success: true, message: '회원 정보가 완전히 삭제되었습니다.' });
+  } catch (err) { next(err); }
+});
+
+// ── 관광객 회원 쿠폰 내역 조회 ─────────────────────────
+router.get('/users/:id/coupons', authenticate, async (req, res, next) => {
+  const userId = req.params.id;
+  try {
+    const [rows] = await pool.execute(
+      `SELECT id, code_hash, coupon_type, face_value, status, issued_at, expires_at, used_at
+       FROM coupons
+       WHERE issued_to = ?
+       ORDER BY issued_at DESC`,
+      [userId]
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) { next(err); }
+});
+
+// ── 1. 발행처 목록 및 배정 현황 조회 ──
+router.get('/issuers', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const [issuers] = await pool.execute(
+      `SELECT id, username, name, created_at FROM issuers ORDER BY created_at DESC`
+    );
+    const [allocations] = await pool.execute(
+      `SELECT id, issuer_id, face_value, total_count, issued_count, created_at 
+       FROM issuer_allocations ORDER BY created_at DESC`
+    );
+    res.json({ success: true, data: { issuers, allocations } });
+  } catch (err) { next(err); }
+});
+
+// ── 2. 신규 발행처 등록 ──
+router.post('/issuers', authenticate, authorize('admin'), async (req, res, next) => {
+  const { username, password, name } = req.body;
+  if (!username || !password || !name) {
+    return res.status(400).json({ success: false, message: '아이디, 비밀번호, 발행처명을 모두 입력해주세요.' });
+  }
+  try {
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await pool.execute(
+      `INSERT INTO issuers (username, password_hash, name) VALUES (?, ?, ?)`,
+      [username, hashedPassword, name]
+    );
+    res.json({ success: true, message: '발행처가 등록되었습니다.' });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ success: false, message: '이미 존재하는 발행처 아이디입니다.' });
+    }
+    next(err);
+  }
+});
+
+// ── 3. 발행처 쿠폰 배정 ──
+router.post('/issuers/allocations', authenticate, authorize('admin'), async (req, res, next) => {
+  const { issuerId, faceValue, totalCount } = req.body;
+  if (!issuerId || !faceValue || !totalCount || totalCount < 1) {
+    return res.status(400).json({ success: false, message: '발행처, 배정 금액, 배정 수량을 올바르게 입력해주세요.' });
+  }
+  try {
+    await pool.execute(
+      `INSERT INTO issuer_allocations (issuer_id, face_value, total_count) VALUES (?, ?, ?)`,
+      [issuerId, faceValue, totalCount]
+    );
+    res.json({ success: true, message: '발행처 쿠폰 배정이 완료되었습니다.' });
+  } catch (err) { next(err); }
+});
+
+// ── 4. 전체 쿠폰 상태 목록 조회 (사용 현황) ──
+router.get('/coupons/status-list', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT c.id, c.coupon_type, c.face_value, c.status, c.issued_at, c.used_at,
+              u.nickname AS tourist_nickname, u.email AS tourist_email,
+              i.name AS issuer_name
+       FROM coupons c
+       LEFT JOIN users u ON c.issued_to = u.id
+       LEFT JOIN issuer_allocations ia ON c.issuer_allocation_id = ia.id
+       LEFT JOIN issuers i ON ia.issuer_id = i.id
+       ORDER BY c.issued_at DESC LIMIT 200`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;

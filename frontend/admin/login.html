@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>관리자 로그인 | 옹진관광 쿠폰</title>
+  <title>관리자 로그인 | 옹진 관광 쿠폰</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
@@ -176,12 +176,21 @@
       padding: 16px 16px 16px 46px;
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      border-radius: 0;
+      border-radius: 8px;
       color: #0f172a;
       font-size: 1rem;
       font-family: inherit;
       transition: all 0.2s;
       outline: none;
+    }
+    #password {
+      padding-right: 48px !important;
+    }
+    input::-ms-reveal,
+    input::-ms-clear {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
     }
     input[type="text"]:focus, input[type="password"]:focus {
       border-color: #2563eb;
@@ -221,10 +230,10 @@
     .btn-login {
       width: 100%;
       padding: 18px;
-      background: #2563eb;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       color: #ffffff;
       border: none;
-      border-radius: 0;
+      border-radius: 8px;
       font-size: 1rem;
       font-weight: 700;
       letter-spacing: 1px;
@@ -237,7 +246,7 @@
       text-transform: uppercase;
     }
     .btn-login:hover:not(:disabled) {
-      background: #1d4ed8;
+      filter: brightness(1.08);
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
     }
     .btn-login:active { transform: scale(0.99); }
@@ -381,9 +390,11 @@
     </form>
 
     <div class="footer-links">
-      <a href="/tourist/" class="footer-link">관광객</a>
+      <a href="/tourist/" class="footer-link" target="_blank" rel="noopener noreferrer">관광객</a>
       <span class="dot-separator"></span>
-      <a href="/merchant/" class="footer-link">가맹점</a>
+      <a href="/merchant/" class="footer-link" target="_blank" rel="noopener noreferrer">가맹점</a>
+      <span class="dot-separator"></span>
+      <a href="/issuer/login.html" class="footer-link" target="_blank" rel="noopener noreferrer">발행처</a>
     </div>
   </div>
 

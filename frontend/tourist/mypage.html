@@ -45,7 +45,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-top: 16px;
+      margin-top: 14px;
     }
     .wallet-btn {
       background: rgba(255,255,255,.18);
@@ -59,6 +59,7 @@
       cursor: pointer;
       transition: background var(--dur) var(--ease);
       border: 1px solid rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center; gap: 4px;
     }
     .wallet-btn:hover { background: rgba(255,255,255,.28); }
 
@@ -163,6 +164,30 @@
     }
     .empty-state .emoji { font-size: 3rem; margin-bottom: 12px; }
     .empty-state p { font-size: .9rem; }
+
+    /* QR 스캔 프로세싱 모달 */
+    .qr-modal-backdrop {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .qr-modal-backdrop.active { opacity: 1; pointer-events: auto; }
+    .qr-modal-sheet {
+      background: #fff;
+      border-radius: 20px;
+      width: 85%;
+      max-width: 340px;
+      padding: 32px 20px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+      transform: scale(0.9);
+      transition: transform 0.25s ease;
+    }
+    .qr-modal-backdrop.active .qr-modal-sheet { transform: scale(1); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
   </style>
 </head>
 <body>
@@ -180,11 +205,24 @@
         <p class="wallet-label">내 쿠폰 잔액</p>
         <p class="wallet-balance" id="balance">—</p>
         <p class="wallet-sub" id="wallet-user">불러오는 중...</p>
+        
+        <!-- 발행처 QR 쿠폰 받기 메인 버튼 -->
+        <div style="margin-top: 20px;">
+          <button class="wallet-btn" id="btn-scan-issuer-qr" style="width: 100%; background: #ffffff; color: #0369a1; border: none; font-size: 0.9rem; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <path d="M14 14h2v2h-2zm4 0h3v3h-3zm3-3h-3v3h3zm-3 7h3v3h-3zm-4-4h2v2h-2zm0 4h2v2h-2z"/>
+            </svg>
+            <span style="font-weight: 800;">📷 QR 쿠폰 받기</span>
+          </button>
+        </div>
+
         <div class="wallet-actions">
           <button class="wallet-btn" id="btn-add-paper">
             📄 종이쿠폰 등록
           </button>
-          <a href="/tourist/map.html" class="wallet-btn" style="text-align:center;">
+          <a href="/tourist/map.html" class="wallet-btn" style="text-align:center; text-decoration: none;">
             📍 가맹점 지도
           </a>
         </div>
@@ -270,10 +308,55 @@
     </div>
   </div>
 
+  <!-- 발행처 QR 촬영용 카메라 인풋 -->
+  <input type="file" accept="image/*" capture="camera" id="issuer-qr-input" style="display:none;" />
+
+  <!-- QR 코드 분석 및 발급 모달 -->
+  <div class="qr-modal-backdrop" id="qr-modal">
+    <div class="qr-modal-sheet">
+      <!-- 1. 분석 중 화면 -->
+      <div id="qr-state-loading" style="display: block;">
+        <div class="spinner" style="width: 48px; height: 48px; border: 4px solid #e0f2fe; border-top-color: #0ea5e9; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+        <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">QR 코드 분석 중</h3>
+        <p style="font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.4;">카메라로 촬영된 이미지를 디코딩하여<br>쿠폰을 발급받고 있습니다. 잠시만 기다려주세요.</p>
+      </div>
+      
+      <!-- 2. 성공 화면 -->
+      <div id="qr-state-success" style="display: none;">
+        <div style="font-size: 3.5rem; margin-bottom: 16px; animation: bounce 0.6s ease-out;">🎉</div>
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">쿠폰 발급 성공!</h3>
+        <p id="qr-success-msg" style="font-size: 0.9rem; color: #0ea5e9; font-weight: 700; margin-bottom: 24px;">쿠폰이 지갑에 등록되었습니다.</p>
+        <button class="btn btn-primary btn-full" id="btn-qr-success-ok" style="padding: 12px 0;">확인</button>
+      </div>
+
+      <!-- 3. 실패 화면 -->
+      <div id="qr-state-error" style="display: none;">
+        <div style="font-size: 3.5rem; margin-bottom: 16px;">❌</div>
+        <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">인식 실패</h3>
+        <p id="qr-error-msg" style="font-size: 0.85rem; color: #ef4444; margin-bottom: 24px; line-height: 1.4;">QR 코드를 찾을 수 없습니다.<br>밝은 곳에서 흔들림 없이 다시 찍어주세요.</p>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline" id="btn-qr-error-close" style="flex: 1; padding: 12px 0;">닫기</button>
+          <button class="btn btn-primary" id="btn-qr-error-retry" style="flex: 2; padding: 12px 0;">다시 촬영</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="toast-container"></div>
+
+  <!-- jsQR CDN (QR 디코딩) -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
   <script type="module">
     import { api, requireAuth, showToast, fmtMoney, fmtDate, clearTokens } from '../shared/js/api.js'
+
+    // ── QR 자동 발급용 매개변수 확인 및 세션 백업 ──
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+    const allocationIdVal = urlParams.get('allocationId');
+    if (action === 'issue' && allocationIdVal) {
+      sessionStorage.setItem('pending_qr_issue', allocationIdVal);
+    }
 
     if (!requireAuth()) throw new Error('not authenticated')
 
@@ -366,15 +449,14 @@
     document.getElementById('btn-close-modal').onclick = () =>
       document.getElementById('paper-modal').classList.add('hidden')
 
-    // 카메라 스캔
+    // 카메라 스캔 (종이쿠폰 바코드)
     document.getElementById('scan-input').addEventListener('change', async e => {
       const file = e.target.files[0]
       if (!file) return
       showToast('바코드 스캔 기능은 ZXing.js 연동 후 사용 가능합니다.', '')
-      // TODO: ZXing.js 바코드 디코딩 연동
     })
 
-    // 쿠폰 등록
+    // 쿠폰 등록 (종이쿠폰)
     document.getElementById('btn-convert').addEventListener('click', async () => {
       const code = document.getElementById('paper-code').value.trim()
       if (!code) { showToast('쿠폰 번호를 입력해 주세요.', 'error'); return }
@@ -398,6 +480,122 @@
       }
     })
 
+    // ── 발행처 QR 스캔 등록 ──────────────────────────
+    const qrModal = document.getElementById('qr-modal');
+    const qrStateLoading = document.getElementById('qr-state-loading');
+    const qrStateSuccess = document.getElementById('qr-state-success');
+    const qrStateError = document.getElementById('qr-state-error');
+
+    function openQrModalState(state) {
+      qrStateLoading.style.display = state === 'loading' ? 'block' : 'none';
+      qrStateSuccess.style.display = state === 'success' ? 'block' : 'none';
+      qrStateError.style.display = state === 'error' ? 'block' : 'none';
+      qrModal.classList.add('active');
+    }
+
+    window.closeQrModal = () => {
+      qrModal.classList.remove('active');
+    };
+
+    window.retryQrCapture = () => {
+      qrModal.classList.remove('active');
+      document.getElementById('issuer-qr-input').click();
+    };
+
+    document.getElementById('btn-qr-success-ok').onclick = closeQrModal;
+    document.getElementById('btn-qr-error-close').onclick = closeQrModal;
+    document.getElementById('btn-qr-error-retry').onclick = retryQrCapture;
+
+    document.getElementById('btn-scan-issuer-qr').onclick = () => {
+      document.getElementById('issuer-qr-input').click();
+    };
+
+    document.getElementById('issuer-qr-input').addEventListener('change', async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // 분석 중 모달 표시
+      openQrModalState('loading');
+
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = async () => {
+        try {
+          // 이미지 크기 최적화 (Downscaling)
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 800; // 800px로 제한하여 jsQR 연산 속도 및 메모리 사용량 최적화
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const imageData = ctx.getImageData(0, 0, width, height);
+          
+          // jsQR 분석
+          const code = jsQR(imageData.data, width, height);
+          URL.revokeObjectURL(img.src);
+          e.target.value = '';
+
+          if (!code) {
+            document.getElementById('qr-error-msg').innerHTML = '사진에서 QR 코드를 인식하지 못했습니다.<br>밝은 곳에서 QR 코드가 잘 보이도록 다시 찍어주세요.';
+            openQrModalState('error');
+            return;
+          }
+
+          const dataStr = code.data;
+          if (!dataStr.startsWith('ONGC_QR_ALLOCATION:')) {
+            document.getElementById('qr-error-msg').textContent = '쿠폰 발급용으로 생성된 올바른 QR 코드가 아닙니다.';
+            openQrModalState('error');
+            return;
+          }
+
+          const allocationIdStr = dataStr.split(':')[1];
+          const allocationId = parseInt(allocationIdStr);
+
+          if (isNaN(allocationId)) {
+            document.getElementById('qr-error-msg').textContent = '유효하지 않은 QR 코드 데이터 포맷입니다.';
+            openQrModalState('error');
+            return;
+          }
+
+          // 서버 쿠폰 발급 API 호출
+          const res = await api.post('/coupon/issue-by-qr', { allocationId });
+          if (res.success) {
+            document.getElementById('qr-success-msg').textContent = `${fmtMoney(res.faceValue || 10000)} 쿠폰이 지갑에 성공적으로 발급되었습니다!`;
+            openQrModalState('success');
+            
+            // 지갑 새로고침
+            allCoupons = [];
+            await loadWallet();
+          } else {
+            document.getElementById('qr-error-msg').textContent = res.message || '쿠폰 발급 처리에 실패했습니다.';
+            openQrModalState('error');
+          }
+        } catch (err) {
+          document.getElementById('qr-error-msg').textContent = err.message || '서버 통신 중 오류가 발생했습니다.';
+          openQrModalState('error');
+        }
+      };
+      
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src);
+        e.target.value = '';
+        document.getElementById('qr-error-msg').textContent = '이미지를 불러올 수 없습니다. 다시 촬영해 주세요.';
+        openQrModalState('error');
+      };
+    });
+
     // ── 로그아웃 ─────────────────────────────────────
     function logout() {
       clearTokens()
@@ -407,9 +605,41 @@
     document.getElementById('nav-logout').onclick = e => { e.preventDefault(); logout() }
 
     // ── 초기 로드 ────────────────────────────────────
-    loadWallet().then(({ data } = {}) => {
-      if (data) allCoupons = data
-    })
+    loadWallet().then(async ({ data } = {}) => {
+      if (data) allCoupons = data;
+
+      // 대기 중인 QR 발급 건이 있다면 자동으로 처리
+      const pendingAllocationId = sessionStorage.getItem('pending_qr_issue');
+      if (pendingAllocationId) {
+        sessionStorage.removeItem('pending_qr_issue');
+
+        // 새로고침 시 중복 발급 시도를 방지하기 위해 URL의 쿼리 스트링 청소
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({}, '', cleanUrl);
+
+        const allocationId = parseInt(pendingAllocationId);
+        if (!isNaN(allocationId)) {
+          openQrModalState('loading');
+          try {
+            const res = await api.post('/coupon/issue-by-qr', { allocationId });
+            if (res.success) {
+              document.getElementById('qr-success-msg').textContent = `${fmtMoney(res.faceValue || 10000)} 쿠폰이 지갑에 성공적으로 발급되었습니다!`;
+              openQrModalState('success');
+              
+              // 지갑 목록 새로고침
+              allCoupons = [];
+              await loadWallet();
+            } else {
+              document.getElementById('qr-error-msg').textContent = res.message || '쿠폰 발급에 실패했습니다.';
+              openQrModalState('error');
+            }
+          } catch (err) {
+            document.getElementById('qr-error-msg').textContent = err.message || '쿠폰 발급 중 오류가 발생했습니다.';
+            openQrModalState('error');
+          }
+        }
+      }
+    });
   </script>
 </body>
 </html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>관리자 계정 관리 | 옹진 관광 쿠폰</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    })();
+  </script>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/css/reset.css" />
+  
+  <style>
+    body { 
+      margin: 0 !important; padding: 0 !important; 
+      width: 100% !important; max-width: none !important; 
+      background: #f1f5f9;
+      color: #1e293b; 
+    }
+    
+    /* 데이터 테이블 */
+    .admin-card {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .admin-table th, .admin-table td {
+      padding: 16px 24px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-table th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+    .admin-table tr:hover { background: #f8fafc; }
+    
+    .btn-export {
+      padding: 10px 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-export:hover { background: #f1f5f9; }
+    .controls { display: flex; gap: 12px; }
+  </style>
+  <script type="module" crossorigin src="/assets/admin-managers-TN32s7kF.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-BQDM6Pi8.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
+</head>
+<body>
+  <div class="app-shell" style="min-height: 100vh;">
+    <!-- 사이드바 -->
+    <aside class="admin-sidebar"></aside>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="admin-content">
+      <header class="dashboard-header">
+        <div class="header-title-area">
+          <span class="header-category">Administrator Settings</span>
+          <h1>관리자 계정 관리</h1>
+          <p class="header-desc">관리자 계정을 추가하거나 권한을 설정할 수 있습니다.</p>
+        </div>
+      </header>
+
+      <!-- 테이블 조작 버튼 영역 -->
+      <div class="table-actions-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; justify-content: flex-start;">
+        <button id="btn-delete-managers" class="btn btn-neutral-outline btn-sm" style="height: 38px; display: flex; align-items: center;">선택 삭제</button>
+        <button id="btn-add-manager" class="btn btn-neutral btn-sm" style="height: 38px; display: flex; align-items: center;">관리자 등록</button>
+      </div>
+
+      <div class="admin-card" style="border-radius: 0;">
+        <table class="admin-table" style="text-align: center;">
+          <thead>
+            <tr>
+              <th style="text-align: center; width: 60px;"><input type="checkbox" id="selectAllManagers" style="cursor: pointer;"></th>
+              <th style="text-align: center;">이름</th>
+              <th style="text-align: center;">아이디</th>
+              <th style="text-align: center;">권한</th>
+            </tr>
+          </thead>
+          <tbody id="managersTableBody">
+            <!-- 데이터가 여기에 렌더링됩니다 -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- 관리자 등록 모달 -->
+  <div id="addManagerModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: #fff; width: 400px; padding: 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <h2 style="margin: 0 0 20px 0; font-size: 1.2rem; font-weight: 700;">새 관리자 등록</h2>
+      
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">이름</label>
+        <input type="text" id="newManagerName" placeholder="관리자 이름 입력" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
+      </div>
+      
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">아이디</label>
+        <input type="text" id="newManagerId" placeholder="로그인 아이디 입력" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
+      </div>
+      
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">비밀번호</label>
+        <input type="password" id="newManagerPwd" placeholder="비밀번호 입력" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
+      </div>
+      
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">권한 설정</label>
+        <select id="newManagerRole" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
+          <option value="super">최고 관리자</option>
+          <option value="operator">일반 운영자</option>
+        </select>
+      </div>
+      
+      <div style="display: flex; gap: 12px; justify-content: flex-start;">
+        <button id="btn-cancel-manager" class="btn btn-neutral-outline btn-sm" style="height: 38px;">취소</button>
+        <button id="btn-save-manager" class="btn btn-neutral btn-sm" style="height: 38px;">등록하기</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

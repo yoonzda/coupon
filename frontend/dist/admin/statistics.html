@@ -3,63 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>통계 및 보고서 | 옹진관광 관리자</title>
+  <title>통계 및 보고서 | 옹진 관광 관리자</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    })();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    * { box-sizing: border-box; }
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      overflow-x: hidden;
       background: #f1f5f9;
-      font-family: var(--font-main); color: #1e293b; 
+      color: #1e293b; 
     }
     
-    .app-shell { 
-      display: flex !important; flex-direction: column; 
-      min-height: 100vh; width: 100% !important; max-width: none !important;
-    }
-
-    @media (min-width: 1024px) {
-      .app-shell { flex-direction: row !important; }
-      .admin-sidebar {
-        width: 240px !important; min-width: 240px; height: 100vh;
-        background: #0f172a; color: #fff; position: sticky; top: 0;
-        display: flex; flex-direction: column; flex-shrink: 0;
-      }
-      .admin-content {
-        flex: 1 !important; background: #f1f5f9; min-height: 100vh;
-        padding: 40px; min-width: 0;
-      }
-    }
-
-    .admin-sidebar .logo {
-      padding: 24px; font-size: 1.1rem; font-weight: 900; 
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex; align-items: center; gap: 10px; color: #fff; white-space: nowrap;
-    }
-    .admin-nav { padding: 16px 0; flex: 1; }
-    .admin-nav a {
-      display: flex; align-items: center; gap: 12px; padding: 12px 24px;
-      color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s;
-      white-space: nowrap; font-size: 0.95rem;
-    }
-    .admin-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
-    .admin-nav a.active { color: #fff; background: var(--primary); font-weight: 700; }
-
     /* Top Controls */
-    .dashboard-header {
-      display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;
-    }
     .controls { display: flex; gap: 12px; align-items: center; }
     .controls select, .controls input[type="date"] {
       padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;
     }
     .btn-export {
-      padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 6px;
+      padding: 8px 16px; background: #334155; color: white; border: none; border-radius: 6px;
       font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: background 0.2s;
     }
-    .btn-export:hover { background: #059669; }
+    .btn-export:hover { background: #1e293b; }
 
     /* KPI Cards */
     .stats-grid {
@@ -98,55 +69,37 @@
     .admin-table td { padding: 16px 24px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
     .admin-table tr:hover { background: var(--surface-2); }
   </style>
-  <script type="module" crossorigin src="/assets/admin-statistics-C8uvTApN.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/main-9hPShMGN.js">
-  <link rel="modulepreload" crossorigin href="/assets/i18n-DJszV0mx.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BkjUHGKL.css">
+  <script type="module" crossorigin src="/assets/admin-statistics-CaYy1-38.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-BQDM6Pi8.js">
+  <link rel="modulepreload" crossorigin href="/assets/i18n-CGOW55WO.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
 </head>
 <body>
   <div class="app-shell">
     <!-- 사이드바 -->
-    <aside class="admin-sidebar">
-      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
-      <nav class="admin-nav">
-        <a href="/admin/index.html" data-i18n="nav_dashboard">대시보드</a>
-        <a href="/admin/merchants.html" data-i18n="nav_merchant">가맹점 관리</a>
-        <a href="/admin/settlement.html" data-i18n="nav_settlement">정산 관리</a>
-        <a href="/admin/fds.html" data-i18n="nav_fds">FDS 모니터링</a>
-        <a href="/admin/coupons.html" data-i18n="nav_coupons">쿠폰 및 발행처 관리</a>
-        <a href="/admin/statistics.html" class="active" data-i18n="nav_statistics">통계 및 보고서</a>
-      </nav>
-      <div style="padding: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <div style="margin-bottom: 16px;">
-          <select id="lang-switcher" style="width: 100%; padding: 6px; background: #1e293b; color: #fff; border: 1px solid #334155; border-radius: 4px;">
-            <option value="ko" data-i18n="lang_ko">한국어</option>
-            <option value="en" data-i18n="lang_en">English</option>
-            <option value="zh" data-i18n="lang_zh">中文</option>
-          </select>
-        </div>
-        <button id="btn-logout" data-i18n="logout" style="color: #94a3b8; font-size: 0.9rem; background: transparent; border: none; cursor: pointer; padding: 0;">로그아웃</button>
-      </div>
-    </aside>
+    <aside class="admin-sidebar"></aside>
 
     <!-- 메인 컨텐츠 -->
     <main class="admin-content">
       <header class="dashboard-header">
-        <div>
-          <h1 style="font-size: 1.5rem; font-weight: 900; margin: 0 0 8px 0;">통계 및 보고서</h1>
-          <p style="color: var(--text-secondary); margin: 0;">플랫폼의 전반적인 성과와 지표를 분석합니다.</p>
-        </div>
-        <div class="controls">
-          <select id="date-range">
-            <option value="today">오늘</option>
-            <option value="week">이번 주</option>
-            <option value="month" selected>이번 달</option>
-            <option value="year">올해</option>
-          </select>
-          <button class="btn-export" id="btn-export" onclick="downloadReport()">
-            <span>📥</span> 보고서 다운로드 (Excel)
-          </button>
+        <div class="header-title-area">
+          <span class="header-category">Statistics & Reports</span>
+          <h1>통계 및 보고서</h1>
+          <p class="header-desc">플랫폼의 전반적인 성과와 지표를 분석합니다.</p>
         </div>
       </header>
+
+      <!-- 필터 및 보고서 내보내기 -->
+      <div class="stats-filter-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px; justify-content: flex-start;">
+        <select id="date-range" style="padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;">
+          <option value="today">오늘</option>
+          <option value="week">이번 주</option>
+          <option value="month" selected>이번 달</option>
+          <option value="year">올해</option>
+        </select>
+        <button class="btn-export" id="btn-export" style="height: 42px;" onclick="downloadReport()">보고서 다운로드 (Excel)</button>
+      </div>
 
       <!-- 요약 KPI -->
       <div class="stats-grid">
@@ -176,14 +129,14 @@
       <div class="charts-grid">
         <!-- 막대 차트: 월별 쿠폰 추이 -->
         <div class="chart-card">
-          <div class="chart-title">📈 월별 쿠폰 발행 및 사용 추이</div>
+          <div class="chart-title"> 월별 쿠폰 발행 및 사용 추이</div>
           <div class="chart-container">
             <canvas id="barChart"></canvas>
           </div>
         </div>
         <!-- 파이 차트: 지역별 가맹점 매출 비중 -->
         <div class="chart-card">
-          <div class="chart-title">📍 지역별 쿠폰 소진 비중</div>
+          <div class="chart-title"> 지역별 쿠폰 소진 비중</div>
           <div class="chart-container" style="display: flex; justify-content: center; align-items: center;">
             <canvas id="pieChart"></canvas>
           </div>
@@ -193,7 +146,7 @@
       <!-- 상위 가맹점 테이블 -->
       <div class="admin-card">
         <div class="card-header">
-          <div class="card-title">🏆 우수 가맹점 Top 5 (사용량 기준)</div>
+          <div class="card-title"> 우수 가맹점 Top 5 (사용량 기준)</div>
         </div>
         <table class="admin-table">
           <thead>
@@ -246,6 +199,6 @@
       </div>
     </main>
   </div>
-
+
 </body>
 </html>

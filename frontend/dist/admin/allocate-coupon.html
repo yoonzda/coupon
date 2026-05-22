@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>쿠폰 배정하기 | 옹진 관광 쿠폰</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    })();
+  </script>
+  <style>
+    body { 
+      margin: 0 !important; padding: 0 !important; 
+      width: 100% !important; max-width: none !important; 
+      background: #f1f5f9;
+      color: #1e293b; 
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .back-link:hover {
+      color: #0f172a !important;
+    }
+    .back-link svg {
+      transition: transform 0.2s;
+    }
+    .back-link:hover svg {
+      transform: translateX(-4px);
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/admin-allocate-coupon-CODvuvLh.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-BQDM6Pi8.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 사이드바 -->
+    <aside class="admin-sidebar"></aside>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="admin-content">
+      <header class="dashboard-header">
+        <div class="header-title-area">
+          <span class="header-category">Coupon Management</span>
+          <h1>쿠폰 관리</h1>
+          <p class="header-desc">종이 쿠폰용 난수 일괄 발행과 함께 전체 디지털/종이 쿠폰의 실시간 발급 및 사용(결제) 현황을 모니터링합니다.</p>
+        </div>
+      </header>
+
+      <div class="subpage-title-area">
+        <div class="back-link-container">
+          <a href="coupons.html" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px; height: 16px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            뒤로가기
+          </a>
+        </div>
+        <h2 class="page-subtitle">쿠폰 배정하기</h2>
+      </div>
+
+      <div class="form-container">
+        
+        <form id="form-create-allocation" onsubmit="createAllocation(event)">
+          <div class="form-group">
+            <label for="allocation-issuer-select">대상 발행처</label>
+            <select id="allocation-issuer-select" required>
+              <option value="">발행처를 로딩 중입니다...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="allocation-face-value">배정 쿠폰 액면가 (금액)</label>
+            <select id="allocation-face-value" required>
+              <option value="5000">5,000원권</option>
+              <option value="10000" selected>10,000원권</option>
+              <option value="15000">15,000원권</option>
+              <option value="20000">20,000원권</option>
+              <option value="30000">30,000원권</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="allocation-total-count">총 배정 수량 (장)</label>
+            <input type="number" id="allocation-total-count" min="1" max="10000" placeholder="예: 100" required />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-neutral btn-sm" style="height: 42px; padding: 0 24px; border-radius: 6px; font-weight: 600; cursor: pointer;">배정 생성</button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+</body>
+</html>

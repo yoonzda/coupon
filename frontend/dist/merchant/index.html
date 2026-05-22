@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="description" content="가맹점 로그인 — 옹진관광 쿠폰 플랫폼" />
-  <title>가맹점 로그인 | 옹진관광 쿠폰</title>
+  <title>가맹점 로그인 | 옹진관광 쿠폰</title>
   <style>
     .merchant-hero {
       background: linear-gradient(160deg, #064e3b 0%, #059669 60%, #34d399 100%);
@@ -121,11 +121,11 @@
       display: none;
     }
   </style>
-  <script type="module" crossorigin src="/assets/merchant-login-D6z_5iVy.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/main-9hPShMGN.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-CHX2GdQ8.js">
-  <link rel="modulepreload" crossorigin href="/assets/i18n-DJszV0mx.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BkjUHGKL.css">
+  <script type="module" crossorigin src="/assets/merchant-login-CraX0pl9.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
+  <link rel="modulepreload" crossorigin href="/assets/i18n-CGOW55WO.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
 </head>
 <body>
   <div class="app-shell">
@@ -137,9 +137,9 @@
           <option value="zh" style="color:#000">中文</option>
         </select>
       </div>
-      <div class="hero-badge">🔐 Zero-Password 로그인</div>
+      <div class="hero-badge">🔐 가맹점 포털</div>
       <h1>가맹점 로그인</h1>
-      <p>상점명 + 휴대폰 번호 인증만으로<br>안전하게 로그인합니다</p>
+      <p>부여받은 아이디와 비밀번호로<br>안전하게 로그인합니다</p>
     </div>
 
     <!-- 로그인 카드 -->
@@ -150,89 +150,23 @@
         <span id="rejection-msg"></span>
       </div>
 
-      <!-- STEP 1: 정보 입력 -->
-      <div id="step1">
-        <p class="step-label">Step 1 / 2 — 상점 정보 입력</p>
+      <div id="login-form-block">
+        <p class="step-label">가맹점 계정 로그인</p>
         <div style="display:flex;flex-direction:column;gap:14px;">
           <div class="form-group">
-            <label class="form-label">상점명</label>
-            <input class="form-input" id="shop-name" type="text"
-              placeholder="예: 옹진 수산물 직판장" autocomplete="organization" />
+            <label class="form-label">아이디</label>
+            <input class="form-input" id="merchant-username" type="text"
+              placeholder="가맹점 아이디 입력 (예: merchant01)" autocomplete="username" />
           </div>
           <div class="form-group">
-            <label class="form-label">대표자 휴대폰 번호</label>
-            <input class="form-input" id="shop-phone" type="tel"
-              placeholder="01012345678" inputmode="numeric" maxlength="11" />
+            <label class="form-label">비밀번호</label>
+            <input class="form-input" id="merchant-password" type="password"
+              placeholder="비밀번호 입력 (예: merchant1234)" autocomplete="current-password" />
           </div>
-          <button class="btn btn-primary btn-full" id="btn-send-otp">
-            인증번호 받기
-          </button>
-          
-          <div class="divider">또는</div>
-          
-          <button class="btn btn-outline btn-full" id="btn-merchant-test" style="border-color: var(--primary); color: var(--primary);">
-            테스트 가맹점으로 로그인 (Dev)
+          <button class="btn btn-primary btn-full" id="btn-merchant-login">
+            로그인
           </button>
         </div>
-      </div>
-
-      <script>
-        document.getElementById('btn-merchant-test').onclick = function() {
-          const shopName = document.getElementById('shop-name').value.trim();
-          const phone = document.getElementById('shop-phone').value.trim();
-          const rejBox = document.getElementById('rejection-box');
-          const rejMsg = document.getElementById('rejection-msg');
-          
-          rejBox.style.display = 'none';
-
-          // LocalStorage에서 관리자 페이지의 목업 데이터 확인
-          const saved = localStorage.getItem('admin_mock_merchants');
-          if (saved && shopName && phone) {
-            const merchants = JSON.parse(saved);
-            const found = merchants.find(m => m.business_name === shopName || m.contact === phone);
-            
-            if (found && found.status === 'rejected') {
-              rejBox.style.display = 'block';
-              rejMsg.textContent = found.rejection_reason || '서류 미비로 인해 반려되었습니다.';
-              return;
-            }
-            
-            if (found && found.status === 'pending') {
-              alert('아직 승인 대기 중인 가맹점입니다. 승인 후 이용 가능합니다.');
-              return;
-            }
-          }
-
-          localStorage.setItem('ongjin_token', 'test_dummy_merchant_token');
-          localStorage.setItem('ongjin_user', JSON.stringify({ id: 101, shopName: shopName || '옹진 맛집 본점', role: 'merchant' }));
-          window.location.href = '/merchant/scan.html';
-        };
-      </script>
-
-      <!-- STEP 2: OTP 입력 -->
-      <div id="step2" class="hidden">
-        <p class="step-label">Step 2 / 2 — 인증번호 입력</p>
-        <p style="font-size:.88rem;color:var(--text-secondary);margin-bottom:16px;" id="otp-desc">
-          휴대폰으로 발송된 6자리 번호를 입력해 주세요.
-        </p>
-        <div class="otp-inputs" id="otp-inputs">
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">
-          <span class="timer" id="timer">03:00</span>
-          <button class="resend-btn" id="btn-resend" disabled>재전송</button>
-        </div>
-        <button class="btn btn-primary btn-full" style="margin-top:16px;" id="btn-verify">
-          로그인
-        </button>
-        <button class="btn btn-outline btn-full" style="margin-top:8px;" id="btn-back">
-          이전으로
-        </button>
       </div>
     </div>
 
@@ -247,6 +181,6 @@
   </div>
 
   <div id="toast-container"></div>
-
+
 </body>
 </html>

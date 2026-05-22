@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>발행처 관리 | 옹진 관광 쿠폰</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    })();
+  </script>
+  <style>
+    body { 
+      margin: 0 !important; padding: 0 !important; 
+      width: 100% !important; max-width: none !important; 
+      background: #f1f5f9;
+      color: #1e293b; 
+    }
+
+    .table-container {
+      background: #fff; border-radius: 0 !important; border: 1px solid #e2e8f0; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 32px;
+    }
+    .table-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; margin-top: 8px; }
+    
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th { background: #f8fafc; padding: 14px 24px; text-align: left; font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+    .admin-table td { padding: 16px 24px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; vertical-align: middle; }
+    .admin-table tr:hover { background: #f8fafc; }
+
+    /* Modal Layout */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-container {
+      background: #fff; border-radius: 12px; width: 480px; max-width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: translateY(20px); transition: transform 0.25s ease; overflow: hidden;
+    }
+    .modal-overlay.active .modal-container { transform: translateY(0); }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+    .modal-body { padding: 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-start; gap: 8px; background: #f8fafc; }
+    
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem; color: #334155; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px;
+      font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+
+    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
+    .badge-info { background: #e0f2fe; color: #0369a1; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef9c3; color: #854d0e; }
+  </style>
+  <script type="module" crossorigin src="/assets/admin-issuers-C1i-drOE.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-BQDM6Pi8.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 사이드바 -->
+    <aside class="admin-sidebar"></aside>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="admin-content">
+      <header class="dashboard-header">
+        <div class="header-title-area">
+          <span class="header-category">Issuer Management</span>
+          <h1>발행처 관리</h1>
+          <p class="header-desc">발행처(안내소 등) 계정을 생성하고, 각 발행처별 배정할 쿠폰 액면가와 총 한도 수량을 제어합니다.</p>
+        </div>
+      </header>
+
+      <!-- 발행처 조작 버튼 영역 -->
+      <div class="table-actions-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; justify-content: flex-start;">
+        <button class="btn btn-neutral-outline btn-sm" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer;" onclick="location.href='register-issuer.html'">발행처 등록</button>
+        <button class="btn btn-neutral btn-sm" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer;" onclick="location.href='allocate-coupon.html'">쿠폰 배정하기</button>
+      </div>
+
+      <!-- 1. 발행처 쿠폰 배정 현황 -->
+      <h2 class="table-title">발행처별 쿠폰 배정 현황</h2>
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>배정 ID</th>
+              <th>발행처</th>
+              <th>액면가</th>
+              <th>총 배정 수량</th>
+              <th>발급된 수량</th>
+              <th>잔여 수량</th>
+              <th>상태</th>
+              <th>배정일시</th>
+            </tr>
+          </thead>
+          <tbody id="allocation-list">
+            <tr><td colspan="8" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2. 발행처 계정 목록 -->
+      <h2 class="table-title">발행처 계정 목록</h2>
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>발행처명</th>
+              <th>아이디 (username)</th>
+              <th>등록일시</th>
+            </tr>
+          </thead>
+          <tbody id="issuer-list">
+            <tr><td colspan="4" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+</body>
+</html>

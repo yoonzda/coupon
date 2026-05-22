@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>관광 쿠폰 수령 | 옹진관광 쿠폰</title>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      background: #0c1a2e; /* Deep ocean background */
+      color: #f1f5f9;
+      font-family: var(--font-main);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── 배경 별빛 데코 ── */
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: .15; }
+      50%      { opacity: .7; }
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 480px;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* ── 환영 헤더 ── */
+    .welcome-header {
+      text-align: center;
+      margin-bottom: 28px;
+      animation: fadeInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .welcome-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(249, 115, 22, 0.12);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+      padding: 6px 14px;
+      border-radius: 99px;
+      color: #fdba74;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .welcome-title {
+      font-size: 1.55rem;
+      font-weight: 900;
+      line-height: 1.35;
+      margin: 0 0 8px 0;
+      color: #ffffff;
+      word-break: keep-all;
+    }
+    .welcome-subtitle {
+      font-size: 0.88rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    /* ── 프리미엄 티켓 카드 ── */
+    .ticket-container {
+      width: 100%;
+      perspective: 1000px;
+      margin-bottom: 32px;
+      animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+    }
+    .ticket-card {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 32px 24px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+    }
+    /* 티켓 절취선 홈 효과 */
+    .ticket-card::before, .ticket-card::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #0c1a2e;
+      top: 60%;
+      z-index: 5;
+    }
+    .ticket-card::before { left: -10px; border-right: 1px solid rgba(255, 255, 255, 0.08); }
+    .ticket-card::after { right: -10px; border-left: 1px solid rgba(255, 255, 255, 0.08); }
+
+    .ticket-dashed-line {
+      position: absolute;
+      width: calc(100% - 20px);
+      left: 10px;
+      top: calc(60% + 9px);
+      border-bottom: 1.5px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    /* 글로잉 링 효과 */
+    .ticket-glow {
+      position: absolute;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+      top: -30px; left: -30px;
+      pointer-events: none;
+    }
+
+    .ticket-logo {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #3b82f6;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+    .ticket-value {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #38bdf8;
+      margin-bottom: 6px;
+      letter-spacing: -1px;
+      text-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+    }
+    .ticket-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 24px;
+    }
+    
+    /* 하단 가맹점용 세부 사양 */
+    .ticket-details {
+      margin-top: 36px;
+      width: 100%;
+      text-align: center;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+    }
+    .detail-key { color: rgba(255, 255, 255, 0.4); }
+    .detail-val { color: #f1f5f9; font-weight: 600; }
+
+    /* ── 안내 가이드 ── */
+    .guide-banner {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      margin-bottom: 24px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      line-height: 1.4;
+      animation: fadeIn 0.8s ease both;
+    }
+
+    /* ── 로그인 버튼 패널 ── */
+    .login-panel {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    }
+    .social-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .social-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+    .social-btn:active { transform: none; filter: brightness(0.97); }
+    .social-btn .sicon { width: 22px; height: 22px; flex-shrink: 0; }
+
+    .btn-kakao  { background: #FEE500; color: #191919; }
+    .btn-naver  { background: #03C75A; color: #fff; }
+    .btn-google {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-test {
+      background: rgba(249, 115, 22, 0.12);
+      color: #fdba74;
+      border: 1.5px solid rgba(249, 115, 22, 0.35);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,.2);
+      font-size: .75rem;
+      margin: 6px 0;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,.08);
+    }
+
+    /* ── 로딩 모달 시트 ── */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 10px;
+      animation: fadeIn 0.4s ease;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid rgba(56, 189, 248, 0.1);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    /* ── 발급 성공 화면 ── */
+    .success-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: zoomIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .success-icon {
+      font-size: 3.5rem;
+      margin-bottom: 16px;
+      animation: bounce 0.6s ease-out;
+    }
+    .btn-mypage {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: #ffffff;
+      border: none;
+      font-weight: 800;
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+    }
+    .btn-mypage:hover {
+      box-shadow: 0 12px 28px rgba(59, 130, 246, 0.45);
+      background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    }
+
+    /* ── 에러 화면 ── */
+    .error-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    /* ── 애니메이션 ── */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+  </style>
+  <script type="module" crossorigin src="/assets/tourist-landing-DoPVeDAH.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
+</head>
+<body>
+
+  <!-- 별빛 데코 배경 -->
+  <div class="star" style="width:2px;height:2px;top:8%;left:15%;animation-delay:.3s"></div>
+  <div class="star" style="width:3px;height:3px;top:15%;left:75%;animation-delay:1.1s"></div>
+  <div class="star" style="width:2px;height:2px;top:25%;left:45%;animation-delay:.7s"></div>
+  <div class="star" style="width:2px;height:2px;top:5%;left:85%;animation-delay:1.8s"></div>
+  <div class="star" style="width:3px;height:3px;top:38%;left:20%;animation-delay:2.2s"></div>
+
+  <div class="app-shell">
+    
+    <!-- 1. 헤더 영역 -->
+    <header class="welcome-header" id="welcome-header">
+      <div class="welcome-badge">🏝️ 옹진관광 스페셜 혜택</div>
+      <h1 class="welcome-title" id="welcome-title">방문을 환영합니다!</h1>
+      <p class="welcome-subtitle" id="welcome-subtitle">현장에서 제공되는 무료 모바일 쿠폰을 받아보세요.</p>
+    </header>
+
+    <!-- 2. 쿠폰 티켓 비주얼 카드 -->
+    <div class="ticket-container" id="ticket-container">
+      <div class="ticket-card">
+        <div class="ticket-glow"></div>
+        <div class="ticket-logo">ONGJIN TOURIST COUPON</div>
+        <div class="ticket-value" id="ticket-value">0원</div>
+        <div class="ticket-label" id="ticket-label">모바일 관광 쿠폰</div>
+        
+        <div class="ticket-dashed-line"></div>
+        
+        <div class="ticket-details">
+          <div class="detail-row">
+            <span class="detail-key">발급처</span>
+            <span class="detail-val" id="detail-issuer">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">대상 구분</span>
+            <span class="detail-val">국내외 방문 관광객 전체</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">유효 기간</span>
+            <span class="detail-val">발급일로부터 30일간 유효</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 본문 상태별 뷰 (로딩 / 로그인 대기 / 발급 결과) -->
+    <div style="width: 100%;" id="status-viewport">
+      
+      <!-- [상태 A] 데이터 로딩 중 -->
+      <div id="view-init-loading" class="loading-container">
+        <div class="spinner"></div>
+        <p style="font-size: 0.85rem; color: #94a3b8;">쿠폰 및 발행처 정보를 불러오는 중...</p>
+      </div>
+
+      <!-- [상태 B] 비로그인 로그인 요청 패널 -->
+      <div id="view-login-required" style="display: none;">
+        <div class="guide-banner">
+          📢 본인 인증 완료 후<br>지정된 쿠폰을 지갑으로 즉시 발급받을 수 있습니다.
+        </div>
+        
+        <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); padding: 20px; border-radius: 18px; margin-bottom: 16px;">
+          <!-- 휴대폰 번호 입력 -->
+          <div style="margin-bottom: 16px; text-align: left;">
+            <label for="phone-input" style="display: block; font-size: 0.8rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">휴대폰 번호</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="tel" id="phone-input" placeholder="010-0000-0000" maxlength="13" style="flex: 1; padding: 14px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 0.95rem; font-weight: 600; outline: none; transition: border 0.2s;" />
+              <button id="btn-send-otp" style="padding: 0 16px; border-radius: 10px; background: #3b82f6; border: none; color: #fff; font-size: 0.88rem; font-weight: 800; cursor: pointer; transition: background 0.2s; white-space: nowrap;">인증 요청</button>
+            </div>
+          </div>
+          
+          <!-- 인증 번호 입력 (초기 숨김) -->
+          <div id="otp-group" style="display: none; margin-bottom: 20px; text-align: left;">
+            <label for="otp-input" style="display: block; font-size: 0.8rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">인증번호 6자리</label>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="tel" id="otp-input" placeholder="인증번호 입력" maxlength="6" style="width: 100%; padding: 14px; padding-right: 60px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 0.95rem; font-weight: 600; outline: none; transition: border 0.2s;" />
+              <span id="otp-timer" style="position: absolute; right: 14px; font-size: 0.85rem; font-weight: 700; color: #f43f5e; pointer-events: none;">03:00</span>
+            </div>
+          </div>
+
+          <!-- 개발자 전용 알림 표시창 -->
+          <div id="dev-otp-notice" style="display: none; background: rgba(249, 115, 22, 0.1); border: 1px dashed rgba(249, 115, 22, 0.3); padding: 12px; border-radius: 10px; margin-bottom: 20px; font-size: 0.78rem; color: #fdba74; line-height: 1.4; text-align: left;">
+            ℹ️ <strong>개발 테스트 모드 활성화</strong><br>
+            인증번호가 아래 칸에 자동으로 채워졌습니다. (발송된 코드: <strong id="dev-otp-code">------</strong>)
+          </div>
+
+          <!-- 인증 완료 및 쿠폰 받기 버튼 (초기 숨김) -->
+          <button id="btn-verify-otp" class="social-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-weight: 800; border: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2); width: 100%; display: none; padding: 16px; border-radius: 14px; font-size: 0.95rem; justify-content: center; align-items: center; cursor: pointer;">
+            <span>인증 완료 및 쿠폰 받기</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- [상태 C] 발급 성공 완료 뷰 -->
+      <div id="view-success" class="success-container" style="display: none;">
+        <div class="success-icon">🎉</div>
+        <h3 style="font-size: 1.2rem; font-weight: 800; color: #38bdf8; margin: 0 0 8px 0;">쿠폰 발급 완료!</h3>
+        <p style="font-size: 0.88rem; color: rgba(255,255,255,0.7); margin-bottom: 24px; line-height: 1.45;">
+          지갑에 쿠폰이 안전하게 발급되었습니다.<br>가맹점에서 바코드를 제시하고 혜택을 이용하세요.
+        </p>
+        <a href="/tourist/mypage.html" class="social-btn btn-mypage">
+          <span>내 지갑 확인하러 가기 (마이페이지) →</span>
+        </a>
+      </div>
+
+      <!-- [상태 D] 발급 실패/에러 뷰 -->
+      <div id="view-error" class="error-container" style="display: none;">
+        <div style="font-size: 3.5rem; margin-bottom: 16px;">❌</div>
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: #ef4444; margin: 0 0 8px 0;">쿠폰 수령 실패</h3>
+        <p id="error-message-text" style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 24px; line-height: 1.45; word-break: keep-all;">
+          에러 내용이 여기에 표시됩니다.
+        </p>
+        <a href="/tourist/mypage.html" class="social-btn" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+          <span>내 지갑으로 돌아가기</span>
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

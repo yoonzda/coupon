@@ -16,6 +16,31 @@ function setTokens(token, refresh) {
 function clearTokens() {
   localStorage.removeItem('ongjin_token')
   localStorage.removeItem('ongjin_refresh')
+  localStorage.removeItem('ongjin_user')
+  localStorage.removeItem('ongjin_admin_token')
+  localStorage.removeItem('ongjin_admin_info')
+  localStorage.removeItem('ongjin_issuer_token')
+  localStorage.removeItem('ongjin_issuer_info')
+}
+
+let isRefreshing = false
+let refreshQueue = []
+
+function redirectToLogin() {
+  const path = window.location.pathname
+  let target = '/tourist/index.html'
+  if (path.includes('/admin/')) {
+    target = '/admin/login.html'
+  } else if (path.includes('/merchant/')) {
+    target = '/merchant/index.html'
+  } else if (path.includes('/issuer/')) {
+    target = '/issuer/login.html'
+  }
+  
+  const cleanTarget = target.replace('.html', '')
+  if (path !== target && !path.includes(cleanTarget)) {
+    window.location.href = target
+  }
 }
 
 async function request(method, path, body = null) {
@@ -23,22 +48,99 @@ async function request(method, path, body = null) {
   const headers = { 'Content-Type': 'application/json' }
   if (token) headers['Authorization'] = `Bearer ${token}`
 
-  const res = await fetch(`${BASE}${path}`, {
+  let res = await fetch(`${BASE}${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : null,
   })
 
-  // 401 → 자동 로그아웃 (로컬 테스트를 위해 잠시 주석 처리)
+  // 401 Unauthorized 발생 시 리프레시 시도
   if (res.status === 401) {
-    console.warn('401 Unauthorized - Dev Mode: Stay on page');
-    // clearTokens()
-    // window.location.href = '/tourist/index.html'
-    // return
+    // 로그인 시도, OTP 전송/검증, 비밀번호 확인/변경 등의 인증 관련 API 요청은 예외 처리하여 리다이렉트나 토큰 초기화를 수행하지 않음
+    const isAuthAction = path.includes('/login') || 
+                          path.includes('/verify-password') || 
+                          path.includes('/change-password') || 
+                          path.includes('/otp/verify') ||
+                          path.includes('/otp/send')
+    
+    if (isAuthAction) {
+      const data = await res.json().catch(() => ({}))
+      const error = new Error(data.message || '인증에 실패했습니다.')
+      error.status = 401
+      throw error
+    }
+
+    const refreshToken = localStorage.getItem('ongjin_refresh')
+    // 이미 refresh 요청을 보내는 중인 API는 재귀 401을 유발하지 않도록 함
+    if (refreshToken && path !== '/auth/refresh') {
+      if (!isRefreshing) {
+        isRefreshing = true
+        try {
+          const refreshRes = await fetch(`${BASE}/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken }),
+          })
+
+          if (refreshRes.ok) {
+            const refreshData = await refreshRes.json()
+            setTokens(refreshData.token, refreshData.refresh)
+            isRefreshing = false
+            
+            // 대기열 재실행
+            refreshQueue.forEach((cb) => cb(refreshData.token))
+            refreshQueue = []
+          } else {
+            throw new Error('Session renewal failed')
+          }
+        } catch (err) {
+          isRefreshing = false
+          refreshQueue = []
+          clearTokens()
+          redirectToLogin()
+          const error = new Error('세션이 만료되었습니다. 다시 로그인해 주세요.')
+          error.status = 401
+          throw error
+        }
+      }
+
+      // 토큰 갱신 완료까지 요청 대기
+      return new Promise((resolve, reject) => {
+        refreshQueue.push((newToken) => {
+          headers['Authorization'] = `Bearer ${newToken}`
+          fetch(`${BASE}${path}`, {
+            method,
+            headers,
+            body: body ? JSON.stringify(body) : null,
+          })
+            .then(async (retryRes) => {
+              const data = await retryRes.json().catch(() => ({}))
+              if (!retryRes.ok) {
+                const error = new Error(data.message || '요청에 실패했습니다.')
+                error.status = retryRes.status
+                reject(error)
+              } else {
+                resolve(data)
+              }
+            })
+            .catch((err) => reject(err))
+        })
+      })
+    } else {
+      clearTokens()
+      redirectToLogin()
+      const error = new Error('세션이 만료되었거나 권한이 없습니다.')
+      error.status = 401
+      throw error
+    }
   }
 
   const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(data.message || '요청에 실패했습니다.')
+  if (!res.ok) {
+    const error = new Error(data.message || '요청에 실패했습니다.')
+    error.status = res.status
+    throw error
+  }
   return data
 }
 

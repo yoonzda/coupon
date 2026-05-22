@@ -12,11 +12,17 @@ export default defineConfig({
         'tourist-map':      resolve(__dirname, 'tourist/map.html'),
         'tourist-callback': resolve(__dirname, 'tourist/auth-callback.html'),
         'tourist-apply':    resolve(__dirname, 'tourist/apply-merchant.html'),
+        'tourist-landing':  resolve(__dirname, 'tourist/landing.html'),
 
         // 가맹점 포털
         'merchant-login':   resolve(__dirname, 'merchant/index.html'),
         'merchant-scan':    resolve(__dirname, 'merchant/scan.html'),
         'merchant-history': resolve(__dirname, 'merchant/history.html'),
+
+        // 발행처 포털
+        'issuer-login':     resolve(__dirname, 'issuer/login.html'),
+        'issuer-coupon-qr': resolve(__dirname, 'issuer/coupon-qr.html'),
+        'issuer-manage':    resolve(__dirname, 'issuer/manage.html'),
 
         // 관리자 포털
         'admin-login':      resolve(__dirname, 'admin/login.html'),
@@ -26,6 +32,11 @@ export default defineConfig({
         'admin-fds':        resolve(__dirname, 'admin/fds.html'),
         'admin-statistics': resolve(__dirname, 'admin/statistics.html'),
         'admin-coupons':    resolve(__dirname, 'admin/coupons.html'),
+        'admin-managers':   resolve(__dirname, 'admin/managers.html'),
+        'admin-users':      resolve(__dirname, 'admin/users.html'),
+        'admin-issuers':    resolve(__dirname, 'admin/issuers.html'),
+        'admin-register-issuer': resolve(__dirname, 'admin/register-issuer.html'),
+        'admin-allocate-coupon': resolve(__dirname, 'admin/allocate-coupon.html'),
       },
     },
     outDir: 'dist',      // 빌드 결과 → dist/ 폴더 (도커 빌드용)

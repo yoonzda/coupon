@@ -133,9 +133,9 @@
           <option value="zh" style="color:#000">中文</option>
         </select>
       </div>
-      <div class="hero-badge">🔐 Zero-Password 로그인</div>
+      <div class="hero-badge">🔐 가맹점 포털</div>
       <h1>가맹점 로그인</h1>
-      <p>상점명 + 휴대폰 번호 인증만으로<br>안전하게 로그인합니다</p>
+      <p>부여받은 아이디와 비밀번호로<br>안전하게 로그인합니다</p>
     </div>
 
     <!-- 로그인 카드 -->
@@ -146,89 +146,23 @@
         <span id="rejection-msg"></span>
       </div>
 
-      <!-- STEP 1: 정보 입력 -->
-      <div id="step1">
-        <p class="step-label">Step 1 / 2 — 상점 정보 입력</p>
+      <div id="login-form-block">
+        <p class="step-label">가맹점 계정 로그인</p>
         <div style="display:flex;flex-direction:column;gap:14px;">
           <div class="form-group">
-            <label class="form-label">상점명</label>
-            <input class="form-input" id="shop-name" type="text"
-              placeholder="예: 옹진 수산물 직판장" autocomplete="organization" />
+            <label class="form-label">아이디</label>
+            <input class="form-input" id="merchant-username" type="text"
+              placeholder="가맹점 아이디 입력 (예: merchant01)" autocomplete="username" />
           </div>
           <div class="form-group">
-            <label class="form-label">대표자 휴대폰 번호</label>
-            <input class="form-input" id="shop-phone" type="tel"
-              placeholder="01012345678" inputmode="numeric" maxlength="11" />
+            <label class="form-label">비밀번호</label>
+            <input class="form-input" id="merchant-password" type="password"
+              placeholder="비밀번호 입력 (예: merchant1234)" autocomplete="current-password" />
           </div>
-          <button class="btn btn-primary btn-full" id="btn-send-otp">
-            인증번호 받기
-          </button>
-          
-          <div class="divider">또는</div>
-          
-          <button class="btn btn-outline btn-full" id="btn-merchant-test" style="border-color: var(--primary); color: var(--primary);">
-            테스트 가맹점으로 로그인 (Dev)
+          <button class="btn btn-primary btn-full" id="btn-merchant-login">
+            로그인
           </button>
         </div>
-      </div>
-
-      <script>
-        document.getElementById('btn-merchant-test').onclick = function() {
-          const shopName = document.getElementById('shop-name').value.trim();
-          const phone = document.getElementById('shop-phone').value.trim();
-          const rejBox = document.getElementById('rejection-box');
-          const rejMsg = document.getElementById('rejection-msg');
-          
-          rejBox.style.display = 'none';
-
-          // LocalStorage에서 관리자 페이지의 목업 데이터 확인
-          const saved = localStorage.getItem('admin_mock_merchants');
-          if (saved && shopName && phone) {
-            const merchants = JSON.parse(saved);
-            const found = merchants.find(m => m.business_name === shopName || m.contact === phone);
-            
-            if (found && found.status === 'rejected') {
-              rejBox.style.display = 'block';
-              rejMsg.textContent = found.rejection_reason || '서류 미비로 인해 반려되었습니다.';
-              return;
-            }
-            
-            if (found && found.status === 'pending') {
-              alert('아직 승인 대기 중인 가맹점입니다. 승인 후 이용 가능합니다.');
-              return;
-            }
-          }
-
-          localStorage.setItem('ongjin_token', 'test_dummy_merchant_token');
-          localStorage.setItem('ongjin_user', JSON.stringify({ id: 101, shopName: shopName || '옹진 맛집 본점', role: 'merchant' }));
-          window.location.href = '/merchant/scan.html';
-        };
-      </script>
-
-      <!-- STEP 2: OTP 입력 -->
-      <div id="step2" class="hidden">
-        <p class="step-label">Step 2 / 2 — 인증번호 입력</p>
-        <p style="font-size:.88rem;color:var(--text-secondary);margin-bottom:16px;" id="otp-desc">
-          휴대폰으로 발송된 6자리 번호를 입력해 주세요.
-        </p>
-        <div class="otp-inputs" id="otp-inputs">
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" />
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">
-          <span class="timer" id="timer">03:00</span>
-          <button class="resend-btn" id="btn-resend" disabled>재전송</button>
-        </div>
-        <button class="btn btn-primary btn-full" style="margin-top:16px;" id="btn-verify">
-          로그인
-        </button>
-        <button class="btn btn-outline btn-full" style="margin-top:8px;" id="btn-back">
-          이전으로
-        </button>
       </div>
     </div>
 
@@ -249,122 +183,44 @@
     import { t, bindLanguageSwitcher } from '../shared/js/i18n.js';
     bindLanguageSwitcher('lang-switcher-merchant');
 
-    const digits = [...document.querySelectorAll('.otp-digit')]
-    let timerInterval, phone, shopName
+    document.getElementById('btn-merchant-login').onclick = async function() {
+      const username = document.getElementById('merchant-username').value.trim();
+      const password = document.getElementById('merchant-password').value;
 
-    // ── OTP 6자리 입력 처리 ──────────────────────────
-    digits.forEach((el, idx) => {
-      el.addEventListener('input', e => {
-        const v = e.target.value.replace(/\D/g, '')
-        e.target.value = v
-        if (v) {
-          e.target.classList.add('filled')
-          if (idx < 5) digits[idx + 1].focus()
-          else autoVerify()
-        } else {
-          e.target.classList.remove('filled')
-        }
-      })
-      el.addEventListener('keydown', e => {
-        if (e.key === 'Backspace' && !e.target.value && idx > 0) {
-          digits[idx - 1].focus()
-          digits[idx - 1].value = ''
-          digits[idx - 1].classList.remove('filled')
-        }
-      })
-    })
+      if (!username) return showToast('아이디를 입력해 주세요.', 'error');
+      if (!password) return showToast('비밀번호를 입력해 주세요.', 'error');
 
-    function getOTP() { return digits.map(d => d.value).join('') }
-
-    function autoVerify() {
-      if (getOTP().length === 6) document.getElementById('btn-verify').click()
-    }
-
-    // ── 타이머 ───────────────────────────────────────
-    function startTimer(seconds = 180) {
-      clearInterval(timerInterval)
-      document.getElementById('btn-resend').disabled = true
-      const timerEl = document.getElementById('timer')
-
-      timerInterval = setInterval(() => {
-        const m = String(Math.floor(seconds / 60)).padStart(2, '0')
-        const s = String(seconds % 60).padStart(2, '0')
-        timerEl.textContent = `${m}:${s}`
-        seconds--
-        if (seconds < 0) {
-          clearInterval(timerInterval)
-          timerEl.textContent = '만료됨'
-          document.getElementById('btn-resend').disabled = false
-        }
-      }, 1000)
-    }
-
-    // ── OTP 요청 ─────────────────────────────────────
-    async function sendOTP() {
-      shopName = document.getElementById('shop-name').value.trim()
-      phone    = document.getElementById('shop-phone').value.replace(/\D/g, '')
-      if (!shopName)                 return showToast('상점명을 입력해 주세요.', 'error')
-      if (!/^01[0-9]{8,9}$/.test(phone)) return showToast('올바른 휴대폰 번호를 입력해 주세요.', 'error')
-
-      const btn = document.getElementById('btn-send-otp')
-      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>'
+      const btn = document.getElementById('btn-merchant-login');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> 로그인 중...';
 
       try {
-        await api.post('/auth/merchant/otp/send', { phone, shopName })
-        document.getElementById('step1').classList.add('hidden')
-        document.getElementById('step2').classList.remove('hidden')
-        digits[0].focus()
-        startTimer()
-        showToast('인증번호를 발송했습니다.', 'success')
-      } catch (e) {
-        // 반려된 경우 처리
-        if (e.message.includes('반려') || e.status === 403) {
-          const rejBox = document.getElementById('rejection-box');
-          const rejMsg = document.getElementById('rejection-msg');
-          rejBox.style.display = 'block';
-          rejMsg.textContent = e.message;
+        const res = await api.post('/auth/merchant/login', { username, password });
+        if (res.success) {
+          setTokens(res.token, res.refresh);
+          
+          // 가맹점 정보 적재
+          localStorage.setItem('ongjin_user', JSON.stringify({
+            id: res.merchant.id,
+            shopName: res.merchant.name,
+            username: res.merchant.username,
+            role: 'merchant'
+          }));
+
+          showToast('로그인에 성공했습니다.', 'success');
+          setTimeout(() => {
+            window.location.href = '/merchant/scan.html';
+          }, 500);
         } else {
-          showToast(e.message, 'error')
+          showToast(res.message || '로그인 실패', 'error');
         }
+      } catch (err) {
+        showToast(err.message || '로그인 중 오류가 발생했습니다.', 'error');
       } finally {
-        btn.disabled = false; btn.textContent = '인증번호 받기'
+        btn.disabled = false;
+        btn.textContent = '로그인';
       }
-    }
-
-    document.getElementById('btn-send-otp').onclick = sendOTP
-
-    // ── 재전송 ───────────────────────────────────────
-    document.getElementById('btn-resend').onclick = sendOTP
-
-    // ── OTP 검증 ─────────────────────────────────────
-    document.getElementById('btn-verify').addEventListener('click', async () => {
-      const otp = getOTP()
-      if (otp.length !== 6) return showToast('6자리를 모두 입력해 주세요.', 'error')
-
-      const btn = document.getElementById('btn-verify')
-      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 확인 중...'
-
-      try {
-        const { accessToken, refreshToken } = await api.post('/auth/merchant/otp/verify', { phone, otp })
-        setTokens(accessToken, refreshToken)
-        clearInterval(timerInterval)
-        window.location.href = '/merchant/scan.html'
-      } catch (e) {
-        showToast(e.message, 'error')
-        digits.forEach(d => { d.value = ''; d.classList.remove('filled') })
-        digits[0].focus()
-      } finally {
-        btn.disabled = false; btn.textContent = '로그인'
-      }
-    })
-
-    // ── 이전 ─────────────────────────────────────────
-    document.getElementById('btn-back').onclick = () => {
-      clearInterval(timerInterval)
-      document.getElementById('step2').classList.add('hidden')
-      document.getElementById('step1').classList.remove('hidden')
-      digits.forEach(d => { d.value = ''; d.classList.remove('filled') })
-    }
+    };
   </script>
 </body>
 </html>

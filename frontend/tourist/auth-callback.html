@@ -55,8 +55,12 @@
       setTimeout(() => window.location.href = '/tourist/index.html', 2000)
     } else if (token) {
       setTokens(token, refresh)
-      // 전화번호 미등록 사용자는 프로필 완성 페이지로
-      window.location.href = '/tourist/mypage.html'
+      const pending = sessionStorage.getItem('pending_qr_issue')
+      if (pending) {
+        window.location.href = `/tourist/landing.html?allocationId=${pending}`
+      } else {
+        window.location.href = '/tourist/mypage.html'
+      }
     } else {
       window.location.href = '/tourist/index.html'
     }

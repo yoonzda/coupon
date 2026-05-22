@@ -3,59 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>정산 관리 | 옹진관광 쿠폰</title>
+  <title>정산 관리 | 옹진 관광 쿠폰</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    })();
+  </script>
   <style>
-    * { box-sizing: border-box; }
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      overflow-x: hidden;
       background: #f1f5f9;
-      font-family: var(--font-main); color: #1e293b; 
+      color: #1e293b; 
     }
     
-    .app-shell { 
-      display: flex !important; flex-direction: column; 
-      min-height: 100vh; width: 100% !important; max-width: none !important;
-    }
-    
-    @media (min-width: 1024px) {
-      .app-shell { flex-direction: row !important; }
-      .admin-sidebar { 
-        width: 240px !important; 
-        min-width: 240px;
-        height: 100vh;
-        background: #0f172a;
-        color: #fff;
-        position: sticky;
-        top: 0;
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-      }
-      .admin-content { 
-        flex: 1 !important; 
-        padding: 40px; 
-        background: #f1f5f9; 
-        min-width: 0;
-      }
-      .bottom-nav { display: none; }
-    }
-    .admin-sidebar .logo {
-      padding: 24px; font-size: 1.1rem; font-weight: 900; 
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex; align-items: center; gap: 10px; color: #fff;
-      white-space: nowrap;
-    }
-    .admin-nav { padding: 16px 0; flex: 1; }
-    .admin-nav a {
-      display: flex; align-items: center; gap: 12px; padding: 12px 24px;
-      color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s;
-      white-space: nowrap; font-size: 0.95rem;
-    }
-    .admin-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
-    .admin-nav a.active { color: #fff; background: var(--primary); font-weight: 700; }
-
     .admin-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; }
     .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     .admin-table { width: 100%; border-collapse: collapse; }
@@ -64,33 +27,24 @@
 
     .filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
   </style>
-  <script type="module" crossorigin src="/assets/admin-settlement-D2fSGMhm.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/main-9hPShMGN.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-CHX2GdQ8.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-DWwHCSqY.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BkjUHGKL.css">
+  <script type="module" crossorigin src="/assets/admin-settlement-CpNI4jC5.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-BQDM6Pi8.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
 </head>
 <body>
   <div class="app-shell">
-    <aside class="admin-sidebar">
-      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
-      <nav class="admin-nav">
-        <a href="/admin/index.html">📊 대시보드</a>
-        <a href="/admin/merchants.html">🏪 가맹점 관리</a>
-        <a href="/admin/settlement.html" class="active">💰 정산 관리</a>
-        <a href="/admin/fds.html">🔍 FDS 모니터링</a>
-        <a href="/admin/coupons.html">🎟️ 쿠폰 및 발행처 관리</a>
-        <a href="/admin/statistics.html">📈 통계 및 보고서</a>
-      </nav>
-    </aside>
+    <!-- 사이드바 -->
+    <aside class="admin-sidebar"></aside>
 
     <main class="admin-content">
-      <header style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
-        <div>
-          <h1 style="font-size: 1.5rem; font-weight: 900;">정산 관리</h1>
-          <p style="color: var(--text-secondary);">월별 가맹점 정산 내역 및 XML 파일 생성을 관리합니다.</p>
+      <header class="dashboard-header">
+        <div class="header-title-area">
+          <span class="header-category">Settlement Management</span>
+          <h1>정산 관리</h1>
+          <p class="header-desc">월별 가맹점 정산 내역 및 XML 파일 생성을 관리합니다.</p>
         </div>
-        <button class="btn btn-primary" id="btn-generate-file">📁 이달의 정산파일 생성</button>
       </header>
 
       <div class="filter-bar">
@@ -104,7 +58,8 @@
           <option value="02">2월</option>
           <option value="01">1월</option>
         </select>
-        <button class="btn btn-outline" id="btn-search">검색</button>
+        <button class="btn btn-neutral-outline" id="btn-search">검색</button>
+        <button class="btn btn-neutral" id="btn-generate-file">이달의 정산파일 생성</button>
       </div>
 
       <div class="admin-card">
@@ -125,6 +80,6 @@
       </div>
     </main>
   </div>
-
+
 </body>
 </html>

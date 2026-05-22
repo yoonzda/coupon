@@ -3,44 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FDS 모니터링 | 옹진관광 쿠폰</title>
+  <title>FDS 모니터링 | 옹진 관광 쿠폰</title>
   <style>
     * { box-sizing: border-box; }
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      overflow-x: hidden;
+      
       background: #f1f5f9;
       font-family: var(--font-main); color: #1e293b; 
     }
     
     .app-shell { 
-      display: flex !important; flex-direction: column; 
+      display: block !important; 
       min-height: 100vh; width: 100% !important; max-width: none !important;
     }
     
-    @media (min-width: 1024px) {
-      .app-shell { flex-direction: row !important; }
-      .admin-sidebar { 
-        width: 240px !important; 
-        min-width: 240px;
-        height: 100vh;
-        background: #0f172a;
-        color: #fff;
-        position: sticky;
-        top: 0;
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-      }
-      .admin-content { 
-        flex: 1 !important; 
-        padding: 40px; 
-        background: #f1f5f9; 
-        min-width: 0;
-      }
-      .bottom-nav { display: none; }
+    .admin-sidebar { 
+      width: 240px !important; 
+      min-width: 240px;
+      height: 100vh;
+      background: #0f172a;
+      color: #fff;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
     }
+    .admin-content { margin-left: 240px;  
+      flex: 1 !important; 
+      padding: 40px; 
+      background: #f1f5f9; 
+      min-width: 0;
+    }
+    .bottom-nav { display: none; }
     .admin-sidebar .logo {
       padding: 24px; font-size: 1.1rem; font-weight: 900; 
       border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -65,30 +61,33 @@
     .rule-DUPLICATE { background: #fee2e2; color: #ef4444; }
     .rule-HIGH_FREQ { background: #ffedd5; color: #f97316; }
   </style>
-  <script type="module" crossorigin src="/assets/admin-fds-fPIZQOSe.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/main-9hPShMGN.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-CHX2GdQ8.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-DWwHCSqY.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BkjUHGKL.css">
+  <script type="module" crossorigin src="/assets/admin-fds-BAJgVBFW.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-BQDM6Pi8.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
 </head>
 <body>
   <div class="app-shell">
     <aside class="admin-sidebar">
-      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
+      <div class="logo">옹진 관광 <span>ADMIN</span></div>
       <nav class="admin-nav">
-        <a href="/admin/index.html">📊 대시보드</a>
-        <a href="/admin/merchants.html">🏪 가맹점 관리</a>
-        <a href="/admin/settlement.html">💰 정산 관리</a>
-        <a href="/admin/fds.html" class="active">🔍 FDS 모니터링</a>
-        <a href="/admin/coupons.html">🎟️ 쿠폰 및 발행처 관리</a>
-        <a href="/admin/statistics.html">📈 통계 및 보고서</a>
+        <a href="/admin/index.html">대시보드</a>
+        <a href="/admin/merchants.html">가맹점 관리</a>
+        <a href="/admin/settlement.html">정산 관리</a>
+        <a href="/admin/fds.html" class="active">FDS 모니터링</a>
+        <a href="/admin/coupons.html">쿠폰 및 발행처 관리</a>
+        <a href="/admin/statistics.html">통계 및 보고서</a>
       </nav>
     </aside>
 
     <main class="admin-content">
-      <header style="margin-bottom: 32px;">
-        <h1 style="font-size: 1.5rem; font-weight: 900;">FDS 모니터링</h1>
-        <p style="color: var(--text-secondary);">시스템이 탐지한 이상 거래 의심 내역을 검토합니다.</p>
+      <header class="dashboard-header">
+        <div class="header-title-area">
+          <span class="header-category">Security Monitoring</span>
+          <h1>FDS 모니터링</h1>
+          <p class="header-desc">시스템이 탐지한 이상 거래 의심 내역을 검토합니다.</p>
+        </div>
       </header>
 
       <div class="admin-card">
@@ -109,6 +108,6 @@
       </div>
     </main>
   </div>
-
+
 </body>
 </html>

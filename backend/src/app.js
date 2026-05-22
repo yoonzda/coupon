@@ -18,6 +18,7 @@ const adminRouter = require('./routes/admin');
 const adminAuthRouter = require('./routes/adminAuth');
 const settlementRouter = require('./routes/settlement');
 const mapRouter = require('./routes/map');
+const issuerAuthRouter = require('./routes/issuerAuth');
 
 // 스케줄러
 require('./jobs/settlementJob');
@@ -61,6 +62,7 @@ app.use(passport.initialize());
 app.use('/tourist', express.static(path.join(__dirname, '../../frontend/tourist')));
 app.use('/merchant', express.static(path.join(__dirname, '../../frontend/merchant')));
 app.use('/admin', express.static(path.join(__dirname, '../../frontend/admin')));
+app.use('/issuer', express.static(path.join(__dirname, '../../frontend/issuer')));
 
 // ── API 라우터 ────────────────────────────────────
 app.use('/api/auth', authRouter);
@@ -68,6 +70,7 @@ app.use('/api/coupon', couponRouter);
 app.use('/api/merchant', merchantRouter);
 app.use('/api/admin/auth', adminAuthRouter);  // 관리자 인증 (인증 미들웨어 없음)
 app.use('/api/admin', adminRouter);
+app.use('/api/auth/issuer', issuerAuthRouter);
 app.use('/api/settlement', settlementRouter);
 app.use('/api/merchant', mapRouter);  // /api/merchant/map (인증 불필요)
 

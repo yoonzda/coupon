@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>발행처 관리 페이지 | 옹진 관광 쿠폰</title>
+  <link rel="stylesheet" href="../shared/css/main.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      background: #f4f8ff !important;
+      background-image: 
+        radial-gradient(circle at 50% 50%, #f4f8ff 0%, #eef4ff 100%) !important;
+      position: relative;
+      overflow-x: hidden;
+      color: #0f172a;
+      word-break: keep-all;
+    }
+
+    /* Decorative blurred glow circles */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+      top: -200px; right: -200px;
+      z-index: 0;
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(30, 58, 138, 0.06) 0%, transparent 60%);
+      bottom: -150px; left: -150px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Layout Header & Title Group Styling */
+    .manage-header {
+      width: 100%;
+      max-width: 1100px;
+      margin: 48px auto 24px auto;
+      padding: 0 24px;
+    }
+    .manage-title-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .manage-subtitle {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .manage-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -1px;
+      margin: 0;
+    }
+    .manage-badge-wrap {
+      margin-top: 4px;
+    }
+    .manage-page-badge {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(37, 99, 235, 0.08);
+      color: #2563eb;
+      border: 1px solid rgba(37, 99, 235, 0.15);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: -0.2px;
+    }
+
+    /* 4 columns Horizontal Navigation Tab style */
+    .tabs-nav-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto 30px auto;
+      padding: 0 24px;
+      z-index: 10;
+      position: relative;
+    }
+    
+    .tab-nav-btn {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 20px;
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.02);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      outline: none;
+    }
+    .tab-nav-btn:hover {
+      background: #ffffff;
+      border-color: rgba(37, 99, 235, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.08);
+    }
+    .tab-nav-btn.active {
+      background: #ffffff;
+      border-color: #2563eb;
+      border-width: 1.5px;
+      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.12);
+    }
+    
+    .tab-icon-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(148, 163, 184, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      color: #64748b;
+      margin-bottom: 10px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tab-nav-btn:hover .tab-icon-circle {
+      transform: scale(1.05);
+      color: #2563eb;
+      background: rgba(37, 99, 235, 0.05);
+      border-color: rgba(37, 99, 235, 0.2);
+    }
+    .tab-nav-btn.active .tab-icon-circle {
+      color: #ffffff;
+      background: #2563eb;
+      border-color: #2563eb;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+    
+    /* Logout button custom color hover */
+    .tab-nav-btn.logout-tab:hover .tab-icon-circle {
+      color: #dc2626;
+      background: rgba(220, 38, 38, 0.05);
+      border-color: rgba(220, 38, 38, 0.2);
+    }
+    .tab-nav-btn.logout-tab.active .tab-icon-circle {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+    
+    .tab-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #475569;
+      transition: color 0.3s ease;
+    }
+    .tab-nav-btn:hover .tab-label {
+      color: #0f172a;
+    }
+    .tab-nav-btn.active .tab-label {
+      color: #2563eb;
+      font-weight: 800;
+    }
+    .tab-nav-btn.logout-tab.active .tab-label {
+      color: #dc2626;
+    }
+
+    /* Content Area Container */
+    .content-area-container {
+      flex: 1;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto 40px auto;
+      padding: 0 24px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 100%;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Statistics styles */
+    .stats-card-wrap {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.03);
+    }
+    /* Unified Card Title Styles */
+    .stats-title,
+    .chart-card-title,
+    .settings-card-title {
+      font-size: 1.25rem;
+      font-weight: 600; /* 세미볼드로 너무 굵지 않게 통일 */
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stats-title {
+      margin: 0 0 20px 0;
+    }
+
+    .stats-card-wrap {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.03);
+    }
+
+    /* Coupon Status Layout (Grid) */
+    .coupon-status-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 32px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .gauge-chart-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      width: 100%;
+      max-width: 240px;
+      margin: 0 auto;
+    }
+
+    .gauge-svg {
+      width: 100%;
+      height: auto;
+      overflow: visible;
+    }
+
+    #gauge-fill-path {
+      transition: stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .gauge-value {
+      font-size: 2.8rem;
+      font-weight: 800;
+      fill: #0f172a;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      font-family: inherit;
+    }
+
+    .progress-metrics-column {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    /* Settings/Account styles */
+    .settings-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .settings-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.03);
+    }
+    .settings-card-title {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    .settings-card-desc {
+      font-size: 0.85rem;
+      color: #475569;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .form-row {
+      margin-bottom: 20px;
+    }
+    .form-row label {
+      display: block;
+      font-size: 0.8rem;
+      color: #475569;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.2px;
+    }
+    .form-row input {
+      width: 100%;
+      padding: 14px 16px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      color: #0f172a;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .form-row input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+    input::-ms-reveal,
+    input::-ms-clear {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    .btn-submit-action {
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 14px 28px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    }
+    .btn-submit-action:hover {
+      background: #1e40af;
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+    }
+    .btn-submit-action:active {
+      transform: translateY(1px);
+    }
+
+    #toast-container {
+      position: fixed; bottom: 20px; right: 20px; z-index: 1100;
+    }
+
+    /* Horizontal Progress Layout */
+    .horizontal-progress-section {
+      width: 100%;
+      margin: 8px 0;
+    }
+
+    .horizontal-progress-bar-container {
+      width: 100%;
+      height: 18px;
+      background: rgba(148, 163, 184, 0.12);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+
+    .horizontal-progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%);
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+    }
+
+    .progress-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+    }
+
+    .progress-metric-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      border-radius: 16px;
+      padding: 18px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.01);
+      transition: transform 0.2s;
+    }
+
+    .progress-metric-card:hover {
+      transform: translateY(-1px);
+    }
+
+    .metric-card-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    .metric-card-val-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .metric-card-val {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .metric-card-percent {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #2563eb;
+    }
+
+    .progress-metric-card.highlight-issued .metric-card-percent {
+      color: #10b981;
+    }
+
+    .progress-metric-card.highlight-remaining .metric-card-percent {
+      color: #f59e0b;
+    }
+
+    /* Date Picker styling */
+    .chart-date-picker-wrap {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: rgba(148, 163, 184, 0.08);
+      padding: 4px 12px;
+      border-radius: 12px;
+    }
+
+    .chart-date-picker-wrap label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #475569;
+      margin: 0;
+    }
+
+    .chart-date-input {
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #0f172a;
+      outline: none;
+      background: #ffffff;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .chart-date-input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+
+    /* ── Statistics Analysis Card ── */
+    .chart-card {
+      margin-top: 0;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .chart-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .chart-card-title {
+      margin: 0;
+    }
+
+    .chart-card-subtitle {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .chart-filter-pills {
+      display: flex;
+      background: rgba(148, 163, 184, 0.08);
+      padding: 4px;
+      border-radius: 12px;
+      gap: 4px;
+    }
+
+    .chart-filter-btn {
+      background: transparent;
+      border: none;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #64748b;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chart-filter-btn.active {
+      background: #ffffff;
+      color: #2563eb;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .chart-wrapper {
+      position: relative;
+      height: 220px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 30px 10px 10px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      gap: 12px;
+      z-index: 1;
+    }
+
+    .chart-grid-lines {
+      position: absolute;
+      top: 38px;
+      bottom: 32px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .chart-grid-line {
+      width: 100%;
+      border-top: 1px dashed rgba(148, 163, 184, 0.15);
+    }
+
+    .chart-bar-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      position: relative;
+      min-width: 20px;
+      z-index: 2;
+    }
+
+    .chart-bar-track {
+      width: 100%;
+      max-width: 18px;
+      height: calc(100% - 32px); /* Leave room for val-label and label */
+      background: rgba(148, 163, 184, 0.08);
+      border-radius: 99px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart-bar-fill {
+      width: 100%;
+      background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 99px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 0%; /* set dynamically */
+      transition: height 1s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+
+    .chart-bar-fill:hover {
+      filter: brightness(1.1);
+    }
+
+    .chart-bar-item.active-today .chart-bar-fill {
+      background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+    }
+
+    .chart-bar-val-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      text-align: center;
+      height: 14px;
+      z-index: 10;
+    }
+
+    .chart-bar-label {
+      font-size: 0.72rem;
+      color: #64748b;
+      font-weight: 600;
+      margin-top: 8px;
+      text-align: center;
+      white-space: nowrap;
+      height: 14px;
+    }
+
+    @media (max-width: 960px) {
+      .tabs-nav-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+    @media (max-width: 768px) {
+      .coupon-status-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .thermometer-wrapper {
+        height: 280px;
+      }
+    }
+    @media (max-width: 480px) {
+      .tabs-nav-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Global SVG definitions for icons -->
+  <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Shared linear gradients -->
+    </defs>
+  </svg>
+
+  <!-- 1. Header with title -->
+  <header class="manage-header">
+    <div class="manage-title-group">
+      <span class="manage-subtitle">옹진 관광 쿠폰</span>
+      <h1 class="manage-title" id="header-issuer-name">발행처</h1>
+      <div class="manage-badge-wrap">
+        <span class="manage-page-badge">관리 페이지</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. Horizontal Tab Navigation (4 columns) -->
+  <nav class="tabs-nav-container">
+    <!-- QR 화면 탭 -->
+    <button class="tab-nav-btn" onclick="goToQrPage()">
+      <div class="tab-icon-circle">
+        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <rect x="7" y="7" width="3" height="3"></rect>
+          <rect x="14" y="7" width="3" height="3"></rect>
+          <rect x="7" y="14" width="3" height="3"></rect>
+          <rect x="14" y="14" width="3" height="3"></rect>
+        </svg>
+      </div>
+      <span class="tab-label">QR 화면</span>
+    </button>
+
+    <!-- 쿠폰 발급 현황 탭 -->
+    <button class="tab-nav-btn active" id="tab-btn-stats" onclick="switchTab('stats')">
+      <div class="tab-icon-circle">
+        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+      </div>
+      <span class="tab-label">쿠폰 발급 현황</span>
+    </button>
+
+    <!-- 계정 정보 탭 -->
+    <button class="tab-nav-btn" id="tab-btn-account" onclick="switchTab('account')">
+      <div class="tab-icon-circle">
+        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </div>
+      <span class="tab-label">계정 정보</span>
+    </button>
+
+    <!-- 로그아웃 탭 -->
+    <button class="tab-nav-btn logout-tab" onclick="triggerLogout()">
+      <div class="tab-icon-circle">
+        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+      </div>
+      <span class="tab-label">로그아웃</span>
+    </button>
+  </nav>
+
+  <!-- 3. Dynamic Tab Content Area -->
+  <main class="content-area-container">
+    
+    <!-- ── 탭 A. 쿠폰 발급 현황 ── -->
+    <section id="content-stats" class="tab-content active">
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- 카드 1: 쿠폰 발급 현황 -->
+        <div class="stats-card-wrap">
+          <h2 class="stats-title">쿠폰 발급 현황</h2>
+          
+          <div class="coupon-status-layout">
+            <!-- 왼쪽: 서큘러 게이지 영역 -->
+            <div class="gauge-chart-container">
+              <svg class="gauge-svg" viewBox="0 0 200 200">
+                <defs>
+                  <!-- Safe 그라데이션 (로열 블루 -> 사이언) -->
+                  <linearGradient id="gauge-grad-safe" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#2563eb"/>
+                    <stop offset="100%" stop-color="#06b6d4"/>
+                  </linearGradient>
+                  <!-- Warn 그라데이션 (옐로 -> 오렌지) -->
+                  <linearGradient id="gauge-grad-warn" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f59e0b"/>
+                    <stop offset="100%" stop-color="#ea580c"/>
+                  </linearGradient>
+                  <!-- Danger 그라데이션 (레드 -> 크림슨) -->
+                  <linearGradient id="gauge-grad-danger" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ef4444"/>
+                    <stop offset="100%" stop-color="#be123c"/>
+                  </linearGradient>
+                </defs>
+                
+                <!-- 배경 원형 링 -->
+                <circle cx="100" cy="100" r="75" 
+                        fill="none" 
+                        stroke="#e2e8f0" 
+                        stroke-width="10" />
+                        
+                <!-- 채워지는 그라데이션 원형 링 -->
+                <circle cx="100" cy="100" r="75" 
+                        fill="none" 
+                        stroke="url(#gauge-grad-safe)" 
+                        stroke-width="10" 
+                        stroke-linecap="round"
+                        stroke-dasharray="471.24"
+                        stroke-dashoffset="471.24"
+                        transform="rotate(-90 100 100)"
+                        id="gauge-fill-path" />
+
+                <!-- 중앙 수치 텍스트 -->
+                <text x="100" y="100" class="gauge-value" id="gauge-center-val" dominant-baseline="middle" text-anchor="middle">0</text>
+              </svg>
+            </div>
+            
+            <!-- 오른쪽: 3단 핵심 수치 카드 (세로 스택) -->
+            <div class="progress-metrics-column">
+              <!-- 남은 쿠폰 -->
+              <div class="progress-metric-card highlight-remaining">
+                <span class="metric-card-label">남은 쿠폰</span>
+                <div class="metric-card-val-wrap">
+                  <span class="metric-card-val" id="metric-remaining">0장</span>
+                </div>
+              </div>
+              <!-- 발급 쿠폰 -->
+              <div class="progress-metric-card highlight-issued">
+                <span class="metric-card-label">발급 쿠폰</span>
+                <div class="metric-card-val-wrap">
+                  <span class="metric-card-val" id="metric-issued">0장</span>
+                </div>
+              </div>
+              <!-- 총 배정 쿠폰 -->
+              <div class="progress-metric-card">
+                <span class="metric-card-label">총 배정 쿠폰</span>
+                <div class="metric-card-val-wrap">
+                  <span class="metric-card-val" id="metric-total">0장</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 카드 2: 쿠폰 발급 통계 분석 -->
+        <div class="stats-card-wrap chart-card">
+          <div class="chart-header">
+            <div class="chart-title-group">
+              <h3 class="chart-card-title">쿠폰 발급 통계 분석</h3>
+              <span class="chart-card-subtitle" id="chart-subtitle-text">금일 실시간 시간대별 발급 추이입니다.</span>
+            </div>
+            
+            <!-- Date Picker for Hourly filter -->
+            <div class="chart-date-picker-wrap" id="chart-date-picker-container" style="display: flex;">
+              <label for="chart-date-input">날짜 선택</label>
+              <input type="date" id="chart-date-input" class="chart-date-input" />
+            </div>
+
+            <div class="chart-filter-pills">
+              <button class="chart-filter-btn active" onclick="switchChartFilter('hourly')">시간대별</button>
+              <button class="chart-filter-btn" onclick="switchChartFilter('daily')">일별</button>
+              <button class="chart-filter-btn" onclick="switchChartFilter('monthly')">월별</button>
+              <button class="chart-filter-btn" onclick="switchChartFilter('yearly')">년별</button>
+            </div>
+          </div>
+          
+          <div class="chart-wrapper" id="chart-bars-container">
+            <!-- Bars will be dynamically generated by JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── 탭 B. 계정 정보 ── -->
+    <section id="content-account" class="tab-content">
+      <div class="settings-grid">
+        <!-- Password Change Section -->
+        <div class="settings-card">
+          <h3 class="settings-card-title">비밀번호 변경</h3>
+          
+          <div class="form-row">
+            <label for="change-current-password">현재 비밀번호</label>
+            <input type="password" id="change-current-password" placeholder="현재 비밀번호 입력" />
+          </div>
+          <div class="form-row">
+            <label for="change-new-password">새 비밀번호</label>
+            <input type="password" id="change-new-password" placeholder="새 비밀번호 입력" />
+          </div>
+          <div class="form-row" style="margin-bottom: 24px;">
+            <label for="change-new-password-confirm">새 비밀번호 확인</label>
+            <input type="password" id="change-new-password-confirm" placeholder="새 비밀번호 재입력" />
+          </div>
+          
+          <button class="btn-submit-action" onclick="submitChangePassword()">변경하기</button>
+        </div>
+
+        <!-- IP Config Section -->
+        <div class="settings-card">
+          <h3 class="settings-card-title">휴대폰 접속용 IP 설정</h3>
+          <p class="settings-card-desc">
+            Kiosk PC가 공유기 와이파이에서 할당받은 로컬 IP(예: 192.168.0.75) 주소로 설정해야 모바일 스캔이 원활하게 연동됩니다. (도커 컨테이너 IP 대역인 172.x.x.x는 사용이 불가능합니다.)
+          </p>
+          <div class="form-row" style="display: flex; gap: 8px; margin-bottom: 0; align-items: center;">
+            <input type="text" id="kiosk-host-input" style="flex: 1;" placeholder="예: http://192.168.0.75:8080" />
+            <button id="btn-save-host" class="btn-submit-action">반영 및 저장</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { api, showToast, fmtMoney } from '../shared/js/api.js';
+
+    // ── 로그인 세션 인증 가드 ──
+    const token = localStorage.getItem('ongjin_issuer_token');
+    const infoStr = localStorage.getItem('ongjin_issuer_info');
+    if (!token || !infoStr) {
+      clearAndRedirect();
+    }
+
+    const info = JSON.parse(infoStr);
+    
+    // UI 기본 바인딩
+    document.getElementById('header-issuer-name').textContent = info.name;
+
+    function clearAndRedirect() {
+      localStorage.removeItem('ongjin_issuer_token');
+      localStorage.removeItem('ongjin_issuer_info');
+      localStorage.removeItem('ongjin_token');
+      window.location.replace('/issuer/login.html');
+    }
+
+    window.triggerLogout = function() {
+      if (confirm('로그아웃 하시겠습니까?')) {
+        clearAndRedirect();
+      }
+    };
+
+    window.goToQrPage = function() {
+      if (confirm('QR 화면으로 이동합니다.')) {
+        window.location.href = './coupon-qr.html';
+      }
+    };
+
+    let cachedAllocation = null;
+    let statsIntervalId = null;
+    let serverLanIp = 'localhost'; 
+    let currentChartFilter = 'hourly';
+    let chartDataCache = null;
+
+    async function loadChartData() {
+      try {
+        let url = `/auth/issuer/stats?filter=${currentChartFilter}`;
+        if (currentChartFilter === 'hourly') {
+          const dateInput = document.getElementById('chart-date-input');
+          if (dateInput && dateInput.value) {
+            url += `&date=${dateInput.value}`;
+          }
+        }
+        const res = await api.get(url);
+        if (res.success) {
+          chartDataCache = res.data;
+          renderChart();
+        }
+      } catch (err) {
+        console.error('차트 데이터 로드 실패', err);
+      }
+    }
+
+    window.switchChartFilter = function(filter) {
+      currentChartFilter = filter;
+      
+      const buttons = document.querySelectorAll('.chart-filter-btn');
+      buttons.forEach(btn => {
+        const labelText = btn.textContent;
+        const targetText = filter === 'hourly' ? '시간대별' : filter === 'daily' ? '일별' : filter === 'monthly' ? '월별' : '년별';
+        if (labelText === targetText) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      const datePickerContainer = document.getElementById('chart-date-picker-container');
+      if (datePickerContainer) {
+        if (filter === 'hourly') {
+          datePickerContainer.style.display = 'flex';
+        } else {
+          datePickerContainer.style.display = 'none';
+        }
+      }
+
+      const subtitleEl = document.getElementById('chart-subtitle-text');
+      if (subtitleEl) {
+        if (filter === 'hourly') {
+          subtitleEl.textContent = '금일 실시간 시간대별 발급 추이입니다.';
+        } else if (filter === 'daily') {
+          subtitleEl.textContent = '최근 7일간 일별 누적 발급 추이입니다.';
+        } else if (filter === 'monthly') {
+          subtitleEl.textContent = '올해 월별 누적 발급 추이입니다.';
+        } else if (filter === 'yearly') {
+          subtitleEl.textContent = '최근 5개년간 년별 발급 추이입니다.';
+        }
+      }
+
+      loadChartData();
+    };
+
+    function renderChart() {
+      if (!chartDataCache || !Array.isArray(chartDataCache)) return;
+      
+      const container = document.getElementById('chart-bars-container');
+      if (!container) return;
+
+      const maxCount = Math.max(...chartDataCache.map(d => d.count), 1);
+
+      // Y축 격자 그리드 라인 먼저 삽입
+      container.innerHTML = `
+        <div class="chart-grid-lines">
+          <div class="chart-grid-line"></div>
+          <div class="chart-grid-line"></div>
+          <div class="chart-grid-line"></div>
+          <div class="chart-grid-line"></div>
+          <div class="chart-grid-line"></div>
+        </div>
+      `;
+
+      chartDataCache.forEach(item => {
+        const pct = Math.round((item.count / maxCount) * 85); // 최대 85% 높이로 라벨 여유 확보
+        
+        const barItem = document.createElement('div');
+        barItem.className = 'chart-bar-item';
+        if (item.isToday) {
+          barItem.classList.add('active-today');
+        }
+
+        // 0장인 경우 수치 라벨을 표시하지 않음
+        const valLabel = item.count > 0 ? `${item.count.toLocaleString()}장` : '';
+
+        barItem.innerHTML = `
+          <div class="chart-bar-val-label">${valLabel}</div>
+          <div class="chart-bar-track">
+            <div class="chart-bar-fill" style="height: 0%;" data-height="${pct}%"></div>
+          </div>
+          <div class="chart-bar-label">${item.label}</div>
+        `;
+        container.appendChild(barItem);
+      });
+
+      // 0% -> 목표 높이로 차오르는 애니메이션 실행
+      setTimeout(() => {
+        const fills = container.querySelectorAll('.chart-bar-fill');
+        fills.forEach(fill => {
+          const targetHeight = fill.getAttribute('data-height');
+          fill.style.height = targetHeight;
+        });
+      }, 50);
+    }
+
+    // ── 탭 전환 로직 ──
+    window.switchTab = function(tabName) {
+      // 모든 탭 버튼 active 클래스 해제
+      document.getElementById('tab-btn-stats').classList.remove('active');
+      document.getElementById('tab-btn-account').classList.remove('active');
+
+      // 모든 콘텐츠 영역 숨김
+      document.getElementById('content-stats').classList.remove('active');
+      document.getElementById('content-account').classList.remove('active');
+
+      // 폴링 주기 정리
+      if (statsIntervalId) {
+        clearInterval(statsIntervalId);
+        statsIntervalId = null;
+      }
+
+      // 특정 탭 활성화
+      if (tabName === 'stats') {
+        document.getElementById('tab-btn-stats').classList.add('active');
+        document.getElementById('content-stats').classList.add('active');
+        
+        lastRemainingCount = null; // 게이지 애니메이션 트리거를 위해 리셋
+        
+        // 통계 3초 주기 폴링 작동
+        if (cachedAllocation) {
+          updateStatsUI(cachedAllocation);
+          loadChartData();
+        }
+        loadAllocation();
+        statsIntervalId = setInterval(loadAllocation, 3000);
+      } else if (tabName === 'account') {
+        document.getElementById('tab-btn-account').classList.add('active');
+        document.getElementById('content-account').classList.add('active');
+      }
+    };
+
+    // ── 데이터 연동 로직 ──
+    async function loadIssuerInfo() {
+      try {
+        const res = await api.get('/auth/issuer/me');
+        if (res.success && res.serverIp) {
+          serverLanIp = res.serverIp;
+        }
+      } catch (err) {
+        console.error('발행처 정보 로드 실패', err);
+      }
+    }
+
+    async function loadAllocation() {
+      localStorage.setItem('ongjin_token', token); // API 공통 헤더 대응
+
+      try {
+        if (serverLanIp === 'localhost') {
+          await loadIssuerInfo();
+        }
+
+        const res = await api.get('/auth/issuer/allocations');
+        if (res.success && res.data.length > 0) {
+          const allocation = res.data[0];
+          cachedAllocation = allocation;
+
+          // IP input value 초기화 대응
+          let targetOrigin = localStorage.getItem('ongjin_kiosk_target_host');
+          if (!targetOrigin) {
+            targetOrigin = window.location.origin;
+            if (targetOrigin.includes('localhost') || targetOrigin.includes('127.0.0.1')) {
+              targetOrigin = (serverLanIp && !serverLanIp.startsWith('172.')) 
+                ? `http://${serverLanIp}:8080` 
+                : `http://192.168.0.75:8080`;
+            }
+          }
+          const inputEl = document.getElementById('kiosk-host-input');
+          if (inputEl && !inputEl.value) {
+            inputEl.value = targetOrigin;
+          }
+
+          updateStatsUI(allocation);
+          loadChartData();
+        } else {
+          showToast('배정된 쿠폰 정보가 없습니다.', 'error');
+        }
+      } catch (err) {
+        console.error('발행처 배정 로드 실패', err);
+        if (err.status === 401 || err.status === 403) {
+          clearAndRedirect();
+        }
+      }
+    }
+
+    let lastRemainingCount = null;
+
+    function updateStatsUI(allocation) {
+      if (!allocation) return;
+      const remaining = allocation.total_count - allocation.issued_count;
+      const rate = allocation.total_count > 0 
+        ? Math.round((allocation.issued_count / allocation.total_count) * 100) 
+        : 0;
+      const remainingRate = allocation.total_count > 0 
+        ? Math.round((remaining / allocation.total_count) * 100) 
+        : 0;
+
+      // 1. 게이지 차트 업데이트 (남은 쿠폰 기준)
+      const fillPath = document.getElementById('gauge-fill-path');
+      const centerValEl = document.getElementById('gauge-center-val');
+      
+      if (fillPath) {
+        const totalLength = 471.24;
+        const offset = totalLength - (remainingRate / 100 * totalLength);
+        
+        // 최초 로드, 탭 전환, 또는 수량 변경 시 0%부터 차오르는 애니메이션 동작
+        if (lastRemainingCount === null || lastRemainingCount !== remaining) {
+          fillPath.style.transition = 'none';
+          fillPath.style.strokeDashoffset = totalLength; // 0% 상태로 즉시 강제 리셋
+          
+          // 브라우저 리플로우 강제 트리거
+          fillPath.getBoundingClientRect();
+          
+          setTimeout(() => {
+            fillPath.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
+            fillPath.style.strokeDashoffset = offset;
+          }, 50);
+        } else {
+          // 변동이 없을 때는 단순 대입
+          fillPath.style.strokeDashoffset = offset;
+        }
+
+        // Dynamic color based on remainingRate
+        if (remainingRate >= 50) {
+          fillPath.setAttribute('stroke', 'url(#gauge-grad-safe)');
+        } else if (remainingRate >= 20) {
+          fillPath.setAttribute('stroke', 'url(#gauge-grad-warn)');
+        } else {
+          fillPath.setAttribute('stroke', 'url(#gauge-grad-danger)');
+        }
+      }
+
+      lastRemainingCount = remaining;
+
+      if (centerValEl) {
+        centerValEl.textContent = remaining.toLocaleString();
+      }
+
+      // 2. 3열 수치 카드 업데이트 (발급 쿠폰, 남은 쿠폰, 총 배정 쿠폰 순서)
+      const issuedEl = document.getElementById('metric-issued');
+      if (issuedEl) issuedEl.textContent = `${allocation.issued_count.toLocaleString()}장`;
+
+      const remainingEl = document.getElementById('metric-remaining');
+      if (remainingEl) remainingEl.textContent = `${remaining.toLocaleString()}장`;
+
+      const totalEl = document.getElementById('metric-total');
+      if (totalEl) totalEl.textContent = `${allocation.total_count.toLocaleString()}장`;
+    }
+
+    // IP 설정 저장
+    document.getElementById('btn-save-host').onclick = function() {
+      const hostVal = document.getElementById('kiosk-host-input').value.trim();
+      if (!hostVal) {
+        showToast('접속 주소를 입력해 주세요.', 'error');
+        return;
+      }
+      localStorage.setItem('ongjin_kiosk_target_host', hostVal);
+      showToast('휴대폰 접속 주소가 반영되었습니다.', 'success');
+      loadAllocation();
+    };
+
+    // 비밀번호 변경
+    window.submitChangePassword = async function() {
+      const currentPassword = document.getElementById('change-current-password').value.trim();
+      const newPassword = document.getElementById('change-new-password').value;
+      const newPasswordConfirm = document.getElementById('change-new-password-confirm').value;
+
+      if (!currentPassword) {
+        showToast('현재 비밀번호를 입력해 주세요.', 'error');
+        return;
+      }
+      if (!newPassword || !newPasswordConfirm) {
+        showToast('새 비밀번호를 입력해 주세요.', 'error');
+        return;
+      }
+      if (newPassword !== newPasswordConfirm) {
+        showToast('새 비밀번호가 일치하지 않습니다.', 'error');
+        return;
+      }
+      if (newPassword.length < 5) {
+        showToast('새 비밀번호는 5자 이상이어야 합니다.', 'error');
+        return;
+      }
+
+      try {
+        const res = await api.post('/auth/issuer/change-password', { currentPassword, newPassword });
+        if (res.success) {
+          showToast('비밀번호가 변경되었습니다. 다시 로그인 해주세요.', 'success');
+          setTimeout(() => {
+            clearAndRedirect();
+          }, 1500);
+        }
+      } catch (err) {
+        showToast(err.message || '비밀번호 변경에 실패했습니다.', 'error');
+      }
+    };
+
+    // KST 오늘 날짜 구하기 (YYYY-MM-DD)
+    function getKstTodayString() {
+      const kstOffset = 9 * 60 * 60 * 1000;
+      const kstDate = new Date(Date.now() + kstOffset);
+      return kstDate.toISOString().split('T')[0];
+    }
+
+    // 날짜 선택기 기본값 설정 및 이벤트 바인딩
+    const dateInput = document.getElementById('chart-date-input');
+    if (dateInput) {
+      const todayKst = getKstTodayString();
+      dateInput.value = todayKst;
+      dateInput.max = todayKst; // 미래 날짜 선택 불가
+      dateInput.addEventListener('change', () => {
+        loadChartData();
+      });
+    }
+
+    // 초기 실행
+    loadAllocation();
+    // 3초 주기 자동 갱신 시작
+    statsIntervalId = setInterval(loadAllocation, 3000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>회원 계정 관리 | 옹진 관광 쿠폰</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="../shared/css/reset.css" />
+  
+  <style>
+    body { 
+      margin: 0 !important; padding: 0 !important; 
+      width: 100% !important; max-width: none !important; 
+      background: #f1f5f9;
+      color: #1e293b; 
+    }
+
+    .admin-card {
+      background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden;
+      display: flex; flex-direction: column;
+      height: 100%;
+    }
+    
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .admin-table th { background: #f8fafc; padding: 14px 16px; border-bottom: 1px solid var(--border); color: var(--text-secondary); font-weight: 600; text-align: center; white-space: nowrap; position: sticky; top: 0; z-index: 10; }
+    .admin-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; text-align: center; }
+    .admin-table tbody tr:hover { background: #f8fafc; }
+    .admin-table tbody tr.selected { background: #eff6ff !important; }
+    
+    .btn-action {
+      padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; border: none; cursor: pointer; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;
+    }
+    .btn-view-coupons { background: #f1f5f9; color: #334155; border: 1px solid var(--border); border-radius: 4px; }
+    .btn-suspend { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; border-radius: 4px; }
+
+    /* 2분할 레이아웃 */
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+      min-height: 0;
+    }
+    
+    #couponSection {
+      display: none;
+    }
+
+    .table-scroll-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+    .table-scroll-container::-webkit-scrollbar { width: 6px; height: 6px; }
+    .table-scroll-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+  <script type="module" crossorigin src="/assets/admin-users-BmVLopov.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-BQDM6Pi8.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 사이드바 -->
+    <aside class="admin-sidebar"></aside>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="admin-content">
+      <header class="dashboard-header">
+        <div class="header-title-area">
+          <span class="header-category">User Account Management</span>
+          <h1>회원 계정 관리</h1>
+          <p class="header-desc">일반 관광객 회원을 조회하고 관리합니다.</p>
+        </div>
+      </header>
+
+      <div class="grid-container">
+        <!-- 왼쪽: 회원 목록 -->
+        <div class="admin-card" style="border-radius: 0;">
+          <div style="padding: 16px; font-weight: bold; border-bottom: 1px solid var(--border); background: #f8fafc; flex-shrink: 0;">회원 목록</div>
+          <div class="table-scroll-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>로그인</th>
+                  <th>이름</th>
+                  <th>전화번호</th>
+                  <th>쿠폰 내역</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <!-- 데이터 렌더링 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 오른쪽: 쿠폰 내역 -->
+        <div class="admin-card" id="couponSection" style="border-radius: 0;">
+          <div style="padding: 16px; font-weight: bold; border-bottom: 1px solid var(--border); background: #f8fafc; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+            <div><span id="sideUserName">선택된 회원</span>님의 쿠폰 내역</div>
+            <button id="btn-close-side" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
+          </div>
+          <div style="padding: 16px; border-bottom: 1px solid var(--border); background: #fff; flex-shrink: 0;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: var(--text-secondary); font-size: 0.9rem;">사용 가능 쿠폰액</span>
+              <strong style="color: var(--primary);" id="sideCouponBalance">0원</strong>
+            </div>
+          </div>
+          <div class="table-scroll-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>종류</th>
+                  <th>금액</th>
+                  <th>상태</th>
+                  <th>발급일</th>
+                </tr>
+              </thead>
+              <tbody id="sideCouponsBody">
+                <!-- 쿠폰 데이터 렌더링 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>

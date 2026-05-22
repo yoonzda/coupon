@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>발행처 키오스크 | 옹진 관광 쿠폰</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      background: #f4f8ff !important;
+      background-image: 
+        radial-gradient(circle at 50% 50%, #f4f8ff 0%, #eef4ff 100%) !important;
+      position: relative;
+      overflow-x: hidden;
+      color: #0f172a;
+    }
+
+    body.kiosk-mode {
+      height: 100vh !important;
+      overflow: hidden !important;
+    }
+
+    /* Decorative blurred glow circles */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+      top: -200px; right: -200px;
+      z-index: 0;
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(30, 58, 138, 0.06) 0%, transparent 60%);
+      bottom: -150px; left: -150px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Floating gear settings button on public Kiosk screen (Bottom Right, 72px) */
+    .kiosk-gear-btn {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 50%;
+      width: 72px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.12);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      outline: none;
+      padding: 0;
+    }
+    .kiosk-gear-btn:hover {
+      background: rgba(255, 255, 255, 0.85);
+      border-color: rgba(37, 99, 235, 0.25);
+      box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.2);
+    }
+    .kiosk-gear-btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-border-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      transform: rotate(-90deg);
+    }
+    .btn-border-bg {
+      fill: none;
+      stroke: rgba(0, 0, 0, 0.06);
+      stroke-width: 1.5;
+    }
+    .btn-border-active {
+      fill: none;
+      stroke: #2563eb;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-dasharray: 213.6;
+      stroke-dashoffset: 213.6;
+      transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .kiosk-gear-btn:hover .btn-border-active {
+      stroke-dashoffset: 0;
+    }
+
+    .kiosk-gear-btn .gear-icon-svg {
+      width: 28px;
+      height: 28px;
+      stroke: #475569;
+      fill: none;
+      z-index: 10;
+      transition: stroke 0.3s ease, transform 0.3s ease;
+    }
+    .kiosk-gear-btn:hover .gear-icon-svg {
+      stroke: #2563eb;
+      transform: rotate(45deg);
+    }
+
+
+
+    /* Screen containers */
+    .screen-container {
+      display: none;
+      flex: 1;
+      width: 100%;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .screen-container.active {
+      display: flex;
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Clean QR Card styling */
+    .issuer-kiosk-card {
+      text-align: center;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: -10px;
+      display: flex;
+      flex-direction: column;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .kiosk-title-group {
+      text-align: center;
+      margin-bottom: 20px;
+      width: 100%;
+      padding: 16px 0 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .kiosk-title-main {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #0f172a;
+      line-height: 1.4;
+      margin: 0 0 10px 0;
+      letter-spacing: -0.6px;
+      word-break: keep-all;
+    }
+    .title-bracket {
+      font-weight: 600;
+      font-size: 1.3rem;
+      opacity: 0.9;
+      color: #0f172a !important; /* 색상 들어가지 않게 상위 색상 강제 지정 */
+    }
+    .highlight-issuer {
+      font-size: 1.85rem;
+      font-weight: 600;
+      color: #2563eb;
+      display: inline;
+      margin: 0 6px;
+      filter: drop-shadow(0 1px 2px rgba(37, 99, 235, 0.08));
+    }
+    .kiosk-title-sub {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.5;
+      margin: 0;
+      letter-spacing: -0.3px;
+      word-break: keep-all;
+    }
+    .highlight-amount {
+      font-size: 1.35rem;
+      color: #2563eb;
+      font-weight: 600;
+      background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+      margin: 0 6px;
+      text-decoration: none !important; /* 밑줄 없게 처리 */
+      border-bottom: none !important;
+    }
+
+    /* Kiosk Steps Guide styles */
+    .kiosk-steps-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 36px;
+      width: 100%;
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .kiosk-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(37, 99, 235, 0.15);
+      padding: 10px 18px;
+      border-radius: 99px;
+      box-shadow: 0 6px 15px -4px rgba(37, 99, 235, 0.05);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .kiosk-step:hover {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(37, 99, 235, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.1);
+    }
+    .step-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+      transition: transform 0.3s ease;
+    }
+    .kiosk-step:hover .step-num {
+      transform: scale(1.1);
+    }
+    .step-icon {
+      width: 20px;
+      height: 20px;
+      stroke: #2563eb;
+      fill: none;
+      flex-shrink: 0;
+      transition: transform 0.3s ease, stroke 0.3s ease;
+      stroke-width: 2;
+    }
+    .kiosk-step:hover .step-icon {
+      stroke: #1e3a8a;
+      transform: scale(1.1) rotate(5deg);
+    }
+    .step-text {
+      font-size: 0.9rem;
+      color: #334155;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .kiosk-step:hover .step-text {
+      color: #0f172a;
+    }
+    .step-arrow {
+      width: 18px;
+      height: 18px;
+      color: #2563eb;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    /* QR Scan Trigger Button styling (Scaled Up) */
+    .btn-qr-trigger {
+      background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
+      color: #ffffff;
+      border: none;
+      width: 100%;
+      max-width: 580px;
+      padding: 24px 48px;
+      font-size: 1.65rem;
+      font-weight: 600;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 12px 32px rgba(37, 99, 235, 0.26);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+    }
+    .btn-qr-trigger:hover {
+      background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 38px rgba(37, 99, 235, 0.36);
+    }
+    .btn-qr-trigger:active {
+      transform: translateY(0);
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+    }
+    .btn-qr-trigger svg {
+      transition: transform 0.3s ease;
+      width: 34px !important;
+      height: 34px !important;
+    }
+    .btn-qr-trigger:hover svg {
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 960px) {
+      .kiosk-title-main {
+        font-size: 1.15rem;
+      }
+      .title-bracket {
+        font-size: 1.15rem;
+      }
+      .highlight-issuer {
+        font-size: 1.6rem;
+      }
+      .kiosk-title-sub {
+        font-size: 1.15rem;
+      }
+      .highlight-amount {
+        font-size: 1.2rem;
+      }
+      .kiosk-steps-container {
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 24px;
+      }
+      .step-arrow {
+        transform: rotate(90deg);
+        margin: -4px 0;
+      }
+      .btn-qr-trigger {
+        font-size: 1.25rem;
+        padding: 16px 32px;
+        max-width: 360px;
+      }
+      .btn-qr-trigger svg {
+        width: 26px !important;
+        height: 26px !important;
+      }
+    }
+
+
+
+    /* Password Modal overlay */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 0;
+      width: 360px;
+      padding: 40px 28px 32px 28px;
+      position: relative;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15), 0 0 1px rgba(0, 0, 0, 0.15);
+      transform: scale(0.95);
+      transition: transform 0.25s ease;
+    }
+    .modal-overlay.active .modal-container { transform: scale(1); }
+
+    .modal-close-x {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+    .modal-close-x:hover {
+      color: #0f172a;
+    }
+    .modal-close-x svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .modal-header-area {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .modal-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+    .title-divider {
+      width: 28px;
+      height: 2px;
+      background: rgba(0, 0, 0, 0.08);
+      margin: 12px auto 16px auto;
+    }
+    .modal-desc {
+      color: #475569;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      font-weight: 400;
+      letter-spacing: -0.2px;
+    }
+    .modal-desc span {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .password-input-box {
+      background: rgba(0, 0, 0, 0.02);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      padding: 24px;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-input-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .modal-input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      stroke: #64748b;
+      fill: none;
+      pointer-events: none;
+      transition: stroke 0.2s;
+    }
+    .modal-input {
+      width: 100%;
+      padding: 14px 16px 14px 44px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      color: #0f172a;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .modal-input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+    input::-ms-reveal,
+    input::-ms-clear {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    .modal-input:focus ~ .modal-input-icon {
+      stroke: #2563eb;
+    }
+    .modal-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn-confirm {
+      background: #2563eb;
+      color: #fff;
+    }
+    .btn-confirm:hover {
+      background: #1e40af;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+
+
+    #toast-container {
+      position: fixed; bottom: 20px; right: 20px; z-index: 1100;
+    }
+
+    /* ── QR 블러 처리 및 오버레이 ── */
+    .qr-container-relative {
+      position: relative;
+      display: inline-block;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(37, 99, 235, 0.15), 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+    .qr-container-relative .qr-frame {
+      box-shadow: none; /* 프레임 자체 섀도우 제거 */
+    }
+    .qr-image.blurred {
+      filter: blur(14px);
+      transition: filter 0.3s ease;
+      transform: scale(1.02);
+    }
+    .qr-overlay-btn-container {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 5;
+    }
+    .btn-qr-view-large {
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 16px 28px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-qr-view-large:hover {
+      background: #60a5fa;
+      transform: scale(1.05);
+      box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+    }
+    .btn-qr-view-large:active {
+      transform: scale(0.98);
+    }
+
+    /* ── QR 크게 보기 모달 전용 스타일 (티켓 형태) ── */
+    .qr-modal-container {
+      background: #ffffff;
+      border-radius: 0;
+      width: 480px;
+      max-width: 90%;
+      padding: 190px 40px 36px 40px; /* Space for overlapping floating QR frame */
+      position: relative;
+      text-align: center;
+      box-shadow: 0 30px 70px rgba(15, 23, 42, 0.22), 0 0 1px rgba(0, 0, 0, 0.15);
+      transform: scale(0.95);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: visible; /* Crucial for floating QR */
+      margin-top: 130px; /* Space above to prevent clipping */
+    }
+    .modal-overlay.active .qr-modal-container {
+      transform: scale(1);
+    }
+    .large-qr-frame {
+      position: absolute;
+      top: -150px; /* Overlaps top of the card */
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 15px 40px rgba(15, 23, 42, 0.14);
+      z-index: 10;
+      width: 300px;
+      height: 300px;
+    }
+    .large-qr-image {
+      width: 260px;
+      height: 260px;
+      display: block;
+    }
+    
+    /* Ticket Details styling */
+    .ticket-icon-wrap {
+      width: 68px;
+      height: 68px;
+      background: rgba(37, 99, 235, 0.07);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px auto;
+    }
+    .ticket-icon-svg {
+      width: 34px;
+      height: 34px;
+      stroke: #2563eb;
+    }
+    .ticket-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+      letter-spacing: -0.5px;
+    }
+    .ticket-desc {
+      font-size: 1.1rem;
+      color: #475569;
+      line-height: 1.65;
+      margin: 0;
+      word-break: keep-all;
+    }
+    .ticket-desc strong {
+      color: #2563eb;
+      font-weight: 700;
+    }
+    .ticket-divider-dash {
+      border-top: 2px dashed #cbd5e1;
+      margin: 28px 0;
+      width: 100%;
+    }
+    .btn-ticket-complete {
+      width: 100%;
+      background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
+      color: #ffffff;
+      border: none;
+      padding: 16px 28px;
+      border-radius: 14px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-ticket-complete:hover {
+      background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.35);
+      transform: translateY(-1px);
+    }
+    .btn-ticket-complete:active {
+      transform: translateY(0);
+      box-shadow: 0 6px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    /* ── 폴링 완료 성공 레이어 ── */
+    .qr-success-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.98);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0; /* Matches parent container border-radius */
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 24px;
+    }
+    .qr-success-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .success-check-badge {
+      width: 76px;
+      height: 76px;
+      background: rgba(37, 99, 235, 0.08);
+      border: 2px solid #2563eb;
+      color: #2563eb;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+      margin-bottom: 20px;
+      box-shadow: 0 0 30px rgba(37, 99, 235, 0.1);
+      animation: scaleBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes scaleBounce {
+      0% { transform: scale(0.3); opacity: 0; }
+      70% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .success-title {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #2563eb;
+      margin-bottom: 8px;
+    }
+    .success-desc {
+      font-size: 0.95rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/issuer-coupon-qr-Oy7B_x3r.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
+</head>
+<body class="kiosk-mode">
+
+  <!-- Global SVG definitions for illustrations -->
+  <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#60a5fa" />
+        <stop offset="100%" stop-color="#2563eb" />
+      </linearGradient>
+      <linearGradient id="navy-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#3b82f6" />
+        <stop offset="100%" stop-color="#1e3a8a" />
+      </linearGradient>
+      <linearGradient id="cyan-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#22d3ee" />
+        <stop offset="100%" stop-color="#0891b2" />
+      </linearGradient>
+      <linearGradient id="silver-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#f1f5f9" />
+        <stop offset="100%" stop-color="#cbd5e1" />
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <!-- Floating Settings button for public screen -->
+  <button type="button" class="kiosk-gear-btn" id="gear-menu-btn" onclick="openMenuBtnAction()" aria-label="설정">
+    <svg class="btn-border-svg" viewBox="0 0 72 72">
+      <!-- 배경 원 (정적 테두리) -->
+      <circle class="btn-border-bg" cx="36" cy="36" r="34" />
+      <!-- 호버 시 채워지는 원 (동적 테두리) -->
+      <circle class="btn-border-active" cx="36" cy="36" r="34" />
+    </svg>
+    <svg class="gear-icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0-1 1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1 1.51H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+  </button>
+
+  <!-- ── 1. QR Kiosk Screen (Default View) ── -->
+  <main id="screen-qr" class="screen-container active">
+    <div class="issuer-kiosk-card">
+      <div class="kiosk-title-group">
+        <h1 class="kiosk-title-main">
+          <span class="title-bracket">[</span><span class="highlight-issuer" id="kiosk-name">인천항 연안여객터미널 안내소</span><span class="title-bracket">]</span> 를 이용해주셔서 감사합니다
+        </h1>
+        <p class="kiosk-title-sub">
+          아래 순서대로 진행하시면 당일 사용 가능한 <span class="highlight-amount" id="kiosk-amount">000원</span> 쿠폰을 발급 받으실 수 있습니다
+        </p>
+        <div style="margin-top: 32px; width: 100%; display: flex; justify-content: center;">
+          <button class="btn-qr-trigger" onclick="openQrModal()">
+            <svg style="width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2.2" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <rect x="7" y="7" width="3" height="3"></rect>
+              <rect x="14" y="7" width="3" height="3"></rect>
+              <rect x="7" y="14" width="3" height="3"></rect>
+              <rect x="14" y="14" width="3" height="3"></rect>
+            </svg>
+            쿠폰 QR 코드 스캔
+          </button>
+        </div>
+      </div>
+
+      <!-- Kiosk Scan Guide Steps (Horizontal Capsule Badges) -->
+      <div class="kiosk-steps-container">
+        <div class="kiosk-step">
+          <span class="step-num">1</span>
+          <svg class="step-icon" viewBox="0 0 24 24">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          <span class="step-text">카메라 열기</span>
+        </div>
+        
+        <svg class="step-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        
+        <div class="kiosk-step">
+          <span class="step-num">2</span>
+          <svg class="step-icon" viewBox="0 0 24 24">
+            <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+            <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+            <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+            <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+            <rect x="7" y="7" width="10" height="10" rx="1" stroke-dasharray="3 2"></rect>
+            <line x1="5" y1="12" x2="19" y2="12" stroke="#ef4444" stroke-width="1.5"></line>
+          </svg>
+          <span class="step-text">스캔</span>
+        </div>
+        
+        <svg class="step-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        
+        <div class="kiosk-step">
+          <span class="step-num">3</span>
+          <svg class="step-icon" viewBox="0 0 24 24">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3" stroke-linecap="round"></line>
+            <path d="M9 10l2 2 4-4" stroke="#10b981"></path>
+          </svg>
+          <span class="step-text">휴대폰 번호 인증</span>
+        </div>
+        
+        <svg class="step-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        
+        <div class="kiosk-step">
+          <span class="step-num">4</span>
+          <svg class="step-icon" viewBox="0 0 24 24">
+            <path d="M15 5v2"></path>
+            <path d="M15 11v2"></path>
+            <path d="M15 17v2"></path>
+            <path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z"></path>
+          </svg>
+          <span class="step-text">가맹점에서 쿠폰 사용</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── 5. Password Authentication Modal ── -->
+  <div class="modal-overlay" id="password-modal">
+    <div class="modal-container">
+      <button type="button" class="modal-close-x" onclick="closePasswordModal()" aria-label="닫기">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="modal-header-area">
+        <h3 class="modal-title">비밀번호 재입력</h3>
+        <div class="title-divider"></div>
+        <p class="modal-desc">
+          설정하신 비밀번호를 다시 한번 입력해주세요
+        </p>
+      </div>
+      
+      <div class="password-input-box">
+        <div class="modal-input-wrap">
+          <input type="password" class="modal-input" id="issuer-password-input" placeholder="비밀번호 입력" maxlength="20" onkeydown="handlePasswordKeydown(event)" />
+          <svg class="modal-input-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <button class="modal-btn btn-confirm" onclick="verifyPasswordAndEnter()">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 6. QR Code Large Viewer Modal ── -->
+  <div class="modal-overlay" id="qr-modal">
+    <div class="qr-modal-container">
+      <!-- 폴링 완료 축하 레이어 -->
+      <div class="qr-success-overlay" id="qr-success-layer">
+        <div class="success-check-badge">✓</div>
+        <div class="success-title">쿠폰 발급 완료!</div>
+        <div class="success-desc">관광객님의 본인인증 및 발급이 완료되었습니다.</div>
+      </div>
+      
+      <button type="button" class="modal-close-x" onclick="closeQrModal()" aria-label="닫기">
+        <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <!-- Overlapping Floating QR Frame -->
+      <div class="large-qr-frame">
+        <img id="kiosk-qr-large-img" class="large-qr-image" src="" alt="Large Coupon QR" />
+      </div>
+      
+      <!-- Ticket Content -->
+      <div class="ticket-icon-wrap">
+        <svg class="ticket-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+          <line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3" stroke-linecap="round"></line>
+          <path d="M9 10l2 2 4-4" stroke="#10b981" stroke-width="2"></path>
+        </svg>
+      </div>
+      
+      <h3 class="ticket-title">모바일 쿠폰 발급</h3>
+      
+      <p class="ticket-desc">
+        카메라로 <strong>QR 코드를 스캔</strong>하시고,<br>
+        휴대폰 번호로 <strong>본인인증</strong>을 진행하신 후,<br>
+        아래의 <strong>완료</strong> 버튼을 눌러주세요.
+      </p>
+      
+      <div class="ticket-divider-dash"></div>
+      
+      <div>
+        <button class="btn-ticket-complete" onclick="verifyManuallyAndClose()">
+          완료
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+</body>
+</html>

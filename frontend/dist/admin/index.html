@@ -3,63 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>관리자 대시보드 | 옹진관광 쿠폰</title>
+  <title>관리자 대시보드 | 옹진 관광 쿠폰</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    })();
+  </script>
   <style>
-    * { box-sizing: border-box; }
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      overflow-x: hidden;
       background: #f1f5f9;
-      font-family: var(--font-main); color: #1e293b; 
+      color: #1e293b; 
     }
-    
-    .app-shell { 
-      display: flex !important; flex-direction: column; 
-      min-height: 100vh; width: 100% !important; max-width: none !important;
-    }
-
-    /* 관리자 전용 레이아웃 (데스크톱 우선) */
-    @media (min-width: 1024px) {
-      .app-shell {
-        flex-direction: row !important;
-      }
-      .admin-sidebar {
-        width: 240px !important;
-        min-width: 240px;
-        height: 100vh;
-        background: #0f172a;
-        color: #fff;
-        position: sticky;
-        top: 0;
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-      }
-      .admin-content {
-        flex: 1 !important;
-        background: #f1f5f9;
-        min-height: 100vh;
-        padding: 40px;
-        min-width: 0;
-      }
-      .bottom-nav { display: none; }
-    }
-
-    .admin-sidebar .logo {
-      padding: 24px; font-size: 1.1rem; font-weight: 900; 
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex; align-items: center; gap: 10px; color: #fff;
-      white-space: nowrap;
-    }
-    .admin-nav { padding: 16px 0; flex: 1; }
-    .admin-nav a {
-      display: flex; align-items: center; gap: 12px; padding: 12px 24px;
-      color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s;
-      white-space: nowrap; font-size: 0.95rem;
-    }
-    .admin-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
-    .admin-nav a.active { color: #fff; background: var(--primary); font-weight: 700; }
 
     /* 통계 카드 */
     .stats-grid {
@@ -114,43 +72,25 @@
     }
     .admin-table tr:hover { background: var(--surface-2); }
   </style>
-  <script type="module" crossorigin src="/assets/admin-index-BiRnQBi6.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/main-9hPShMGN.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-CHX2GdQ8.js">
-  <link rel="modulepreload" crossorigin href="/assets/i18n-DJszV0mx.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-DWwHCSqY.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BkjUHGKL.css">
+  <script type="module" crossorigin src="/assets/admin-index-CD3s8-y_.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-BQDM6Pi8.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
 </head>
 <body>
   <div class="app-shell">
     <!-- 사이드바 -->
-    <aside class="admin-sidebar">
-      <div class="logo">🏝️ 옹진관광 <span>ADMIN</span></div>
-      <nav class="admin-nav">
-        <a href="/admin/index.html" class="active" data-i18n="nav_dashboard">대시보드</a>
-        <a href="/admin/merchants.html" data-i18n="nav_merchant">가맹점 관리</a>
-        <a href="/admin/settlement.html" data-i18n="nav_settlement">정산 관리</a>
-        <a href="/admin/fds.html" data-i18n="nav_fds">FDS 모니터링</a>
-        <a href="/admin/coupons.html" data-i18n="nav_coupons">쿠폰 및 발행처 관리</a>
-        <a href="/admin/statistics.html" data-i18n="nav_statistics">통계 및 보고서</a>
-      </nav>
-      <div style="padding: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <div style="margin-bottom: 16px;">
-          <select id="lang-switcher" style="width: 100%; padding: 6px; background: #1e293b; color: #fff; border: 1px solid #334155; border-radius: 4px;">
-            <option value="ko" data-i18n="lang_ko">한국어</option>
-            <option value="en" data-i18n="lang_en">English</option>
-            <option value="zh" data-i18n="lang_zh">中文</option>
-          </select>
-        </div>
-        <button id="btn-logout" data-i18n="logout" style="color: #94a3b8; font-size: 0.9rem; background: transparent; border: none; cursor: pointer; padding: 0;">로그아웃</button>
-      </div>
-    </aside>
+    <aside class="admin-sidebar"></aside>
 
     <!-- 메인 컨텐츠 -->
     <main class="admin-content">
-      <header style="margin-bottom: 32px;">
-        <h1 data-i18n="admin_title" style="font-size: 1.5rem; font-weight: 900;">플랫폼 현황 요약</h1>
-        <p data-i18n="admin_desc" style="color: var(--text-secondary);">실시간 쿠폰 발행 및 결제 데이터를 확인합니다.</p>
+      <header class="dashboard-header">
+        <div class="header-title-area">
+          <span class="header-category">Dashboard</span>
+          <h1>대시보드</h1>
+          <p class="header-desc">실시간 쿠폰 발행 및 결제 데이터를 확인합니다.</p>
+        </div>
       </header>
 
       <!-- 통계 -->
@@ -158,27 +98,35 @@
         <div class="stat-card">
           <div class="stat-label" data-i18n="stat_total_amount">금월 누적 결제액</div>
           <div class="stat-value" id="stat-total-amount">₩0</div>
-          <div class="stat-trend trend-up">전월 대비 12% ↑</div>
+          <div class="stat-trend" id="stat-tx-count" style="color: var(--text-muted); font-size:0.8rem;">결제 0건</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label" data-i18n="stat_users">활성 사용자</div>
+          <div class="stat-label" data-i18n="stat_users">가입 관광객</div>
           <div class="stat-value" id="stat-users">0</div>
+          <div class="stat-trend" style="color: var(--text-muted); font-size:0.8rem;">누적 회원</div>
         </div>
         <div class="stat-card">
           <div class="stat-label" data-i18n="stat_merchants">승인 가맹점</div>
           <div class="stat-value" id="stat-merchants">0</div>
+          <div class="stat-trend" id="stat-pending" style="color: var(--text-muted); font-size:0.8rem;">대기 0곳</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">발행 쿠폰 / 사용</div>
+          <div class="stat-value" id="stat-coupon-issued">0</div>
+          <div class="stat-trend" id="stat-coupon-rate" style="color: #10b981; font-size:0.8rem;">사용률 0%</div>
         </div>
         <div class="stat-card">
           <div class="stat-label" data-i18n="stat_fds">FDS 미해결 알림</div>
           <div class="stat-value" style="color: var(--danger);" id="stat-fds">0</div>
+          <div class="stat-trend" style="color: var(--text-muted); font-size:0.8rem;">이상거래 탐지</div>
         </div>
       </div>
 
       <!-- 최근 FDS 알림 -->
       <div class="admin-card">
         <div class="card-header">
-          <div class="card-title" data-i18n="fds_recent_title">⚠️ 최근 이상거래 의심 내역 (FDS)</div>
-          <a href="/admin/fds.html" class="btn btn-outline" data-i18n="btn_view_all" style="padding: 6px 12px; font-size: 0.8rem;">전체보기</a>
+          <div class="card-title" data-i18n="fds_recent_title">️ 최근 이상거래 의심 내역 (FDS)</div>
+          <a href="/admin/fds.html" class="btn btn-neutral-outline" data-i18n="btn_view_all" style="padding: 6px 12px; font-size: 0.8rem;">전체보기</a>
         </div>
         <table class="admin-table">
           <thead>
@@ -198,6 +146,6 @@
       </div>
     </main>
   </div>
-
+
 </body>
 </html>
