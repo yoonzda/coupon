@@ -101,23 +101,23 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label">총 쿠폰 발행량</div>
-          <div class="stat-value">12,450건</div>
-          <div class="stat-trend trend-up">↑ 15% (전월대비)</div>
+          <div class="stat-value" id="kpi-total-issued">0건</div>
+          <div class="stat-trend" style="display: none;"></div>
         </div>
         <div class="stat-card">
           <div class="stat-label">누적 쿠폰 사용량</div>
-          <div class="stat-value">8,320건</div>
-          <div class="stat-trend trend-up">↑ 22% (전월대비)</div>
+          <div class="stat-value" id="kpi-total-used">0건</div>
+          <div class="stat-trend" style="display: none;"></div>
         </div>
         <div class="stat-card">
           <div class="stat-label">누적 정산 완료액</div>
-          <div class="stat-value">₩41,600,000</div>
-          <div class="stat-trend trend-up">↑ 18% (전월대비)</div>
+          <div class="stat-value" id="kpi-total-settled">₩0</div>
+          <div class="stat-trend" style="display: none;"></div>
         </div>
         <div class="stat-card">
           <div class="stat-label">활성 가맹점 수</div>
-          <div class="stat-value">142곳</div>
-          <div class="stat-trend trend-down">↓ 2곳 (휴업/탈퇴)</div>
+          <div class="stat-value" id="kpi-active-merchants">0곳</div>
+          <div class="stat-trend" style="display: none;"></div>
         </div>
       </div>
 
@@ -154,41 +154,9 @@
               <th>정산 발생액</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="top-merchants-body">
             <tr>
-              <td>1</td>
-              <td><strong>영흥바다횟집</strong></td>
-              <td>영흥면</td>
-              <td>450건</td>
-              <td>₩2,250,000</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td><strong>백령자연식당</strong></td>
-              <td>백령면</td>
-              <td>382건</td>
-              <td>₩1,910,000</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td><strong>덕적아일랜드카페</strong></td>
-              <td>덕적면</td>
-              <td>310건</td>
-              <td>₩1,550,000</td>
-            </tr>
-            <tr>
-              <td>4</td>
-              <td><strong>자월도펜션파크</strong></td>
-              <td>자월면</td>
-              <td>295건</td>
-              <td>₩1,475,000</td>
-            </tr>
-            <tr>
-              <td>5</td>
-              <td><strong>대청해산물직판장</strong></td>
-              <td>대청면</td>
-              <td>215건</td>
-              <td>₩1,075,000</td>
+              <td colspan="5" class="text-center" style="padding: 40px; text-align: center; color: #64748b;">데이터를 불러오는 중입니다...</td>
             </tr>
           </tbody>
         </table>
@@ -198,74 +166,149 @@
 
   <script type="module">
     import { requireAdminAuth } from '../shared/js/admin-guard.js';
-    import { t, bindLanguageSwitcher } from '../shared/js/i18n.js';
+    import { api, fmtMoney } from '../shared/js/api.js';
     await requireAdminAuth();
-    
 
-    // 1. Bar Chart: 쿠폰 추이
-    const ctxBar = document.getElementById('barChart').getContext('2d');
-    const barChart = new Chart(ctxBar, {
-      type: 'bar',
-      data: {
-        labels: ['11월', '12월', '1월', '2월', '3월', '4월'],
-        datasets: [
-          {
-            label: '발행량',
-            data: [1500, 2000, 1800, 2200, 2500, 2450],
-            backgroundColor: '#94a3b8',
-            borderRadius: 4
-          },
-          {
-            label: '사용량',
-            data: [1000, 1400, 1200, 1700, 1900, 2100],
-            backgroundColor: '#3b82f6',
-            borderRadius: 4
+    let barChart = null;
+    let pieChart = null;
+
+    async function loadStatsReport() {
+      try {
+        const res = await api.get('/admin/stats/reports');
+        if (res.success && res.data) {
+          const { kpis, monthlyTrend, regionDistribution, topMerchants } = res.data;
+
+          // 1. KPI 카드 업데이트
+          document.getElementById('kpi-total-issued').textContent = `${Number(kpis.totalIssued).toLocaleString()}건`;
+          document.getElementById('kpi-total-used').textContent = `${Number(kpis.totalUsed).toLocaleString()}건`;
+          document.getElementById('kpi-total-settled').textContent = fmtMoney(kpis.totalSettled);
+          document.getElementById('kpi-active-merchants').textContent = `${kpis.activeMerchants}곳`;
+
+          // 2. Bar Chart 업데이트
+          const barLabels = [];
+          const barIssuedData = [];
+          const barUsedData = [];
+
+          if (monthlyTrend && monthlyTrend.length > 0) {
+            monthlyTrend.forEach(row => {
+              const [year, month] = row.month.split('-');
+              barLabels.push(`${parseInt(month)}월`);
+              barIssuedData.push(row.issued_count);
+              barUsedData.push(row.used_count);
+            });
+          } else {
+            // 데이터가 없는 경우 최근 6개월 0건으로 라벨 생성
+            const now = new Date();
+            for (let i = 5; i >= 0; i--) {
+              const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+              barLabels.push(`${d.getMonth() + 1}월`);
+              barIssuedData.push(0);
+              barUsedData.push(0);
+            }
           }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'top' }
+          renderBarChart(barLabels, barIssuedData, barUsedData);
+
+          // 3. Pie Chart 업데이트
+          const pieLabels = regionDistribution.map(r => r.name);
+          const pieData = regionDistribution.map(r => r.value);
+          const pieColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1', '#a855f7'];
+
+          if (pieLabels.length === 0) {
+            pieLabels.push('소진 내역 없음');
+            pieData.push(1);
+            pieColors.splice(0, pieColors.length, '#e2e8f0');
+          }
+          renderPieChart(pieLabels, pieData, pieColors);
+
+          // 4. 우수 가맹점 Top 5 업데이트
+          const tbody = document.getElementById('top-merchants-body');
+          if (!topMerchants || topMerchants.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding: 40px; text-align: center; color: #64748b;">실적이 있는 가맹점이 없습니다.</td></tr>`;
+          } else {
+            tbody.innerHTML = topMerchants.map((m, idx) => {
+              const addr = m.address || '';
+              const parts = addr.split(' ');
+              const region = parts.find(p => p.endsWith('면') || p.endsWith('구') || p.endsWith('동') || p.endsWith('군')) || '기타';
+              return `
+                <tr>
+                  <td>${idx + 1}</td>
+                  <td><strong>${m.name}</strong></td>
+                  <td>${region}</td>
+                  <td>${Number(m.tx_count).toLocaleString()}건</td>
+                  <td>${fmtMoney(m.total_amount)}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+        }
+      } catch (err) {
+        console.error('보고서 로드 실패', err);
+        showToast('보고서 통계 로드 실패', 'error');
+      }
+    }
+
+    function renderBarChart(labels, issued, used) {
+      const ctxBar = document.getElementById('barChart').getContext('2d');
+      if (barChart) barChart.destroy();
+      barChart = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '발행량',
+              data: issued,
+              backgroundColor: '#94a3b8',
+              borderRadius: 4
+            },
+            {
+              label: '사용량',
+              data: used,
+              backgroundColor: '#3b82f6',
+              borderRadius: 4
+            }
+          ]
         },
-        scales: {
-          y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
-          x: { grid: { display: false } }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top' }
+          },
+          scales: {
+            y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
+            x: { grid: { display: false } }
+          }
         }
-      }
-    });
+      });
+    }
 
-    // 2. Pie Chart: 지역별 비중
-    const ctxPie = document.getElementById('pieChart').getContext('2d');
-    const pieChart = new Chart(ctxPie, {
-      type: 'doughnut',
-      data: {
-        labels: ['영흥면', '백령면', '덕적면', '자월면', '기타'],
-        datasets: [{
-          data: [35, 25, 20, 10, 10],
-          backgroundColor: [
-            '#3b82f6', // blue
-            '#10b981', // green
-            '#f59e0b', // yellow
-            '#8b5cf6', // purple
-            '#e2e8f0'  // gray
-          ],
-          borderWidth: 0,
-          hoverOffset: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%',
-        plugins: {
-          legend: { position: 'bottom' }
+    function renderPieChart(labels, data, colors) {
+      const ctxPie = document.getElementById('pieChart').getContext('2d');
+      if (pieChart) pieChart.destroy();
+      pieChart = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colors,
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '65%',
+          plugins: {
+            legend: { position: 'bottom' }
+          }
         }
-      }
-    });
+      });
+    }
 
-    // 3. 엑셀 다운로드 (Mock)
+    // 엑셀 다운로드 (실제 DB 데이터 기준 다운로드)
     window.downloadReport = function downloadReport() {
       const btn = document.getElementById('btn-export');
       const originalText = btn.innerHTML;
@@ -273,13 +316,36 @@
       btn.style.opacity = '0.7';
       btn.disabled = true;
 
-      setTimeout(() => {
-        alert('테스트용 엑셀 다운로드가 준비되었습니다.\n(백엔드 API 연동 시 실제 파일이 다운로드됩니다.)');
+      // 실제 통계 데이터 기반 CSV 생성
+      api.get('/admin/stats/reports').then(res => {
+        if (res.success && res.data) {
+          const { topMerchants } = res.data;
+          let csvContent = "data:text/csv;charset=utf-8,\uFEFF"
+            + "순위,가맹점명,소진건수,정산발생액\n";
+          
+          topMerchants.forEach((m, idx) => {
+            csvContent += `${idx + 1},${m.name},${m.tx_count},${m.total_amount}\n`;
+          });
+
+          const encodedUri = encodeURI(csvContent);
+          const link = document.createElement("a");
+          link.setAttribute("href", encodedUri);
+          link.setAttribute("download", `statistics_report_${new Date().toISOString().slice(0, 10)}.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }).catch(err => {
+        alert('엑셀 파일 생성 실패: ' + err.message);
+      }).finally(() => {
         btn.innerHTML = originalText;
         btn.style.opacity = '1';
         btn.disabled = false;
-      }, 1500);
+      });
     };
+
+    // 초기 로드
+    loadStatsReport();
   </script>
 </body>
 </html>

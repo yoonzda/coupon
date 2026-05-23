@@ -39,6 +39,36 @@
     .back-link:hover svg {
       transform: translateX(-4px);
     }
+
+    /* 스핀박스 화살표 제거 */
+    .no-spin::-webkit-outer-spin-button,
+    .no-spin::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .no-spin[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    /* input-unit 스타일 */
+    .input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .input-group input {
+      width: 100%;
+      padding-right: 40px !important;
+    }
+    .input-group .input-unit {
+      position: absolute;
+      right: 16px;
+      font-size: 0.9rem;
+      color: #64748b;
+      font-weight: 500;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -72,24 +102,24 @@
         
         <form id="form-create-allocation" onsubmit="createAllocation(event)">
           <div class="form-group">
-            <label for="allocation-issuer-select">대상 발행처</label>
+            <label for="allocation-issuer-select">발행처</label>
             <select id="allocation-issuer-select" required>
               <option value="">발행처를 로딩 중입니다...</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="allocation-face-value">배정 쿠폰 액면가 (금액)</label>
-            <select id="allocation-face-value" required>
-              <option value="5000">5,000원권</option>
-              <option value="10000" selected>10,000원권</option>
-              <option value="15000">15,000원권</option>
-              <option value="20000">20,000원권</option>
-              <option value="30000">30,000원권</option>
-            </select>
+            <label for="allocation-face-value">배정 쿠폰 금액</label>
+            <div class="input-group">
+              <input type="number" id="allocation-face-value" class="no-spin" min="0" required />
+              <span class="input-unit">원</span>
+            </div>
           </div>
           <div class="form-group">
-            <label for="allocation-total-count">총 배정 수량 (장)</label>
-            <input type="number" id="allocation-total-count" min="1" max="10000" placeholder="예: 100" required />
+            <label for="allocation-total-count">배정 쿠폰 수량</label>
+            <div class="input-group">
+              <input type="number" id="allocation-total-count" class="no-spin" min="1" max="10000" required />
+              <span class="input-unit">장</span>
+            </div>
           </div>
 
           <div class="form-actions">
@@ -108,6 +138,10 @@
 
     await requireAdminAuth();
 
+    // URL 파라미터에서 issuerId 추출
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetIssuerId = urlParams.get('issuerId');
+
     async function loadIssuers() {
       try {
         const res = await api.get('/admin/issuers');
@@ -118,7 +152,11 @@
             return;
           }
           select.innerHTML = '<option value="">발행처를 선택하세요</option>' + 
-            res.data.issuers.map(i => `<option value="${i.id}">${escapeHtml(i.name)} (${escapeHtml(i.username)})</option>`).join('');
+            res.data.issuers.map(i => `<option value="${i.id}">${escapeHtml(i.name)}</option>`).join('');
+          
+          if (targetIssuerId) {
+            select.value = targetIssuerId;
+          }
         }
       } catch (err) {
         showToast('발행처 목록 조회 실패: ' + err.message, 'error');

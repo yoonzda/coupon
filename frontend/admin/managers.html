@@ -65,6 +65,15 @@
     }
     .btn-export:hover { background: #f1f5f9; }
     .controls { display: flex; gap: 12px; }
+    
+    /* 체크박스 크기 통일 */
+    .admin-table input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      vertical-align: middle;
+      margin: 0;
+    }
   </style>
 </head>
 <body>
@@ -84,18 +93,19 @@
 
       <!-- 테이블 조작 버튼 영역 -->
       <div class="table-actions-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; justify-content: flex-start;">
+        <a href="register-manager.html" id="btn-add-manager" class="btn btn-neutral btn-sm" style="height: 38px; display: flex; align-items: center;">관리자 등록</a>
         <button id="btn-delete-managers" class="btn btn-neutral-outline btn-sm" style="height: 38px; display: flex; align-items: center;">선택 삭제</button>
-        <button id="btn-add-manager" class="btn btn-neutral btn-sm" style="height: 38px; display: flex; align-items: center;">관리자 등록</button>
       </div>
 
-      <div class="admin-card" style="border-radius: 0;">
-        <table class="admin-table" style="text-align: center;">
+      <div class="admin-card">
+        <table class="admin-table">
           <thead>
             <tr>
-              <th style="text-align: center; width: 60px;"><input type="checkbox" id="selectAllManagers" style="cursor: pointer;"></th>
-              <th style="text-align: center;">이름</th>
-              <th style="text-align: center;">아이디</th>
-              <th style="text-align: center;">권한</th>
+              <th style="text-align: center; width: 8%;"><input type="checkbox" id="selectAllManagers" style="cursor: pointer;"></th>
+              <th style="text-align: center; width: 20%;">이름</th>
+              <th style="text-align: center; width: 32%;">아이디</th>
+              <th style="text-align: center; width: 25%;">권한</th>
+              <th style="text-align: center; width: 15%;">관리</th>
             </tr>
           </thead>
           <tbody id="managersTableBody">
@@ -104,41 +114,6 @@
         </table>
       </div>
     </main>
-  </div>
-
-  <!-- 관리자 등록 모달 -->
-  <div id="addManagerModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
-    <div style="background: #fff; width: 400px; padding: 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-      <h2 style="margin: 0 0 20px 0; font-size: 1.2rem; font-weight: 700;">새 관리자 등록</h2>
-      
-      <div style="margin-bottom: 16px;">
-        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">이름</label>
-        <input type="text" id="newManagerName" placeholder="관리자 이름 입력" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
-      </div>
-      
-      <div style="margin-bottom: 16px;">
-        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">아이디</label>
-        <input type="text" id="newManagerId" placeholder="로그인 아이디 입력" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
-      </div>
-      
-      <div style="margin-bottom: 16px;">
-        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">비밀번호</label>
-        <input type="password" id="newManagerPwd" placeholder="비밀번호 입력" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
-      </div>
-      
-      <div style="margin-bottom: 24px;">
-        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">권한 설정</label>
-        <select id="newManagerRole" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
-          <option value="super">최고 관리자</option>
-          <option value="operator">일반 운영자</option>
-        </select>
-      </div>
-      
-      <div style="display: flex; gap: 12px; justify-content: flex-start;">
-        <button id="btn-cancel-manager" class="btn btn-neutral-outline btn-sm" style="height: 38px;">취소</button>
-        <button id="btn-save-manager" class="btn btn-neutral btn-sm" style="height: 38px;">등록하기</button>
-      </div>
-    </div>
   </div>
 
   <script type="module">
@@ -179,6 +154,11 @@
           <td style="text-align: center;">${m.name}</td>
           <td style="text-align: center;"><strong>${m.username}</strong></td>
           <td style="text-align: center;">${roleBadge}</td>
+          <td style="text-align: center;">
+            <a href="edit-manager.html?id=${m.id}" class="btn-table-edit">
+              <span>수정</span>
+            </a>
+          </td>
         `;
         tbody.appendChild(tr);
       });
@@ -240,65 +220,6 @@
       });
     }
 
-    // 관리자 등록 모달 제어
-    const modal = document.getElementById('addManagerModal');
-    const btnAdd = document.getElementById('btn-add-manager');
-    const btnCancel = document.getElementById('btn-cancel-manager');
-    const btnSave = document.getElementById('btn-save-manager');
-
-    if (btnAdd && modal) {
-      btnAdd.addEventListener('click', () => {
-        modal.style.display = 'flex';
-      });
-    }
-
-    if (btnCancel && modal) {
-      btnCancel.addEventListener('click', () => {
-        modal.style.display = 'none';
-        document.getElementById('newManagerName').value = '';
-        document.getElementById('newManagerId').value = '';
-        document.getElementById('newManagerPwd').value = '';
-      });
-    }
-
-    if (btnSave) {
-      btnSave.addEventListener('click', async () => {
-        const name = document.getElementById('newManagerName').value.trim();
-        const username = document.getElementById('newManagerId').value.trim();
-        const password = document.getElementById('newManagerPwd').value.trim();
-        const role = document.getElementById('newManagerRole').value;
-        
-        if (!name || !username || !password) {
-          alert('모든 정보를 입력해주세요.');
-          return;
-        }
-
-        try {
-          const res = await fetch('/api/admin/managers', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ name, username, password, role })
-          });
-          const data = await res.json();
-          if (data.success) {
-            alert('관리자가 성공적으로 등록되었습니다.');
-            modal.style.display = 'none';
-            document.getElementById('newManagerName').value = '';
-            document.getElementById('newManagerId').value = '';
-            document.getElementById('newManagerPwd').value = '';
-            loadManagers();
-          } else {
-            alert('등록 실패: ' + data.message);
-          }
-        } catch (err) {
-          console.error(err);
-          alert('서버 오류가 발생했습니다.');
-        }
-      });
-    }
   </script>
 </body>
 </html>

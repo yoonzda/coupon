@@ -59,6 +59,66 @@
     .btn-download:hover { background: #f8fafc; color: #1e293b; border-color: #475569; }
     
     .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
+    
+    /* 필터 셀렉트박스 커스텀 화살표 스타일 적용 */
+    .filter-bar select {
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'%3E%3C/path%3E%3C/svg%3E") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 12px center !important;
+      background-size: 14px !important;
+      padding-right: 32px !important;
+      cursor: pointer;
+    }
+
+    /* 발행처 비교 테이블 가로 스크롤 및 첫 열 고정 */
+    .comparison-container {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .comparison-table th, .comparison-table td {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .comparison-table th {
+      background: var(--surface-2);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+    /* 첫 번째 열 고정 */
+    .comparison-table th:first-child,
+    .comparison-table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background: #f8fafc !important;
+      font-weight: 600;
+      text-align: left;
+      border-right: 2px solid var(--border);
+      box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    }
+    .comparison-table th:first-child {
+      z-index: 11;
+      background: #f1f5f9 !important;
+      color: var(--text-primary);
+    }
+    .comparison-table tr:hover td {
+      background: var(--surface-2);
+    }
+    .comparison-table tr:hover td:first-child {
+      background: #f1f5f9 !important;
+    }
   </style>
 </head>
 <body>
@@ -75,101 +135,27 @@
       </header>
 
       <!-- 쿠폰 조작 버튼 영역 -->
-      <div class="table-actions-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; justify-content: flex-start;">
+      <div class="table-actions-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px; justify-content: flex-start;">
         <button class="btn btn-neutral btn-sm" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer;" onclick="location.href='allocate-coupon.html'">쿠폰 배정하기</button>
       </div>
 
-      <!-- 쿠폰 대량 발행 폼 -->
-      <div class="admin-card">
-        <div class="card-header">
-          <div class="card-title"> 신규 난수 쿠폰 발행</div>
-        </div>
-        <div class="card-body">
-          <form id="form-generate-coupons" onsubmit="generateCoupons(event)">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="issuer-select">발행처 (관광지 키오스크)</label>
-                <select id="issuer-select" required>
-                  <option value="">발행처를 선택하세요</option>
-                  <option value="LOC-001">백령도 유람선 매표소</option>
-                  <option value="LOC-002">덕적도 해변 관광안내소</option>
-                  <option value="LOC-003">영흥도 에너지파크</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="coupon-type">권종 (액면가)</label>
-                <select id="coupon-type" required>
-                  <option value="5000">5,000원권</option>
-                  <option value="10000">10,000원권</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="issue-qty">발행 수량 (장)</label>
-                <input type="number" id="issue-qty" min="10" max="1000" step="10" value="100" required>
-              </div>
-              <div class="form-group" style="flex: 0.5;">
-                <button type="submit" class="btn-generate" id="btn-submit">발행하기</button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- 발행 내역 테이블 -->
-      <div class="admin-card">
-        <div class="card-header">
-          <div class="card-title"> 최근 발행 내역 (종이 난수)</div>
-        </div>
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>배치 ID</th>
-              <th>발행 일시</th>
-              <th>발행처</th>
-              <th>권종</th>
-              <th>발행 수량</th>
-              <th>다운로드 (Excel)</th>
-            </tr>
-          </thead>
-          <tbody id="batch-list">
-            <tr>
-              <td><strong>BATCH-20260504-01</strong></td>
-              <td>2026-05-04 10:30</td>
-              <td>백령도 유람선 매표소</td>
-              <td>5,000원권</td>
-              <td>500장</td>
-              <td><button class="btn-download" onclick="alert('엑셀 다운로드 시작')">️ 난수 추출</button></td>
-            </tr>
-            <tr>
-              <td><strong>BATCH-20260503-02</strong></td>
-              <td>2026-05-03 14:15</td>
-              <td>영흥도 에너지파크</td>
-              <td>10,000원권</td>
-              <td>200장</td>
-              <td><button class="btn-download" onclick="alert('엑셀 다운로드 시작')">️ 난수 추출</button></td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- 필터 영역 (버튼 아래 줄, 왼쪽 정렬) -->
+      <div class="filter-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; justify-content: flex-start;">
+        <select id="filter-status" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 120px; outline: none;">
+          <option value="all">전체 상태</option>
+          <option value="available">사용 가능</option>
+          <option value="used">사용 완료</option>
+          <option value="expired">기간 만료</option>
+        </select>
+        <select id="filter-type" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 120px; outline: none;">
+          <option value="all">전체 구분</option>
+          <option value="digital">디지털 쿠폰</option>
+          <option value="paper">종이 쿠폰</option>
+        </select>
       </div>
 
       <!-- 전체 쿠폰 발급 및 사용 현황 -->
       <div class="admin-card">
-        <div class="card-header" style="flex-wrap: wrap; gap: 16px;">
-          <div class="card-title">💵 전체 쿠폰 발급 및 사용 현황</div>
-          <div style="display: flex; gap: 8px;">
-            <select id="filter-status" onchange="window.filterCoupons()" style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
-              <option value="all">전체 상태</option>
-              <option value="available">사용 가능</option>
-              <option value="used">사용 완료</option>
-              <option value="expired">기간 만료</option>
-            </select>
-            <select id="filter-type" onchange="window.filterCoupons()" style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
-              <option value="all">전체 구분</option>
-              <option value="digital">디지털 쿠폰</option>
-              <option value="paper">종이 쿠폰</option>
-            </select>
-          </div>
-        </div>
         <table class="admin-table">
           <thead>
             <tr>
@@ -187,6 +173,25 @@
             <tr><td colspan="8" class="text-center" style="padding: 30px; color:#64748b;">데이터를 불러오는 중입니다...</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- 쿠폰 배정 내역 -->
+      <div style="margin-top: 32px; margin-bottom: 12px;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">쿠폰 배정 내역</h3>
+      </div>
+      <div id="comparison-section" class="admin-card" style="border-radius: 6px;">
+        <div class="comparison-container">
+          <table class="comparison-table">
+            <thead>
+              <tr id="comparison-header">
+                <!-- 지표명 및 발행처 헤더 동적 로드 -->
+              </tr>
+            </thead>
+            <tbody id="comparison-body">
+              <!-- 비교 항목별 행 데이터 렌더링 -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
   </div>
@@ -263,68 +268,144 @@
       renderCouponStatusTable(filtered);
     }
 
-    window.generateCoupons = async function(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btn-submit');
-      const originalText = btn.innerHTML;
-      
-      const issuerInput = document.getElementById('issuer-select');
-      const issuer = issuerInput.options[issuerInput.selectedIndex].text;
-      const qty = document.getElementById('issue-qty').value;
-      const type = document.getElementById('coupon-type').value;
-
-      btn.innerHTML = '생성 중...';
-      btn.disabled = true;
-      btn.style.opacity = '0.7';
-
-      try {
-        const res = await api.post('/admin/coupons/generate', { issuer, type: parseInt(type), quantity: parseInt(qty) });
-        
-        showToast(res.message, 'success');
-        
-        // 테이블 상단에 새 행 추가
-        const tbody = document.getElementById('batch-list');
-        const tr = document.createElement('tr');
-        const now = new Date();
-        const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-        
-        // CSV 데이터 생성용
-        const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
-          + "발행처,권종(원),쿠폰번호\n"
-          + res.data.map(e => `${e.issuer},${e.faceValue},${e.code}`).join("\n");
-        const encodedUri = encodeURI(csvContent);
-
-        const batchId = `BATCH-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*1000)}`;
-
-        tr.innerHTML = `
-          <td><strong>${batchId}</strong></td>
-          <td>${dateStr}</td>
-          <td>${issuer}</td>
-          <td>${Number(type).toLocaleString()}원권</td>
-          <td>${qty}장</td>
-          <td><a href="${encodedUri}" download="coupons_${batchId}.csv" class="btn-download" style="text-decoration:none; display:inline-block;">난수 추출 (CSV)</a></td>
-        `;
-        tbody.insertBefore(tr, tbody.firstChild);
-
-        // 전체 리스트 새로고침
-        await loadCouponStatusList();
-
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        btn.style.opacity = '1';
-      }
-    }
-
     function escapeHtml(string) {
       const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
       return String(string).replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 
+    async function loadComparisonData() {
+      try {
+        const res = await api.get('/admin/issuers');
+        let issuers = [];
+        let allocations = [];
+        
+        if (res.success && res.data) {
+          issuers = res.data.issuers || [];
+          allocations = res.data.allocations || [];
+        }
+        
+        const comparisonList = issuers.map((issuer) => {
+          const issuerAllocations = allocations.filter(a => a.issuer_id === issuer.id);
+          
+          const totalAllocated = issuerAllocations.reduce((sum, a) => sum + a.total_count, 0);
+          const totalIssued = issuerAllocations.reduce((sum, a) => sum + a.issued_count, 0);
+          const remaining = totalAllocated - totalIssued;
+          
+          // 사용완료 수 구하기 (couponsCache 기반)
+          const usedCount = couponsCache.filter(c => c.issuer_name === issuer.name && c.status === 'used').length;
+          
+          // 최근 발행 일시 구하기 (allocations 기반)
+          let latestDate = '—';
+          if (issuerAllocations.length > 0) {
+            const dates = issuerAllocations.map(a => new Date(a.created_at));
+            const maxDate = new Date(Math.max(...dates));
+            latestDate = fmtDate(maxDate);
+          }
+          
+          const faceValues = issuerAllocations.map(a => a.face_value);
+          const repFaceValue = faceValues.length > 0 ? Math.max(...faceValues) : 0;
+          
+          return {
+            name: issuer.name,
+            faceValue: repFaceValue,
+            totalAllocated,
+            totalIssued,
+            usedCount,
+            latestDate,
+            reissueCount: 0
+          };
+        });
+        
+        renderComparisonTable(comparisonList);
+      } catch (err) {
+        console.error('비교 데이터 로드 실패', err);
+        renderComparisonTable([]);
+      }
+    }
+
+    function renderComparisonTable(list) {
+      const headerTr = document.getElementById('comparison-header');
+      const body = document.getElementById('comparison-body');
+      
+      let headerHtml = `<th style="width: 220px; min-width: 220px;">분류</th>`;
+      if (list.length === 0) {
+        headerHtml += `<th style="min-width: 200px; color: #94a3b8; font-style: italic;">등록된 발행처 없음</th>`;
+      } else {
+        list.forEach((item) => {
+          headerHtml += `
+            <th style="min-width: 200px;">
+              <div style="font-weight: 700; font-size: 0.9rem; padding: 6px 0;">${escapeHtml(item.name)}</div>
+            </th>
+          `;
+        });
+      }
+      headerTr.innerHTML = headerHtml;
+      
+      const rows = [
+        { label: '쿠폰 금액', key: 'faceValue', format: val => val > 0 ? `<strong>${val.toLocaleString()}원</strong>` : '—' },
+        { label: '발행 쿠폰 수', key: 'totalIssued', format: val => `${val.toLocaleString()}장` },
+        { 
+          label: '사용현황', 
+          key: 'usedCount', 
+          format: (val, item) => {
+            const pct = item.totalIssued > 0 ? Math.round((val / item.totalIssued) * 100) : 0;
+            return `사용완료: ${val.toLocaleString()}장 (${pct}%)`;
+          }
+        },
+        { label: '최근 발행 일시', key: 'latestDate', format: val => val },
+        { label: '재발행 횟수', key: 'reissueCount', format: val => `${val}회` },
+        { 
+          label: '재발행', 
+          key: 'name', 
+          format: val => `<button class="btn" style="height: 28px; padding: 0 10px; font-size: 0.75rem; font-weight:600; cursor:pointer; background:#334155; color:white; border:none; border-radius:4px; margin: 0 auto; display:block;" onclick="window.reissueCoupons('${escapeHtml(val)}')">재발행</button>`
+        },
+        { 
+          label: '쿠폰 셋팅 수정', 
+          key: 'name', 
+          format: val => `<button class="btn-download" style="height: 28px; padding: 0 10px; font-size: 0.75rem; font-weight:600; cursor:pointer; margin: 0 auto; display:block;" onclick="window.editCouponSettings('${escapeHtml(val)}')">수정</button>`
+        },
+        { label: '총 발행 수', key: 'totalAllocated', format: val => `${val.toLocaleString()}장` }
+      ];
+      
+      let bodyHtml = '';
+      rows.forEach((row) => {
+        bodyHtml += `<tr>`;
+        bodyHtml += `<td>${row.label}</td>`;
+        if (list.length === 0) {
+          bodyHtml += `<td style="color: #cbd5e1;">—</td>`;
+        } else {
+          list.forEach((item) => {
+            bodyHtml += `<td>${row.format(item[row.key], item)}</td>`;
+          });
+        }
+        bodyHtml += `</tr>`;
+      });
+      body.innerHTML = bodyHtml;
+    }
+
+    window.reissueCoupons = function(issuerName) {
+      showToast(`${issuerName}의 쿠폰 재발행 요청이 접수되었습니다. (데모)`, 'success');
+    }
+    
+    window.editCouponSettings = function(issuerName) {
+      showToast(`${issuerName}의 쿠폰 설정 수정 화면으로 이동합니다. (데모)`, 'info');
+    }
+
+    function renderStarsHtml(rating) {
+      let stars = '';
+      for (let i = 0; i < 5; i++) {
+        if (i < rating) {
+          stars += '<span style="color: #fbbf24; font-size: 1rem;">★</span>';
+        } else {
+          stars += '<span style="color: #cbd5e1; font-size: 1rem;">★</span>';
+        }
+      }
+      return stars;
+    }
+
     // 초기 로드
     loadCouponStatusList();
+    loadComparisonData();
   </script>
 </body>
 </html>

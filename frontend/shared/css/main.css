@@ -9,16 +9,16 @@
 /* ── 디자인 토큰 ────────────────────────────────── */
 :root {
   /* Brand */
-  --primary:       #0ea5e9;   /* 옹진 바다 블루 */
-  --primary-dark:  #0369a1;
-  --primary-light: #e0f2fe;
-  --accent:        #f59e0b;   /* 황금 선셋 */
-  --accent-dark:   #b45309;
+  --primary:       #475569;   /* Soft Medium Slate */
+  --primary-dark:  #334155;   /* Darker Slate */
+  --primary-light: #f1f5f9;
+  --accent:        #94a3b8;   /* Light Slate Gray */
+  --accent-dark:   #64748b;
 
   /* Surface */
-  --bg:            #f0f9ff;
+  --bg:            #f8fafc;
   --surface:       #ffffff;
-  --surface-2:     #f8fafc;
+  --surface-2:     #f1f5f9;
   --border:        #e2e8f0;
 
   /* Text */
@@ -39,9 +39,9 @@
   --radius-xl:  28px;
 
   /* Shadow */
-  --shadow-sm:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-  --shadow:     0 4px 16px rgba(14,165,233,.12), 0 2px 8px rgba(0,0,0,.06);
-  --shadow-lg:  0 12px 40px rgba(14,165,233,.18), 0 4px 16px rgba(0,0,0,.08);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+  --shadow:     0 4px 16px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-lg:  0 12px 40px rgba(15, 23, 42, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06);
 
   /* Transition */
   --ease: cubic-bezier(.4,0,.2,1);
@@ -85,7 +85,7 @@ input, select, textarea { font-family: inherit; }
 
 /* PC에서도 볼 수 있도록 */
 @media (min-width: 768px) {
-  body { background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%); }
+  body { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); }
 }
 
 /* ── 헤더 ───────────────────────────────────────── */
@@ -166,10 +166,9 @@ input, select, textarea { font-family: inherit; }
 .btn-primary {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(14,165,233,.35);
+  box-shadow: 0 4px 12px rgba(30,41,59,.15);
 }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(14,165,233,.45); }
-.btn-primary:active { transform: translateY(0); }
+.btn-primary:hover { box-shadow: 0 4px 12px rgba(30,41,59,.15); }
 
 .btn-outline {
   background: transparent;
@@ -664,11 +663,6 @@ html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer button .logout-icon 
 }
 .btn-neutral:hover {
   background: #1e293b !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(30, 41, 59, 0.25) !important;
-}
-.btn-neutral:active {
-  transform: translateY(0) !important;
 }
 
 .btn-neutral-outline {
@@ -711,13 +705,15 @@ html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer button .logout-icon 
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important; 
   padding: 40px !important;
   margin-bottom: 32px !important;
-  max-width: 720px !important; /* 너비를 720px로 제한하여 시선의 분산을 방지 */
+  max-width: none !important;
   width: 100% !important;
   box-sizing: border-box !important;
 }
 
 .form-container form {
   width: 100% !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
 }
 
 .form-container .form-group {
@@ -727,7 +723,7 @@ html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer button .logout-icon 
 .form-container .form-group label {
   display: block !important;
   font-weight: 600 !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 3px !important;
   font-size: 0.88rem !important;
   color: #334155 !important;
 }
@@ -769,5 +765,105 @@ html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer button .logout-icon 
   gap: 12px !important;
   margin-top: 32px !important;
 }
+
+.form-container .form-actions button {
+  width: 100% !important;
+}
+
+/* ── 프리미엄 데이터 테이블 카드 ── */
+.admin-card {
+  background: #ffffff !important;
+  border-radius: 0px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
+  overflow: hidden !important;
+}
+
+/* ── 프리미엄 데이터 테이블 레이아웃 ── */
+.admin-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 0.88rem !important;
+}
+
+.admin-table th {
+  background: #f8fafc !important;             /* 은은하고 정돈된 실버그레이 배경 */
+  color: #475569 !important;                  /* 신뢰감을 주는 중간 차콜 텍스트 */
+  font-weight: 600 !important;                /* 고급스러운 세미볼드 두께 */
+  padding: 14px 24px !important;              /* 균형 잡힌 상하좌우 패딩 */
+  font-size: 0.82rem !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 1px solid #e2e8f0 !important; /* 아주 얇고 정교한 구분선 */
+  border-top: none !important;
+}
+
+.admin-table td {
+  padding: 16px 24px !important;              /* 넉넉한 내부 데이터 패딩 */
+  color: #334155 !important;                  /* 편안한 본문 텍스트 명도 */
+  border-bottom: 1px solid #f1f5f9 !important; /* 테이블 내 행간 극세선 구분 */
+  vertical-align: middle !important;
+}
+
+/* 마지막 행 테두리 제거 */
+.admin-table tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* 테이블 호버 반응 */
+.admin-table tr {
+  transition: background-color 0.2s ease !important;
+}
+.admin-table tbody tr:hover {
+  background: #f8fafc !important;            /* 은은하게 드러나는 밀크 그레이 오버레이 */
+}
+
+/* 테이블 수정 버튼 (연필 아이콘 + 텍스트) */
+.btn-table-edit {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 6px 12px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  color: #475569 !important;                  /* 고급스러운 브랜드 슬레이트 그레이 */
+  background-color: #f1f5f9 !important;       /* 부드러운 배경색 */
+  border: 1px solid #cbd5e1 !important;       /* 깔끔한 테두리 */
+  border-radius: 6px !important;
+  text-decoration: none !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  line-height: 1 !important;
+  box-shadow: 0 1px 2px 0 rgba(71, 85, 105, 0.03) !important;
+}
+
+.btn-table-edit svg {
+  width: 12px !important;
+  height: 12px !important;
+  color: #64748b !important;                  /* 살짝 옅은 아이콘 컬러 */
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-table-edit:hover {
+  background-color: #334155 !important;       /* 진한 차콜 그레이로 반전 */
+  border-color: #334155 !important;
+  color: #ffffff !important;                   /* 글자 화이트 처리 */
+  box-shadow: 0 4px 6px -1px rgba(51, 65, 85, 0.15), 0 2px 4px -1px rgba(51, 65, 85, 0.08) !important;
+}
+
+.btn-table-edit:hover svg {
+  color: #ffffff !important;
+  transform: rotate(-12deg) scale(1.15) !important; /* 위트 있는 미세 회전 및 스케일업 효과 */
+}
+
+/* 전역 placeholder 색상 제어 (부드러운 연회색) */
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1; /* 파이어폭스 등 일부 브라우저 투명도 리셋 */
+}
+
+
 
 

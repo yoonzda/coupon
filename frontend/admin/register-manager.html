@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>관리자 등록 | 옹진 관광 쿠폰</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="../shared/css/main.css" />
+  <style>
+    body { 
+      margin: 0 !important; padding: 0 !important; 
+      width: 100% !important; max-width: none !important; 
+      background: #f1f5f9;
+      color: #1e293b; 
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .back-link:hover {
+      color: #0f172a !important;
+    }
+    .back-link svg {
+      transition: transform 0.2s;
+    }
+    .back-link:hover svg {
+      transform: translateX(-4px);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 사이드바 -->
+    <aside class="admin-sidebar"></aside>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="admin-content">
+      <header class="dashboard-header">
+        <div class="header-title-area">
+          <span class="header-category">Administrator Settings</span>
+          <h1>관리자 계정 관리</h1>
+          <p class="header-desc">관리자 계정을 추가하거나 권한을 설정할 수 있습니다.</p>
+        </div>
+      </header>
+
+      <div class="subpage-title-area">
+        <div class="back-link-container">
+          <a href="managers.html" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px; height: 16px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            뒤로가기
+          </a>
+        </div>
+        <h2 class="page-subtitle">관리자 등록</h2>
+      </div>
+
+      <div class="form-container">
+        <form id="form-create-manager" onsubmit="createManager(event)">
+          <div class="form-group">
+            <label for="manager-name">관리자 이름</label>
+            <input type="text" id="manager-name" placeholder="관리자 이름 입력" required />
+          </div>
+          <div class="form-group">
+            <label for="manager-username">아이디</label>
+            <input type="text" id="manager-username" placeholder="아이디 입력" required />
+          </div>
+          <div class="form-group">
+            <label for="manager-password">비밀번호</label>
+            <input type="password" id="manager-password" placeholder="비밀번호 입력" required />
+          </div>
+          <div class="form-group">
+            <label for="manager-role">권한 설정</label>
+            <select id="manager-role" required>
+              <option value="super">최고 관리자</option>
+              <option value="operator" selected>일반 운영자</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-sm" style="height: 42px; padding: 0 24px; border-radius: 6px; font-weight: 600; cursor: pointer;">등록하기</button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { api, showToast } from '../shared/js/api.js'
+    import { requireAdminAuth } from '../shared/js/admin-guard.js'
+
+    await requireAdminAuth();
+
+    window.createManager = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('manager-name').value.trim();
+      const username = document.getElementById('manager-username').value.trim();
+      const password = document.getElementById('manager-password').value;
+      const role = document.getElementById('manager-role').value;
+
+      if (!name || !username || !password || !role) {
+        showToast('모든 정보를 정확히 입력해주세요.', 'error');
+        return;
+      }
+
+      try {
+        const res = await api.post('/admin/managers', { name, username, password, role });
+        showToast(res.message || '관리자가 정상적으로 등록되었습니다.', 'success');
+        
+        setTimeout(() => {
+          location.href = 'managers.html';
+        }, 1000);
+      } catch (err) {
+        showToast(err.message || '등록에 실패했습니다.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -57,7 +57,6 @@
           <div class="tab" data-status="approved">승인 완료 <span class="count" id="count-approved">0</span></div>
           <div class="tab" data-status="rejected">반려/중지 <span class="count" id="count-rejected">0</span></div>
         </div>
-        <button class="btn btn-neutral-outline btn-sm" style="margin-bottom: 8px;" onclick="window.resetData()">데이터 초기화</button>
       </div>
 
       <div class="merchant-card">
@@ -87,33 +86,7 @@
 
     await requireAdminAuth();
 
-    const STORAGE_KEY = 'admin_mock_merchants_v2';
     let currentStatus = 'pending';
-
-    const initialMock = [
-      { id: 101, business_name: '백령도 사곶 냉면', category: '음식점', contact: '010-1234-5678', address: '인천광역시 옹진군 백령면 사곶로 123', applied_at: new Date(Date.now() - 86400000).toISOString(), status: 'pending' },
-      { id: 102, business_name: '연안부두 회센터', category: '음식점', contact: '010-9876-5432', address: '인천광역시 중구 연안부두로 45', applied_at: new Date(Date.now() - 172800000).toISOString(), status: 'pending' },
-      { id: 103, business_name: '덕적도 솔숲 민박', category: '숙박업', contact: '010-5555-4444', address: '인천광역시 옹진군 덕적면 솔밭길 89', applied_at: new Date(Date.now() - 259200000).toISOString(), status: 'pending' },
-      { id: 104, business_name: '대청도 모래사막 카페', category: '관광·레저', contact: '010-1111-2222', address: '인천광역시 옹진군 대청면 대청북로 200', applied_at: new Date(Date.now() - 3600000).toISOString(), status: 'pending' },
-      { id: 105, business_name: '연평도 꽃게 전문점', category: '음식점', contact: '010-3333-7777', address: '인천광역시 옹진군 연평면 연평로 55', applied_at: new Date(Date.now() - 7200000).toISOString(), status: 'pending' },
-      { id: 106, business_name: '영흥도 캠핑장', category: '숙박업', contact: '010-8888-9999', address: '인천광역시 옹진군 영흥면 영흥남로 321', applied_at: new Date(Date.now() - 14400000).toISOString(), status: 'pending' }
-    ];
-
-    function getMockData() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialMock));
-        return initialMock;
-      }
-      return JSON.parse(saved);
-    }
-    
-    window.resetData = () => {
-      if(confirm('데이터를 초기화하시겠습니까?')) {
-        localStorage.removeItem(STORAGE_KEY);
-        location.reload();
-      }
-    }
 
     function renderMerchants(data) {
       const list = document.getElementById('merchant-list');
@@ -128,10 +101,10 @@
         return `
           <tr id="row-${m.id}">
             <td>
-              <div style="font-weight:700; font-size:1rem; color: #1e293b;">${m.business_name || m.name || '이름 없음'}</div>
+              <div style="font-weight:700; font-size:1rem; color: #1e293b;">${m.name || '이름 없음'}</div>
               <div style="font-size:0.8rem; color:#64748b; margin-top:4px;">${m.category || '-'}</div>
             </td>
-            <td>${m.contact || m.phone || '-'}</td>
+            <td>${m.phone || '-'}</td>
             <td style="color: #64748b; font-size: 0.85rem; max-width: 250px;">
               ${m.address || '-'}
               ${displayStatus === 'rejected' && m.rejection_reason ? `
@@ -171,18 +144,6 @@
       }
 
       try {
-        if (numId >= 100) {
-          const data = getMockData();
-          const idx = data.findIndex(m => m.id === numId);
-          if (idx > -1) {
-            data[idx].status = status;
-            if (status === 'rejected') data[idx].rejection_reason = reason;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            showToast(`${label} 처리가 완료되었습니다.`, 'success');
-            loadMerchants();
-          }
-          return;
-        }
         await api.patch(`/admin/merchants/${numId}/status`, { status, reason });
         showToast(`${label} 처리가 완료되었습니다.`, 'success');
         loadMerchants();
@@ -192,18 +153,32 @@
     };
 
     async function loadMerchants() {
-      const data = getMockData();
-      document.getElementById('count-pending').textContent = data.filter(m => m.status === 'pending').length;
-      document.getElementById('count-approved').textContent = data.filter(m => m.status === 'approved').length;
-      document.getElementById('count-rejected').textContent = data.filter(m => m.status === 'rejected').length;
-
-      const filtered = data.filter(m => m.status === currentStatus);
-      renderMerchants(filtered);
-
       try {
-        const res = await api.get(`/admin/merchants?status=${currentStatus}`);
-        if (res.data) renderMerchants([...filtered, ...res.data]);
-      } catch (e) { console.warn('API load skipped'); }
+        const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
+          api.get('/admin/merchants?status=pending'),
+          api.get('/admin/merchants?status=approved'),
+          api.get('/admin/merchants?status=rejected')
+        ]);
+
+        const pendingList = pendingRes.data || [];
+        const approvedList = approvedRes.data || [];
+        const rejectedList = rejectedRes.data || [];
+
+        document.getElementById('count-pending').textContent = pendingList.length;
+        document.getElementById('count-approved').textContent = approvedList.length;
+        document.getElementById('count-rejected').textContent = rejectedList.length;
+
+        if (currentStatus === 'pending') {
+          renderMerchants(pendingList);
+        } else if (currentStatus === 'approved') {
+          renderMerchants(approvedList);
+        } else if (currentStatus === 'rejected') {
+          renderMerchants(rejectedList);
+        }
+      } catch (e) {
+        console.error('API load failed', e);
+        showToast('가맹점 목록을 불러오지 못했습니다.', 'error');
+      }
     }
 
     document.querySelectorAll('.tab').forEach(tab => {

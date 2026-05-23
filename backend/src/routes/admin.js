@@ -159,8 +159,8 @@ router.get('/merchants', authenticate, authorize('admin'), async (req, res, next
   const { status = 'pending', page = 1, limit = 20 } = req.query;
   const offset = (page - 1) * limit;
   try {
-    const [rows] = await pool.execute(
-      `SELECT id, name, address, category, status, applied_at, approved_at
+    const [rows] = await pool.query(
+      `SELECT id, name, phone, address, category, status, applied_at, approved_at
        FROM merchants WHERE status = ? ORDER BY applied_at DESC LIMIT ? OFFSET ?`,
       [status, Number(limit), Number(offset)]
     );
@@ -368,12 +368,56 @@ router.delete('/managers', authenticate, authorize('admin'), async (req, res, ne
   } catch (err) { next(err); }
 });
 
+// ── 관리자 개별 정보 조회 (수정용) ────────────────────
+router.get('/managers/:id', authenticate, authorize('admin'), async (req, res, next) => {
+  if (req.user.adminRole !== 'super') {
+    return res.status(403).json({ success: false, message: '최고 관리자만 접근 가능합니다.' });
+  }
+  try {
+    const [[manager]] = await pool.execute(
+      `SELECT id, username, name, role FROM admins WHERE id = ?`,
+      [req.params.id]
+    );
+    if (!manager) {
+      return res.status(404).json({ success: false, message: '관리자를 찾을 수 없습니다.' });
+    }
+    res.json({ success: true, data: manager });
+  } catch (err) { next(err); }
+});
+
+// ── 관리자 정보 수정 ──────────────────────────────────
+router.put('/managers/:id', authenticate, authorize('admin'), async (req, res, next) => {
+  if (req.user.adminRole !== 'super') {
+    return res.status(403).json({ success: false, message: '최고 관리자만 접근 가능합니다.' });
+  }
+  const { name, role, password } = req.body;
+  if (!name || !role) {
+    return res.status(400).json({ success: false, message: '이름과 권한을 입력해주세요.' });
+  }
+  try {
+    if (password) {
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await pool.execute(
+        `UPDATE admins SET name = ?, role = ?, password_hash = ? WHERE id = ?`,
+        [name, role, hashedPassword, req.params.id]
+      );
+    } else {
+      await pool.execute(
+        `UPDATE admins SET name = ?, role = ? WHERE id = ?`,
+        [name, role, req.params.id]
+      );
+    }
+    res.json({ success: true, message: '관리자 정보가 수정되었습니다.' });
+  } catch (err) { next(err); }
+});
+
 // ── 관광객 회원 목록 조회 ───────────────────────────────────
 router.get('/users', authenticate, async (req, res, next) => {
   try {
     // Both super and operator can access this route
     const [rows] = await pool.execute(
-      `SELECT id, social_provider, nickname, email, coupon_balance, status, created_at 
+      `SELECT id, social_provider, nickname, email, coupon_balance, created_at 
        FROM users 
        WHERE role = 'tourist' 
        ORDER BY created_at DESC`
@@ -451,6 +495,66 @@ router.post('/issuers', authenticate, authorize('admin'), async (req, res, next)
   }
 });
 
+// ── 2.5 단일 발행처 상세 조회 ──
+router.get('/issuers/:id', authenticate, authorize('admin'), async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await pool.execute(
+      `SELECT id, username, name, created_at FROM issuers WHERE id = ?`,
+      [id]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: '존재하지 않는 발행처입니다.' });
+    }
+    res.json({ success: true, data: rows[0] });
+  } catch (err) { next(err); }
+});
+
+// ── 2.6 발행처 정보 수정 ──
+router.put('/issuers/:id', authenticate, authorize('admin'), async (req, res, next) => {
+  const { id } = req.params;
+  const { name, password } = req.body;
+  if (!name) {
+    return res.status(400).json({ success: false, message: '기관명을 입력해주세요.' });
+  }
+  try {
+    if (password) {
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await pool.execute(
+        `UPDATE issuers SET name = ?, password_hash = ? WHERE id = ?`,
+        [name, hashedPassword, id]
+      );
+    } else {
+      await pool.execute(
+        `UPDATE issuers SET name = ? WHERE id = ?`,
+        [name, id]
+      );
+    }
+    res.json({ success: true, message: '발행처 정보가 수정되었습니다.' });
+  } catch (err) { next(err); }
+});
+
+// ── 2.7 발행처 삭제 ──
+router.delete('/issuers/:id', authenticate, authorize('admin'), async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const [allocations] = await pool.execute(
+      `SELECT id FROM issuer_allocations WHERE issuer_id = ?`,
+      [id]
+    );
+    if (allocations.length > 0) {
+      return res.status(400).json({ success: false, message: '배정된 쿠폰 내역이 존재하는 발행처는 삭제할 수 없습니다.' });
+    }
+    
+    await pool.execute(
+      `DELETE FROM issuers WHERE id = ?`,
+      [id]
+    );
+    res.json({ success: true, message: '발행처가 삭제되었습니다.' });
+  } catch (err) { next(err); }
+});
+
 // ── 3. 발행처 쿠폰 배정 ──
 router.post('/issuers/allocations', authenticate, authorize('admin'), async (req, res, next) => {
   const { issuerId, faceValue, totalCount } = req.body;
@@ -479,7 +583,88 @@ router.get('/coupons/status-list', authenticate, authorize('admin'), async (req,
        LEFT JOIN issuers i ON ia.issuer_id = i.id
        ORDER BY c.issued_at DESC LIMIT 200`
     );
-    res.json({ success: true, data: rows });
+  } catch (err) { next(err); }
+});
+
+// ── 통계 보고서 데이터 (statistics.html용) ─────────
+router.get('/stats/reports', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    // 1. KPI 카드용 누적 데이터
+    const [[kpiStats]] = await pool.execute(
+      `SELECT
+         COUNT(*) AS total_issued,
+         SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END) AS total_used,
+         SUM(CASE WHEN status = 'used' THEN face_value ELSE 0 END) AS total_settled
+       FROM coupons`
+    );
+    const [[activeMerchants]] = await pool.execute(
+      `SELECT COUNT(*) AS count FROM merchants WHERE status = 'approved'`
+    );
+
+    // 2. 월별 발행 및 사용 추이 (최근 6개월)
+    const [monthlyRows] = await pool.execute(
+      `SELECT 
+         DATE_FORMAT(c.issued_at, '%Y-%m') AS month,
+         COUNT(*) AS issued_count,
+         SUM(CASE WHEN c.status = 'used' THEN 1 ELSE 0 END) AS used_count
+       FROM coupons c
+       WHERE c.issued_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+       GROUP BY DATE_FORMAT(c.issued_at, '%Y-%m')
+       ORDER BY month ASC`
+    );
+
+    // 3. 지역별 쿠폰 소진 건수
+    const [regionRows] = await pool.execute(
+      `SELECT 
+         m.address,
+         COUNT(*) AS count
+       FROM coupons c
+       JOIN coupon_transactions ct ON c.id = ct.coupon_id
+       JOIN merchants m ON ct.merchant_id = m.id
+       WHERE c.status = 'used'
+       GROUP BY m.address`
+    );
+
+    // 4. 우수 가맹점 Top 5
+    const [topMerchants] = await pool.execute(
+      `SELECT 
+         m.name,
+         m.address,
+         COUNT(ct.id) AS tx_count,
+         COALESCE(SUM(ct.amount), 0) AS total_amount
+       FROM merchants m
+       LEFT JOIN coupon_transactions ct ON m.id = ct.merchant_id
+       WHERE m.status = 'approved'
+       GROUP BY m.id, m.name, m.address
+       ORDER BY tx_count DESC, total_amount DESC
+       LIMIT 5`
+    );
+
+    // 지역 데이터 파싱 (인천 옹진군 백령면 -> 백령면 추출)
+    const regionMap = {};
+    for (const row of regionRows) {
+      const addr = row.address || '';
+      const parts = addr.split(' ');
+      // '면' 또는 '구' 등으로 끝나는 단어 찾기
+      const region = parts.find(p => p.endsWith('면') || p.endsWith('구') || p.endsWith('동') || p.endsWith('군') || p.endsWith('시')) || '기타';
+      regionMap[region] = (regionMap[region] || 0) + row.count;
+    }
+    const regionData = Object.entries(regionMap).map(([name, value]) => ({ name, value }));
+
+    res.json({
+      success: true,
+      data: {
+        kpis: {
+          totalIssued: kpiStats.total_issued || 0,
+          totalUsed: kpiStats.total_used || 0,
+          totalSettled: Number(kpiStats.total_settled || 0),
+          activeMerchants: activeMerchants.count || 0
+        },
+        monthlyTrend: monthlyRows,
+        regionDistribution: regionData,
+        topMerchants
+      }
+    });
   } catch (err) { next(err); }
 });
 

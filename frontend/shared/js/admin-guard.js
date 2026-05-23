@@ -115,10 +115,22 @@ function renderAdminSidebar(admin) {
   if (!sidebar) return;
 
   let currentPath = window.location.pathname;
-  if (currentPath === '/admin/register-issuer.html') {
-    currentPath = '/admin/issuers.html';
-  } else if (currentPath === '/admin/allocate-coupon.html') {
-    currentPath = '/admin/coupons.html';
+
+  // 동적 서브페이지 자동 부모 매핑 규칙 (예: register-xxx, detail-xxx, edit-xxx, allocate-xxx)
+  // 예: /admin/detail-merchant.html -> /admin/merchants.html
+  const subpageMatch = currentPath.match(/\/admin\/(register|detail|edit|allocate)-([a-zA-Z0-9_-]+)\.html/);
+  if (subpageMatch) {
+    const model = subpageMatch[2];
+    let parentPage = model;
+    
+    if (model === 'settlement') {
+      parentPage = 'settlement'; // 정산은 단수형 파일명 유지
+    } else if (model.endsWith('s')) {
+      parentPage = model;        // 이미 s로 끝나는 명칭 유지
+    } else {
+      parentPage = model + 's';  // user -> users, merchant -> merchants, coupon -> coupons, manager -> managers 등 복수화
+    }
+    currentPath = `/admin/${parentPage}.html`;
   }
 
   // 메뉴별 SVG 아이콘 정의
@@ -133,6 +145,14 @@ function renderAdminSidebar(admin) {
     users: `<svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>`,
     manager: `<svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.991l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.645-.869l.214-1.28z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`
   };
+  
+  // 최고 관리자(super)일 때만 관리자 계정 관리 메뉴가 보이도록 함
+  const managerMenu = admin && admin.role === 'super' ? `
+        <a href="/admin/managers.html" class="nav-manager">
+          ${ICONS.manager}
+          <span>관리자 계정 관리</span>
+        </a>
+  ` : '';
 
   // 공통 사이드바 HTML 구조 생성
   sidebar.innerHTML = `
@@ -180,10 +200,7 @@ function renderAdminSidebar(admin) {
           ${ICONS.users}
           <span>회원 계정 관리</span>
         </a>
-        <a href="/admin/managers.html" class="nav-manager" style="display: none;">
-          ${ICONS.manager}
-          <span>관리자 계정 관리</span>
-        </a>
+        ${managerMenu}
       </nav>
   `;
 
@@ -194,14 +211,6 @@ function renderAdminSidebar(admin) {
       link.classList.add('active');
     }
   });
-
-  // 최고 관리자는 계정 관리 메뉴 노출 처리
-  if (admin.role === 'super') {
-    const managerLink = sidebar.querySelector('.nav-manager');
-    if (managerLink) {
-      managerLink.style.display = 'flex';
-    }
-  }
 
   // ── 활성 메뉴 표시기(Indicator) 슬라이딩 애니메이션 효과 추가 ──
   const activeLink = sidebar.querySelector('.admin-nav a.active');
@@ -283,21 +292,6 @@ function renderAdminSidebar(admin) {
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
             <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 600;">${roleLabel}</div>
-            <div class="admin-role-info" style="position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; background: rgba(255,255,255,0.15); border-radius: 50%; color: #cbd5e1; font-size: 0.7rem; font-weight: bold;">
-              i
-              <div class="admin-role-tooltip" style="
-                position: absolute; left: 24px; bottom: 0;
-                background: #1e293b; border: 1px solid #334155; border-radius: 4px;
-                padding: 16px; width: 280px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-                visibility: hidden; opacity: 0; transition: all 0.2s; z-index: 200;
-                display: flex; flex-direction: column; gap: 10px; cursor: default;
-              ">
-                <div style="color: #cbd5e1; font-size: 0.75rem; line-height: 1.5; margin-bottom: 4px; text-align: left; font-weight: normal; white-space: normal;">
-                  <div style="margin-bottom: 8px;"><strong style="color: #fff; font-size: 0.8rem;">[최고 관리자]</strong><br>모든 메뉴 접근 및 관리자 계정 생성/수정 가능</div>
-                  <div><strong style="color: #fff; font-size: 0.8rem;">[일반 운영자]</strong><br>가맹점 관리, 쿠폰 발급, 통계 조회 가능</div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
