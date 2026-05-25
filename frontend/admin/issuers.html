@@ -345,7 +345,12 @@
     function renderAllocationsTable(list) {
       const tbody = document.getElementById('allocation-list');
       if (!list || list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding: 30px; color:#64748b;">배정된 쿠폰 내역이 없습니다.</td></tr>`;
+        const isUnallocatedOnly = document.getElementById('filter-alloc')?.checked;
+        if (isUnallocatedOnly) {
+          tbody.innerHTML = '';
+        } else {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding: 30px; color:#64748b;">배정된 쿠폰 내역이 없습니다.</td></tr>`;
+        }
         return;
       }
       

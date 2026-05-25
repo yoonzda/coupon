@@ -1,4 +1,4 @@
-import"./modulepreload-polyfill-B5Qt9EMX.js";/* empty css             */import{a as n,s as a,b as o}from"./api-CJmOwHvj.js";import{r as d}from"./admin-guard-BQDM6Pi8.js";await d();async function r(){const e=document.getElementById("fds-list");try{const{data:s}=await n.get("/admin/fds");if(!s||s.length===0){e.innerHTML=`
+import"./modulepreload-polyfill-B5Qt9EMX.js";/* empty css             */import{a as n,s as a,b as o}from"./api-cr5AAT4V.js";import{r as d}from"./admin-guard-_dmZlLiC.js";await d();async function r(){const e=document.getElementById("fds-list");try{const{data:s}=await n.get("/admin/fds");if(!s||s.length===0){e.innerHTML=`
             <tr><td colspan="5" style="padding: 60px; text-align: center; color: #64748b;">
               <div style="font-size: 2rem; margin-bottom: 8px;"></div>
               탐지된 이상 거래가 없습니다.

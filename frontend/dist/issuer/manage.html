@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>발행처 관리 페이지 | 옹진 관광 쿠폰</title>
+  <title>발행처 관리 페이지 | 옹진 관광 쿠폰</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -45,7 +45,7 @@
     .manage-header {
       width: 100%;
       max-width: 1100px;
-      margin: 48px auto 24px auto;
+      margin: 16px auto 12px auto;
       padding: 0 24px;
     }
     .manage-title-group {
@@ -57,7 +57,7 @@
     .manage-subtitle {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #64748b;
+      color: #475569;
       letter-spacing: 1px;
       text-transform: uppercase;
     }
@@ -88,85 +88,89 @@
     .tabs-nav-container {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
+      gap: 12px;
       width: 100%;
       max-width: 1100px;
-      margin: 0 auto 30px auto;
+      margin: 0 auto 12px auto;
       padding: 0 24px;
       z-index: 10;
       position: relative;
     }
     
     .tab-nav-btn {
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(37, 99, 235, 0.08);
       border-radius: 20px;
-      padding: 20px 12px;
+      padding: 14px 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.02);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.03);
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       outline: none;
+      color: #64748b;
     }
     .tab-nav-btn:hover {
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.9);
       border-color: rgba(37, 99, 235, 0.25);
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.08);
+      box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.1);
+      color: #0f172a;
     }
     .tab-nav-btn.active {
-      background: #ffffff;
+      background: rgba(37, 99, 235, 0.08);
       border-color: #2563eb;
       border-width: 1.5px;
-      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.12);
+      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15);
+      color: #1e3a8a;
     }
     
     .tab-icon-circle {
-      width: 52px;
-      height: 52px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(148, 163, 184, 0.08);
-      border: 1px solid rgba(148, 163, 184, 0.15);
+      background: rgba(0, 0, 0, 0.02);
+      border: 1px solid rgba(0, 0, 0, 0.05);
       color: #64748b;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .tab-nav-btn:hover .tab-icon-circle {
       transform: scale(1.05);
       color: #2563eb;
       background: rgba(37, 99, 235, 0.05);
-      border-color: rgba(37, 99, 235, 0.2);
+      border-color: rgba(37, 99, 235, 0.15);
     }
     .tab-nav-btn.active .tab-icon-circle {
       color: #ffffff;
       background: #2563eb;
       border-color: #2563eb;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
     }
     
     /* Logout button custom color hover */
     .tab-nav-btn.logout-tab:hover .tab-icon-circle {
-      color: #dc2626;
-      background: rgba(220, 38, 38, 0.05);
-      border-color: rgba(220, 38, 38, 0.2);
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.05);
+      border-color: rgba(239, 68, 68, 0.15);
     }
     .tab-nav-btn.logout-tab.active .tab-icon-circle {
-      background: #dc2626;
-      border-color: #dc2626;
+      background: #ef4444;
+      border-color: #ef4444;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
     }
     
     .tab-label {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 700;
-      color: #475569;
+      color: #64748b;
       transition: color 0.3s ease;
     }
     .tab-nav-btn:hover .tab-label {
@@ -177,7 +181,7 @@
       font-weight: 800;
     }
     .tab-nav-btn.logout-tab.active .tab-label {
-      color: #dc2626;
+      color: #ef4444;
     }
 
     /* Content Area Container */
@@ -185,7 +189,7 @@
       flex: 1;
       width: 100%;
       max-width: 1100px;
-      margin: 0 auto 40px auto;
+      margin: 0 auto 12px auto;
       padding: 0 24px;
       z-index: 1;
       position: relative;
@@ -205,250 +209,183 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Stats top grid */
+    .stats-top-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 960px) {
+      .stats-top-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* Statistics styles */
     .stats-card-wrap {
       background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(37, 99, 235, 0.1);
       border-radius: 24px;
-      padding: 36px;
-      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.03);
+      padding: 28px;
+      box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.05);
     }
-    /* Unified Card Title Styles */
+    /* Unified Card Title Styles (No icons, clean text) */
     .stats-title,
     .chart-card-title,
     .settings-card-title {
       font-size: 1.25rem;
-      font-weight: 600; /* 세미볼드로 너무 굵지 않게 통일 */
+      font-weight: 700;
       color: #0f172a;
       letter-spacing: -0.3px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .stats-title {
       margin: 0 0 20px 0;
     }
 
-    .stats-card-wrap {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      border-radius: 24px;
-      padding: 36px;
-      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.03);
-    }
-
-    /* Coupon Status Layout (Grid) */
+    /* Coupon Status Layout */
     .coupon-status-layout {
-      display: grid;
-      grid-template-columns: 1fr 1.2fr;
-      gap: 32px;
-      align-items: center;
-      width: 100%;
-    }
-
-    .gauge-chart-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      width: 100%;
-      max-width: 240px;
-      margin: 0 auto;
-    }
-
-    .gauge-svg {
-      width: 100%;
-      height: auto;
-      overflow: visible;
-    }
-
-    #gauge-fill-path {
-      transition: stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .gauge-value {
-      font-size: 2.8rem;
-      font-weight: 800;
-      fill: #0f172a;
-      text-anchor: middle;
-      dominant-baseline: middle;
-      font-family: inherit;
-    }
-
-    .progress-metrics-column {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
       width: 100%;
     }
 
-    /* Settings/Account styles */
-    .settings-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-    .settings-card {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      border-radius: 24px;
-      padding: 32px;
-      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.03);
-    }
-    .settings-card-title {
-      margin-top: 0;
-      margin-bottom: 8px;
-    }
-    .settings-card-desc {
-      font-size: 0.85rem;
-      color: #475569;
-      margin-bottom: 24px;
-      line-height: 1.6;
-    }
-
-    .form-row {
-      margin-bottom: 20px;
-    }
-    .form-row label {
-      display: block;
-      font-size: 0.8rem;
-      color: #475569;
-      font-weight: 700;
-      margin-bottom: 8px;
-      letter-spacing: -0.2px;
-    }
-    .form-row input {
-      width: 100%;
-      padding: 14px 16px;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      color: #0f172a;
-      font-size: 0.95rem;
-      outline: none;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-    .form-row input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-    }
-    input::-ms-reveal,
-    input::-ms-clear {
-      display: none !important;
-      width: 0 !important;
-      height: 0 !important;
-    }
-
-    .btn-submit-action {
-      background: #2563eb;
-      color: #ffffff;
-      border: none;
-      padding: 14px 28px;
-      font-size: 0.92rem;
-      font-weight: 700;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
-    }
-    .btn-submit-action:hover {
-      background: #1e40af;
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
-    }
-    .btn-submit-action:active {
-      transform: translateY(1px);
-    }
-
-    #toast-container {
-      position: fixed; bottom: 20px; right: 20px; z-index: 1100;
-    }
-
-    /* Horizontal Progress Layout */
-    .horizontal-progress-section {
-      width: 100%;
-      margin: 8px 0;
-    }
-
-    .horizontal-progress-bar-container {
-      width: 100%;
-      height: 18px;
-      background: rgba(148, 163, 184, 0.12);
-      border-radius: 99px;
-      overflow: hidden;
-      margin-bottom: 24px;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-      position: relative;
-    }
-
-    .horizontal-progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 99px;
-      background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%);
-      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
-    }
-
-    .progress-metrics-grid {
+    .metrics-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
+      gap: 16px;
       width: 100%;
     }
 
-    .progress-metric-card {
+    .metric-card {
       background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(37, 99, 235, 0.08);
       border-radius: 16px;
-      padding: 18px 24px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.01);
-      transition: transform 0.2s;
-    }
-
-    .progress-metric-card:hover {
-      transform: translateY(-1px);
-    }
-
-    .metric-card-label {
-      font-size: 0.85rem;
-      color: #64748b;
-      font-weight: 700;
-    }
-
-    .metric-card-val-wrap {
-      display: flex;
-      align-items: baseline;
+      align-items: center;
+      justify-content: center;
       gap: 6px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.06);
+      border-color: rgba(37, 99, 235, 0.2);
     }
 
-    .metric-card-val {
-      font-size: 1.6rem;
+    .metric-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .metric-value {
+      font-size: 1.3rem;
       font-weight: 800;
       color: #0f172a;
     }
 
-    .metric-card-percent {
-      font-size: 1rem;
-      font-weight: 700;
+    .metric-card.highlight-issued .metric-value {
       color: #2563eb;
     }
 
-    .progress-metric-card.highlight-issued .metric-card-percent {
-      color: #10b981;
+    .metric-card.highlight-remaining .metric-value {
+      color: #ea580c;
     }
 
-    .progress-metric-card.highlight-remaining .metric-card-percent {
-      color: #f59e0b;
+    /* 실시간 발급 진행 상태바 */
+    .progress-bar-container {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: 99px;
+      height: 24px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .progress-bar-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    /* Insight Feed style */
+    .insight-feed-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      height: 100%;
+    }
+    .insight-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(37, 99, 235, 0.06);
+      border-radius: 14px;
+      align-items: flex-start;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.02);
+    }
+    .insight-item:hover {
+      background: #ffffff;
+      border-color: rgba(37, 99, 235, 0.15);
+      transform: translateX(4px);
+      box-shadow: 0 6px 15px rgba(37, 99, 235, 0.06);
+    }
+    .insight-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .insight-icon-wrap.blue { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+    .insight-icon-wrap.green { background: rgba(16, 185, 129, 0.1); color: #16a34a; }
+    .insight-icon-wrap.amber { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .insight-icon-wrap.rose { background: rgba(244, 63, 94, 0.1); color: #dc2626; }
+    
+    .insight-text-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+    .insight-item-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .insight-item-desc {
+      font-size: 0.8rem;
+      color: #475569;
+      line-height: 1.55;
+    }
+    .insight-loading {
+      text-align: center;
+      padding: 40px;
+      color: #64748b;
+      font-size: 0.9rem;
     }
 
     /* Date Picker styling */
@@ -456,8 +393,9 @@
       display: none;
       align-items: center;
       gap: 8px;
-      background: rgba(148, 163, 184, 0.08);
-      padding: 4px 12px;
+      background: rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 6px 12px;
       border-radius: 12px;
     }
 
@@ -469,21 +407,21 @@
     }
 
     .chart-date-input {
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.1);
       border-radius: 8px;
       padding: 4px 8px;
       font-size: 0.82rem;
       font-weight: 700;
       color: #0f172a;
       outline: none;
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.8);
       transition: all 0.2s;
       font-family: inherit;
     }
 
     .chart-date-input:focus {
       border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
     }
 
     /* ── Statistics Analysis Card ── */
@@ -506,18 +444,15 @@
       gap: 4px;
     }
 
-    .chart-card-title {
-      margin: 0;
-    }
-
     .chart-card-subtitle {
       font-size: 0.8rem;
-      color: #64748b;
+      color: #475569;
     }
 
     .chart-filter-pills {
       display: flex;
-      background: rgba(148, 163, 184, 0.08);
+      background: rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.05);
       padding: 4px;
       border-radius: 12px;
       gap: 4px;
@@ -529,34 +464,53 @@
       padding: 6px 14px;
       font-size: 0.8rem;
       font-weight: 700;
-      color: #64748b;
+      color: #475569;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .chart-filter-btn.active {
-      background: #ffffff;
-      color: #2563eb;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      background: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    /* 좌우 분할 통계 그리드 */
+    .chart-split-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 24px;
+      width: 100%;
+      align-items: stretch;
+    }
+    @media (max-width: 680px) {
+      .chart-split-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
     }
 
     .chart-wrapper {
       position: relative;
-      height: 220px;
+      height: 240px;
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
-      padding: 30px 10px 10px 10px;
-      border-bottom: 1px solid #f1f5f9;
+      padding: 20px 10px 10px 10px;
+      border: 1px solid rgba(37, 99, 235, 0.06);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       gap: 12px;
       z-index: 1;
     }
 
     .chart-grid-lines {
       position: absolute;
-      top: 38px;
-      bottom: 32px;
+      top: 24px;
+      bottom: 28px;
       left: 10px;
       right: 10px;
       display: flex;
@@ -568,7 +522,7 @@
 
     .chart-grid-line {
       width: 100%;
-      border-top: 1px dashed rgba(148, 163, 184, 0.15);
+      border-top: 1px dashed rgba(0, 0, 0, 0.03);
     }
 
     .chart-bar-item {
@@ -579,59 +533,216 @@
       height: 100%;
       justify-content: flex-end;
       position: relative;
-      min-width: 20px;
+      min-width: 16px;
       z-index: 2;
     }
 
     .chart-bar-track {
-      width: 100%;
-      max-width: 18px;
-      height: calc(100% - 32px); /* Leave room for val-label and label */
-      background: rgba(148, 163, 184, 0.08);
+      width: 10px;
+      height: calc(100% - 24px);
+      background: rgba(37, 99, 235, 0.03);
       border-radius: 99px;
       position: relative;
-      overflow: hidden;
+      transition: background 0.3s ease;
+    }
+
+    .chart-bar-item.zero-value .chart-bar-track {
+      background: rgba(0, 0, 0, 0.01) !important;
     }
 
     .chart-bar-fill {
       width: 100%;
-      background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+      background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
       border-radius: 99px;
       position: absolute;
       bottom: 0;
       left: 0;
-      height: 0%; /* set dynamically */
-      transition: height 1s cubic-bezier(0.16, 1, 0.3, 1);
+      height: 0%;
+      transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
       cursor: pointer;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
     }
 
     .chart-bar-fill:hover {
       filter: brightness(1.1);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
     }
 
     .chart-bar-item.active-today .chart-bar-fill {
       background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
     }
 
     .chart-bar-val-label {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      color: #475569;
-      margin-bottom: 6px;
+      color: #2563eb;
+      margin-bottom: 4px;
       white-space: nowrap;
       text-align: center;
       height: 14px;
       z-index: 10;
+    }
+    .chart-bar-item.active-today .chart-bar-val-label {
+      color: #10b981;
+    }
+    .chart-bar-item.zero-value .chart-bar-val-label {
+      color: #94a3b8;
     }
 
     .chart-bar-label {
       font-size: 0.72rem;
       color: #64748b;
       font-weight: 600;
-      margin-top: 8px;
+      margin-top: 6px;
       text-align: center;
       white-space: nowrap;
       height: 14px;
+    }
+
+    /* Modern Tooltip styling on Bar Item */
+    .chart-bar-item .chart-tooltip {
+      position: absolute;
+      top: -10px;
+      background: rgba(15, 23, 42, 0.95);
+      color: #ffffff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(6px) scale(0.9);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .chart-bar-item:hover .chart-tooltip {
+      opacity: 1;
+      transform: translateY(-8px) scale(1);
+    }
+
+    /* 프리미엄 데이터 표 뷰 스타일 */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid rgba(37, 99, 235, 0.06);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      max-height: 240px;
+      overflow-y: auto;
+    }
+    .premium-data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.82rem;
+    }
+    .premium-data-table th {
+      background: rgba(37, 99, 235, 0.03);
+      padding: 12px 14px;
+      font-weight: 700;
+      color: #475569;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      font-size: 0.78rem;
+      letter-spacing: -0.2px;
+    }
+    .premium-data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+      color: #0f172a;
+      font-weight: 600;
+    }
+    .premium-data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .premium-data-table tbody tr:hover td {
+      background: rgba(37, 99, 235, 0.01);
+    }
+
+    /* Settings/Account styles */
+    .settings-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .settings-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(37, 99, 235, 0.1);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.05);
+    }
+    .settings-card-desc {
+      font-size: 0.85rem;
+      color: #475569;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .form-row {
+      margin-bottom: 20px;
+    }
+    .form-row label {
+      display: block;
+      font-size: 0.8rem;
+      color: #475569;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.2px;
+    }
+    .form-row input {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      color: #0f172a;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .form-row input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      background: #ffffff;
+    }
+    input::-ms-reveal,
+    input::-ms-clear {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    .btn-submit-action {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: #ffffff;
+      border: none;
+      padding: 14px 28px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+    .btn-submit-action:hover {
+      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.3);
+    }
+    .btn-submit-action:active {
+      transform: translateY(1px);
+    }
+
+    #toast-container {
+      position: fixed; bottom: 20px; right: 20px; z-index: 1100;
     }
 
     @media (max-width: 960px) {
@@ -646,11 +757,9 @@
     }
     @media (max-width: 768px) {
       .coupon-status-layout {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 24px;
-      }
-      .thermometer-wrapper {
-        height: 280px;
       }
     }
     @media (max-width: 480px) {
@@ -659,10 +768,10 @@
       }
     }
   </style>
-  <script type="module" crossorigin src="/assets/issuer-manage-aS0f7qUg.js"></script>
+  <script type="module" crossorigin src="/assets/issuer-manage-Cxob6jXk.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-cr5AAT4V.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-Cqa8uoiE.css">
 </head>
 <body>
 
@@ -743,82 +852,46 @@
     <section id="content-stats" class="tab-content active">
       <div style="display: flex; flex-direction: column; gap: 24px;">
         
-        <!-- 카드 1: 쿠폰 발급 현황 -->
-        <div class="stats-card-wrap">
-          <h2 class="stats-title">쿠폰 발급 현황</h2>
-          
-          <div class="coupon-status-layout">
-            <!-- 왼쪽: 서큘러 게이지 영역 -->
-            <div class="gauge-chart-container">
-              <svg class="gauge-svg" viewBox="0 0 200 200">
-                <defs>
-                  <!-- Safe 그라데이션 (로열 블루 -> 사이언) -->
-                  <linearGradient id="gauge-grad-safe" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#2563eb"/>
-                    <stop offset="100%" stop-color="#06b6d4"/>
-                  </linearGradient>
-                  <!-- Warn 그라데이션 (옐로 -> 오렌지) -->
-                  <linearGradient id="gauge-grad-warn" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#f59e0b"/>
-                    <stop offset="100%" stop-color="#ea580c"/>
-                  </linearGradient>
-                  <!-- Danger 그라데이션 (레드 -> 크림슨) -->
-                  <linearGradient id="gauge-grad-danger" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ef4444"/>
-                    <stop offset="100%" stop-color="#be123c"/>
-                  </linearGradient>
-                </defs>
-                
-                <!-- 배경 원형 링 -->
-                <circle cx="100" cy="100" r="75" 
-                        fill="none" 
-                        stroke="#e2e8f0" 
-                        stroke-width="10" />
-                        
-                <!-- 채워지는 그라데이션 원형 링 -->
-                <circle cx="100" cy="100" r="75" 
-                        fill="none" 
-                        stroke="url(#gauge-grad-safe)" 
-                        stroke-width="10" 
-                        stroke-linecap="round"
-                        stroke-dasharray="471.24"
-                        stroke-dashoffset="471.24"
-                        transform="rotate(-90 100 100)"
-                        id="gauge-fill-path" />
-
-                <!-- 중앙 수치 텍스트 -->
-                <text x="100" y="100" class="gauge-value" id="gauge-center-val" dominant-baseline="middle" text-anchor="middle">0</text>
-              </svg>
-            </div>
+        <div class="stats-top-grid">
+          <!-- 카드 1: 쿠폰 발급 현황 -->
+          <div class="stats-card-wrap">
+            <h2 class="stats-title">쿠폰 발급 현황</h2>
             
-            <!-- 오른쪽: 3단 핵심 수치 카드 (세로 스택) -->
-            <div class="progress-metrics-column">
-              <!-- 남은 쿠폰 -->
-              <div class="progress-metric-card highlight-remaining">
-                <span class="metric-card-label">남은 쿠폰</span>
-                <div class="metric-card-val-wrap">
-                  <span class="metric-card-val" id="metric-remaining">0장</span>
+            <div class="coupon-status-layout">
+              <!-- 3단 가로형 지표 카드 -->
+              <div class="metrics-grid">
+                <div class="metric-card">
+                  <span class="metric-label">총 배정 수량</span>
+                  <span class="metric-value" id="metric-total">0장</span>
+                </div>
+                <div class="metric-card highlight-issued">
+                  <span class="metric-label">누적 발급량</span>
+                  <span class="metric-value" id="metric-issued">0장</span>
+                </div>
+                <div class="metric-card highlight-remaining">
+                  <span class="metric-label">현재 잔여량</span>
+                  <span class="metric-value" id="metric-remaining">0장</span>
                 </div>
               </div>
-              <!-- 발급 쿠폰 -->
-              <div class="progress-metric-card highlight-issued">
-                <span class="metric-card-label">발급 쿠폰</span>
-                <div class="metric-card-val-wrap">
-                  <span class="metric-card-val" id="metric-issued">0장</span>
-                </div>
+              
+              <!-- 하단 가로형 프로그레스 진행바 -->
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar-fill-el" style="width: 0%;"></div>
+                <span class="progress-bar-text" id="progress-bar-text-el">0% 발급 완료</span>
               </div>
-              <!-- 총 배정 쿠폰 -->
-              <div class="progress-metric-card">
-                <span class="metric-card-label">총 배정 쿠폰</span>
-                <div class="metric-card-val-wrap">
-                  <span class="metric-card-val" id="metric-total">0장</span>
-                </div>
-              </div>
+            </div>
+          </div>
+          
+          <!-- 카드 2: 실시간 분석 & 인사이트 -->
+          <div class="stats-card-wrap">
+            <h2 class="stats-title">실시간 분석 & 인사이트</h2>
+            <div class="insight-feed-container" id="insight-feed-content">
+              <div class="insight-loading">데이터를 분석 중입니다...</div>
             </div>
           </div>
         </div>
 
-        <!-- 카드 2: 쿠폰 발급 통계 분석 -->
+        <!-- 카드 3: 쿠폰 발급 통계 분석 -->
         <div class="stats-card-wrap chart-card">
           <div class="chart-header">
             <div class="chart-title-group">
@@ -826,22 +899,44 @@
               <span class="chart-card-subtitle" id="chart-subtitle-text">금일 실시간 시간대별 발급 추이입니다.</span>
             </div>
             
-            <!-- Date Picker for Hourly filter -->
-            <div class="chart-date-picker-wrap" id="chart-date-picker-container" style="display: flex;">
-              <label for="chart-date-input">날짜 선택</label>
-              <input type="date" id="chart-date-input" class="chart-date-input" />
-            </div>
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <!-- Date Picker for Hourly filter -->
+              <div class="chart-date-picker-wrap" id="chart-date-picker-container" style="display: flex;">
+                <label for="chart-date-input">날짜 선택</label>
+                <input type="date" id="chart-date-input" class="chart-date-input" />
+              </div>
 
-            <div class="chart-filter-pills">
-              <button class="chart-filter-btn active" onclick="switchChartFilter('hourly')">시간대별</button>
-              <button class="chart-filter-btn" onclick="switchChartFilter('daily')">일별</button>
-              <button class="chart-filter-btn" onclick="switchChartFilter('monthly')">월별</button>
-              <button class="chart-filter-btn" onclick="switchChartFilter('yearly')">년별</button>
+              <div class="chart-filter-pills">
+                <button class="chart-filter-btn active" onclick="switchChartFilter('hourly')">시간대별</button>
+                <button class="chart-filter-btn" onclick="switchChartFilter('daily')">일별</button>
+                <button class="chart-filter-btn" onclick="switchChartFilter('monthly')">월별</button>
+                <button class="chart-filter-btn" onclick="switchChartFilter('yearly')">년별</button>
+              </div>
             </div>
           </div>
           
-          <div class="chart-wrapper" id="chart-bars-container">
-            <!-- Bars will be dynamically generated by JS -->
+          <!-- 좌우 스플릿 컨테이너 (차트 60%, 표 40%) -->
+          <div class="chart-split-grid">
+            <!-- 왼쪽: 차트 영역 -->
+            <div class="chart-wrapper" id="chart-bars-container">
+              <!-- Bars will be dynamically generated by JS -->
+            </div>
+
+            <!-- 오른쪽: 표 영역 -->
+            <div class="table-wrapper" id="chart-table-container">
+              <table class="premium-data-table">
+                <thead>
+                  <tr>
+                    <th>구분 (시간/일자)</th>
+                    <th>발급 수량</th>
+                    <th>비중 (%)</th>
+                  </tr>
+                </thead>
+                <tbody id="chart-table-tbody">
+                  <!-- JS로 동적 생성 -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -875,10 +970,10 @@
         <div class="settings-card">
           <h3 class="settings-card-title">휴대폰 접속용 IP 설정</h3>
           <p class="settings-card-desc">
-            Kiosk PC가 공유기 와이파이에서 할당받은 로컬 IP(예: 192.168.0.75) 주소로 설정해야 모바일 스캔이 원활하게 연동됩니다. (도커 컨테이너 IP 대역인 172.x.x.x는 사용이 불가능합니다.)
+            Kiosk PC가 공유기 와이파이에서 할당받은 로컬 IP(예: 192.168.0.10) 주소로 설정해야 모바일 스캔이 원활하게 연동됩니다. (도커 컨테이너 IP 대역인 172.x.x.x는 사용이 불가능합니다.)
           </p>
           <div class="form-row" style="display: flex; gap: 8px; margin-bottom: 0; align-items: center;">
-            <input type="text" id="kiosk-host-input" style="flex: 1;" placeholder="예: http://192.168.0.75:8080" />
+            <input type="text" id="kiosk-host-input" style="flex: 1;" placeholder="예: http://192.168.0.10:8080" />
             <button id="btn-save-host" class="btn-submit-action">반영 및 저장</button>
           </div>
         </div>
@@ -888,6 +983,6 @@
   </main>
 
   <div id="toast-container"></div>
-
+
 </body>
 </html>

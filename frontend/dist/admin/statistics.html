@@ -69,11 +69,11 @@
     .admin-table td { padding: 16px 24px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
     .admin-table tr:hover { background: var(--surface-2); }
   </style>
-  <script type="module" crossorigin src="/assets/admin-statistics-CaYy1-38.js"></script>
+  <script type="module" crossorigin src="/assets/admin-statistics-f2QBovE-.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-BQDM6Pi8.js">
-  <link rel="modulepreload" crossorigin href="/assets/i18n-CGOW55WO.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-_dmZlLiC.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-cr5AAT4V.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-Cqa8uoiE.css">
 </head>
 <body>
   <div class="app-shell">
@@ -105,23 +105,23 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label">총 쿠폰 발행량</div>
-          <div class="stat-value">12,450건</div>
-          <div class="stat-trend trend-up">↑ 15% (전월대비)</div>
+          <div class="stat-value" id="kpi-total-issued">0건</div>
+          <div class="stat-trend" style="display: none;"></div>
         </div>
         <div class="stat-card">
           <div class="stat-label">누적 쿠폰 사용량</div>
-          <div class="stat-value">8,320건</div>
-          <div class="stat-trend trend-up">↑ 22% (전월대비)</div>
+          <div class="stat-value" id="kpi-total-used">0건</div>
+          <div class="stat-trend" style="display: none;"></div>
         </div>
         <div class="stat-card">
           <div class="stat-label">누적 정산 완료액</div>
-          <div class="stat-value">₩41,600,000</div>
-          <div class="stat-trend trend-up">↑ 18% (전월대비)</div>
+          <div class="stat-value" id="kpi-total-settled">₩0</div>
+          <div class="stat-trend" style="display: none;"></div>
         </div>
         <div class="stat-card">
           <div class="stat-label">활성 가맹점 수</div>
-          <div class="stat-value">142곳</div>
-          <div class="stat-trend trend-down">↓ 2곳 (휴업/탈퇴)</div>
+          <div class="stat-value" id="kpi-active-merchants">0곳</div>
+          <div class="stat-trend" style="display: none;"></div>
         </div>
       </div>
 
@@ -158,41 +158,9 @@
               <th>정산 발생액</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="top-merchants-body">
             <tr>
-              <td>1</td>
-              <td><strong>영흥바다횟집</strong></td>
-              <td>영흥면</td>
-              <td>450건</td>
-              <td>₩2,250,000</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td><strong>백령자연식당</strong></td>
-              <td>백령면</td>
-              <td>382건</td>
-              <td>₩1,910,000</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td><strong>덕적아일랜드카페</strong></td>
-              <td>덕적면</td>
-              <td>310건</td>
-              <td>₩1,550,000</td>
-            </tr>
-            <tr>
-              <td>4</td>
-              <td><strong>자월도펜션파크</strong></td>
-              <td>자월면</td>
-              <td>295건</td>
-              <td>₩1,475,000</td>
-            </tr>
-            <tr>
-              <td>5</td>
-              <td><strong>대청해산물직판장</strong></td>
-              <td>대청면</td>
-              <td>215건</td>
-              <td>₩1,075,000</td>
+              <td colspan="5" class="text-center" style="padding: 40px; text-align: center; color: #64748b;">데이터를 불러오는 중입니다...</td>
             </tr>
           </tbody>
         </table>

@@ -10,7 +10,7 @@
         document.documentElement.classList.add('sidebar-collapsed');
       }
     })();
-  </script>
+  </script>
   <style>
     body { 
       margin: 0 !important; padding: 0 !important; 
@@ -25,8 +25,8 @@
     }
     .table-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; margin-top: 8px; }
     
-    .admin-table { width: 100%; border-collapse: collapse; }
-    .admin-table th { background: #f8fafc; padding: 14px 24px; text-align: left; font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+    .admin-table { width: 100%; border-collapse: collapse; text-align: center; }
+    .admin-table th { background: #f8fafc; padding: 14px 24px; text-align: center; font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
     .admin-table td { padding: 16px 24px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; vertical-align: middle; }
     .admin-table tr:hover { background: #f8fafc; }
 
@@ -60,12 +60,93 @@
     .badge-info { background: #e0f2fe; color: #0369a1; }
     .badge-success { background: #dcfce7; color: #166534; }
     .badge-warning { background: #fef9c3; color: #854d0e; }
+
+    /* 삭제 버튼 스타일 (수정 버튼과 조화를 이루는 프리미엄 적색 테마 - 덜 쨍하고 고급스러운 딥 로즈 레드) */
+    .btn-table-delete {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 6px 12px !important;
+      font-size: 0.78rem !important;
+      font-weight: 600 !important;
+      color: #be123c !important;                 /* 톤다운된 차분한 딥 로즈 레드 */
+      background-color: #fff1f2 !important;       /* 은은하고 편안한 연분홍 배경 */
+      border: 1px solid #ffe4e6 !important;       /* 연하고 자연스러운 테두리 */
+      border-radius: 6px !important;
+      text-decoration: none !important;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      cursor: pointer !important;
+      line-height: 1 !important;
+      box-shadow: 0 1px 2px 0 rgba(190, 18, 60, 0.03) !important;
+    }
+    .btn-table-delete:hover {
+      background-color: #be123c !important;       /* 차분한 딥 로즈 레드로 반전 */
+      border-color: #be123c !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 6px -1px rgba(190, 18, 60, 0.15), 0 2px 4px -1px rgba(190, 18, 60, 0.08) !important;
+    }
+
+    /* 토글 온오프 스위치 스타일 */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toggle-label {
+      font-size: 0.82rem;
+      color: #475569;
+      font-weight: 500;
+      user-select: none;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 26px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: .3s;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 5px;
+      bottom: 5px;
+      background-color: white;
+      transition: .3s;
+    }
+    input:checked + .slider {
+      background-color: #2563eb;
+    }
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2563eb;
+    }
+    input:checked + .slider:before {
+      transform: translateX(18px);
+    }
+    .slider.round {
+      border-radius: 34px;
+    }
+    .slider.round:before {
+      border-radius: 50%;
+    }
   </style>
-  <script type="module" crossorigin src="/assets/admin-issuers-C1i-drOE.js"></script>
+  <script type="module" crossorigin src="/assets/admin-issuers-BqLj8AU8.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-CJmOwHvj.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-BQDM6Pi8.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BSX2ofZY.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-cr5AAT4V.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-_dmZlLiC.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-Cqa8uoiE.css">
 </head>
 <body>
   <div class="app-shell">
@@ -78,48 +159,23 @@
         <div class="header-title-area">
           <span class="header-category">Issuer Management</span>
           <h1>발행처 관리</h1>
-          <p class="header-desc">발행처(안내소 등) 계정을 생성하고, 각 발행처별 배정할 쿠폰 액면가와 총 한도 수량을 제어합니다.</p>
+          <p class="header-desc">발행처 계정을 생성하고 발행처를 등록하고 관리합니다. 각 발행처의 쿠폰 현황을 확인할 수 있습니다.</p>
         </div>
       </header>
 
-      <!-- 발행처 조작 버튼 영역 -->
-      <div class="table-actions-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; justify-content: flex-start;">
-        <button class="btn btn-neutral-outline btn-sm" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer;" onclick="location.href='register-issuer.html'">발행처 등록</button>
-        <button class="btn btn-neutral btn-sm" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer;" onclick="location.href='allocate-coupon.html'">쿠폰 배정하기</button>
+      <!-- 1. 발행처 목록 -->
+      <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; margin-top: 8px;">
+        <h2 class="table-title" style="margin: 0;">발행처 목록</h2>
+        <button class="btn btn-neutral-outline btn-sm" style="height: 30px; padding: 0 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.8rem;" onclick="location.href='register-issuer.html'">발행처 등록</button>
       </div>
-
-      <!-- 1. 발행처 쿠폰 배정 현황 -->
-      <h2 class="table-title">발행처별 쿠폰 배정 현황</h2>
       <div class="table-container">
-        <table class="admin-table">
+        <table class="admin-table" style="text-align: center;">
           <thead>
             <tr>
-              <th>배정 ID</th>
-              <th>발행처</th>
-              <th>액면가</th>
-              <th>총 배정 수량</th>
-              <th>발급된 수량</th>
-              <th>잔여 수량</th>
-              <th>상태</th>
-              <th>배정일시</th>
-            </tr>
-          </thead>
-          <tbody id="allocation-list">
-            <tr><td colspan="8" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- 2. 발행처 계정 목록 -->
-      <h2 class="table-title">발행처 계정 목록</h2>
-      <div class="table-container">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>발행처명</th>
-              <th>아이디 (username)</th>
-              <th>등록일시</th>
+              <th style="width: 25%; text-align: center;">기관명</th>
+              <th style="width: 25%; text-align: center;">ID</th>
+              <th style="width: 25%; text-align: center;">쿠폰 현황</th>
+              <th style="width: 25%; text-align: center;">관리</th>
             </tr>
           </thead>
           <tbody id="issuer-list">
@@ -127,10 +183,39 @@
           </tbody>
         </table>
       </div>
+
+      <!-- 2. 발행처 쿠폰 배정 현황 -->
+      <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; margin-top: 24px;">
+        <h2 class="table-title" style="margin: 0;">쿠폰 배정현황</h2>
+        <div class="toggle-container">
+          <span class="toggle-label">배정 필요</span>
+          <label class="switch">
+            <input type="checkbox" id="filter-alloc" onchange="window.filterAllocations()" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>기관명</th>
+              <th>쿠폰 금액</th>
+              <th>발급 수량</th>
+              <th>잔여 수량</th>
+              <th>총 배정 수량</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="allocation-list">
+            <tr><td colspan="6" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </main>
   </div>
 
   <div id="toast-container"></div>
-
+
 </body>
 </html>
