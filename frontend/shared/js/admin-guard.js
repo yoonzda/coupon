@@ -158,7 +158,7 @@ function renderAdminSidebar(admin) {
   sidebar.innerHTML = `
       <div class="logo">
         <button class="nav-toggle-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
         </button>
@@ -167,7 +167,7 @@ function renderAdminSidebar(admin) {
           <div class="logo-badge">ADMIN</div>
         </div>
       </div>
-      <nav class="admin-nav" style="display: flex; flex-direction: column; padding: 16px 0; gap: 4px; flex: 1;">
+      <nav class="admin-nav">
         <a href="/admin/index.html">
           ${ICONS.dashboard}
           <span>대시보드</span>
@@ -231,13 +231,13 @@ function renderAdminSidebar(admin) {
       indicator.style.top = `${prevTop}px`;
       indicator.style.height = `${prevHeight}px`;
       indicator.style.opacity = '1';
-      indicator.style.setProperty('transition', 'none', 'important');
+      indicator.style.transition = 'none';
 
       // 리플로우 강제 수행
       indicator.offsetHeight;
 
       // 2. 현재 활성화된 위치로 트랜지션 효과를 적용하며 이동
-      indicator.style.removeProperty('transition');
+      indicator.style.transition = '';
       indicator.style.top = `${activeLink.offsetTop}px`;
       indicator.style.height = `${activeLink.offsetHeight}px`;
     } else {
@@ -245,9 +245,9 @@ function renderAdminSidebar(admin) {
       indicator.style.top = `${activeLink.offsetTop}px`;
       indicator.style.height = `${activeLink.offsetHeight}px`;
       indicator.style.opacity = '1';
-      indicator.style.setProperty('transition', 'none', 'important');
+      indicator.style.transition = 'none';
       indicator.offsetHeight;
-      indicator.style.removeProperty('transition');
+      indicator.style.transition = '';
     }
   }
 
@@ -278,48 +278,28 @@ function renderAdminSidebar(admin) {
   const footer = document.createElement('div');
   footer.id = 'admin-sidebar-footer';
   footer.innerHTML = `
-    <div style="
-      padding: 16px 20px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      margin-top: auto;
-      transition: padding 0.3s ease, display 0.3s ease;
-    ">
-      <div class="footer-info-row" style="display: flex; align-items: center; margin-bottom: 16px; transition: all 0.3s;">
+    <div class="admin-sidebar-footer-inner">
+      <div class="admin-footer-info-row">
         <!-- 평소 보일 텍스트 정보 -->
-        <div class="footer-text" style="min-width: 0; display: flex; flex-direction: column; gap: 4px;">
-          <div style="color: #fff; font-weight: 700; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        <div class="admin-footer-text">
+          <div class="admin-footer-name">
             ${adminName} (${admin.username || 'admin'})
           </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 600;">${roleLabel}</div>
+          <div class="admin-footer-role-row">
+            <div class="admin-footer-role-label">${roleLabel}</div>
           </div>
         </div>
       </div>
-      <button
-        id="btn-admin-logout"
-        style="
-          width: 100%; padding: 10px;
-          background: transparent;
-          color: #94a3b8;
-          border: 1px solid #334155;
-          cursor: pointer;
-          font-size: 0.8rem;
-          font-weight: 600;
-          transition: all 0.2s;
-          font-family: inherit;
-        "
-        onmouseover="this.style.background='#1e293b'; this.style.color='#fff';"
-        onmouseout="this.style.background='transparent'; this.style.color='#94a3b8';"
-      >
+      <button id="btn-admin-logout" class="admin-logout-btn">
         <span>로그아웃</span>
         <!-- 접혔을 때 보일 로그아웃 SVG -->
-        <svg class="logout-icon" style="display: none; width: 18px; height: 18px; color: inherit;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <svg class="admin-logout-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
         </svg>
       </button>
     </div>
   `;
-  
+
   sidebar.appendChild(footer);
 
   document.getElementById('btn-admin-logout').addEventListener('click', () => {
@@ -373,12 +353,12 @@ function initSidebarToggle() {
 
   function updateToggleIcon(collapsed) {
     const hamburgerSvg = `
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
       </svg>
     `;
     const chevronLeftSvg = `
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
       </svg>
     `;

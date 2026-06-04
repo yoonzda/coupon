@@ -36,6 +36,7 @@ export default defineConfig({
         'admin-coupons':    resolve(__dirname, 'admin/coupons.html'),
         'admin-managers':   resolve(__dirname, 'admin/managers.html'),
         'admin-users':      resolve(__dirname, 'admin/users.html'),
+        'admin-detail-user': resolve(__dirname, 'admin/detail-user.html'),
         'admin-issuers':    resolve(__dirname, 'admin/issuers.html'),
         'admin-register-issuer': resolve(__dirname, 'admin/register-issuer.html'),
         'admin-register-manager': resolve(__dirname, 'admin/register-manager.html'),

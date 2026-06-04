@@ -416,7 +416,7 @@ router.get('/users', authenticate, async (req, res, next) => {
   try {
     // Both super and operator can access this route
     const [rows] = await pool.execute(
-      `SELECT id, social_provider, nickname, email, coupon_balance, created_at 
+      `SELECT id, social_provider, nickname, email, phone_hash, coupon_balance, created_at 
        FROM users 
        WHERE role = 'tourist' 
        ORDER BY created_at DESC`

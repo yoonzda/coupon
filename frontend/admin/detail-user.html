@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>회원 상세 정보 | 옹진 관광 쿠폰</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="../shared/css/main.css" />
+  
+  <style>
+    body { 
+      margin: 0; padding: 0; 
+      width: 100%; max-width: none; 
+      background: #f1f5f9;
+      color: #1e293b; 
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .back-link:hover {
+      color: #0f172a;
+    }
+    .back-link svg {
+      transition: transform 0.2s;
+      width: 16px;
+      height: 16px;
+    }
+    .back-link:hover svg {
+      transform: translateX(-4px);
+    }
+
+    .profile-card {
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      padding: 24px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .profile-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .profile-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .profile-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-scroll-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+    .table-scroll-container::-webkit-scrollbar { width: 6px; height: 6px; }
+    .table-scroll-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 사이드바 -->
+    <aside class="admin-sidebar"></aside>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="admin-content">
+      <header class="dashboard-header">
+        <div class="header-title-area">
+          <span class="header-category">User Account Details</span>
+          <h1>회원 상세 정보</h1>
+          <p class="header-desc">회원의 기본 정보 및 쿠폰 이용 내역을 확인합니다.</p>
+        </div>
+      </header>
+
+      <div class="subpage-title-area">
+        <div class="back-link-container">
+          <a href="users.html" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            목록으로 돌아가기
+          </a>
+        </div>
+        <h2 class="page-subtitle">회원 상세 정보</h2>
+      </div>
+
+      <!-- 프로필 정보 요약 -->
+      <div class="profile-card">
+        <div class="profile-item">
+          <span class="profile-label">회원 ID</span>
+          <div class="profile-value" id="profile-id">-</div>
+        </div>
+        <div class="profile-item">
+          <span class="profile-label">가입 일시</span>
+          <div class="profile-value" id="profile-regdate">-</div>
+        </div>
+        <div class="profile-item">
+          <span class="profile-label">전화번호</span>
+          <div class="profile-value" id="profile-phone">-</div>
+        </div>
+        <div class="profile-item">
+          <span class="profile-label">보유 쿠폰 잔액</span>
+          <div class="profile-value text-primary-color" id="profile-balance">0원</div>
+        </div>
+      </div>
+
+      <!-- 쿠폰 보유 및 사용 내역 -->
+      <div class="admin-card">
+        <div class="card-title-bar">쿠폰 내역</div>
+        <div class="table-scroll-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th class="col-quarter">종류</th>
+                <th class="col-quarter">금액</th>
+                <th class="col-quarter">상태</th>
+                <th class="col-quarter">발급일</th>
+              </tr>
+            </thead>
+            <tbody id="couponsTableBody">
+              <tr><td colspan="4" class="table-placeholder">쿠폰 내역이 로드되는 중입니다...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { api, showToast } from '../shared/js/api.js';
+    import { requireAdminAuth, getAdminToken } from '../shared/js/admin-guard.js';
+
+    await requireAdminAuth();
+    const token = getAdminToken();
+
+    // URL에서 userId 추출
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = parseInt(urlParams.get('id'));
+
+    if (!userId) {
+      showToast('잘못된 접근입니다.', 'error');
+      setTimeout(() => {
+        window.location.href = 'users.html';
+      }, 1500);
+    } else {
+      loadUserDetails();
+      loadUserCoupons();
+    }
+
+    async function loadUserDetails() {
+      try {
+        const res = await fetch('/api/admin/users', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          const user = data.data.find(u => u.id === userId);
+          if (!user) {
+            showToast('존재하지 않는 회원입니다.', 'error');
+            setTimeout(() => {
+              window.location.href = 'users.html';
+            }, 1500);
+            return;
+          }
+          
+          let phoneStr = '미인증';
+          if(user.phone_hash && user.phone_hash !== 'null' && user.phone_hash.length > 5) {
+            phoneStr = '010-****-' + user.phone_hash.substring(user.phone_hash.length - 4);
+          }
+
+          const regDateStr = user.created_at ? new Date(user.created_at).toLocaleString('ko-KR') : '—';
+
+          document.getElementById('profile-id').innerText = '#' + user.id;
+          document.getElementById('profile-regdate').innerText = regDateStr;
+          document.getElementById('profile-phone').innerText = phoneStr;
+          document.getElementById('profile-balance').innerText = Number(user.coupon_balance).toLocaleString() + '원';
+        } else {
+          showToast('회원 정보를 불러오지 못했습니다.', 'error');
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('서버 통신 실패', 'error');
+      }
+    }
+
+    async function loadUserCoupons() {
+      const tableBody = document.getElementById('couponsTableBody');
+      try {
+        const res = await fetch(`/api/admin/users/${userId}/coupons`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          tableBody.innerHTML = '';
+          if (data.data.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4" class="table-placeholder">보유한 쿠폰이 없습니다.</td></tr>';
+            return;
+          }
+
+          data.data.forEach(c => {
+            const statusLabel = {
+              'available': '<span class="status-available">사용 가능</span>',
+              'used': '<span class="status-used">사용 완료</span>',
+              'expired': '<span class="status-expired">만료</span>',
+              'cancelled': '<span class="status-cancelled">취소됨</span>'
+            }[c.status] || c.status;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${c.coupon_type === 'digital' ? '디지털' : '지류(종이)'}</td>
+              <td class="coupon-face-value">${Number(c.face_value).toLocaleString()}원</td>
+              <td>${statusLabel}</td>
+              <td class="coupon-date">${new Date(c.issued_at).toLocaleDateString()}</td>
+            `;
+            tableBody.appendChild(tr);
+          });
+        } else {
+          tableBody.innerHTML = '<tr><td colspan="4" class="table-placeholder status-expired">쿠폰 내역 조회 실패</td></tr>';
+        }
+      } catch (err) {
+        console.error(err);
+        tableBody.innerHTML = '<tr><td colspan="4" class="table-placeholder status-expired">서버 오류 발생</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>
