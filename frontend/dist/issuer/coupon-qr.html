@@ -498,6 +498,34 @@
     .modal-input:focus ~ .modal-input-icon {
       stroke: #2563eb;
     }
+    .modal-input-wrap .modal-input {
+      padding-right: 44px !important;
+    }
+    .pw-toggle-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+      z-index: 5;
+    }
+    .pw-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: #64748b;
+      fill: none;
+      transition: stroke 0.2s;
+    }
+    .pw-toggle-btn:hover svg {
+      stroke: #1e293b;
+    }
     .modal-btn {
       width: 100%;
       padding: 14px;
@@ -728,10 +756,10 @@
       line-height: 1.5;
     }
   </style>
-  <script type="module" crossorigin src="/assets/issuer-coupon-qr-BInHE3eP.js"></script>
+  <script type="module" crossorigin src="/assets/issuer-coupon-qr-C_2ywBIh.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-cr5AAT4V.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-Cqa8uoiE.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-yYhXsohp.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BUpdExfZ.css">
 </head>
 <body class="kiosk-mode">
 
@@ -868,11 +896,17 @@
       
       <div class="password-input-box">
         <div class="modal-input-wrap">
-          <input type="password" class="modal-input" id="issuer-password-input" placeholder="비밀번호 입력" maxlength="20" onkeydown="handlePasswordKeydown(event)" />
+          <input type="password" class="modal-input" id="issuer-password-input" placeholder="비밀번호 입력" onkeydown="handlePasswordKeydown(event)" />
           <svg class="modal-input-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
+          <button type="button" class="pw-toggle-btn" id="pw-toggle-kiosk" aria-label="비밀번호 보기">
+            <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
         </div>
         <button class="modal-btn btn-confirm" onclick="verifyPasswordAndEnter()">확인</button>
       </div>

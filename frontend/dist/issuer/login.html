@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>발행처 로그인 | 옹진 관광 쿠폰</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -121,16 +121,13 @@
       align-items: flex-start;
       margin-bottom: 40px;
     }
-    .issuer-badge {
-      background: rgba(59, 130, 246, 0.1);
-      color: #60a5fa;
-      border: 1px solid rgba(96, 165, 250, 0.3);
-      font-size: 0.75rem;
+    .logo-subtitle {
+      font-size: 0.85rem;
       font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 4px;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
+      color: #60a5fa; /* blue point color */
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
     }
     .logo-title {
       font-family: 'Gowun Dodum', sans-serif;
@@ -476,14 +473,88 @@
       letter-spacing: 0.3px;
     }
 
+    /* ── Responsive & Mobile First Styles ── */
+    @media (max-width: 480px) {
+      body {
+        background: #0f172a;
+        background-image: none;
+        align-items: flex-start;
+      }
+      
+      body::before, body::after {
+        display: none;
+      }
+
+      .login-card {
+        width: 100%;
+        max-width: 100%;
+        min-height: 100vh;
+        border: none;
+        border-top: 4px solid #3b82f6;
+        padding: 48px 24px 32px 24px;
+        box-shadow: none;
+        background: #0f172a;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .logo-area {
+        margin-bottom: 32px;
+      }
+      
+      .logo-title {
+        font-size: 2rem;
+      }
+
+      input[type="text"], input[type="password"] {
+        padding: 15px 15px 15px 44px;
+        font-size: 0.95rem;
+        background: rgba(15, 23, 42, 0.8);
+      }
+
+      .btn-login {
+        padding: 16px;
+        margin-top: 16px;
+      }
+
+      .floating-inquiry-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+      }
+      .btn-text-q {
+        font-size: 1.8rem;
+      }
+
+      .modal-container {
+        width: 90%;
+        max-width: 330px;
+        padding: 32px 20px 24px 20px;
+        background: #1e293b;
+      }
+      .inquiry-info-box {
+        padding: 16px 20px;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .inquiry-info-item {
+        font-size: 0.88rem;
+      }
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
   </style>
-  <script type="module" crossorigin src="/assets/issuer-login-C_Se9NUM.js"></script>
+  <script type="module" crossorigin src="/assets/issuer-login-Dk4JKJtl.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-cr5AAT4V.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-yYhXsohp.js">
 </head>
 <body>
   <div class="login-card" id="login-card-container">
@@ -494,7 +565,8 @@
     </div>
 
     <div class="logo-area">
-      <div class="logo-title">옹진 관광 쿠폰</div>
+      <span class="logo-subtitle">옹진 관광 쿠폰</span>
+      <div class="logo-title">관광지 로그인</div>
     </div>
 
     <form id="form-issuer-login" novalidate>

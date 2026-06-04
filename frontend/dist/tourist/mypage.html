@@ -6,171 +6,238 @@
   <meta name="description" content="내 쿠폰 지갑 — 옹진관광 쿠폰 마이페이지" />
   <title>내 쿠폰 지갑 | 옹진관광 쿠폰</title>
   <style>
-    /* 지갑 카드 */
-    .wallet-card {
-      background: linear-gradient(135deg, #0369a1 0%, #0ea5e9 60%, #38bdf8 100%);
-      border-radius: var(--radius-xl);
-      padding: 24px;
-      color: #fff;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(14,165,233,.4);
+    /* 파란색/남색 포인트 및 밝은 테마 설정 */
+    :root {
+      --primary: #0284c7;       /* Vibrant Sky Blue */
+      --primary-dark: #1e3a8a;  /* Deep Navy Point */
+      --primary-light: #e0f2fe; /* Soft Light Blue */
+      --bg: #f0f9ff;            /* Bright light blue tint background */
+      --surface: #ffffff;
+      --border: #bae6fd;        /* Light blue border for soft, bright look */
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --shadow-sm: 0 4px 12px rgba(2, 132, 199, 0.05);
+      --shadow: 0 8px 24px rgba(2, 132, 199, 0.08);
     }
-    .wallet-card::before {
-      content: '';
-      position: absolute;
-      top: -30px; right: -30px;
-      width: 140px; height: 140px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.08);
-    }
-    .wallet-card::after {
-      content: '';
-      position: absolute;
-      bottom: -40px; left: -20px;
-      width: 100px; height: 100px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.06);
-    }
-    .wallet-label { font-size: .78rem; opacity: .8; font-weight: 500; letter-spacing: .5px; }
-    .wallet-balance {
-      font-size: 2.4rem;
-      font-weight: 900;
-      letter-spacing: -1px;
-      margin: 6px 0 4px;
-    }
-    .wallet-sub { font-size: .8rem; opacity: .75; }
-    .wallet-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 14px;
-    }
-    .wallet-btn {
-      background: rgba(255,255,255,.18);
-      backdrop-filter: blur(8px);
-      border-radius: var(--radius-sm);
-      padding: 10px;
-      text-align: center;
-      font-size: .8rem;
-      font-weight: 700;
-      color: #fff;
-      cursor: pointer;
-      transition: background var(--dur) var(--ease);
-      border: 1px solid rgba(255,255,255,.2);
-      display: flex; align-items: center; justify-content: center; gap: 4px;
-    }
-    .wallet-btn:hover { background: rgba(255,255,255,.28); }
 
-    /* 탭 */
-    .tab-bar {
-      display: flex;
-      background: var(--surface-2);
-      border-radius: var(--radius-sm);
-      padding: 4px;
-      gap: 2px;
+    body {
+      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
     }
-    .tab-item {
-      flex: 1;
-      padding: 8px;
-      text-align: center;
-      font-size: .82rem;
-      font-weight: 600;
-      border-radius: 8px;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all var(--dur) var(--ease);
+
+    .app-shell {
+      background: #f8fafc;
+      box-shadow: 0 10px 30px rgba(2, 132, 199, 0.1);
     }
-    .tab-item.active {
-      background: var(--surface);
-      color: var(--primary);
-      box-shadow: var(--shadow-sm);
+
+    /* 헤더 스타일 정리 */
+    .app-header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
+      height: 60px;
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.15);
+      border-bottom: none;
+    }
+    
+    .app-header .logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff !important;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      border-left: 4px solid var(--primary);
+      padding-left: 10px;
+      margin-top: 20px;
+      margin-bottom: 14px;
+      line-height: 1.25;
     }
 
     /* 쿠폰 카드 */
-    .coupon-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 16px;
+    .coupon-card {
       background: var(--surface);
+      border: 1.5px solid #bae6fd;
       border-radius: var(--radius);
-      border: 1px solid var(--border);
+      padding: 14px 16px;
       box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
       transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
     }
-    .coupon-item:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
-    .coupon-icon {
-      width: 48px; height: 48px;
-      background: var(--primary-light);
+    .coupon-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    .coupon-card.used, .coupon-card.expired {
+      opacity: 0.65;
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+    .coupon-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .coupon-value {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--primary-dark);
+    }
+    .coupon-card.used .coupon-value {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+    .coupon-info-grid {
+      display: grid;
+      grid-template-columns: 75px 1fr;
+      row-gap: 6px;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      border-top: 1px dashed #bae6fd;
+      padding-top: 8px;
+    }
+    .coupon-card.used .coupon-info-grid {
+      border-top-color: #cbd5e1;
+    }
+    .coupon-info-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .coupon-info-value {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* 가맹점 카드 */
+    .merchant-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .merchant-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+      display: flex;
+      flex-direction: column;
+    }
+    .merchant-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    .merchant-img-container {
+      height: 150px;
+      position: relative;
+      background: #f1f5f9;
+    }
+    .merchant-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .merchant-category {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 8px;
       border-radius: var(--radius-sm);
+      background: rgba(30, 41, 59, 0.8);
+      color: #fff;
+      backdrop-filter: blur(4px);
+    }
+    .merchant-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-grow: 1;
+    }
+    .merchant-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+    .merchant-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      margin-bottom: 6px;
+    }
+    .merchant-address {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 사용 QR 모달 */
+    .use-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
-      flex-shrink: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s var(--ease);
     }
-    .coupon-info { flex: 1; min-width: 0; }
-    .coupon-name {
-      font-size: .9rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .use-modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
     }
-    .coupon-meta { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
-    .coupon-value {
-      font-size: 1.1rem;
-      font-weight: 900;
-      color: var(--primary-dark);
-      flex-shrink: 0;
-    }
-
-    /* 종이쿠폰 모달 */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.5);
-      z-index: 500;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      animation: fadeIn .2s var(--ease);
-    }
-    .modal-backdrop.hidden { display: none; }
-    .modal-sheet {
+    .use-modal-sheet {
       background: var(--surface);
-      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-      width: 100%;
-      max-width: 480px;
-      padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
-      animation: slideUp .25s var(--ease);
-    }
-    .modal-handle {
-      width: 40px; height: 4px;
-      background: var(--border);
-      border-radius: 999px;
-      margin: 0 auto 20px;
-    }
-    @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
-
-    /* 빈 상태 */
-    .empty-state {
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 360px;
+      padding: 28px 24px;
       text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
+      box-shadow: var(--shadow-lg);
+      transform: scale(0.92);
+      transition: transform 0.25s var(--ease);
     }
-    .empty-state .emoji { font-size: 3rem; margin-bottom: 12px; }
-    .empty-state p { font-size: .9rem; }
+    .use-modal-backdrop.active .use-modal-sheet {
+      transform: scale(1);
+    }
+    .qr-container {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin: 16px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      aspect-ratio: 1;
+    }
+    .qr-img {
+      width: 100%;
+      height: 100%;
+      max-width: 200px;
+      max-height: 200px;
+    }
 
-    /* QR 스캔 프로세싱 모달 */
+    /* 발급 QR 모달 백드롭 (기존 Kiosk 발급 연동 유지용) */
     .qr-modal-backdrop {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(15, 23, 42, 0.75);
       backdrop-filter: blur(10px);
       display: flex; align-items: center; justify-content: center;
-      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+      z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
     }
     .qr-modal-backdrop.active { opacity: 1; pointer-events: auto; }
     .qr-modal-sheet {
@@ -185,73 +252,45 @@
       transition: transform 0.25s ease;
     }
     .qr-modal-backdrop.active .qr-modal-sheet { transform: scale(1); }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
   </style>
-  <script type="module" crossorigin src="/assets/tourist-mypage-CBaWl9eZ.js"></script>
+  <script type="module" crossorigin src="/assets/tourist-mypage-Bx5dBif7.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-cr5AAT4V.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-Cqa8uoiE.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-yYhXsohp.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BUpdExfZ.css">
 </head>
 <body>
   <div class="app-shell">
     <!-- 헤더 -->
     <header class="app-header">
-      <div class="logo">🏝️ 옹진관광 <span>쿠폰</span></div>
-      <button id="btn-logout" style="font-size:.8rem;color:var(--text-muted);">로그아웃</button>
+      <div class="logo">옹진 관광 쿠폰</div>
     </header>
 
     <!-- 컨텐츠 -->
     <main class="page-content">
-      <!-- 지갑 카드 -->
-      <div class="wallet-card">
-        <p class="wallet-label">내 쿠폰 잔액</p>
-        <p class="wallet-balance" id="balance">—</p>
-        <p class="wallet-sub" id="wallet-user">불러오는 중...</p>
-        
-        <!-- 발행처 QR 쿠폰 받기 메인 버튼 -->
-        <div style="margin-top: 20px;">
-          <button class="wallet-btn" id="btn-scan-issuer-qr" style="width: 100%; background: #ffffff; color: #0369a1; border: none; font-size: 0.9rem; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;">
-              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-              <rect x="3" y="14" width="7" height="7" rx="1"/>
-              <path d="M14 14h2v2h-2zm4 0h3v3h-3zm3-3h-3v3h3zm-3 7h3v3h-3zm-4-4h2v2h-2zm0 4h2v2h-2z"/>
-            </svg>
-            <span style="font-weight: 800;">📷 QR 쿠폰 받기</span>
-          </button>
+      <!-- 쿠폰 목록 영역 -->
+      <section>
+        <h3 class="section-title">내 쿠폰 목록</h3>
+        <div id="coupon-list" style="display:flex;flex-direction:column;gap:12px;">
+          <!-- 쿠폰 스켈레톤 로더 -->
+          <div class="skeleton" style="height:150px;"></div>
+          <div class="skeleton" style="height:150px;"></div>
         </div>
+      </section>
 
-        <div class="wallet-actions">
-          <button class="wallet-btn" id="btn-add-paper">
-            📄 종이쿠폰 등록
-          </button>
-          <a href="/tourist/map.html" class="wallet-btn" style="text-align:center; text-decoration: none;">
-            📍 가맹점 지도
-          </a>
+      <!-- 사용 가맹점 영역 -->
+      <section style="margin-top: 24px;">
+        <h3 class="section-title">사용 가능한 가맹점</h3>
+        <div id="merchant-list" class="merchant-grid">
+          <!-- 가맹점 스켈레톤 로더 -->
+          <div class="skeleton" style="height:240px;"></div>
+          <div class="skeleton" style="height:240px;"></div>
         </div>
-      </div>
-
-      <!-- 쿠폰 탭 -->
-      <div>
-        <div class="tab-bar" id="tab-bar">
-          <div class="tab-item active" data-status="available">사용 가능</div>
-          <div class="tab-item" data-status="used">사용 완료</div>
-          <div class="tab-item" data-status="expired">만료</div>
-        </div>
-      </div>
-
-      <!-- 쿠폰 목록 -->
-      <div id="coupon-list" style="display:flex;flex-direction:column;gap:10px;">
-        <!-- JS로 렌더링 -->
-        <div class="skeleton" style="height:76px;"></div>
-        <div class="skeleton" style="height:76px;"></div>
-        <div class="skeleton" style="height:76px;"></div>
-      </div>
+      </section>
     </main>
 
     <!-- 바텀 네비 -->
     <nav class="bottom-nav">
-      <a href="/tourist/mypage.html" class="active">
+      <a href="/tourist/mypage.html" class="active" style="color: var(--primary);">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="18" height="18" rx="2"/>
           <path d="M3 9h18"/>
@@ -283,48 +322,46 @@
     </nav>
   </div>
 
-  <!-- 종이쿠폰 등록 모달 -->
-  <div class="modal-backdrop hidden" id="paper-modal">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">종이쿠폰 등록</h2>
-      <p style="font-size:.83rem;color:var(--text-secondary);margin-bottom:20px;">
-        쿠폰 뒷면의 번호를 입력하거나 바코드를 스캔하세요.
-      </p>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <div class="form-group">
-          <label class="form-label">쿠폰 번호</label>
-          <input class="form-input" id="paper-code" type="text"
-            placeholder="예: AB1234-5678" autocomplete="off"
-            inputmode="text" style="text-transform:uppercase;letter-spacing:1px;" />
+  <!-- 쿠폰 사용 QR 모달 -->
+  <div class="use-modal-backdrop" id="use-qr-modal">
+    <div class="use-modal-sheet" style="position: relative;">
+      <!-- 상단 X 닫기 버튼 -->
+      <button class="close-x" onclick="window.closeUseModal()" style="position: absolute; top: 16px; right: 18px; font-size: 1.6rem; font-weight: 300; color: var(--text-muted); cursor: pointer; border: none; background: none; line-height: 1;">&times;</button>
+      
+      <!-- QR 및 타이머 영역 -->
+      <div id="use-modal-qr-container" style="margin-top: 14px;">
+        <div class="qr-container">
+          <img id="use-modal-qr-img" class="qr-img" src="" alt="쿠폰 결제용 QR 코드" />
         </div>
-        <div style="text-align:center;color:var(--text-muted);font-size:.8rem;">또는</div>
-        <label class="btn btn-outline btn-full" style="cursor:pointer;">
-          📷 카메라로 바코드 스캔
-          <input type="file" accept="image/*" capture="camera" id="scan-input" class="hidden" />
-        </label>
-        <button class="btn btn-primary btn-full" id="btn-convert">
-          쿠폰 등록하기
-        </button>
-        <button class="btn btn-outline btn-full" id="btn-close-modal">취소</button>
+        
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 20px;">
+          <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500;">남은 시간</div>
+          <div id="use-modal-timer" style="font-size: 1.25rem; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums;">03:00</div>
+        </div>
       </div>
+      
+      <!-- 만료된 화면 오버레이 -->
+      <div id="use-modal-expired-container" style="display: none; margin: 30px 0; text-align: center;">
+        <div style="font-size: 2.5rem; margin-bottom: 12px;">⏰</div>
+        <p style="font-size: 0.88rem; color: var(--danger); font-weight: 700; margin-bottom: 6px;">유효 시간이 만료되었습니다</p>
+        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 20px;">보안을 위해 QR 코드가 소멸되었습니다.</p>
+        <button class="btn btn-outline" onclick="window.regenerateQr()" style="padding: 8px 16px; font-size: 0.8rem; border-radius: var(--radius-sm); border-color: var(--primary); color: var(--primary); margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 4px;">🔄 다시 받기</button>
+      </div>
+      
+      <!-- 완료 버튼 -->
+      <button class="btn btn-primary btn-full" id="btn-complete-payment" onclick="window.completePayment()" style="background: linear-gradient(135deg, #0284c7 0%, #1e3a8a 100%); border-radius: var(--radius-sm); font-weight: 700; border: none; color: #fff;">완료</button>
     </div>
   </div>
 
-  <!-- 발행처 QR 촬영용 카메라 인풋 -->
-  <input type="file" accept="image/*" capture="camera" id="issuer-qr-input" style="display:none;" />
-
-  <!-- QR 코드 분석 및 발급 모달 -->
+  <!-- Kiosk 자동 발급을 위한 기존 발급 처리 모달 (삭제되지 않음) -->
   <div class="qr-modal-backdrop" id="qr-modal">
     <div class="qr-modal-sheet">
-      <!-- 1. 분석 중 화면 -->
       <div id="qr-state-loading" style="display: block;">
         <div class="spinner" style="width: 48px; height: 48px; border: 4px solid #e0f2fe; border-top-color: #0ea5e9; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
         <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">QR 코드 분석 중</h3>
         <p style="font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.4;">카메라로 촬영된 이미지를 디코딩하여<br>쿠폰을 발급받고 있습니다. 잠시만 기다려주세요.</p>
       </div>
       
-      <!-- 2. 성공 화면 -->
       <div id="qr-state-success" style="display: none;">
         <div style="font-size: 3.5rem; margin-bottom: 16px; animation: bounce 0.6s ease-out;">🎉</div>
         <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">쿠폰 발급 성공!</h3>
@@ -332,23 +369,18 @@
         <button class="btn btn-primary btn-full" id="btn-qr-success-ok" style="padding: 12px 0;">확인</button>
       </div>
 
-      <!-- 3. 실패 화면 -->
       <div id="qr-state-error" style="display: none;">
         <div style="font-size: 3.5rem; margin-bottom: 16px;">❌</div>
         <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">인식 실패</h3>
         <p id="qr-error-msg" style="font-size: 0.85rem; color: #ef4444; margin-bottom: 24px; line-height: 1.4;">QR 코드를 찾을 수 없습니다.<br>밝은 곳에서 흔들림 없이 다시 찍어주세요.</p>
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-outline" id="btn-qr-error-close" style="flex: 1; padding: 12px 0;">닫기</button>
-          <button class="btn btn-primary" id="btn-qr-error-retry" style="flex: 2; padding: 12px 0;">다시 촬영</button>
         </div>
       </div>
     </div>
   </div>
 
   <div id="toast-container"></div>
-
-  <!-- jsQR CDN (QR 디코딩) -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
 </body>
 </html>

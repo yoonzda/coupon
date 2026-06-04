@@ -39,11 +39,11 @@
       transform: translateX(-4px);
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-register-manager-CScBWpkE.js"></script>
+  <script type="module" crossorigin src="/assets/admin-register-manager-T7Nlk9Fv.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-cr5AAT4V.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-_dmZlLiC.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-Cqa8uoiE.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-yYhXsohp.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-D2w6DInN.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BUpdExfZ.css">
 </head>
 <body>
   <div class="app-shell">
@@ -74,22 +74,25 @@
 
       <div class="form-container">
         <form id="form-create-manager" onsubmit="createManager(event)">
+          <!-- 브라우저 자동완성 방지용 더미 필드 -->
+          <input type="text" style="display:none;" aria-hidden="true" />
+          <input type="password" style="display:none;" aria-hidden="true" />
+
           <div class="form-group">
             <label for="manager-name">관리자 이름</label>
-            <input type="text" id="manager-name" placeholder="관리자 이름 입력" required />
+            <input type="text" id="manager-name" placeholder="관리자 이름 입력" autocomplete="off" required />
           </div>
           <div class="form-group">
             <label for="manager-username">아이디</label>
-            <input type="text" id="manager-username" placeholder="아이디 입력" required />
+            <input type="text" id="manager-username" placeholder="아이디 입력" autocomplete="new-username" required />
           </div>
           <div class="form-group">
             <label for="manager-password">비밀번호</label>
-            <input type="password" id="manager-password" placeholder="비밀번호 입력" required />
+            <input type="password" id="manager-password" placeholder="비밀번호 입력" autocomplete="new-password" required />
           </div>
           <div class="form-group">
             <label for="manager-role">권한 설정</label>
             <select id="manager-role" required>
-              <option value="super">최고 관리자</option>
               <option value="operator" selected>일반 운영자</option>
             </select>
           </div>

@@ -198,6 +198,7 @@
       .admin-sidebar, 
       .dashboard-header, 
       .back-link-container, 
+      .subpage-title-area, 
       .print-hide, 
       .management-bar,
       #toast-container {
@@ -218,7 +219,14 @@
         page-break-inside: avoid;
       }
       .doc-img-view {
-        max-height: 250px !important;
+        max-height: 550px !important;
+        width: auto !important;
+        margin: 0 auto !important;
+        display: block !important;
+      }
+      .print-page {
+        page-break-after: always !important;
+        break-after: page !important;
       }
     }
   </style>
@@ -247,7 +255,7 @@
             목록으로
           </a>
         </div>
-        <div style="display: flex; gap: 10px;" class="print-hide">
+        <div style="display: flex; gap: 10px; align-items: center;" class="print-hide" id="top-action-buttons">
           <button class="btn btn-neutral btn-sm" onclick="window.printMerchant()">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.821V21h10.56v-7.179m-10.56 0a2.25 2.25 0 01-1.636-2.17V9.582a2.25 2.25 0 011.636-2.17m10.56 0a2.25 2.25 0 011.636 2.17v2.07a2.25 2.25 0 01-1.636 2.17m-10.56 0h10.56M9 3h6v4.5H9V3z" />
@@ -257,7 +265,7 @@
         </div>
       </div>
 
-      <div class="detail-container">
+      <div class="detail-container print-page">
         <!-- 1. 기본 정보 카드 -->
         <div class="merchant-detail-card">
           <h3 class="card-title">
@@ -319,43 +327,43 @@
           </div>
         </div>
 
-        <!-- 3. 증빙 서류 이미지 카드 -->
-        <div class="merchant-detail-card" style="grid-column: span 2;">
-          <h3 class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-            </svg>
-            입점 증빙 첨부서류
-          </h3>
-          <div class="document-grid">
-            <div class="document-box">
-              <div class="document-title">사업자등록증 사본</div>
-              <div id="cert-img-container">등록된 파일이 없습니다.</div>
-            </div>
-            <div class="document-box">
-              <div class="document-title">정산 통장 사본</div>
-              <div id="bankbook-img-container">등록된 파일이 없습니다.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. 가게 이미지 갤러리 카드 -->
-        <div class="merchant-detail-card" style="grid-column: span 2;">
-          <h3 class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375 0 01.75 0z" />
-            </svg>
-            등록 가게 이미지
-          </h3>
-          <div class="images-gallery" id="store-images-gallery">
-            <!-- JS 렌더링 -->
-          </div>
+      <!-- 3. 증빙 서류 카드: 사업자등록증 사본 (Page 2) -->
+      <div class="merchant-detail-card print-page" style="margin-top: 24px;">
+        <h3 class="card-title">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+          입점 증빙 첨부서류 - 사업자등록증 사본
+        </h3>
+        <div class="document-box" style="background: #fff; border: none; padding: 0;">
+          <div id="cert-img-container">등록된 파일이 없습니다.</div>
         </div>
       </div>
 
-      <!-- 하단 상태 조작 바 -->
-      <div class="management-bar print-hide" id="status-management-bar">
-        <!-- JS 렌더링 -->
+      <!-- 4. 증빙 서류 카드: 정산 통장 사본 (Page 3) -->
+      <div class="merchant-detail-card" style="margin-top: 24px;">
+        <h3 class="card-title">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+          입점 증빙 첨부서류 - 정산 통장 사본
+        </h3>
+        <div class="document-box" style="background: #fff; border: none; padding: 0;">
+          <div id="bankbook-img-container">등록된 파일이 없습니다.</div>
+        </div>
+      </div>
+
+      <!-- 5. 가게 이미지 갤러리 카드 (홈페이지 전용, 인쇄 차단) -->
+      <div class="merchant-detail-card print-hide" style="margin-top: 24px;">
+        <h3 class="card-title">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375 0 01.75 0z" />
+          </svg>
+          등록 가게 이미지
+        </h3>
+        <div class="images-gallery" id="store-images-gallery">
+          <!-- JS 렌더링 -->
+        </div>
       </div>
     </main>
   </div>
@@ -389,6 +397,29 @@
 
     window.printMerchant = () => {
       window.print();
+    };
+
+    window.downloadImage = (src, filename) => {
+      const a = document.createElement('a');
+      a.href = src;
+      let ext = 'png';
+      if (src.startsWith('data:image/')) {
+        const match = src.match(/data:image\/([a-zA-Z0-9+]+);/);
+        if (match) {
+          ext = match[1];
+          if (ext === 'svg+xml') ext = 'svg';
+          if (ext === 'jpeg') ext = 'jpg';
+        }
+      } else {
+        const urlParts = src.split(/[#?]/)[0].split('.');
+        if (urlParts.length > 1) {
+          ext = urlParts.pop().toLowerCase();
+        }
+      }
+      a.download = `${filename}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     };
 
     async function loadMerchantDetails() {
@@ -457,30 +488,27 @@
           const imagesList = m.images ? JSON.parse(m.images) : [];
           const gallery = document.getElementById('store-images-gallery');
           if (imagesList.length > 0) {
-            gallery.innerHTML = imagesList.map(img => `
-              <div class="gallery-img-box" onclick="window.openImageLarge('${img}')">
-                <img src="${img}" alt="가게 이미지" />
+            gallery.innerHTML = imagesList.map((img, idx) => `
+              <div class="gallery-img-box-wrapper" style="display: flex; flex-direction: column; gap: 6px; align-items: center;">
+                <div class="gallery-img-box" onclick="window.openImageLarge('${img}')">
+                  <img src="${img}" alt="가게 이미지" />
+                </div>
+                <button class="btn btn-xs btn-neutral-outline print-hide" onclick="event.stopPropagation(); window.downloadImage('${img}', 'store-image-${idx+1}')" style="width: 100%; padding: 4px 8px !important; font-size: 0.75rem;">
+                  다운로드
+                </button>
               </div>
             `).join('');
           } else {
             gallery.innerHTML = '<span style="color:#94a3b8;font-size:0.85rem;padding: 10px 0;">등록된 가게 이미지가 없습니다.</span>';
           }
 
-          // 하단 승인/반려 조작 바 처리
-          const mBar = document.getElementById('status-management-bar');
+          // 상단 조작 버튼 렌더링 (승인/반려)
+          const topActions = document.getElementById('top-action-buttons');
           if (m.status === 'pending') {
-            mBar.innerHTML = `
-              <button class="btn btn-primary" onclick="window.updateMerchantStatus('approved')">입점 승인</button>
-              <button class="btn btn-neutral-outline" onclick="window.updateMerchantStatus('rejected')">입점 반려</button>
-              <a href="merchants.html" class="btn btn-neutral">목록으로</a>
-            `;
-          } else {
-            mBar.innerHTML = `
-              <div style="font-size:0.88rem; color:#64748b; font-weight:600; display:flex; align-items:center; gap:8px;">
-                심사가 완료된 가맹점입니다 (${statusLabel}).
-              </div>
-              <a href="merchants.html" class="btn btn-neutral">목록으로</a>
-            `;
+            topActions.insertAdjacentHTML('beforeend', `
+              <button class="btn btn-primary btn-sm" onclick="window.updateMerchantStatus('approved')">입점 승인</button>
+              <button class="btn btn-neutral-outline btn-sm" onclick="window.updateMerchantStatus('rejected')">입점 반려</button>
+            `);
           }
 
         } else {

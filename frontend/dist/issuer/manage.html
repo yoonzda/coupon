@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google" content="notranslate" />
   <title>발행처 관리 페이지 | 옹진 관광 쿠폰</title>
   <style>
     * { box-sizing: border-box; }
@@ -212,14 +213,9 @@
     /* Stats top grid */
     .stats-top-grid {
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: 1fr;
       gap: 24px;
       margin-bottom: 24px;
-    }
-    @media (max-width: 960px) {
-      .stats-top-grid {
-        grid-template-columns: 1fr;
-      }
     }
 
     /* Statistics styles */
@@ -476,192 +472,126 @@
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
     }
 
-    /* 좌우 분할 통계 그리드 */
+    /* 쿠폰 목표 달성도 및 누적 발급 추이 레이아웃 */
     .chart-split-grid {
       display: grid;
-      grid-template-columns: 1.5fr 1fr;
+      grid-template-columns: 1fr 2fr;
       gap: 24px;
       width: 100%;
       align-items: stretch;
     }
-    @media (max-width: 680px) {
+    
+    @media (max-width: 992px) {
       .chart-split-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
       }
     }
 
-    .chart-wrapper {
-      position: relative;
-      height: 240px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      padding: 20px 10px 10px 10px;
-      border: 1px solid rgba(37, 99, 235, 0.06);
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      gap: 12px;
-      z-index: 1;
-    }
-
-    .chart-grid-lines {
-      position: absolute;
-      top: 24px;
-      bottom: 28px;
-      left: 10px;
-      right: 10px;
+    .chart-progress-ring-card, .chart-cumulative-card {
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(0, 0, 0, 0.03);
+      border-radius: 20px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      pointer-events: none;
-      z-index: 0;
+      gap: 16px;
     }
 
-    .chart-grid-line {
+    .progress-ring-title, .cumulative-chart-title {
+      font-size: 0.95rem;
+      font-weight: 850;
+      color: #0f172a;
+    }
+
+    .progress-ring-wrapper {
+      position: relative;
       width: 100%;
-      border-top: 1px dashed rgba(0, 0, 0, 0.03);
+      height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    .chart-bar-item {
-      flex: 1;
+    .progress-ring-wrapper canvas {
+      max-height: 100%;
+      max-width: 100%;
+    }
+
+    .progress-ring-center-text {
+      position: absolute;
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 100%;
-      justify-content: flex-end;
-      position: relative;
-      min-width: 16px;
-      z-index: 2;
-    }
-
-    .chart-bar-track {
-      width: 10px;
-      height: calc(100% - 24px);
-      background: rgba(37, 99, 235, 0.03);
-      border-radius: 99px;
-      position: relative;
-      transition: background 0.3s ease;
-    }
-
-    .chart-bar-item.zero-value .chart-bar-track {
-      background: rgba(0, 0, 0, 0.01) !important;
-    }
-
-    .chart-bar-fill {
-      width: 100%;
-      background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
-      border-radius: 99px;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 0%;
-      transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
-    }
-
-    .chart-bar-fill:hover {
-      filter: brightness(1.1);
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
-    }
-
-    .chart-bar-item.active-today .chart-bar-fill {
-      background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
-      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
-    }
-
-    .chart-bar-val-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #2563eb;
-      margin-bottom: 4px;
-      white-space: nowrap;
+      justify-content: center;
       text-align: center;
-      height: 14px;
-      z-index: 10;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
-    .chart-bar-item.active-today .chart-bar-val-label {
+
+    .progress-percentage {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #2563eb;
+      line-height: 1;
+    }
+
+    .progress-ratio {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #64748b;
+      margin-top: 6px;
+    }
+    .yearly-card-item {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(37, 99, 235, 0.12);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .yearly-card-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 35px -5px rgba(37, 99, 235, 0.1);
+    }
+    .yearly-card-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .yearly-card-val {
+      font-size: 2rem;
+      font-weight: 850;
+      color: #0f172a;
+      letter-spacing: -1px;
+      margin: 8px 0;
+    }
+    .yearly-card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+    .yearly-card-badge.up {
+      background: rgba(16, 185, 129, 0.1);
       color: #10b981;
     }
-    .chart-bar-item.zero-value .chart-bar-val-label {
-      color: #94a3b8;
+    .yearly-card-badge.down {
+      background: rgba(244, 63, 94, 0.1);
+      color: #f43f5e;
     }
-
-    .chart-bar-label {
-      font-size: 0.72rem;
+    .yearly-card-badge.none {
+      background: rgba(100, 116, 139, 0.1);
       color: #64748b;
-      font-weight: 600;
-      margin-top: 6px;
-      text-align: center;
-      white-space: nowrap;
-      height: 14px;
-    }
-
-    /* Modern Tooltip styling on Bar Item */
-    .chart-bar-item .chart-tooltip {
-      position: absolute;
-      top: -10px;
-      background: rgba(15, 23, 42, 0.95);
-      color: #ffffff;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      transform: translateY(6px) scale(0.9);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      white-space: nowrap;
-      z-index: 100;
-    }
-    .chart-bar-item:hover .chart-tooltip {
-      opacity: 1;
-      transform: translateY(-8px) scale(1);
-    }
-
-    /* 프리미엄 데이터 표 뷰 스타일 */
-    .table-wrapper {
-      width: 100%;
-      overflow-x: auto;
-      border-radius: 16px;
-      border: 1px solid rgba(37, 99, 235, 0.06);
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      max-height: 240px;
-      overflow-y: auto;
-    }
-    .premium-data-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.82rem;
-    }
-    .premium-data-table th {
-      background: rgba(37, 99, 235, 0.03);
-      padding: 12px 14px;
-      font-weight: 700;
-      color: #475569;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-      font-size: 0.78rem;
-      letter-spacing: -0.2px;
-    }
-    .premium-data-table td {
-      padding: 10px 14px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.02);
-      color: #0f172a;
-      font-weight: 600;
-    }
-    .premium-data-table tbody tr:last-child td {
-      border-bottom: none;
-    }
-    .premium-data-table tbody tr:hover td {
-      background: rgba(37, 99, 235, 0.01);
     }
 
     /* Settings/Account styles */
@@ -767,11 +697,45 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* Password visibility toggle styles */
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .password-wrapper input {
+      width: 100%;
+      padding-right: 40px !important;
+    }
+    .pw-toggle-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+    }
+    .pw-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: #64748b;
+      fill: none;
+      transition: stroke 0.2s;
+    }
+    .pw-toggle-btn:hover svg {
+      stroke: #1e293b;
+    }
   </style>
-  <script type="module" crossorigin src="/assets/issuer-manage-Cxob6jXk.js"></script>
+  <script type="module" crossorigin src="/assets/issuer-manage-YCRQYqdp.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-cr5AAT4V.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-Cqa8uoiE.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-yYhXsohp.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BUpdExfZ.css">
 </head>
 <body>
 
@@ -873,72 +837,11 @@
                   <span class="metric-value" id="metric-remaining">0장</span>
                 </div>
               </div>
-              
-              <!-- 하단 가로형 프로그레스 진행바 -->
-              <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="progress-bar-fill-el" style="width: 0%;"></div>
-                <span class="progress-bar-text" id="progress-bar-text-el">0% 발급 완료</span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- 카드 2: 실시간 분석 & 인사이트 -->
-          <div class="stats-card-wrap">
-            <h2 class="stats-title">실시간 분석 & 인사이트</h2>
-            <div class="insight-feed-container" id="insight-feed-content">
-              <div class="insight-loading">데이터를 분석 중입니다...</div>
             </div>
           </div>
         </div>
 
-        <!-- 카드 3: 쿠폰 발급 통계 분석 -->
-        <div class="stats-card-wrap chart-card">
-          <div class="chart-header">
-            <div class="chart-title-group">
-              <h3 class="chart-card-title">쿠폰 발급 통계 분석</h3>
-              <span class="chart-card-subtitle" id="chart-subtitle-text">금일 실시간 시간대별 발급 추이입니다.</span>
-            </div>
-            
-            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-              <!-- Date Picker for Hourly filter -->
-              <div class="chart-date-picker-wrap" id="chart-date-picker-container" style="display: flex;">
-                <label for="chart-date-input">날짜 선택</label>
-                <input type="date" id="chart-date-input" class="chart-date-input" />
-              </div>
 
-              <div class="chart-filter-pills">
-                <button class="chart-filter-btn active" onclick="switchChartFilter('hourly')">시간대별</button>
-                <button class="chart-filter-btn" onclick="switchChartFilter('daily')">일별</button>
-                <button class="chart-filter-btn" onclick="switchChartFilter('monthly')">월별</button>
-                <button class="chart-filter-btn" onclick="switchChartFilter('yearly')">년별</button>
-              </div>
-            </div>
-          </div>
-          
-          <!-- 좌우 스플릿 컨테이너 (차트 60%, 표 40%) -->
-          <div class="chart-split-grid">
-            <!-- 왼쪽: 차트 영역 -->
-            <div class="chart-wrapper" id="chart-bars-container">
-              <!-- Bars will be dynamically generated by JS -->
-            </div>
-
-            <!-- 오른쪽: 표 영역 -->
-            <div class="table-wrapper" id="chart-table-container">
-              <table class="premium-data-table">
-                <thead>
-                  <tr>
-                    <th>구분 (시간/일자)</th>
-                    <th>발급 수량</th>
-                    <th>비중 (%)</th>
-                  </tr>
-                </thead>
-                <tbody id="chart-table-tbody">
-                  <!-- JS로 동적 생성 -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
 
       </div>
     </section>
@@ -952,15 +855,39 @@
           
           <div class="form-row">
             <label for="change-current-password">현재 비밀번호</label>
-            <input type="password" id="change-current-password" placeholder="현재 비밀번호 입력" />
+            <div class="password-wrapper">
+              <input type="password" id="change-current-password" placeholder="현재 비밀번호 입력" />
+              <button type="button" class="pw-toggle-btn" id="pw-toggle-curr" aria-label="현재 비밀번호 보기">
+                <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
           <div class="form-row">
             <label for="change-new-password">새 비밀번호</label>
-            <input type="password" id="change-new-password" placeholder="새 비밀번호 입력" />
+            <div class="password-wrapper">
+              <input type="password" id="change-new-password" placeholder="새 비밀번호 입력" />
+              <button type="button" class="pw-toggle-btn" id="pw-toggle-new" aria-label="새 비밀번호 보기">
+                <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
           <div class="form-row" style="margin-bottom: 24px;">
             <label for="change-new-password-confirm">새 비밀번호 확인</label>
-            <input type="password" id="change-new-password-confirm" placeholder="새 비밀번호 재입력" />
+            <div class="password-wrapper">
+              <input type="password" id="change-new-password-confirm" placeholder="새 비밀번호 재입력" />
+              <button type="button" class="pw-toggle-btn" id="pw-toggle-new-conf" aria-label="새 비밀번호 확인 보기">
+                <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
           
           <button class="btn-submit-action" onclick="submitChangePassword()">변경하기</button>
@@ -970,10 +897,10 @@
         <div class="settings-card">
           <h3 class="settings-card-title">휴대폰 접속용 IP 설정</h3>
           <p class="settings-card-desc">
-            Kiosk PC가 공유기 와이파이에서 할당받은 로컬 IP(예: 192.168.0.10) 주소로 설정해야 모바일 스캔이 원활하게 연동됩니다. (도커 컨테이너 IP 대역인 172.x.x.x는 사용이 불가능합니다.)
+            Kiosk PC가 공유기 와이파이에서 할당받은 로컬 IP(예: 192.168.0.75) 주소로 설정해야 모바일 스캔이 원활하게 연동됩니다. (도커 컨테이너 IP 대역인 172.x.x.x는 사용이 불가능합니다.)
           </p>
           <div class="form-row" style="display: flex; gap: 8px; margin-bottom: 0; align-items: center;">
-            <input type="text" id="kiosk-host-input" style="flex: 1;" placeholder="예: http://192.168.0.10:8080" />
+            <input type="text" id="kiosk-host-input" style="flex: 1;" placeholder="예: http://192.168.0.75:8080" />
             <button id="btn-save-host" class="btn-submit-action">반영 및 저장</button>
           </div>
         </div>
@@ -983,6 +910,7 @@
   </main>
 
   <div id="toast-container"></div>
+
 
 </body>
 </html>

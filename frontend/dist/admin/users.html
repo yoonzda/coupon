@@ -15,42 +15,10 @@
   
   <style>
     body { 
-      margin: 0 !important; padding: 0 !important; 
-      width: 100% !important; max-width: none !important; 
+      margin: 0; padding: 0; 
+      width: 100%; max-width: none; 
       background: #f1f5f9;
       color: #1e293b; 
-    }
-
-    .admin-card {
-      background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden;
-      display: flex; flex-direction: column;
-      height: 100%;
-    }
-    
-    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-    .admin-table th { background: #f8fafc; padding: 14px 16px; border-bottom: 1px solid var(--border); color: var(--text-secondary); font-weight: 600; text-align: center; white-space: nowrap; position: sticky; top: 0; z-index: 10; }
-    .admin-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; text-align: center; }
-    .admin-table tbody tr:hover { background: #f8fafc; }
-    .admin-table tbody tr.selected { background: #eff6ff !important; }
-    
-    .btn-action {
-      padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; border: none; cursor: pointer; font-weight: 600;
-      display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;
-    }
-    .btn-view-coupons { background: #f1f5f9; color: #334155; border: 1px solid var(--border); border-radius: 4px; }
-    .btn-suspend { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; border-radius: 4px; }
-
-    /* 2분할 레이아웃 */
-    .grid-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      flex: 1;
-      min-height: 0;
-    }
-    
-    #couponSection {
-      display: none;
     }
 
     .table-scroll-container {
@@ -60,11 +28,48 @@
     }
     .table-scroll-container::-webkit-scrollbar { width: 6px; height: 6px; }
     .table-scroll-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    .admin-table-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .col-phone { width: 45%; }
+    .col-date { width: 35%; }
+    .col-actions { width: 20%; }
+
+    .table-actions-bar {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+
+    .search-input {
+      padding: 10px 16px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #fff;
+      color: #0f172a;
+      width: 320px;
+      box-sizing: border-box;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary, #475569);
+      box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.15);
+      background: #fff;
+    }
   </style>
-  <script type="module" crossorigin src="/assets/admin-users-MhiplI3T.js"></script>
+  <script type="module" crossorigin src="/assets/admin-users-BhoRczcH.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-_dmZlLiC.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-Cqa8uoiE.css">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-D2w6DInN.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BUpdExfZ.css">
 </head>
 <body>
   <div class="app-shell">
@@ -81,55 +86,31 @@
         </div>
       </header>
 
-      <div class="grid-container">
-        <!-- 왼쪽: 회원 목록 -->
-        <div class="admin-card" style="border-radius: 0;">
-          <div style="padding: 16px; font-weight: bold; border-bottom: 1px solid var(--border); background: #f8fafc; flex-shrink: 0;">회원 목록</div>
-          <div class="table-scroll-container">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>로그인</th>
-                  <th>이름</th>
-                  <th>전화번호</th>
-                  <th>쿠폰 내역</th>
-                  <th>관리</th>
-                </tr>
-              </thead>
-              <tbody id="usersTableBody">
-                <!-- 데이터 렌더링 -->
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <!-- 회원 목록 외부 타이틀 -->
+      <div class="subpage-title-area">
+        <h2 class="page-subtitle">회원 목록</h2>
+      </div>
 
-        <!-- 오른쪽: 쿠폰 내역 -->
-        <div class="admin-card" id="couponSection" style="border-radius: 0;">
-          <div style="padding: 16px; font-weight: bold; border-bottom: 1px solid var(--border); background: #f8fafc; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
-            <div><span id="sideUserName">선택된 회원</span>님의 쿠폰 내역</div>
-            <button id="btn-close-side" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
-          </div>
-          <div style="padding: 16px; border-bottom: 1px solid var(--border); background: #fff; flex-shrink: 0;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: var(--text-secondary); font-size: 0.9rem;">사용 가능 쿠폰액</span>
-              <strong style="color: var(--primary);" id="sideCouponBalance">0원</strong>
-            </div>
-          </div>
-          <div class="table-scroll-container">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>종류</th>
-                  <th>금액</th>
-                  <th>상태</th>
-                  <th>발급일</th>
-                </tr>
-              </thead>
-              <tbody id="sideCouponsBody">
-                <!-- 쿠폰 데이터 렌더링 -->
-              </tbody>
-            </table>
-          </div>
+      <!-- 검색 바 -->
+      <div class="table-actions-bar">
+        <input type="text" class="search-input" id="search-phone" placeholder="전화번호 또는 뒷 4자리 검색..." />
+      </div>
+
+      <!-- 회원 목록 카드 -->
+      <div class="admin-card">
+        <div class="table-scroll-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th class="col-phone">전화번호</th>
+                <th class="col-date">가입 일시</th>
+                <th class="col-actions">관리</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="3" class="table-placeholder">데이터를 불러오는 중입니다...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </main>
