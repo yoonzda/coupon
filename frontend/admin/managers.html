@@ -149,16 +149,16 @@
           ? `<span style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">최고 관리자</span>`
           : `<span style="background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">일반 운영자</span>`;
         
+        const actionCol = m.role === 'super'
+          ? '—'
+          : `<a href="edit-manager.html?id=${m.id}" class="btn-table-edit"><span>수정</span></a>`;
+
         tr.innerHTML = `
           <td style="text-align: center;"><input type="checkbox" class="manager-checkbox" value="${m.id}" style="cursor: pointer;"></td>
           <td style="text-align: center;">${m.name}</td>
           <td style="text-align: center;"><strong>${m.username}</strong></td>
           <td style="text-align: center;">${roleBadge}</td>
-          <td style="text-align: center;">
-            <a href="edit-manager.html?id=${m.id}" class="btn-table-edit">
-              <span>수정</span>
-            </a>
-          </td>
+          <td style="text-align: center;">${actionCol}</td>
         `;
         tbody.appendChild(tr);
       });

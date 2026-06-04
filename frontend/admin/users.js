@@ -24,14 +24,7 @@ async function loadUsers() {
 }
 
 function getMaskedPhone(nickname) {
-  if (!nickname) return '미인증';
-  const clean = nickname.replace(/[^0-9]/g, '');
-  if (clean.startsWith('010') && clean.length >= 10) {
-    const part1 = clean.substring(0, 3);
-    const part3 = clean.substring(clean.length - 4);
-    return `${part1}-****-${part3}`;
-  }
-  return nickname; // Fallback for seed data nicknames (e.g. '바다별')
+  return nickname || '미인증';
 }
 
 function renderUsers(users) {
@@ -46,7 +39,7 @@ function renderUsers(users) {
     tr.id = 'user-row-' + u.id;
     tr.classList.add('row-clickable');
     
-    // 전화번호 처리 (nickname 컬럼에 평문 전화번호가 들어있으므로 이를 이용해 마스킹)
+    // 전화번호 처리 (nickname 컬럼에 이미 백엔드 마스킹된 전화번호가 내려옵니다)
     const phoneStr = getMaskedPhone(u.nickname);
 
     // 가입 일시 포맷팅
@@ -97,7 +90,7 @@ window.deleteUser = async function(event, userId) {
   }
 };
 
-// 검색 기능 구현 (전화번호 숫자 매칭 및 닉네임 부분 일치 검색)
+// 검색 기능 구현 (전화번호 뒷 4자리 숫자 매칭 및 닉네임 부분 일치 검색)
 const searchInput = document.getElementById('search-phone');
 if (searchInput) {
   searchInput.addEventListener('input', (e) => {
@@ -107,14 +100,17 @@ if (searchInput) {
       return;
     }
     
-    const isNumeric = /^[0-9]+$/.test(query);
+    // 입력값에서 대시 등 특수문자 제거 후 숫자 여부 체크
+    const cleanQuery = query.replace(/[^0-9]/g, '');
+    const isNumeric = cleanQuery.length > 0;
+    
     const filtered = currentUsers.filter(u => {
-      if (!u.nickname) return false;
       if (isNumeric) {
-        const cleanPhone = u.nickname.replace(/[^0-9]/g, '');
-        return cleanPhone.includes(query);
+        // 숫자인 경우, 백엔드에서 넘겨준 phone_last4 필드와 비교 매칭
+        return u.phone_last4 && u.phone_last4.includes(cleanQuery);
       } else {
-        return u.nickname.toLowerCase().includes(query.toLowerCase());
+        // 숫자가 아닌 경우, 마스킹된 nickname(바다별 등 일반명칭 매칭)과 부분 비교
+        return u.nickname && u.nickname.toLowerCase().includes(query.toLowerCase());
       }
     });
     renderUsers(filtered);

@@ -363,14 +363,7 @@
     }
 
     function getMaskedPhone(nickname) {
-      if (!nickname) return '미인증';
-      const clean = nickname.replace(/[^0-9]/g, '');
-      if (clean.startsWith('010') && clean.length >= 10) {
-        const part1 = clean.substring(0, 3);
-        const part3 = clean.substring(clean.length - 4);
-        return `${part1}-****-${part3}`;
-      }
-      return nickname; // Fallback for seed nicknames (e.g. '바다별')
+      return nickname || '미인증';
     }
 
     async function loadUserDetails() {

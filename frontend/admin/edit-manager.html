@@ -88,8 +88,7 @@
           <div class="form-group">
             <label for="manager-role">권한 설정</label>
             <select id="manager-role" required>
-              <option value="super">최고 관리자</option>
-              <option value="operator">일반 운영자</option>
+              <option value="operator" selected>일반 운영자</option>
             </select>
           </div>
 
@@ -162,6 +161,11 @@
       try {
         const res = await api.get(`/admin/managers/${managerId}`);
         if (res.success && res.data) {
+          if (res.data.role === 'super') {
+            alert('최고 관리자는 수정할 수 없습니다.');
+            location.href = 'managers.html';
+            return;
+          }
           document.getElementById('manager-name').value = res.data.name;
           document.getElementById('manager-username').value = res.data.username;
           document.getElementById('manager-role').value = res.data.role;

@@ -421,7 +421,25 @@ router.get('/users', authenticate, async (req, res, next) => {
        WHERE role = 'tourist' 
        ORDER BY created_at DESC`
     );
-    res.json({ success: true, data: rows });
+
+    const mapped = rows.map(u => {
+      let nickname = u.nickname || '미인증';
+      let phone_last4 = null;
+      const clean = nickname.replace(/[^0-9]/g, '');
+      if (clean.startsWith('010') && clean.length >= 10) {
+        const part1 = clean.substring(0, 3);
+        const part3 = clean.substring(clean.length - 4);
+        nickname = `${part1}-****-${part3}`;
+        phone_last4 = part3;
+      }
+      return {
+        ...u,
+        nickname,
+        phone_last4
+      };
+    });
+
+    res.json({ success: true, data: mapped });
   } catch (err) { next(err); }
 });
 
