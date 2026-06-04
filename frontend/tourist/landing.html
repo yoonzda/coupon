@@ -515,10 +515,14 @@
           // 이미 발급받았다는 문구인 경우 유저 지갑으로 유도 가능하도록 사유 확인
           if (err.message && (err.message.includes('이미') || err.message.includes('수량'))) {
             document.getElementById('error-message-text').innerHTML = `${err.message}<br><br><span style="color:#64748b; font-size:0.78rem;">이미 쿠폰이 발급되었거나 사용 한도가 도달한 상태입니다.</span>`;
+            switchView('error');
+          } else if (err.status === 401) {
+            // 토큰 만료 등의 인증 실패 시 로그인 폼으로 분기
+            switchView('login');
           } else {
             document.getElementById('error-message-text').textContent = err.message || '쿠폰 발급 중 에러가 발생했습니다.';
+            switchView('error');
           }
-          switchView('error');
         }
       } else {
         // 미로그인 상태 -> 로그인 수단 노출

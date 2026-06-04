@@ -179,48 +179,25 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { api, setTokens, showToast } from '../shared/js/api.js'
-    import { t, bindLanguageSwitcher } from '../shared/js/i18n.js';
-    bindLanguageSwitcher('lang-switcher-merchant');
-
-    document.getElementById('btn-merchant-login').onclick = async function() {
-      const username = document.getElementById('merchant-username').value.trim();
-      const password = document.getElementById('merchant-password').value;
-
-      if (!username) return showToast('아이디를 입력해 주세요.', 'error');
-      if (!password) return showToast('비밀번호를 입력해 주세요.', 'error');
-
-      const btn = document.getElementById('btn-merchant-login');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> 로그인 중...';
-
+    import { getToken } from '../shared/js/api.js'
+    
+    const existingToken = getToken();
+    const existingUser = localStorage.getItem('ongjin_user');
+    
+    if (existingToken && existingUser) {
       try {
-        const res = await api.post('/auth/merchant/login', { username, password });
-        if (res.success) {
-          setTokens(res.token, res.refresh);
-          
-          // 가맹점 정보 적재
-          localStorage.setItem('ongjin_user', JSON.stringify({
-            id: res.merchant.id,
-            shopName: res.merchant.name,
-            username: res.merchant.username,
-            role: 'merchant'
-          }));
-
-          showToast('로그인에 성공했습니다.', 'success');
-          setTimeout(() => {
-            window.location.href = '/merchant/scan.html';
-          }, 500);
+        const userObj = JSON.parse(existingUser);
+        if (userObj.role === 'merchant') {
+          window.location.replace('/merchant/scan.html');
         } else {
-          showToast(res.message || '로그인 실패', 'error');
+          window.location.replace('/merchant/login.html');
         }
-      } catch (err) {
-        showToast(err.message || '로그인 중 오류가 발생했습니다.', 'error');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '로그인';
+      } catch (e) {
+        window.location.replace('/merchant/login.html');
       }
-    };
+    } else {
+      window.location.replace('/merchant/login.html');
+    }
   </script>
 </body>
 </html>

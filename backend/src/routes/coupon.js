@@ -28,8 +28,17 @@ router.get('/allocation-public/:id', async (req, res, next) => {
 router.get('/my', authenticate, authorize('tourist'), async (req, res, next) => {
   try {
     const [coupons] = await pool.execute(
-      `SELECT id, coupon_type, face_value, status, issued_at, expires_at, used_at
-       FROM coupons WHERE issued_to = ? ORDER BY issued_at DESC`,
+      `SELECT c.id, c.code_hash, c.coupon_type, c.face_value, c.status, c.issued_at, c.expires_at, c.used_at,
+              COALESCE(i.name, pc.issued_by_location, '옹진군청') AS issuer_name,
+              m.name AS used_merchant_name
+       FROM coupons c
+       LEFT JOIN issuer_allocations ia ON c.issuer_allocation_id = ia.id
+       LEFT JOIN issuers i ON ia.issuer_id = i.id
+       LEFT JOIN paper_coupons pc ON c.code_hash = pc.random_code_hash
+       LEFT JOIN coupon_transactions ct ON c.id = ct.coupon_id
+       LEFT JOIN merchants m ON ct.merchant_id = m.id
+       WHERE c.issued_to = ?
+       ORDER BY c.issued_at DESC`,
       [req.user.id]
     );
     res.json({ success: true, data: coupons });

@@ -11,8 +11,9 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_local_pass}
       MYSQL_USER: ${MYSQL_USER:-ongjin_user}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-ongjin_local_pass}
+      TZ: Asia/Seoul
     ports:
-      - "3307:3306"   # 로컬 3307 → 컨테이너 3306 (기존 MySQL 충돌 방지)
+      - "3309:3306"   # 로컬 3309 → 컨테이너 3306 (기존 MySQL 충돌 방지)
     volumes:
       - ./database/migrations:/docker-entrypoint-initdb.d   # 초기 SQL 자동 실행
       # 자동 시드 데이터 주입 설정 (컨테이너 최초 실행 시 자동 구동)
@@ -43,6 +44,7 @@ services:
       PORT: 3010
       NODE_ENV: development
       CALLBACK_URL: http://localhost:8080/tourist/auth-callback.html
+      TZ: Asia/Seoul
     depends_on:
       db:
         condition: service_healthy   # DB 준비 완료 후 기동

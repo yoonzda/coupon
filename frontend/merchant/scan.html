@@ -200,7 +200,7 @@
   <script type="module">
     import { api, requireAuth, showToast, fmtMoney, clearTokens } from '../shared/js/api.js'
 
-    if (!requireAuth('/merchant/index.html')) throw new Error('not authenticated')
+    if (!requireAuth('/merchant/login.html')) throw new Error('not authenticated')
 
     // ── 오프라인 큐 (LocalStorage, AES 암호화 생략 → 개발 단계) ──
     const QUEUE_KEY = 'ongjin_scan_queue'

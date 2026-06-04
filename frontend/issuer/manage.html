@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google" content="notranslate" />
   <title>발행처 관리 페이지 | 옹진 관광 쿠폰</title>
   <link rel="stylesheet" href="../shared/css/main.css" />
   <style>
@@ -213,14 +214,9 @@
     /* Stats top grid */
     .stats-top-grid {
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: 1fr;
       gap: 24px;
       margin-bottom: 24px;
-    }
-    @media (max-width: 960px) {
-      .stats-top-grid {
-        grid-template-columns: 1fr;
-      }
     }
 
     /* Statistics styles */
@@ -477,192 +473,126 @@
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
     }
 
-    /* 좌우 분할 통계 그리드 */
+    /* 쿠폰 목표 달성도 및 누적 발급 추이 레이아웃 */
     .chart-split-grid {
       display: grid;
-      grid-template-columns: 1.5fr 1fr;
+      grid-template-columns: 1fr 2fr;
       gap: 24px;
       width: 100%;
       align-items: stretch;
     }
-    @media (max-width: 680px) {
+    
+    @media (max-width: 992px) {
       .chart-split-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
       }
     }
 
-    .chart-wrapper {
-      position: relative;
-      height: 240px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      padding: 20px 10px 10px 10px;
-      border: 1px solid rgba(37, 99, 235, 0.06);
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      gap: 12px;
-      z-index: 1;
-    }
-
-    .chart-grid-lines {
-      position: absolute;
-      top: 24px;
-      bottom: 28px;
-      left: 10px;
-      right: 10px;
+    .chart-progress-ring-card, .chart-cumulative-card {
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(0, 0, 0, 0.03);
+      border-radius: 20px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      pointer-events: none;
-      z-index: 0;
+      gap: 16px;
     }
 
-    .chart-grid-line {
+    .progress-ring-title, .cumulative-chart-title {
+      font-size: 0.95rem;
+      font-weight: 850;
+      color: #0f172a;
+    }
+
+    .progress-ring-wrapper {
+      position: relative;
       width: 100%;
-      border-top: 1px dashed rgba(0, 0, 0, 0.03);
+      height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    .chart-bar-item {
-      flex: 1;
+    .progress-ring-wrapper canvas {
+      max-height: 100%;
+      max-width: 100%;
+    }
+
+    .progress-ring-center-text {
+      position: absolute;
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 100%;
-      justify-content: flex-end;
-      position: relative;
-      min-width: 16px;
-      z-index: 2;
-    }
-
-    .chart-bar-track {
-      width: 10px;
-      height: calc(100% - 24px);
-      background: rgba(37, 99, 235, 0.03);
-      border-radius: 99px;
-      position: relative;
-      transition: background 0.3s ease;
-    }
-
-    .chart-bar-item.zero-value .chart-bar-track {
-      background: rgba(0, 0, 0, 0.01) !important;
-    }
-
-    .chart-bar-fill {
-      width: 100%;
-      background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
-      border-radius: 99px;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 0%;
-      transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
-    }
-
-    .chart-bar-fill:hover {
-      filter: brightness(1.1);
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
-    }
-
-    .chart-bar-item.active-today .chart-bar-fill {
-      background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
-      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
-    }
-
-    .chart-bar-val-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #2563eb;
-      margin-bottom: 4px;
-      white-space: nowrap;
+      justify-content: center;
       text-align: center;
-      height: 14px;
-      z-index: 10;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
-    .chart-bar-item.active-today .chart-bar-val-label {
+
+    .progress-percentage {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #2563eb;
+      line-height: 1;
+    }
+
+    .progress-ratio {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #64748b;
+      margin-top: 6px;
+    }
+    .yearly-card-item {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(37, 99, 235, 0.12);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .yearly-card-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 35px -5px rgba(37, 99, 235, 0.1);
+    }
+    .yearly-card-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .yearly-card-val {
+      font-size: 2rem;
+      font-weight: 850;
+      color: #0f172a;
+      letter-spacing: -1px;
+      margin: 8px 0;
+    }
+    .yearly-card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+    .yearly-card-badge.up {
+      background: rgba(16, 185, 129, 0.1);
       color: #10b981;
     }
-    .chart-bar-item.zero-value .chart-bar-val-label {
-      color: #94a3b8;
+    .yearly-card-badge.down {
+      background: rgba(244, 63, 94, 0.1);
+      color: #f43f5e;
     }
-
-    .chart-bar-label {
-      font-size: 0.72rem;
+    .yearly-card-badge.none {
+      background: rgba(100, 116, 139, 0.1);
       color: #64748b;
-      font-weight: 600;
-      margin-top: 6px;
-      text-align: center;
-      white-space: nowrap;
-      height: 14px;
-    }
-
-    /* Modern Tooltip styling on Bar Item */
-    .chart-bar-item .chart-tooltip {
-      position: absolute;
-      top: -10px;
-      background: rgba(15, 23, 42, 0.95);
-      color: #ffffff;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      transform: translateY(6px) scale(0.9);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      white-space: nowrap;
-      z-index: 100;
-    }
-    .chart-bar-item:hover .chart-tooltip {
-      opacity: 1;
-      transform: translateY(-8px) scale(1);
-    }
-
-    /* 프리미엄 데이터 표 뷰 스타일 */
-    .table-wrapper {
-      width: 100%;
-      overflow-x: auto;
-      border-radius: 16px;
-      border: 1px solid rgba(37, 99, 235, 0.06);
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      max-height: 240px;
-      overflow-y: auto;
-    }
-    .premium-data-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.82rem;
-    }
-    .premium-data-table th {
-      background: rgba(37, 99, 235, 0.03);
-      padding: 12px 14px;
-      font-weight: 700;
-      color: #475569;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-      font-size: 0.78rem;
-      letter-spacing: -0.2px;
-    }
-    .premium-data-table td {
-      padding: 10px 14px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.02);
-      color: #0f172a;
-      font-weight: 600;
-    }
-    .premium-data-table tbody tr:last-child td {
-      border-bottom: none;
-    }
-    .premium-data-table tbody tr:hover td {
-      background: rgba(37, 99, 235, 0.01);
     }
 
     /* Settings/Account styles */
@@ -768,6 +698,40 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* Password visibility toggle styles */
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .password-wrapper input {
+      width: 100%;
+      padding-right: 40px !important;
+    }
+    .pw-toggle-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+    }
+    .pw-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: #64748b;
+      fill: none;
+      transition: stroke 0.2s;
+    }
+    .pw-toggle-btn:hover svg {
+      stroke: #1e293b;
+    }
   </style>
 </head>
 <body>
@@ -870,72 +834,11 @@
                   <span class="metric-value" id="metric-remaining">0장</span>
                 </div>
               </div>
-              
-              <!-- 하단 가로형 프로그레스 진행바 -->
-              <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="progress-bar-fill-el" style="width: 0%;"></div>
-                <span class="progress-bar-text" id="progress-bar-text-el">0% 발급 완료</span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- 카드 2: 실시간 분석 & 인사이트 -->
-          <div class="stats-card-wrap">
-            <h2 class="stats-title">실시간 분석 & 인사이트</h2>
-            <div class="insight-feed-container" id="insight-feed-content">
-              <div class="insight-loading">데이터를 분석 중입니다...</div>
             </div>
           </div>
         </div>
 
-        <!-- 카드 3: 쿠폰 발급 통계 분석 -->
-        <div class="stats-card-wrap chart-card">
-          <div class="chart-header">
-            <div class="chart-title-group">
-              <h3 class="chart-card-title">쿠폰 발급 통계 분석</h3>
-              <span class="chart-card-subtitle" id="chart-subtitle-text">금일 실시간 시간대별 발급 추이입니다.</span>
-            </div>
-            
-            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-              <!-- Date Picker for Hourly filter -->
-              <div class="chart-date-picker-wrap" id="chart-date-picker-container" style="display: flex;">
-                <label for="chart-date-input">날짜 선택</label>
-                <input type="date" id="chart-date-input" class="chart-date-input" />
-              </div>
 
-              <div class="chart-filter-pills">
-                <button class="chart-filter-btn active" onclick="switchChartFilter('hourly')">시간대별</button>
-                <button class="chart-filter-btn" onclick="switchChartFilter('daily')">일별</button>
-                <button class="chart-filter-btn" onclick="switchChartFilter('monthly')">월별</button>
-                <button class="chart-filter-btn" onclick="switchChartFilter('yearly')">년별</button>
-              </div>
-            </div>
-          </div>
-          
-          <!-- 좌우 스플릿 컨테이너 (차트 60%, 표 40%) -->
-          <div class="chart-split-grid">
-            <!-- 왼쪽: 차트 영역 -->
-            <div class="chart-wrapper" id="chart-bars-container">
-              <!-- Bars will be dynamically generated by JS -->
-            </div>
-
-            <!-- 오른쪽: 표 영역 -->
-            <div class="table-wrapper" id="chart-table-container">
-              <table class="premium-data-table">
-                <thead>
-                  <tr>
-                    <th>구분 (시간/일자)</th>
-                    <th>발급 수량</th>
-                    <th>비중 (%)</th>
-                  </tr>
-                </thead>
-                <tbody id="chart-table-tbody">
-                  <!-- JS로 동적 생성 -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
 
       </div>
     </section>
@@ -949,15 +852,39 @@
           
           <div class="form-row">
             <label for="change-current-password">현재 비밀번호</label>
-            <input type="password" id="change-current-password" placeholder="현재 비밀번호 입력" />
+            <div class="password-wrapper">
+              <input type="password" id="change-current-password" placeholder="현재 비밀번호 입력" />
+              <button type="button" class="pw-toggle-btn" id="pw-toggle-curr" aria-label="현재 비밀번호 보기">
+                <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
           <div class="form-row">
             <label for="change-new-password">새 비밀번호</label>
-            <input type="password" id="change-new-password" placeholder="새 비밀번호 입력" />
+            <div class="password-wrapper">
+              <input type="password" id="change-new-password" placeholder="새 비밀번호 입력" />
+              <button type="button" class="pw-toggle-btn" id="pw-toggle-new" aria-label="새 비밀번호 보기">
+                <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
           <div class="form-row" style="margin-bottom: 24px;">
             <label for="change-new-password-confirm">새 비밀번호 확인</label>
-            <input type="password" id="change-new-password-confirm" placeholder="새 비밀번호 재입력" />
+            <div class="password-wrapper">
+              <input type="password" id="change-new-password-confirm" placeholder="새 비밀번호 재입력" />
+              <button type="button" class="pw-toggle-btn" id="pw-toggle-new-conf" aria-label="새 비밀번호 확인 보기">
+                <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
           
           <button class="btn-submit-action" onclick="submitChangePassword()">변경하기</button>
@@ -967,10 +894,10 @@
         <div class="settings-card">
           <h3 class="settings-card-title">휴대폰 접속용 IP 설정</h3>
           <p class="settings-card-desc">
-            Kiosk PC가 공유기 와이파이에서 할당받은 로컬 IP(예: 192.168.0.10) 주소로 설정해야 모바일 스캔이 원활하게 연동됩니다. (도커 컨테이너 IP 대역인 172.x.x.x는 사용이 불가능합니다.)
+            Kiosk PC가 공유기 와이파이에서 할당받은 로컬 IP(예: 192.168.0.75) 주소로 설정해야 모바일 스캔이 원활하게 연동됩니다. (도커 컨테이너 IP 대역인 172.x.x.x는 사용이 불가능합니다.)
           </p>
           <div class="form-row" style="display: flex; gap: 8px; margin-bottom: 0; align-items: center;">
-            <input type="text" id="kiosk-host-input" style="flex: 1;" placeholder="예: http://192.168.0.10:8080" />
+            <input type="text" id="kiosk-host-input" style="flex: 1;" placeholder="예: http://192.168.0.75:8080" />
             <button id="btn-save-host" class="btn-submit-action">반영 및 저장</button>
           </div>
         </div>
@@ -981,17 +908,15 @@
 
   <div id="toast-container"></div>
 
+
   <script type="module">
     import { api, showToast, fmtMoney } from '../shared/js/api.js';
 
     // ── 구버전 로컬스토리지 IP 마이그레이션 ──
     const savedHost = localStorage.getItem('ongjin_kiosk_target_host');
     if (savedHost) {
-      if (savedHost.includes('192.168.') && !savedHost.includes('192.168.0.10')) {
-        const regex = /192\.168\.\d+\.\d+/;
-        localStorage.setItem('ongjin_kiosk_target_host', savedHost.replace(regex, '192.168.0.10'));
-      } else if (savedHost.includes('localhost') || savedHost.includes('127.0.0.1')) {
-        localStorage.setItem('ongjin_kiosk_target_host', savedHost.replace('localhost', '192.168.0.10').replace('127.0.0.1', '192.168.0.10'));
+      if (savedHost.includes('localhost') || savedHost.includes('127.0.0.1') || savedHost.includes('192.168.0.10')) {
+        localStorage.setItem('ongjin_kiosk_target_host', savedHost.replace('localhost', '192.168.0.75').replace('127.0.0.1', '192.168.0.75').replace('192.168.0.10', '192.168.0.75'));
       }
     }
 
@@ -1029,270 +954,8 @@
 
     // ── 상태 변수들 ──
     let cachedAllocation = null;
-    let chartDataCache = null;
-    let currentChartFilter = 'hourly';
     let statsIntervalId = null;
     let serverLanIp = 'localhost';
-
-    async function loadChartData() {
-      try {
-        let url = `/auth/issuer/stats?filter=${currentChartFilter}`;
-        if (currentChartFilter === 'hourly') {
-          const dateInput = document.getElementById('chart-date-input');
-          if (dateInput && dateInput.value) {
-            url += `&date=${dateInput.value}`;
-          }
-        }
-        const res = await api.get(url);
-        if (res.success) {
-          chartDataCache = res.data;
-          renderChart();
-          renderTable();
-          updateInsightFeed();
-        }
-      } catch (err) {
-        console.error('차트 데이터 로드 실패', err);
-      }
-    }
-
-    window.switchChartFilter = function(filter) {
-      currentChartFilter = filter;
-      
-      const buttons = document.querySelectorAll('.chart-filter-btn');
-      buttons.forEach(btn => {
-        const labelText = btn.textContent;
-        const targetText = filter === 'hourly' ? '시간대별' : filter === 'daily' ? '일별' : filter === 'monthly' ? '월별' : '년별';
-        if (labelText === targetText) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-
-      const datePickerContainer = document.getElementById('chart-date-picker-container');
-      if (datePickerContainer) {
-        if (filter === 'hourly') {
-          datePickerContainer.style.display = 'flex';
-        } else {
-          datePickerContainer.style.display = 'none';
-        }
-      }
-
-      const subtitleEl = document.getElementById('chart-subtitle-text');
-      if (subtitleEl) {
-        if (filter === 'hourly') {
-          subtitleEl.textContent = '금일 실시간 시간대별 발급 추이입니다.';
-        } else if (filter === 'daily') {
-          subtitleEl.textContent = '최근 7일간 일별 누적 발급 추이입니다.';
-        } else if (filter === 'monthly') {
-          subtitleEl.textContent = '올해 월별 누적 발급 추이입니다.';
-        } else if (filter === 'yearly') {
-          subtitleEl.textContent = '최근 5개년간 년별 발급 추이입니다.';
-        }
-      }
-
-      loadChartData();
-    };
-
-    window.switchViewMode = function(mode) {
-      const btnChart = document.getElementById('btn-view-chart');
-      const btnTable = document.getElementById('btn-view-table');
-      const chartWrapper = document.getElementById('chart-bars-container');
-      const tableWrapper = document.getElementById('chart-table-container');
-
-      if (mode === 'chart') {
-        btnChart.classList.add('active');
-        btnTable.classList.remove('active');
-        chartWrapper.style.display = 'flex';
-        tableWrapper.style.display = 'none';
-      } else {
-        btnChart.classList.remove('active');
-        btnTable.classList.add('active');
-        chartWrapper.style.display = 'none';
-        tableWrapper.style.display = 'block';
-        renderTable();
-      }
-    };
-
-    function renderTable() {
-      const tbody = document.getElementById('chart-table-tbody');
-      if (!tbody || !chartDataCache || !Array.isArray(chartDataCache)) return;
-
-      const totalCount = chartDataCache.reduce((sum, d) => sum + d.count, 0);
-
-      tbody.innerHTML = chartDataCache.map(item => {
-        const ratio = totalCount > 0 ? ((item.count / totalCount) * 100).toFixed(1) : '0.0';
-        return `
-          <tr>
-            <td style="font-weight: 700; color: #475569;">${item.label}</td>
-            <td style="font-weight: 800; color: #0f172a;">${item.count.toLocaleString()}장</td>
-            <td style="color: #2563eb; font-weight: 800;">${ratio}%</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function renderChart() {
-      if (!chartDataCache || !Array.isArray(chartDataCache)) return;
-      
-      const container = document.getElementById('chart-bars-container');
-      if (!container) return;
-
-      const maxCount = Math.max(...chartDataCache.map(d => d.count), 1);
-
-      // Y축 격자 그리드 라인 먼저 삽입
-      container.innerHTML = `
-        <div class="chart-grid-lines">
-          <div class="chart-grid-line"></div>
-          <div class="chart-grid-line"></div>
-          <div class="chart-grid-line"></div>
-          <div class="chart-grid-line"></div>
-          <div class="chart-grid-line"></div>
-        </div>
-      `;
-
-      chartDataCache.forEach(item => {
-        const pct = Math.round((item.count / maxCount) * 85); // 최대 85% 높이로 라벨 여유 확보
-        
-        const barItem = document.createElement('div');
-        barItem.className = 'chart-bar-item';
-        if (item.isToday) {
-          barItem.classList.add('active-today');
-        }
-        if (item.count === 0) {
-          barItem.classList.add('zero-value');
-        }
-
-        // 0장인 경우 수치 라벨을 표시하지 않음
-        const valLabel = item.count > 0 ? `${item.count.toLocaleString()}장` : '';
-
-        barItem.innerHTML = `
-          <div class="chart-tooltip">${item.count.toLocaleString()}장</div>
-          <div class="chart-bar-val-label">${valLabel}</div>
-          <div class="chart-bar-track">
-            <div class="chart-bar-fill" style="height: 0%;" data-height="${pct}%"></div>
-          </div>
-          <div class="chart-bar-label">${item.label}</div>
-        `;
-        container.appendChild(barItem);
-      });
-
-      // 0% -> 목표 높이로 차오르는 애니메이션 실행
-      setTimeout(() => {
-        const fills = container.querySelectorAll('.chart-bar-fill');
-        fills.forEach(fill => {
-          const targetHeight = fill.getAttribute('data-height');
-          fill.style.height = targetHeight;
-        });
-      }, 50);
-    }
-
-    function updateInsightFeed() {
-      const feedEl = document.getElementById('insight-feed-content');
-      if (!feedEl) return;
-
-      if (!cachedAllocation || !chartDataCache || !Array.isArray(chartDataCache)) {
-        feedEl.innerHTML = '<div class="insight-loading">분석 데이터를 조회하는 중입니다...</div>';
-        return;
-      }
-
-      const remaining = cachedAllocation.total_count - cachedAllocation.issued_count;
-      const totalCount = cachedAllocation.total_count;
-      const remainingRate = totalCount > 0 ? Math.round((remaining / totalCount) * 100) : 0;
-      
-      const kstTodayList = chartDataCache || [];
-      const totalToday = kstTodayList.reduce((sum, d) => sum + d.count, 0);
-      
-      let peakHour = null;
-      let peakCount = 0;
-      kstTodayList.forEach(item => {
-        if (item.count > peakCount) {
-          peakCount = item.count;
-          peakHour = item.label;
-        }
-      });
-
-      let feedHtml = '';
-
-      // 1. 소진 상태 피드
-      if (remaining === 0) {
-        feedHtml += `
-          <div class="insight-item">
-            <div class="insight-icon-wrap rose">
-              <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-              </svg>
-            </div>
-            <div class="insight-text-wrap">
-              <span class="insight-item-title" style="color:#dc2626;">배정 쿠폰 한도 소진 완료</span>
-              <span class="insight-item-desc">현재 배정된 쿠폰 수량이 완전히 소진되었습니다. 추가 쿠폰 배정을 요청해 주세요.</span>
-            </div>
-          </div>
-        `;
-      } else if (remainingRate <= 20) {
-        feedHtml += `
-          <div class="insight-item">
-            <div class="insight-icon-wrap amber">
-              <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-              </svg>
-            </div>
-            <div class="insight-text-wrap">
-              <span class="insight-item-title" style="color:#d97706;">배정 한도 도달 위험 (잔여 ${remainingRate}%)</span>
-              <span class="insight-item-desc">잔여 한도 수량이 20% 이하(${remaining.toLocaleString()}장)입니다. 원활한 서비스를 위해 조속히 추가 배정을 진행하는 것이 좋습니다.</span>
-            </div>
-          </div>
-        `;
-      } else {
-        feedHtml += `
-          <div class="insight-item">
-            <div class="insight-icon-wrap green">
-              <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div class="insight-text-wrap">
-              <span class="insight-item-title" style="color:#16a34a;">쿠폰 소진 상태 안정</span>
-              <span class="insight-item-desc">현재 남은 한도 수량이 전체의 ${remainingRate}%(${remaining.toLocaleString()}장)로 매우 안정적인 발급 여유를 가지고 있습니다.</span>
-            </div>
-          </div>
-        `;
-      }
-
-      // 2. 금일 피크 타임 피드
-      if (peakCount > 0) {
-        feedHtml += `
-          <div class="insight-item">
-            <div class="insight-icon-wrap blue">
-              <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-            </div>
-            <div class="insight-text-wrap">
-              <span class="insight-item-title" style="color:#2563eb;">발급 피크 시점 감지</span>
-              <span class="insight-item-desc">최다 발급 기록 시점은 <strong>${peakHour}</strong>대 이며, 해당 시간대에만 <strong>${peakCount.toLocaleString()}장</strong>의 쿠폰이 집중 발급되었습니다.</span>
-            </div>
-          </div>
-        `;
-      }
-
-      // 3. 당일 발급 통계
-      feedHtml += `
-        <div class="insight-item">
-          <div class="insight-icon-wrap blue">
-            <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-            </svg>
-          </div>
-          <div class="insight-text-wrap">
-            <span class="insight-item-title">실시간 누적 발급 통계</span>
-            <span class="insight-item-desc">선택된 기간/시간대 동안 총 <strong>${totalToday.toLocaleString()}장</strong>의 쿠폰이 발급되었습니다.</span>
-          </div>
-        </div>
-      `;
-
-      feedEl.innerHTML = feedHtml;
-    }
 
     // ── 탭 전환 로직 ──
     window.switchTab = function(tabName) {
@@ -1315,12 +978,8 @@
         document.getElementById('tab-btn-stats').classList.add('active');
         document.getElementById('content-stats').classList.add('active');
         
-        lastRemainingCount = null; // 게이지 애니메이션 트리거를 위해 리셋
-        
-        // 통계 3초 주기 폴링 작동
         if (cachedAllocation) {
           updateStatsUI(cachedAllocation);
-          loadChartData();
         }
         loadAllocation();
         statsIntervalId = setInterval(loadAllocation, 3000);
@@ -1357,12 +1016,18 @@
 
           // IP input value 초기화 대응
           let targetOrigin = localStorage.getItem('ongjin_kiosk_target_host');
+          if (targetOrigin) {
+            if (targetOrigin.includes('localhost') || targetOrigin.includes('127.0.0.1') || targetOrigin.includes('192.168.0.10')) {
+              targetOrigin = targetOrigin.replace('localhost', '192.168.0.75').replace('127.0.0.1', '192.168.0.75').replace('192.168.0.10', '192.168.0.75');
+              localStorage.setItem('ongjin_kiosk_target_host', targetOrigin);
+            }
+          }
           if (!targetOrigin) {
             targetOrigin = window.location.origin;
             if (targetOrigin.includes('localhost') || targetOrigin.includes('127.0.0.1')) {
               targetOrigin = (serverLanIp && !serverLanIp.startsWith('172.')) 
                 ? `http://${serverLanIp}:8080` 
-                : `http://192.168.0.10:8080`;
+                : `http://192.168.0.75:8080`;
             }
           }
           const inputEl = document.getElementById('kiosk-host-input');
@@ -1371,7 +1036,6 @@
           }
 
           updateStatsUI(allocation);
-          loadChartData();
         } else {
           showToast('배정된 쿠폰 정보가 없습니다.', 'error');
         }
@@ -1403,14 +1067,6 @@
 
       const totalEl = document.getElementById('metric-total');
       if (totalEl) totalEl.textContent = `${allocation.total_count.toLocaleString()}장`;
-
-      // 2. 프로그레스 바 & 퍼센티지 텍스트 업데이트
-      const percentText = document.getElementById('progress-bar-text-el');
-      const barFill = document.getElementById('progress-bar-fill-el');
-      if (barFill && percentText) {
-        barFill.style.width = `${rate}%`;
-        percentText.textContent = `${rate}% 발급 완료`;
-      }
     }
 
     // IP 설정 저장
@@ -1419,10 +1075,6 @@
       if (!hostVal) {
         showToast('접속 주소를 입력해 주세요.', 'error');
         return;
-      }
-      if (hostVal.includes('192.168.0.75')) {
-        hostVal = hostVal.replace('192.168.0.75', '192.168.0.10');
-        document.getElementById('kiosk-host-input').value = hostVal;
       }
       localStorage.setItem('ongjin_kiosk_target_host', hostVal);
       showToast('휴대폰 접속 주소가 반영되었습니다.', 'success');
@@ -1465,23 +1117,32 @@
       }
     };
 
-    // KST 오늘 날짜 구하기 (YYYY-MM-DD)
-    function getKstTodayString() {
-      const kstOffset = 9 * 60 * 60 * 1000;
-      const kstDate = new Date(Date.now() + kstOffset);
-      return kstDate.toISOString().split('T')[0];
-    }
-
-    // 날짜 선택기 기본값 설정 및 이벤트 바인딩
-    const dateInput = document.getElementById('chart-date-input');
-    if (dateInput) {
-      const todayKst = getKstTodayString();
-      dateInput.value = todayKst;
-      dateInput.max = todayKst; // 미래 날짜 선택 불가
-      dateInput.addEventListener('change', () => {
-        loadChartData();
+    // ── 패스워드 토글 기능 ──
+    function setupPasswordToggle(inputId, toggleId) {
+      const input = document.getElementById(inputId);
+      const toggle = document.getElementById(toggleId);
+      if (!input || !toggle) return;
+      
+      toggle.addEventListener('click', () => {
+        if (input.type === 'password') {
+          input.type = 'text';
+          toggle.innerHTML = `<svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>`;
+        } else {
+          input.type = 'password';
+          toggle.innerHTML = `<svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>`;
+        }
       });
     }
+
+    setupPasswordToggle('change-current-password', 'pw-toggle-curr');
+    setupPasswordToggle('change-new-password', 'pw-toggle-new');
+    setupPasswordToggle('change-new-password-confirm', 'pw-toggle-new-conf');
 
     // 초기 실행
     loadAllocation();

@@ -191,24 +191,42 @@ router.get('/stats', authenticate, authorize('issuer'), async (req, res, next) =
 
     let rows = [];
     if (filter === 'hourly') {
-      let targetDate = req.query.date;
-      if (!targetDate) {
-        const kstOffset = 9 * 60 * 60 * 1000;
-        const kstDate = new Date(Date.now() + kstOffset);
-        targetDate = kstDate.toISOString().split('T')[0];
+      const range = req.query.range;
+      let dateFilter = '';
+      let queryParams = [...allocationIds];
+
+      if (range === 'today') {
+        dateFilter = `AND DATE(CONVERT_TZ(issued_at, '+00:00', '+09:00')) = DATE(CONVERT_TZ(NOW(), '+00:00', '+09:00'))`;
+      } else if (range === '7days') {
+        dateFilter = `AND CONVERT_TZ(issued_at, '+00:00', '+09:00') >= DATE_SUB(DATE(CONVERT_TZ(NOW(), '+00:00', '+09:00')), INTERVAL 6 DAY)`;
+      } else if (range === '30days') {
+        dateFilter = `AND CONVERT_TZ(issued_at, '+00:00', '+09:00') >= DATE_SUB(DATE(CONVERT_TZ(NOW(), '+00:00', '+09:00')), INTERVAL 29 DAY)`;
+      } else if (range === 'all') {
+        dateFilter = '';
+      } else {
+        // 특정 날짜 선택 또는 기본값 (오늘)
+        let targetDate = req.query.date;
+        if (!targetDate) {
+          const kstOffset = 9 * 60 * 60 * 1000;
+          const kstDate = new Date(Date.now() + kstOffset);
+          targetDate = kstDate.toISOString().split('T')[0];
+        }
+        dateFilter = `AND DATE(CONVERT_TZ(issued_at, '+00:00', '+09:00')) = ?`;
+        queryParams.push(targetDate);
       }
+
       const query = `
         SELECT HOUR(CONVERT_TZ(issued_at, '+00:00', '+09:00')) as hour_val, COUNT(*) as count
         FROM coupons
         WHERE issuer_allocation_id IN (${placeholders})
-          AND DATE(CONVERT_TZ(issued_at, '+00:00', '+09:00')) = ?
+          ${dateFilter}
         GROUP BY HOUR(CONVERT_TZ(issued_at, '+00:00', '+09:00'))
         ORDER BY hour_val ASC
       `;
-      [rows] = await pool.execute(query, [...allocationIds, targetDate]);
+      [rows] = await pool.execute(query, queryParams);
       
       const hourlyData = [];
-      for (let h = 9; h <= 20; h++) {
+      for (let h = 0; h <= 23; h++) {
         const found = rows.find(r => r.hour_val === h);
         hourlyData.push({
           label: `${String(h).padStart(2, '0')}시`,
@@ -218,44 +236,89 @@ router.get('/stats', authenticate, authorize('issuer'), async (req, res, next) =
       return res.json({ success: true, data: hourlyData });
 
     } else if (filter === 'daily') {
-      // 최근 7일간 일별 발급 추이 (비어있는 날짜 0 보정)
-      const query = `
-        SELECT DATE_FORMAT(CONVERT_TZ(issued_at, '+00:00', '+09:00'), '%c/%e') as label, DATE(CONVERT_TZ(issued_at, '+00:00', '+09:00')) as raw_date, COUNT(*) as count
-        FROM coupons
-        WHERE issuer_allocation_id IN (${placeholders})
-          AND CONVERT_TZ(issued_at, '+00:00', '+09:00') >= DATE_SUB(DATE(CONVERT_TZ(NOW(), '+00:00', '+09:00')), INTERVAL 6 DAY)
-        GROUP BY label, raw_date
-        ORDER BY raw_date ASC
-      `;
-      [rows] = await pool.execute(query, allocationIds);
+      const monthParam = req.query.month;
+      if (monthParam && /^\d{4}-\d{2}$/.test(monthParam)) {
+        const [yearStr, monthStr] = monthParam.split('-');
+        const year = parseInt(yearStr, 10);
+        const month = parseInt(monthStr, 10);
+        const numDays = new Date(year, month, 0).getDate();
 
-      const dailyData = [];
-      const today = new Date();
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(today.getDate() - i);
-        const matchLabel = `${d.getMonth() + 1}/${d.getDate()}`;
-        
-        const found = rows.find(r => r.label === matchLabel);
-        dailyData.push({
-          label: matchLabel,
-          count: found ? found.count : 0,
-          isToday: i === 0
-        });
+        const query = `
+          SELECT DAY(CONVERT_TZ(issued_at, '+00:00', '+09:00')) as day_val, COUNT(*) as count
+          FROM coupons
+          WHERE issuer_allocation_id IN (${placeholders})
+            AND YEAR(CONVERT_TZ(issued_at, '+00:00', '+09:00')) = ?
+            AND MONTH(CONVERT_TZ(issued_at, '+00:00', '+09:00')) = ?
+          GROUP BY DAY(CONVERT_TZ(issued_at, '+00:00', '+09:00'))
+          ORDER BY day_val ASC
+        `;
+        [rows] = await pool.execute(query, [...allocationIds, year, month]);
+
+        const dailyData = [];
+        const kstOffset = 9 * 60 * 60 * 1000;
+        const kstNow = new Date(Date.now() + kstOffset);
+        const todayStr = kstNow.toISOString().split('T')[0];
+
+        for (let d = 1; d <= numDays; d++) {
+          const dayStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const found = rows.find(r => r.day_val === d);
+          const isToday = (dayStr === todayStr);
+          dailyData.push({
+            label: `${month}/${d}`,
+            count: found ? found.count : 0,
+            isToday
+          });
+        }
+        return res.json({ success: true, data: dailyData });
+      } else {
+        // 최근 30일간 일별 발급 추이 (기본값)
+        const query = `
+          SELECT DATE_FORMAT(CONVERT_TZ(issued_at, '+00:00', '+09:00'), '%Y-%m-%d') as raw_date, COUNT(*) as count
+          FROM coupons
+          WHERE issuer_allocation_id IN (${placeholders})
+            AND CONVERT_TZ(issued_at, '+00:00', '+09:00') >= DATE_SUB(DATE(CONVERT_TZ(NOW(), '+00:00', '+09:00')), INTERVAL 29 DAY)
+          GROUP BY raw_date
+          ORDER BY raw_date ASC
+        `;
+        [rows] = await pool.execute(query, allocationIds);
+
+        const dailyData = [];
+        const kstOffset = 9 * 60 * 60 * 1000;
+        const todayKst = new Date(Date.now() + kstOffset);
+        for (let i = 29; i >= 0; i--) {
+          const d = new Date(todayKst.getTime() - i * 24 * 60 * 60 * 1000);
+          const dateStr = d.toISOString().split('T')[0];
+          const parts = dateStr.split('-');
+          const mVal = parseInt(parts[1], 10);
+          const dVal = parseInt(parts[2], 10);
+
+          const found = rows.find(r => r.raw_date === dateStr);
+          dailyData.push({
+            label: `${mVal}/${dVal}`,
+            count: found ? found.count : 0,
+            isToday: i === 0
+          });
+        }
+        return res.json({ success: true, data: dailyData });
       }
-      return res.json({ success: true, data: dailyData });
 
     } else if (filter === 'monthly') {
-      // 올해 월별 발급 추이 (1~12월)
+      let targetYear = parseInt(req.query.year, 10);
+      if (!targetYear || isNaN(targetYear)) {
+        const kstOffset = 9 * 60 * 60 * 1000;
+        const kstDate = new Date(Date.now() + kstOffset);
+        targetYear = kstDate.getUTCFullYear();
+      }
+      
       const query = `
         SELECT MONTH(CONVERT_TZ(issued_at, '+00:00', '+09:00')) as month_val, COUNT(*) as count
         FROM coupons
         WHERE issuer_allocation_id IN (${placeholders})
-          AND YEAR(CONVERT_TZ(issued_at, '+00:00', '+09:00')) = YEAR(CONVERT_TZ(NOW(), '+00:00', '+09:00'))
+          AND YEAR(CONVERT_TZ(issued_at, '+00:00', '+09:00')) = ?
         GROUP BY MONTH(CONVERT_TZ(issued_at, '+00:00', '+09:00'))
         ORDER BY month_val ASC
       `;
-      [rows] = await pool.execute(query, allocationIds);
+      [rows] = await pool.execute(query, [...allocationIds, targetYear]);
 
       const monthlyData = [];
       for (let m = 1; m <= 12; m++) {
@@ -268,20 +331,23 @@ router.get('/stats', authenticate, authorize('issuer'), async (req, res, next) =
       return res.json({ success: true, data: monthlyData });
 
     } else if (filter === 'yearly') {
-      // 최근 5개년 년별 발급 추이
+      // 2026년(출시 년도)부터 년별 발급 추이
       const query = `
         SELECT YEAR(CONVERT_TZ(issued_at, '+00:00', '+09:00')) as year_val, COUNT(*) as count
         FROM coupons
         WHERE issuer_allocation_id IN (${placeholders})
-          AND CONVERT_TZ(issued_at, '+00:00', '+09:00') >= DATE_SUB(DATE(CONVERT_TZ(NOW(), '+00:00', '+09:00')), INTERVAL 4 YEAR)
+          AND YEAR(CONVERT_TZ(issued_at, '+00:00', '+09:00')) >= 2026
         GROUP BY YEAR(CONVERT_TZ(issued_at, '+00:00', '+09:00'))
         ORDER BY year_val ASC
       `;
       [rows] = await pool.execute(query, allocationIds);
 
       const yearlyData = [];
-      const currentYear = new Date().getFullYear();
-      for (let y = currentYear - 4; y <= currentYear; y++) {
+      const kstOffset = 9 * 60 * 60 * 1000;
+      const kstDate = new Date(Date.now() + kstOffset);
+      const currentYear = kstDate.getUTCFullYear();
+      const startYear = 2026;
+      for (let y = startYear; y <= currentYear; y++) {
         const found = rows.find(r => r.year_val === y);
         yearlyData.push({
           label: `${y}년`,
@@ -289,6 +355,50 @@ router.get('/stats', authenticate, authorize('issuer'), async (req, res, next) =
         });
       }
       return res.json({ success: true, data: yearlyData });
+    } else if (filter === 'cumulative') {
+      // 출시일자 또는 첫 발행시점부터 오늘까지의 일별 누적 추이
+      const query = `
+        SELECT DATE_FORMAT(CONVERT_TZ(issued_at, '+00:00', '+09:00'), '%Y-%m-%d') as raw_date, COUNT(*) as count
+        FROM coupons
+        WHERE issuer_allocation_id IN (${placeholders})
+        GROUP BY raw_date
+        ORDER BY raw_date ASC
+      `;
+      [rows] = await pool.execute(query, allocationIds);
+
+      const cumulativeData = [];
+      let runningTotal = 0;
+
+      if (rows.length > 0) {
+        const kstOffset = 9 * 60 * 60 * 1000;
+        const firstDateStr = rows[0].raw_date;
+        const todayStr = new Date(Date.now() + kstOffset).toISOString().split('T')[0];
+
+        const start = new Date(firstDateStr);
+        const end = new Date(todayStr);
+
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const dateStr = d.toISOString().split('T')[0];
+          const found = rows.find(r => r.raw_date === dateStr);
+          if (found) {
+            runningTotal += found.count;
+          }
+          const parts = dateStr.split('-');
+          cumulativeData.push({
+            label: `${parseInt(parts[1], 10)}/${parseInt(parts[2], 10)}`,
+            count: runningTotal
+          });
+        }
+      } else {
+        const kstOffset = 9 * 60 * 60 * 1000;
+        const todayStr = new Date(Date.now() + kstOffset).toISOString().split('T')[0];
+        const parts = todayStr.split('-');
+        cumulativeData.push({
+          label: `${parseInt(parts[1], 10)}/${parseInt(parts[2], 10)}`,
+          count: 0
+        });
+      }
+      return res.json({ success: true, data: cumulativeData });
     } else {
       return res.status(400).json({ success: false, message: '유효하지 않은 필터입니다.' });
     }

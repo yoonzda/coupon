@@ -56,6 +56,27 @@ async function initializeDatabase(retries = 10, delay = 2000) {
         // 이미 존재하면 무시
       }
 
+      // merchants 테이블에 신규 입점 필드들 추가
+      const columnsToAdd = [
+        { name: 'owner_name', type: 'VARCHAR(100) NULL' },
+        { name: 'store_phone', type: 'VARCHAR(20) NULL' },
+        { name: 'images', type: 'MEDIUMTEXT NULL' },
+        { name: 'business_hours', type: 'VARCHAR(100) NULL' },
+        { name: 'business_cert_image', type: 'MEDIUMTEXT NULL' },
+        { name: 'bank_name', type: 'VARCHAR(50) NULL' },
+        { name: 'account_no', type: 'VARCHAR(50) NULL' },
+        { name: 'bankbook_image', type: 'MEDIUMTEXT NULL' }
+      ];
+
+      for (const col of columnsToAdd) {
+        try {
+          await conn.execute(`ALTER TABLE merchants ADD COLUMN ${col.name} ${col.type}`);
+          logger.info(`✅ DB 스키마 업데이트 성공 (merchants.${col.name} 추가)`);
+        } catch (err) {
+          // 이미 존재하면 무시
+        }
+      }
+
       // 가맹점 자동 주입 제거 완료 (사용자 요청에 의한 깔끔한 초기 상태 보장)
 
       conn.release();

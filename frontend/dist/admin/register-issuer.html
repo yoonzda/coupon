@@ -62,8 +62,42 @@
     .btn-register-submit:active {
       background: #0f172a;
     }
+
+    /* Password visibility toggle styles */
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .password-wrapper input {
+      width: 100%;
+      padding-right: 40px !important;
+    }
+    .pw-toggle-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+    }
+    .pw-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: #64748b;
+      fill: none;
+      transition: stroke 0.2s;
+    }
+    .pw-toggle-btn:hover svg {
+      stroke: #1e293b;
+    }
   </style>
-  <script type="module" crossorigin src="/assets/admin-register-issuer-BHi9E37E.js"></script>
+  <script type="module" crossorigin src="/assets/admin-register-issuer-BMtTZMpd.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-cr5AAT4V.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-guard-_dmZlLiC.js">
@@ -109,11 +143,27 @@
           </div>
           <div class="form-group">
             <label for="issuer-password">비밀번호</label>
-            <input type="password" id="issuer-password" placeholder="비밀번호 설정" required />
+            <div class="password-wrapper">
+              <input type="password" id="issuer-password" placeholder="비밀번호 설정" required />
+              <button type="button" class="pw-toggle-btn" id="pw-toggle-1" aria-label="비밀번호 보기">
+                <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
           <div class="form-group">
             <label for="issuer-password-confirm">비밀번호 확인</label>
-            <input type="password" id="issuer-password-confirm" placeholder="비밀번호 재입력" required />
+            <div class="password-wrapper">
+              <input type="password" id="issuer-password-confirm" placeholder="비밀번호 재입력" required />
+              <button type="button" class="pw-toggle-btn" id="pw-toggle-2" aria-label="비밀번호 확인 보기">
+                <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div class="form-actions">

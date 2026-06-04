@@ -160,8 +160,7 @@ router.get('/merchants', authenticate, authorize('admin'), async (req, res, next
   const offset = (page - 1) * limit;
   try {
     const [rows] = await pool.query(
-      `SELECT id, name, phone, address, category, status, applied_at, approved_at
-       FROM merchants WHERE status = ? ORDER BY applied_at DESC LIMIT ? OFFSET ?`,
+      `SELECT * FROM merchants WHERE status = ? ORDER BY applied_at DESC LIMIT ? OFFSET ?`,
       [status, Number(limit), Number(offset)]
     );
     res.json({ success: true, data: rows });
@@ -463,11 +462,11 @@ router.get('/users/:id/coupons', authenticate, async (req, res, next) => {
 router.get('/issuers', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const [issuers] = await pool.execute(
-      `SELECT id, username, name, created_at FROM issuers ORDER BY created_at DESC`
+      `SELECT id, username, name, created_at FROM issuers ORDER BY created_at ASC`
     );
     const [allocations] = await pool.execute(
       `SELECT id, issuer_id, face_value, total_count, issued_count, created_at 
-       FROM issuer_allocations ORDER BY created_at DESC`
+       FROM issuer_allocations ORDER BY created_at ASC`
     );
     res.json({ success: true, data: { issuers, allocations } });
   } catch (err) { next(err); }

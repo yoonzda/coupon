@@ -12,10 +12,12 @@ export default defineConfig({
         'tourist-map':      resolve(__dirname, 'tourist/map.html'),
         'tourist-callback': resolve(__dirname, 'tourist/auth-callback.html'),
         'tourist-apply':    resolve(__dirname, 'tourist/apply-merchant.html'),
+        'tourist-apply-pending': resolve(__dirname, 'tourist/apply-pending.html'),
         'tourist-landing':  resolve(__dirname, 'tourist/landing.html'),
 
         // 가맹점 포털
-        'merchant-login':   resolve(__dirname, 'merchant/index.html'),
+        'merchant-login':   resolve(__dirname, 'merchant/login.html'),
+        'merchant-index':   resolve(__dirname, 'merchant/index.html'),
         'merchant-scan':    resolve(__dirname, 'merchant/scan.html'),
         'merchant-history': resolve(__dirname, 'merchant/history.html'),
 

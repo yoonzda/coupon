@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>관리자 로그인 | 옹진 관광 쿠폰</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -124,16 +124,13 @@
       align-items: flex-start;
       margin-bottom: 40px;
     }
-    .admin-badge {
-      background: #eff6ff;
-      color: #1e40af;
-      border: 1px solid #bfdbfe;
-      font-size: 0.75rem;
+    .logo-subtitle {
+      font-size: 0.85rem;
       font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 0;
-      letter-spacing: 1px;
-      margin-bottom: 12px; /* 요청하신 마진 바텀 12px */
+      color: #2563eb; /* blue point color */
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
     }
     .logo-title {
       font-family: 'Gowun Dodum', sans-serif;
@@ -314,6 +311,62 @@
       border-radius: 0; /* 각진 스타일 유지 */
     }
 
+    /* ── Responsive & Mobile First Styles ── */
+    @media (max-width: 480px) {
+      body {
+        background: #ffffff;
+        background-image: none;
+        align-items: flex-start;
+      }
+      
+      body::before, body::after {
+        display: none;
+      }
+
+      .login-card {
+        width: 100%;
+        max-width: 100%;
+        min-height: 100vh;
+        border: none;
+        border-top: 4px solid #2563eb;
+        padding: 48px 24px 32px 24px;
+        box-shadow: none;
+        background: #ffffff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .logo-area {
+        margin-bottom: 32px;
+      }
+      
+      .logo-title {
+        font-size: 2rem;
+      }
+
+      input[type="text"], input[type="password"] {
+        padding: 15px 15px 15px 44px;
+        font-size: 0.95rem;
+      }
+
+      .btn-login {
+        padding: 16px;
+        margin-top: 24px;
+      }
+
+      .footer-links {
+        margin-top: 36px;
+        gap: 16px;
+      }
+      .footer-link {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+      }
+    }
+
     /* 애니메이션 */
     .login-card {
       animation: fadeIn 0.5s ease-out;
@@ -326,16 +379,9 @@
 </head>
 <body>
   <div class="login-card">
-    <div class="shield-tooltip-container">
-      <svg class="shield-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-      </svg>
-      <div class="tooltip-text">이 페이지는 인가된 관리자만 접근 가능합니다</div>
-    </div>
-
     <div class="logo-area">
-      <span class="admin-badge">ADMIN</span>
-      <div class="logo-title">옹진 관광 쿠폰</div>
+      <span class="logo-subtitle">옹진 관광 쿠폰</span>
+      <div class="logo-title">관리자 로그인</div>
     </div>
 
     <form id="login-form" novalidate>

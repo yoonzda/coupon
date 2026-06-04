@@ -28,11 +28,14 @@ let refreshQueue = []
 
 function redirectToLogin() {
   const path = window.location.pathname
+  if (path.includes('/tourist/landing')) {
+    return
+  }
   let target = '/tourist/index.html'
   if (path.includes('/admin/')) {
     target = '/admin/login.html'
   } else if (path.includes('/merchant/')) {
-    target = '/merchant/index.html'
+    target = '/merchant/login.html'
   } else if (path.includes('/issuer/')) {
     target = '/issuer/login.html'
   }
@@ -152,7 +155,21 @@ export const api = {
   delete: (path)        => request('DELETE', path),
 }
 
-export { getToken, setTokens, clearTokens }
+export { getToken, setTokens, clearTokens, isTokenExpired }
+
+function isTokenExpired(token) {
+  if (!token) return true;
+  if (token === 'test_dummy_jwt_token') return false;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return true;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (!payload.exp) return false;
+    return payload.exp * 1000 < Date.now();
+  } catch (e) {
+    return true;
+  }
+}
 
 // ── 토스트 알림 ─────────────────────────────────────
 export function showToast(msg, type = '') {

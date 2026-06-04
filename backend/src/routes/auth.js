@@ -382,4 +382,83 @@ router.post('/refresh',
   }
 );
 
+// ── 가맹점 입점 신청 ──
+router.post('/merchant/apply',
+  async (req, res, next) => {
+    const {
+      ownerName,
+      phone,
+      shopName,
+      storePhone,
+      category,
+      address,
+      images, // array or stringified JSON
+      businessHours,
+      businessNo,
+      businessCertImage,
+      bankName,
+      accountNo,
+      bankbookImage,
+      username,
+      password,
+      lat,
+      lng
+    } = req.body;
+
+    if (!ownerName || !phone || !shopName || !address || !category || !username || !password) {
+      return res.status(400).json({ success: false, message: '필수 정보를 모두 입력해 주세요.' });
+    }
+
+    const pool = require('../config/database');
+    const bcrypt = require('bcryptjs');
+    
+    try {
+      // 1. 아이디 중복 체크
+      const [existingUser] = await pool.execute(
+        `SELECT id FROM merchants WHERE username = ? LIMIT 1`,
+        [username]
+      );
+      if (existingUser.length > 0) {
+        return res.status(400).json({ success: false, message: '이미 존재하는 아이디입니다.' });
+      }
+
+      // 2. 전화번호 중복 체크
+      const phoneHash = hashPhone(phone.replace(/\D/g, ''));
+      const [existingPhone] = await pool.execute(
+        `SELECT id FROM merchants WHERE phone_hash = ? LIMIT 1`,
+        [phoneHash]
+      );
+      if (existingPhone.length > 0) {
+        return res.status(400).json({ success: false, message: '이미 등록된 휴대폰 번호입니다.' });
+      }
+
+      // 3. 비밀번호 해싱
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      // 4. 이미지 및 필드 포맷
+      const formattedPhone = phone.replace(/\D/g, '').replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3');
+      const formattedStorePhone = storePhone ? storePhone.replace(/\D/g, '').replace(/(\d{2,3})(\d{3,4})(\d{4})/, '$1-$2-$3') : null;
+      const imagesJson = Array.isArray(images) ? JSON.stringify(images) : images || null;
+
+      // 5. DB 저장
+      await pool.execute(
+        `INSERT INTO merchants (
+          name, owner_name, phone, phone_hash, store_phone, category, address, images,
+          business_hours, business_no, business_cert_image, bank_name, account_no, bankbook_image,
+          username, password_hash, status, applied_at, lat, lng
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), ?, ?)`,
+        [
+          shopName, ownerName, formattedPhone, phoneHash, formattedStorePhone, category, address, imagesJson,
+          businessHours, businessNo, businessCertImage, bankName, accountNo, bankbookImage,
+          username, passwordHash, lat || null, lng || null
+        ]
+      );
+
+      res.json({ success: true, message: '입점 신청이 완료되었습니다.' });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 module.exports = router;

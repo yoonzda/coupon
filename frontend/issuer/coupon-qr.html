@@ -499,6 +499,34 @@
     .modal-input:focus ~ .modal-input-icon {
       stroke: #2563eb;
     }
+    .modal-input-wrap .modal-input {
+      padding-right: 44px !important;
+    }
+    .pw-toggle-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+      z-index: 5;
+    }
+    .pw-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: #64748b;
+      fill: none;
+      transition: stroke 0.2s;
+    }
+    .pw-toggle-btn:hover svg {
+      stroke: #1e293b;
+    }
     .modal-btn {
       width: 100%;
       padding: 14px;
@@ -865,11 +893,17 @@
       
       <div class="password-input-box">
         <div class="modal-input-wrap">
-          <input type="password" class="modal-input" id="issuer-password-input" placeholder="비밀번호 입력" maxlength="20" onkeydown="handlePasswordKeydown(event)" />
+          <input type="password" class="modal-input" id="issuer-password-input" placeholder="비밀번호 입력" onkeydown="handlePasswordKeydown(event)" />
           <svg class="modal-input-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
+          <button type="button" class="pw-toggle-btn" id="pw-toggle-kiosk" aria-label="비밀번호 보기">
+            <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
         </div>
         <button class="modal-btn btn-confirm" onclick="verifyPasswordAndEnter()">확인</button>
       </div>
@@ -933,11 +967,8 @@
     // ── 구버전 로컬스토리지 IP 마이그레이션 ──
     const savedHost = localStorage.getItem('ongjin_kiosk_target_host');
     if (savedHost) {
-      if (savedHost.includes('192.168.') && !savedHost.includes('192.168.0.10')) {
-        const regex = /192\.168\.\d+\.\d+/;
-        localStorage.setItem('ongjin_kiosk_target_host', savedHost.replace(regex, '192.168.0.10'));
-      } else if (savedHost.includes('localhost') || savedHost.includes('127.0.0.1')) {
-        localStorage.setItem('ongjin_kiosk_target_host', savedHost.replace('localhost', '192.168.0.10').replace('127.0.0.1', '192.168.0.10'));
+      if (savedHost.includes('localhost') || savedHost.includes('127.0.0.1') || savedHost.includes('192.168.0.10')) {
+        localStorage.setItem('ongjin_kiosk_target_host', savedHost.replace('localhost', '192.168.0.75').replace('127.0.0.1', '192.168.0.75').replace('192.168.0.10', '192.168.0.75'));
       }
     }
 
@@ -1019,14 +1050,10 @@
       
       let targetOrigin = localStorage.getItem('ongjin_kiosk_target_host');
       
-      // 만약 로컬스토리지에 저장된 값이 아예 localhost 이거나 127.0.0.1 혹은 다른 192.168 대역이면 강제 192.168.0.10 치환
+      // 만약 로컬스토리지에 저장된 값이 아예 localhost 이거나 127.0.0.1 이거나 192.168.0.10 이면 기본 192.168.0.75 치환
       if (targetOrigin) {
-        if (targetOrigin.includes('192.168.') && !targetOrigin.includes('192.168.0.10')) {
-          const regex = /192\.168\.\d+\.\d+/;
-          targetOrigin = targetOrigin.replace(regex, '192.168.0.10');
-          localStorage.setItem('ongjin_kiosk_target_host', targetOrigin);
-        } else if (targetOrigin.includes('localhost') || targetOrigin.includes('127.0.0.1')) {
-          targetOrigin = targetOrigin.replace('localhost', '192.168.0.10').replace('127.0.0.1', '192.168.0.10');
+        if (targetOrigin.includes('localhost') || targetOrigin.includes('127.0.0.1') || targetOrigin.includes('192.168.0.10')) {
+          targetOrigin = targetOrigin.replace('localhost', '192.168.0.75').replace('127.0.0.1', '192.168.0.75').replace('192.168.0.10', '192.168.0.75');
           localStorage.setItem('ongjin_kiosk_target_host', targetOrigin);
         }
       }
@@ -1038,7 +1065,7 @@
       if (targetOrigin.includes('localhost') || targetOrigin.includes('127.0.0.1')) {
         targetOrigin = (serverLanIp && !serverLanIp.startsWith('172.') && !serverLanIp.startsWith('127.')) 
           ? `http://${serverLanIp}:8080` 
-          : `http://192.168.0.10:8080`;
+          : `http://192.168.0.75:8080`;
       }
       
       if (targetOrigin.endsWith('/')) {
@@ -1152,6 +1179,34 @@
         }
       }
     }
+
+    function setupPasswordToggle(inputId, toggleId) {
+      const input = document.getElementById(inputId);
+      const toggle = document.getElementById(toggleId);
+      if (!input || !toggle) return;
+      
+      toggle.addEventListener('click', () => {
+        if (input.type === 'password') {
+          input.type = 'text';
+          toggle.innerHTML = `
+            <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+          `;
+        } else {
+          input.type = 'password';
+          toggle.innerHTML = `
+            <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          `;
+        }
+      });
+    }
+
+    setupPasswordToggle('issuer-password-input', 'pw-toggle-kiosk');
 
     // 초기 로드 실행
     loadAllocation();

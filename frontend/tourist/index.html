@@ -449,13 +449,35 @@
     </script>
 
     <script type="module">
-      import { api, getToken } from '../shared/js/api.js'
+      import { api, getToken, setTokens, clearTokens, isTokenExpired } from '../shared/js/api.js'
       import { t, bindLanguageSwitcher } from '../shared/js/i18n.js';
       bindLanguageSwitcher('lang-switcher-tourist');
       
-      if (getToken() && getToken() !== 'test_dummy_jwt_token') {
-        window.location.href = '/tourist/mypage.html';
+      async function checkAuthAndRedirect() {
+        const token = getToken();
+        if (token && token !== 'test_dummy_jwt_token') {
+          if (isTokenExpired(token)) {
+            const refreshToken = localStorage.getItem('ongjin_refresh');
+            if (refreshToken) {
+              try {
+                const res = await api.post('/auth/refresh', { refreshToken });
+                if (res.success) {
+                  setTokens(res.token, res.refresh);
+                  window.location.href = '/tourist/mypage.html';
+                  return;
+                }
+              } catch (e) {
+                clearTokens();
+              }
+            } else {
+              clearTokens();
+            }
+          } else {
+            window.location.href = '/tourist/mypage.html';
+          }
+        }
       }
+      checkAuthAndRedirect();
 
       // ── 휴대폰 인증번호 자동 하이픈 바인딩 ──
       const phoneInput = document.getElementById('phone-input');

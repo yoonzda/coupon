@@ -50,7 +50,7 @@ const otpLimiter = rateLimit({
 });
 
 // ── 공통 미들웨어 ─────────────────────────────────
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }));
 
