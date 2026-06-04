@@ -23,10 +23,21 @@ async function loadUsers() {
   }
 }
 
+function getMaskedPhone(nickname) {
+  if (!nickname) return '미인증';
+  const clean = nickname.replace(/[^0-9]/g, '');
+  if (clean.startsWith('010') && clean.length >= 10) {
+    const part1 = clean.substring(0, 3);
+    const part3 = clean.substring(clean.length - 4);
+    return `${part1}-****-${part3}`;
+  }
+  return nickname; // Fallback for seed data nicknames (e.g. '바다별')
+}
+
 function renderUsers(users) {
   tbody.innerHTML = '';
   if (users.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" class="table-placeholder">등록된 회원이 없습니다.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="3" class="table-placeholder">등록된 회원이 없습니다.</td></tr>';
     return;
   }
 
@@ -35,17 +46,13 @@ function renderUsers(users) {
     tr.id = 'user-row-' + u.id;
     tr.classList.add('row-clickable');
     
-    // 전화번호 처리
-    let phoneStr = '미인증';
-    if(u.phone_hash && u.phone_hash !== 'null' && u.phone_hash.length > 5) {
-      phoneStr = '010-****-' + u.phone_hash.substring(u.phone_hash.length - 4);
-    }
+    // 전화번호 처리 (nickname 컬럼에 평문 전화번호가 들어있으므로 이를 이용해 마스킹)
+    const phoneStr = getMaskedPhone(u.nickname);
 
     // 가입 일시 포맷팅
     const regDateStr = u.created_at ? new Date(u.created_at).toLocaleString('ko-KR') : '—';
 
     tr.innerHTML = `
-      <td class="user-nickname">#${u.id}</td>
       <td class="user-nickname">${phoneStr}</td>
       <td class="user-phone">${regDateStr}</td>
       <td>

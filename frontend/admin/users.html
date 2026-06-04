@@ -35,6 +35,10 @@
       gap: 8px;
       justify-content: center;
     }
+
+    .col-phone { width: 45%; }
+    .col-date { width: 35%; }
+    .col-actions { width: 20%; }
   </style>
 </head>
 <body>
@@ -59,14 +63,13 @@
           <table class="admin-table">
             <thead>
               <tr>
-                <th class="col-id">회원 번호</th>
                 <th class="col-phone">전화번호</th>
                 <th class="col-date">가입 일시</th>
                 <th class="col-actions">관리</th>
               </tr>
             </thead>
             <tbody id="usersTableBody">
-              <tr><td colspan="4" class="table-placeholder">데이터를 불러오는 중입니다...</td></tr>
+              <tr><td colspan="3" class="table-placeholder">데이터를 불러오는 중입니다...</td></tr>
             </tbody>
           </table>
         </div>

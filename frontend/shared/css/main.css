@@ -982,6 +982,7 @@ select::placeholder {
 .col-actions { width: 20%; }
 
 .col-quarter { width: 25%; }
+.col-third { width: 33.33%; }
 
 .card-title-bar {
   padding: 16px;
