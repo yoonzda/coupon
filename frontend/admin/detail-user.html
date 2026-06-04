@@ -50,62 +50,10 @@
       border: 1px solid #e2e8f0;
       padding: 24px;
       margin-bottom: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
-    }
-    @media (min-width: 640px) {
-      .profile-container {
-        flex-direction: row;
-        align-items: center;
-        gap: 32px;
-      }
-    }
-    .profile-avatar-area {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .profile-avatar {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-    }
-    .profile-avatar svg {
-      width: 28px;
-      height: 28px;
-    }
-    .profile-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .profile-role-badge {
-      display: inline-flex;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #475569;
-      background: #f1f5f9;
-      padding: 2px 8px;
-      border-radius: 4px;
-      width: fit-content;
-    }
-    .profile-name {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #0f172a;
-    }
-    .profile-details-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 16px;
-      flex: 1;
+      box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
     }
     .profile-detail-card {
       display: flex;
@@ -216,23 +164,6 @@
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
-    }
-    .coupon-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-    }
-    .coupon-card.type-available::before {
-      background: #3b82f6;
-    }
-    .coupon-card.type-used::before {
-      background: #22c55e;
-    }
-    .coupon-card.type-expired::before {
-      background: #ef4444;
     }
     .coupon-card:hover {
       transform: translateY(-4px);
@@ -359,39 +290,26 @@
 
       <!-- 프로필 정보 요약 -->
       <div class="profile-container">
-        <div class="profile-avatar-area">
-          <div class="profile-avatar">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+        <div class="profile-detail-card">
+          <div class="profile-detail-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
             </svg>
           </div>
-          <div class="profile-meta">
-            <span class="profile-role-badge">관광객</span>
-            <h3 class="profile-name">일반 회원</h3>
+          <div class="profile-detail-info">
+            <span class="profile-detail-label">전화번호</span>
+            <span class="profile-detail-value" id="profile-phone">-</span>
           </div>
         </div>
-        <div class="profile-details-grid">
-          <div class="profile-detail-card">
-            <div class="profile-detail-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-              </svg>
-            </div>
-            <div class="profile-detail-info">
-              <span class="profile-detail-label">전화번호</span>
-              <span class="profile-detail-value" id="profile-phone">-</span>
-            </div>
+        <div class="profile-detail-card">
+          <div class="profile-detail-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+            </svg>
           </div>
-          <div class="profile-detail-card">
-            <div class="profile-detail-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-              </svg>
-            </div>
-            <div class="profile-detail-info">
-              <span class="profile-detail-label">가입 일시</span>
-              <span class="profile-detail-value" id="profile-regdate">-</span>
-            </div>
+          <div class="profile-detail-info">
+            <span class="profile-detail-label">가입 일시</span>
+            <span class="profile-detail-value" id="profile-regdate">-</span>
           </div>
         </div>
       </div>
@@ -539,7 +457,6 @@
           card.className = 'coupon-card type-available';
           card.innerHTML = `
             <div class="coupon-card-top">
-              <span class="status-badge badge-available">사용 전</span>
               <span class="coupon-amount">${amountStr}</span>
             </div>
             <div class="coupon-card-divider"></div>
