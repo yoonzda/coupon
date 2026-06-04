@@ -211,39 +211,20 @@
           <thead>
             <tr>
               <th>상점명</th>
-              <th>대표자 및 연락처</th>
+              <th>카테고리</th>
+              <th>대표자 성명</th>
+              <th>연락처</th>
               <th>주소</th>
               <th>신청일</th>
               <th>관리</th>
             </tr>
           </thead>
           <tbody id="merchant-list">
-            <tr><td colspan="5" class="text-center" style="padding: 40px;">데이터 로드 중...</td></tr>
+            <tr><td colspan="7" class="text-center" style="padding: 40px;">데이터 로드 중...</td></tr>
           </tbody>
         </table>
       </div>
     </main>
-  </div>
-
-  <!-- 가맹점 상세 보기 모달 -->
-  <div id="merchant-detail-modal" class="modal-overlay">
-    <div class="modal-container" style="width: 580px; max-width: 90%; max-height: 85vh; overflow-y: auto; text-align: left; padding: 32px 28px;">
-      <button type="button" class="modal-close-x" onclick="window.closeMerchantDetails()" aria-label="닫기">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-      <h3 class="modal-title" style="margin-bottom: 24px; font-weight:700; font-size:1.3rem;">가맹점 가입 신청 상세</h3>
-      
-      <div id="detail-modal-content">
-        <!-- JS 렌더링 -->
-      </div>
-      
-      <div style="margin-top: 32px; display:flex; justify-content:flex-end; gap:12px;" id="detail-modal-footer">
-        <!-- JS 렌더링 -->
-      </div>
-    </div>
   </div>
 
   <div id="toast-container"></div>
@@ -260,7 +241,7 @@
     function renderMerchants(data) {
       const list = document.getElementById('merchant-list');
       if (!data || data.length === 0) {
-        list.innerHTML = `<tr><td colspan="5" class="text-center" style="padding: 40px; color: #64748b;">내역이 없습니다.</td></tr>`;
+        list.innerHTML = `<tr><td colspan="7" class="text-center" style="padding: 40px; color: #64748b;">내역이 없습니다.</td></tr>`;
         return;
       }
 
@@ -269,15 +250,11 @@
         const displayStatus = m.status || currentStatus;
         return `
           <tr id="row-${m.id}">
-            <td>
-              <div style="font-weight:700; font-size:1rem; color: #1e293b;">${m.name || '이름 없음'}</div>
-              <div style="font-size:0.8rem; color:#64748b; margin-top:4px;">${m.category || '-'}</div>
-            </td>
-            <td>
-              <div style="font-weight:600; color: #334155;">${m.owner_name || '-'}</div>
-              <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">${m.phone || '-'}</div>
-            </td>
-            <td style="color: #64748b; font-size: 0.85rem; max-width: 230px;">
+            <td style="font-weight:700; font-size:0.95rem; color: #1e293b;">${m.name || '이름 없음'}</td>
+            <td style="font-size:0.88rem; color:#475569;">${m.category || '-'}</td>
+            <td style="font-weight:600; color: #334155; font-size:0.88rem;">${m.owner_name || '-'}</td>
+            <td style="font-size:0.88rem; color:#475569;">${m.phone || '-'}</td>
+            <td style="color: #64748b; font-size: 0.85rem; max-width: 250px;">
               ${m.address || '-'}
               ${displayStatus === 'rejected' && m.rejection_reason ? `
                 <div style="margin-top:8px; padding:8px; background:#fff1f2; border-radius:4px; color:#e11d48; font-size:0.75rem;">
@@ -285,7 +262,7 @@
                 </div>
               ` : ''}
             </td>
-            <td>${date}</td>
+            <td style="font-size:0.85rem; color:#64748b;">${date}</td>
             <td>
               <div class="action-btns">
                 <button class="btn btn-neutral btn-sm" onclick="window.showMerchantDetails(${m.id})">상세보기</button>
@@ -303,110 +280,8 @@
       }).join('');
     }
 
-    // ── 상세 보기 모달 ──
     window.showMerchantDetails = (id) => {
-      const m = allMerchantsCache.find(x => x.id === id);
-      if (!m) return;
-
-      const imagesList = m.images ? JSON.parse(m.images) : [];
-
-      document.getElementById('detail-modal-content').innerHTML = `
-        <div class="detail-grid">
-          <div class="detail-label">상호명</div>
-          <div class="detail-val" style="font-weight:700; color:#0f172a;">${m.name || '-'}</div>
-          
-          <div class="detail-label">대표자 성명</div>
-          <div class="detail-val">${m.owner_name || '-'}</div>
-
-          <div class="detail-label">연락처 (관리자용)</div>
-          <div class="detail-val">${m.phone || '-'}</div>
-
-          <div class="detail-label">가게 전화번호</div>
-          <div class="detail-val">${m.store_phone || '-'}</div>
-
-          <div class="detail-label">카테고리</div>
-          <div class="detail-val">${m.category || '-'}</div>
-
-          <div class="detail-label">위치 (주소)</div>
-          <div class="detail-val">
-            ${m.address || '-'}
-            ${m.lat && m.lng ? `
-              <a href="https://map.naver.com/p/directions/-/${m.lng},${m.lat},${encodeURIComponent(m.name)}/-/transit" target="_blank" style="margin-left: 8px; font-size: 0.8rem; color: #10b981; text-decoration: underline; font-weight: 600;">
-                [네이버 길찾기 확인]
-              </a>
-            ` : '<span style="color:#ef4444; font-size:0.8rem; margin-left:8px;">(위치 좌표 없음)</span>'}
-          </div>
-
-          <div class="detail-label">영업시간</div>
-          <div class="detail-val">${m.business_hours || '-'}</div>
-        </div>
-
-        <div class="detail-section-hdr">가게 이미지 (${imagesList.length}장)</div>
-        <div class="detail-images-gallery">
-          ${imagesList.map(img => `
-            <div class="detail-img-box" onclick="window.openImageLarge('${img}')">
-              <img src="${img}" alt="가게 이미지" />
-            </div>
-          `).join('') || '<span style="color:#94a3b8;font-size:0.85rem;">등록된 이미지가 없습니다.</span>'}
-        </div>
-
-        <div class="detail-section-hdr">서류 및 정산 계좌 정보</div>
-        <div class="detail-grid">
-          <div class="detail-label">사업자번호</div>
-          <div class="detail-val">${m.business_no || '-'}</div>
-
-          <div class="detail-label">은행 / 계좌번호</div>
-          <div class="detail-val">${m.bank_name || '-'} / ${m.account_no || '-'}</div>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:20px;">
-          <div>
-            <div style="font-size:0.8rem; font-weight:700; color:#64748b; margin-bottom:6px;">사업자등록증</div>
-            ${m.business_cert_image ? `
-              <img class="doc-img-view" src="${m.business_cert_image}" onclick="window.openImageLarge('${m.business_cert_image}')" alt="사업자등록증" />
-            ` : '<span style="color:#94a3b8;font-size:0.85rem;">미등록</span>'}
-          </div>
-          <div>
-            <div style="font-size:0.8rem; font-weight:700; color:#64748b; margin-bottom:6px;">통장사본</div>
-            ${m.bankbook_image ? `
-              <img class="doc-img-view" src="${m.bankbook_image}" onclick="window.openImageLarge('${m.bankbook_image}')" alt="통장사본" />
-            ` : '<span style="color:#94a3b8;font-size:0.85rem;">미등록</span>'}
-          </div>
-        </div>
-
-        <div class="detail-section-hdr">신청 및 계정 정보</div>
-        <div class="detail-grid">
-          <div class="detail-label">가입 희망 ID</div>
-          <div class="detail-val" style="font-weight:600;">${m.username || '-'}</div>
-          
-          <div class="detail-label">신청일자</div>
-          <div class="detail-val">${m.applied_at ? fmtDate(m.applied_at) : '-'}</div>
-        </div>
-      `;
-
-      const footer = document.getElementById('detail-modal-footer');
-      if (m.status === 'pending') {
-        footer.innerHTML = `
-          <button class="btn btn-primary" onclick="window.updateMerchantStatus(${m.id}, 'approved')">승인</button>
-          <button class="btn btn-neutral-outline" onclick="window.updateMerchantStatus(${m.id}, 'rejected')">반려</button>
-          <button class="btn btn-neutral" onclick="window.closeMerchantDetails()">닫기</button>
-        `;
-      } else {
-        footer.innerHTML = `
-          <button class="btn btn-neutral" onclick="window.closeMerchantDetails()">닫기</button>
-        `;
-      }
-
-      document.getElementById('merchant-detail-modal').classList.add('active');
-    };
-
-    window.closeMerchantDetails = () => {
-      document.getElementById('merchant-detail-modal').classList.remove('active');
-    };
-
-    window.openImageLarge = (src) => {
-      const w = window.open();
-      w.document.write(`<img src="${src}" style="max-width:100%; border:none; display:block; margin: 20px auto;" />`);
+      window.location.href = `detail-merchant.html?id=${id}`;
     };
 
     window.updateMerchantStatus = async (id, status) => {
@@ -422,21 +297,11 @@
       }
 
       try {
-        await api.post(`/admin/merchants/${numId}/status`, { status, reason }); // Note: updated to use standard post or patch based on routing
+        await api.patch(`/admin/merchants/${numId}/status`, { status, reason });
         showToast(`${label} 처리가 완료되었습니다.`, 'success');
-        window.closeMerchantDetails();
         loadMerchants();
       } catch (err) {
-        // Fallback to try PATCH if POST is not defined on status patch, but backend src/routes/admin.js uses PATCH:
-        // router.patch('/merchants/:id/status'
-        try {
-          await api.patch(`/admin/merchants/${numId}/status`, { status, reason });
-          showToast(`${label} 처리가 완료되었습니다.`, 'success');
-          window.closeMerchantDetails();
-          loadMerchants();
-        } catch (patchErr) {
-          showToast(`처리 실패: ${patchErr.message}`, 'error');
-        }
+        showToast(`처리 실패: ${err.message}`, 'error');
       }
     };
 

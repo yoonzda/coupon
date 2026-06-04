@@ -167,6 +167,20 @@ router.get('/merchants', authenticate, authorize('admin'), async (req, res, next
   } catch (err) { next(err); }
 });
 
+// ── 가맹점 단건 상세 조회 ──────────────────────────────
+router.get('/merchants/:id', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const [[merchant]] = await pool.execute(
+      `SELECT * FROM merchants WHERE id = ?`,
+      [req.params.id]
+    );
+    if (!merchant) {
+      return res.status(404).json({ success: false, message: '가맹점을 찾을 수 없습니다.' });
+    }
+    res.json({ success: true, data: merchant });
+  } catch (err) { next(err); }
+});
+
 // ── 정산 목록 조회 ────────────────────────────────
 router.get('/settlements', authenticate, authorize('admin'), async (req, res, next) => {
   const { period } = req.query; // 'YYYY-MM'

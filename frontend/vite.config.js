@@ -37,6 +37,7 @@ export default defineConfig({
         'admin-managers':   resolve(__dirname, 'admin/managers.html'),
         'admin-users':      resolve(__dirname, 'admin/users.html'),
         'admin-detail-user': resolve(__dirname, 'admin/detail-user.html'),
+        'admin-detail-merchant': resolve(__dirname, 'admin/detail-merchant.html'),
         'admin-issuers':    resolve(__dirname, 'admin/issuers.html'),
         'admin-register-issuer': resolve(__dirname, 'admin/register-issuer.html'),
         'admin-register-manager': resolve(__dirname, 'admin/register-manager.html'),
