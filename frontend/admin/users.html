@@ -39,6 +39,33 @@
     .col-phone { width: 45%; }
     .col-date { width: 35%; }
     .col-actions { width: 20%; }
+
+    .table-actions-bar {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+
+    .search-input {
+      padding: 10px 16px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #fff;
+      color: #0f172a;
+      width: 320px;
+      box-sizing: border-box;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary, #475569);
+      box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.15);
+      background: #fff;
+    }
   </style>
 </head>
 <body>
@@ -56,9 +83,18 @@
         </div>
       </header>
 
+      <!-- 회원 목록 외부 타이틀 -->
+      <div class="subpage-title-area">
+        <h2 class="page-subtitle">회원 목록</h2>
+      </div>
+
+      <!-- 검색 바 -->
+      <div class="table-actions-bar">
+        <input type="text" class="search-input" id="search-phone" placeholder="전화번호 또는 뒷 4자리 검색..." />
+      </div>
+
       <!-- 회원 목록 카드 -->
       <div class="admin-card">
-        <div class="card-title-bar">회원 목록</div>
         <div class="table-scroll-container">
           <table class="admin-table">
             <thead>

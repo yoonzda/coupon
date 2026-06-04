@@ -799,6 +799,7 @@ html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer .admin-logout-btn .a
   letter-spacing: 0.05em;
   border-bottom: 1px solid #e2e8f0;
   border-top: none;
+  text-align: center;
 }
 
 .admin-table td {
@@ -806,6 +807,7 @@ html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer .admin-logout-btn .a
   color: #334155;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
+  text-align: center;
 }
 
 /* 마지막 행 테두리 제거 */

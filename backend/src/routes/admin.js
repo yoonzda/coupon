@@ -448,10 +448,16 @@ router.get('/users/:id/coupons', authenticate, async (req, res, next) => {
   const userId = req.params.id;
   try {
     const [rows] = await pool.execute(
-      `SELECT id, code_hash, coupon_type, face_value, status, issued_at, expires_at, used_at
-       FROM coupons
-       WHERE issued_to = ?
-       ORDER BY issued_at DESC`,
+      `SELECT c.id, c.code_hash, c.coupon_type, c.face_value, c.status, c.issued_at, c.used_at,
+              i.name AS issuer_name,
+              m.name AS merchant_name
+       FROM coupons c
+       LEFT JOIN issuer_allocations ia ON c.issuer_allocation_id = ia.id
+       LEFT JOIN issuers i ON ia.issuer_id = i.id
+       LEFT JOIN coupon_transactions ct ON c.id = ct.coupon_id
+       LEFT JOIN merchants m ON ct.merchant_id = m.id
+       WHERE c.issued_to = ?
+       ORDER BY c.issued_at DESC`,
       [userId]
     );
     res.json({ success: true, data: rows });

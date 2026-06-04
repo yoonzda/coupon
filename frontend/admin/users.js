@@ -97,4 +97,28 @@ window.deleteUser = async function(event, userId) {
   }
 };
 
+// 검색 기능 구현 (전화번호 숫자 매칭 및 닉네임 부분 일치 검색)
+const searchInput = document.getElementById('search-phone');
+if (searchInput) {
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    if (!query) {
+      renderUsers(currentUsers);
+      return;
+    }
+    
+    const isNumeric = /^[0-9]+$/.test(query);
+    const filtered = currentUsers.filter(u => {
+      if (!u.nickname) return false;
+      if (isNumeric) {
+        const cleanPhone = u.nickname.replace(/[^0-9]/g, '');
+        return cleanPhone.includes(query);
+      } else {
+        return u.nickname.toLowerCase().includes(query.toLowerCase());
+      }
+    });
+    renderUsers(filtered);
+  });
+}
+
 loadUsers();
