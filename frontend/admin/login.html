@@ -385,6 +385,10 @@
     </div>
 
     <form id="login-form" novalidate>
+      <!-- 브라우저 자동완성 방지용 더미 필드 -->
+      <input type="text" style="display:none;" aria-hidden="true" />
+      <input type="password" style="display:none;" aria-hidden="true" />
+
       <div class="form-group">
         <label for="username">아이디</label>
         <div class="input-wrap">
@@ -393,7 +397,7 @@
             id="username"
             name="username"
             placeholder="아이디를 입력하세요"
-            autocomplete="username"
+            autocomplete="off"
             required
           />
           <svg class="input-icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
@@ -411,7 +415,7 @@
             id="password"
             name="password"
             placeholder="비밀번호를 입력하세요"
-            autocomplete="current-password"
+            autocomplete="off"
             required
           />
           <svg class="input-icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
