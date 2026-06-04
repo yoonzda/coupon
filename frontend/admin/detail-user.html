@@ -107,6 +107,20 @@
       padding: 4px;
       border-radius: 20px;
       gap: 2px;
+      position: relative;
+      z-index: 1;
+    }
+    .coupon-tab-indicator {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 0;
+      width: 0;
+      background: #475569;
+      border-radius: 16px;
+      z-index: 0;
+      transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      box-shadow: 0 2px 8px rgba(71, 85, 105, 0.25);
     }
     .coupon-tab-pill {
       padding: 8px 18px;
@@ -118,17 +132,19 @@
       align-items: center;
       gap: 6px;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: color 0.2s ease;
       background: none;
       border: none;
+      position: relative;
+      z-index: 2;
     }
     .coupon-tab-pill:hover {
       color: #0f172a;
     }
     .coupon-tab-pill.active {
-      background: #475569;
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(71, 85, 105, 0.25);
+      background: none !important;
+      color: #fff !important;
+      box-shadow: none !important;
     }
     .tab-count-badge {
       display: inline-flex;
@@ -317,6 +333,7 @@
       <!-- 3탭 버튼 영역 (목록 컨테이너와 분리됨) -->
       <div class="coupon-tabs-outer">
         <div class="coupon-tabs-container">
+          <div class="coupon-tab-indicator"></div>
           <button class="coupon-tab-pill active" id="tab-btn-available" onclick="window.switchTab('available')">
             사용 전
             <span class="tab-count-badge" id="count-available">0</span>
@@ -396,6 +413,23 @@
       }
     }
 
+    function updateTabIndicator(immediate = false) {
+      const container = document.querySelector('.coupon-tabs-container');
+      const activePill = container.querySelector('.coupon-tab-pill.active');
+      const indicator = container.querySelector('.coupon-tab-indicator');
+      if (activePill && indicator) {
+        if (immediate) {
+          indicator.style.setProperty('transition', 'none', 'important');
+        }
+        indicator.style.left = `${activePill.offsetLeft}px`;
+        indicator.style.width = `${activePill.offsetWidth}px`;
+        if (immediate) {
+          indicator.offsetHeight; // Force reflow
+          indicator.style.removeProperty('transition');
+        }
+      }
+    }
+
     let userCoupons = [];
     let currentTab = 'available';
 
@@ -403,6 +437,7 @@
       currentTab = tabName;
       document.querySelectorAll('.coupon-tab-pill').forEach(btn => btn.classList.remove('active'));
       document.getElementById(`tab-btn-${tabName}`).classList.add('active');
+      updateTabIndicator();
       renderCoupons();
     };
 
@@ -546,6 +581,8 @@
           userCoupons = data.data;
           updateTabCounts();
           renderCoupons();
+          updateTabIndicator(true);
+          window.addEventListener('resize', () => updateTabIndicator(true));
         } else {
           document.getElementById('couponsCardContainer').innerHTML = '<div class="card-placeholder status-red">쿠폰 내역 조회 실패</div>';
         }
