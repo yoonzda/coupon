@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>쿠폰 관리 | 옹진 관광 관리자</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <script>
     (function() {
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
@@ -134,24 +137,48 @@
         </div>
       </header>
 
-      <!-- 쿠폰 조작 버튼 영역 -->
-      <div class="table-actions-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px; justify-content: flex-start;">
-        <button class="btn btn-neutral btn-sm" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer;" onclick="location.href='allocate-coupon.html'">쿠폰 배정하기</button>
+      <!-- 예산 현황 영역 -->
+      <div style="margin-top: 24px; margin-bottom: 12px;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">예산 현황</h3>
+      </div>
+      <div class="admin-card" style="margin-bottom: 24px; padding: 24px; border-radius: 8px;">
+        <!-- 큼직한 배정액 / 전체예산 표시 -->
+        <div style="text-align: center; margin: 16px 0 16px 0; display: flex; align-items: baseline; justify-content: center;">
+          <span id="budget-allocated" style="font-family: 'Inter', sans-serif; font-size: 2.5rem; font-weight: 800; color: #0284c7; line-height: 1;">—</span>
+          <span style="font-family: 'Inter', sans-serif; font-size: 1.8rem; font-weight: 400; color: #cbd5e1; margin: 0 14px; line-height: 1;">/</span>
+          <span id="budget-total" style="font-family: 'Inter', sans-serif; font-size: 2.5rem; font-weight: 800; color: #0f172a; line-height: 1;">—</span>
+          <span style="font-size: 1.2rem; font-weight: 600; color: #475569; margin-left: 6px;">원</span>
+        </div>
+        <!-- 프로그레스 바 -->
+        <div style="background: #e2e8f0; height: 10px; border-radius: 99px; overflow: hidden; display: flex; margin-bottom: 20px;">
+          <div id="budget-progress-bar" style="background: #0284c7; width: 0%; height: 100%; transition: width 0.3s ease;"></div>
+        </div>
+        <!-- 중앙 정렬된 예산 설정 수정 버튼 -->
+        <div style="display: flex; justify-content: center;">
+          <button class="btn btn-neutral btn-sm" onclick="location.href='register-budget.html'" style="height: 38px; padding: 0 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin: 0;">예산 설정 수정</button>
+        </div>
       </div>
 
-      <!-- 필터 영역 (버튼 아래 줄, 왼쪽 정렬) -->
-      <div class="filter-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; justify-content: flex-start;">
-        <select id="filter-status" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 120px; outline: none;">
-          <option value="all">전체 상태</option>
-          <option value="available">사용 가능</option>
-          <option value="used">사용 완료</option>
-          <option value="expired">기간 만료</option>
-        </select>
-        <select id="filter-type" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 120px; outline: none;">
-          <option value="all">전체 구분</option>
-          <option value="digital">디지털 쿠폰</option>
-          <option value="paper">종이 쿠폰</option>
-        </select>
+      <!-- 필터 및 쿠폰 배정 영역 (동일 라인 배치) -->
+      <div class="filter-bar" style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px; justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">상태 :</span>
+            <select id="filter-status" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 100px; outline: none;">
+              <option value="all">전체</option>
+              <option value="available">사용전</option>
+              <option value="used">사용 완료</option>
+              <option value="expired">만료</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">발행처 :</span>
+            <select id="filter-issuer" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 130px; outline: none;">
+              <option value="all">전체</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-neutral btn-sm" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer; margin: 0;" onclick="location.href='allocate-coupon.html'">쿠폰 배정하기</button>
       </div>
 
       <!-- 전체 쿠폰 발급 및 사용 현황 -->
@@ -159,18 +186,15 @@
         <table class="admin-table">
           <thead>
             <tr>
-              <th>쿠폰 ID</th>
-              <th>구분</th>
-              <th>액면가</th>
-              <th>수령인 (관광객)</th>
-              <th>발행처 / 출처</th>
+              <th>금액</th>
+              <th>전화번호</th>
+              <th>발행처</th>
               <th>상태</th>
-              <th>발급일시</th>
-              <th>사용일시</th>
+              <th>사용처</th>
             </tr>
           </thead>
           <tbody id="coupon-status-list">
-            <tr><td colspan="8" class="text-center" style="padding: 30px; color:#64748b;">데이터를 불러오는 중입니다...</td></tr>
+            <tr><td colspan="5" class="text-center" style="padding: 30px; color:#64748b;">데이터를 불러오는 중입니다...</td></tr>
           </tbody>
         </table>
       </div>
@@ -202,6 +226,7 @@
     await requireAdminAuth();
     
     let couponsCache = [];
+    let issuersCache = [];
 
     async function loadCouponStatusList() {
       try {
@@ -209,61 +234,111 @@
         if (res.success && res.data) {
           couponsCache = res.data;
           renderCouponStatusTable(couponsCache);
+          populateIssuerFilter(issuersCache, couponsCache);
         }
       } catch (e) {
         console.error('쿠폰 사용 현황 로드 실패', e);
-        document.getElementById('coupon-status-list').innerHTML = `<tr><td colspan="8" class="text-center" style="padding: 30px; color:#ef4444;">데이터를 불러오지 못했습니다.</td></tr>`;
+        document.getElementById('coupon-status-list').innerHTML = `<tr><td colspan="5" class="text-center" style="padding: 30px; color:#ef4444;">데이터를 불러오지 못했습니다.</td></tr>`;
       }
     }
 
     function renderCouponStatusTable(data) {
       const list = document.getElementById('coupon-status-list');
       if (!data || data.length === 0) {
-        list.innerHTML = `<tr><td colspan="8" class="text-center" style="padding: 30px; color:#64748b;">쿠폰 내역이 없습니다.</td></tr>`;
+        list.innerHTML = `<tr><td colspan="5" class="text-center" style="padding: 30px; color:#64748b;">쿠폰 내역이 없습니다.</td></tr>`;
         return;
       }
       list.innerHTML = data.map(c => {
-        const typeLabel = c.coupon_type === 'digital' ? '<span class="badge" style="background:#e0f2fe; color:#0369a1; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">디지털</span>' : '<span class="badge" style="background:#f1f5f9; color:#475569; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">종이</span>';
-        
         let statusBadge = '';
         if (c.status === 'available') {
-          statusBadge = '<span class="badge" style="background:#dcfce7; color:#166534; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">사용 가능</span>';
+          statusBadge = '<span class="badge" style="background:#dcfce7; color:#166534; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">사용전</span>';
         } else if (c.status === 'used') {
           statusBadge = '<span class="badge" style="background:#e0f2fe; color:#0369a1; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">사용 완료</span>';
         } else if (c.status === 'expired') {
-          statusBadge = '<span class="badge" style="background:#f1f5f9; color:#64748b; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">기간 만료</span>';
+          statusBadge = '<span class="badge" style="background:#f1f5f9; color:#64748b; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">만료</span>';
         } else {
           statusBadge = `<span class="badge" style="background:#fee2e2; color:#991b1b; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">${c.status}</span>`;
         }
 
-        const tourist = c.tourist_nickname ? `${escapeHtml(c.tourist_nickname)} (${escapeHtml(c.tourist_email || '-')})` : '<span style="color:#94a3b8;">미수령</span>';
+        let phoneDisplay = '<span style="color:#94a3b8;">미수령</span>';
+        if (c.tourist_nickname) {
+          const clean = c.tourist_nickname.replace(/[^0-9]/g, '');
+          if (clean.startsWith('010') && clean.length >= 10) {
+            const part1 = clean.substring(0, 3);
+            const part3 = clean.substring(clean.length - 4);
+            phoneDisplay = `${part1}-****-${part3}`;
+          } else {
+            phoneDisplay = escapeHtml(c.tourist_nickname);
+          }
+        }
+
         const issuer = c.issuer_name ? escapeHtml(c.issuer_name) : '<span style="color:#94a3b8;">키오스크 / 기타</span>';
+        const issuedTimeHtml = c.issued_at ? `<div style="font-size: 0.75rem; color:#64748b; margin-top:2px;">${fmtDate(c.issued_at)}</div>` : '';
+
+        let usageHtml = '<span style="color:#94a3b8;">—</span>';
+        if (c.status === 'used') {
+          const merchant = c.used_merchant_name ? escapeHtml(c.used_merchant_name) : '<span style="color:#94a3b8;">알 수 없음</span>';
+          const usedTimeHtml = c.used_at ? `<div style="font-size: 0.75rem; color:#64748b; margin-top:2px;">${fmtDate(c.used_at)}</div>` : '';
+          usageHtml = `<div>${merchant}</div>${usedTimeHtml}`;
+        }
 
         return `
           <tr>
-            <td><strong>#${c.id}</strong></td>
-            <td>${typeLabel}</td>
             <td style="font-weight:700; color:#0f172a;">${fmtMoney(c.face_value)}</td>
-            <td>${tourist}</td>
-            <td>${issuer}</td>
+            <td>${phoneDisplay}</td>
+            <td><div>${issuer}</div>${issuedTimeHtml}</td>
             <td>${statusBadge}</td>
-            <td>${fmtDate(c.issued_at)}</td>
-            <td>${c.used_at ? fmtDate(c.used_at) : '<span style="color:#94a3b8;">—</span>'}</td>
+            <td>${usageHtml}</td>
           </tr>
         `;
       }).join('');
     }
 
+    function populateIssuerFilter(issuersList, couponsData) {
+      const select = document.getElementById('filter-issuer');
+      const currentVal = select.value;
+      
+      const namesSet = new Set();
+      if (issuersList && issuersList.length > 0) {
+        issuersList.forEach(i => {
+          if (i.name) namesSet.add(i.name);
+        });
+      }
+      if (couponsData && couponsData.length > 0) {
+        couponsData.forEach(c => {
+          if (c.issuer_name) namesSet.add(c.issuer_name);
+        });
+      }
+      
+      const issuers = Array.from(namesSet).sort();
+      
+      let html = '<option value="all">전체</option>';
+      issuers.forEach(issuer => {
+        html += `<option value="${issuer}">${escapeHtml(issuer)}</option>`;
+      });
+      if (couponsData && couponsData.some(c => !c.issuer_name)) {
+        html += '<option value="none">키오스크 / 기타</option>';
+      }
+      select.innerHTML = html;
+      if (Array.from(select.options).some(opt => opt.value === currentVal)) {
+        select.value = currentVal;
+      }
+    }
+
     window.filterCoupons = function() {
       const statusFilter = document.getElementById('filter-status').value;
-      const typeFilter = document.getElementById('filter-type').value;
+      const issuerFilter = document.getElementById('filter-issuer').value;
 
       let filtered = couponsCache;
       if (statusFilter !== 'all') {
         filtered = filtered.filter(c => c.status === statusFilter);
       }
-      if (typeFilter !== 'all') {
-        filtered = filtered.filter(c => c.coupon_type === typeFilter);
+      if (issuerFilter !== 'all') {
+        if (issuerFilter === 'none') {
+          filtered = filtered.filter(c => !c.issuer_name);
+        } else {
+          filtered = filtered.filter(c => c.issuer_name === issuerFilter);
+        }
       }
       renderCouponStatusTable(filtered);
     }
@@ -280,36 +355,64 @@
         let allocations = [];
         
         if (res.success && res.data) {
-          issuers = res.data.issuers || [];
+          issuersCache = res.data.issuers || [];
+          issuers = issuersCache;
           allocations = res.data.allocations || [];
+          populateIssuerFilter(issuersCache, couponsCache);
         }
         
-        const comparisonList = issuers.map((issuer) => {
+        const groups = {};
+        issuers.forEach(issuer => {
           const issuerAllocations = allocations.filter(a => a.issuer_id === issuer.id);
-          
-          const totalAllocated = issuerAllocations.reduce((sum, a) => sum + a.total_count, 0);
-          const totalIssued = issuerAllocations.reduce((sum, a) => sum + a.issued_count, 0);
-          const remaining = totalAllocated - totalIssued;
-          
-          // 사용완료 수 구하기 (couponsCache 기반)
-          const usedCount = couponsCache.filter(c => c.issuer_name === issuer.name && c.status === 'used').length;
-          
-          // 최근 발행 일시 구하기 (allocations 기반)
+          if (issuerAllocations.length === 0) {
+            const key = `${issuer.id}_0`;
+            groups[key] = {
+              issuerId: issuer.id,
+              issuerName: issuer.name,
+              faceValue: 0,
+              totalAllocated: 0,
+              totalIssued: 0,
+              createdDates: [],
+            };
+          } else {
+            issuerAllocations.forEach(a => {
+              const key = `${a.issuer_id}_${a.face_value}`;
+              if (!groups[key]) {
+                groups[key] = {
+                  issuerId: a.issuer_id,
+                  issuerName: issuer.name,
+                  faceValue: a.face_value,
+                  totalAllocated: 0,
+                  totalIssued: 0,
+                  createdDates: [],
+                };
+              }
+              groups[key].totalAllocated += a.total_count;
+              groups[key].totalIssued += a.issued_count;
+              groups[key].createdDates.push(new Date(a.created_at));
+            });
+          }
+        });
+
+        const comparisonList = Object.values(groups).map(g => {
+          const usedCount = couponsCache.filter(
+            c => c.issuer_name === g.issuerName && 
+                 Number(c.face_value) === Number(g.faceValue) && 
+                 c.status === 'used'
+          ).length;
+
           let latestDate = '—';
-          if (issuerAllocations.length > 0) {
-            const dates = issuerAllocations.map(a => new Date(a.created_at));
-            const maxDate = new Date(Math.max(...dates));
+          if (g.createdDates.length > 0) {
+            const maxDate = new Date(Math.max(...g.createdDates));
             latestDate = fmtDate(maxDate);
           }
-          
-          const faceValues = issuerAllocations.map(a => a.face_value);
-          const repFaceValue = faceValues.length > 0 ? Math.max(...faceValues) : 0;
-          
+
           return {
-            name: issuer.name,
-            faceValue: repFaceValue,
-            totalAllocated,
-            totalIssued,
+            name: g.issuerName,
+            displayName: g.issuerName,
+            faceValue: g.faceValue,
+            totalAllocated: g.totalAllocated,
+            totalIssued: g.totalIssued,
             usedCount,
             latestDate,
             reissueCount: 0
@@ -352,18 +455,7 @@
             return `사용완료: ${val.toLocaleString()}장 (${pct}%)`;
           }
         },
-        { label: '최근 발행 일시', key: 'latestDate', format: val => val },
-        { label: '재발행 횟수', key: 'reissueCount', format: val => `${val}회` },
-        { 
-          label: '재발행', 
-          key: 'name', 
-          format: val => `<button class="btn" style="height: 28px; padding: 0 10px; font-size: 0.75rem; font-weight:600; cursor:pointer; background:#334155; color:white; border:none; border-radius:4px; margin: 0 auto; display:block;" onclick="window.reissueCoupons('${escapeHtml(val)}')">재발행</button>`
-        },
-        { 
-          label: '쿠폰 셋팅 수정', 
-          key: 'name', 
-          format: val => `<button class="btn-download" style="height: 28px; padding: 0 10px; font-size: 0.75rem; font-weight:600; cursor:pointer; margin: 0 auto; display:block;" onclick="window.editCouponSettings('${escapeHtml(val)}')">수정</button>`
-        },
+        { label: '최근 발행일시', key: 'latestDate', format: val => val },
         { label: '총 발행 수', key: 'totalAllocated', format: val => `${val.toLocaleString()}장` }
       ];
       
@@ -391,6 +483,52 @@
       showToast(`${issuerName}의 쿠폰 설정 수정 화면으로 이동합니다. (데모)`, 'info');
     }
 
+    async function loadBudgetStatus() {
+      try {
+        const res = await api.get('/admin/budget');
+        if (res.success && res.data) {
+          const { totalBudget, allocatedBudget, remainingBudget } = res.data;
+          
+          document.getElementById('budget-total').innerText = fmtMoney(totalBudget).replace('원', '');
+          document.getElementById('budget-allocated').innerText = fmtMoney(allocatedBudget).replace('원', '');
+          
+          const remEl = document.getElementById('budget-remaining');
+          if (remEl) {
+            remEl.innerHTML = `<strong>${fmtMoney(remainingBudget)}</strong>`;
+            if (remainingBudget < 0) {
+              remEl.style.color = '#ef4444';
+            } else {
+              remEl.style.color = '#16a34a';
+            }
+          }
+
+          const pct = totalBudget > 0 ? Math.round((allocatedBudget / totalBudget) * 100) : 0;
+          const bar = document.getElementById('budget-progress-bar');
+          bar.style.width = `${Math.min(pct, 100)}%`;
+          
+          if (pct >= 100) {
+            bar.style.background = '#ef4444';
+          } else if (pct >= 80) {
+            bar.style.background = '#f97316';
+          } else {
+            bar.style.background = '#0284c7';
+          }
+
+          const pctEl = document.getElementById('budget-percent-used');
+          if (pctEl) {
+            pctEl.innerText = `사용률: ${pct}%`;
+          }
+          const statusEl = document.getElementById('budget-status-text');
+          if (statusEl) {
+            statusEl.innerText = pct >= 100 ? '예산 초과' : pct >= 80 ? '예산 소진 임박' : '안정적';
+            statusEl.style.color = pct >= 100 ? '#ef4444' : pct >= 80 ? '#f97316' : '#64748b';
+          }
+        }
+      } catch (err) {
+        console.error('예산 데이터 로드 실패', err);
+      }
+    }
+
     function renderStarsHtml(rating) {
       let stars = '';
       for (let i = 0; i < 5; i++) {
@@ -406,6 +544,7 @@
     // 초기 로드
     loadCouponStatusList();
     loadComparisonData();
+    loadBudgetStatus();
   </script>
 </body>
 </html>

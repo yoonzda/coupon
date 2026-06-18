@@ -16,6 +16,16 @@ exports.scanCoupon = async (req, res) => {
   try {
     await connection.beginTransaction();
 
+    // 0. 가맹점 상태 체크
+    const [merchants] = await connection.execute(
+      'SELECT status FROM merchants WHERE id = ?',
+      [merchantId]
+    );
+    if (merchants.length === 0 || merchants[0].status !== 'approved') {
+      await connection.rollback();
+      return res.status(403).json({ message: '승인 완료된 가맹점만 결제를 처리할 수 있습니다.' });
+    }
+
     // 1. 쿠폰 정보 조회 (SHA-256 해시 비교)
     // 실제 운영 시에는 crypto.createHash('sha256').update(couponCode + salt).digest('hex') 필요
     // 여기서는 단순화를 위해 평문 또는 매칭되는 해시를 찾는다고 가정
@@ -97,6 +107,15 @@ exports.getTransactions = async (req, res) => {
   const merchantId = req.user.id;
 
   try {
+    // 가맹점 상태 체크
+    const [merchants] = await db.execute(
+      'SELECT status FROM merchants WHERE id = ? LIMIT 1',
+      [merchantId]
+    );
+    if (merchants.length === 0 || merchants[0].status !== 'approved') {
+      return res.status(403).json({ message: '승인 완료된 가맹점만 거래 내역을 볼 수 있습니다.' });
+    }
+
     const [rows] = await db.execute(`
       SELECT ct.*, c.coupon_type
       FROM coupon_transactions ct

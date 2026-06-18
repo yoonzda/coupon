@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>가맹점 입점 재신청 | 옹진 관광 쿠폰</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
+  <!-- 네이버 지도 API (NCP Client ID 및 Geocoder 서브모듈 적용) -->
+  <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=x0h48m56fw&submodules=geocoder"></script>
+  <style>
+    *, *::before, *::after { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      word-break: keep-all; 
+    }
+    
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      background: #fdf2f2; /* Light red/rose background tint for reapply */
+      background-image: 
+        radial-gradient(circle at 10% 20%, #fee2e2 0%, #fdf2f2 100%);
+      position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 40px 20px;
+      color: #1e293b;
+    }
+
+    .bg-decorations {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .decor-circle {
+      position: absolute;
+      border-radius: 50%;
+    }
+    .decor-top {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.06) 0%, transparent 70%);
+      top: -200px; right: -200px;
+    }
+    .decor-bottom {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(248, 113, 113, 0.04) 0%, transparent 60%);
+      bottom: -150px; left: -150px;
+    }
+
+    .apply-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      border-top: 4px solid #ef4444; /* Red border for rejection/reapply state */
+      border-radius: 0; 
+      padding: 56px 48px;
+      width: 100%;
+      max-width: 680px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 20px 40px rgba(239, 68, 68, 0.04), 0 1px 3px rgba(0, 0, 0, 0.05);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .logo-area {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    .logo-subtitle {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #dc2626;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .logo-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 400; 
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+
+    /* 반려 안내 띠 */
+    .rejection-banner {
+      background: #fef2f2;
+      border: 1.5px solid #fecaca;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 36px;
+      color: #991b1b;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .rejection-banner strong {
+      color: #ef4444;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 32px 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid rgba(239, 68, 68, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title:first-of-type {
+      margin-top: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .full-width {
+      grid-column: span 2;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+    }
+    .required-mark {
+      color: #ef4444;
+      margin-left: 3px;
+    }
+    
+    input[type="text"], input[type="password"], input[type="tel"], select {
+      width: 100%;
+      padding: 16px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      color: #0f172a;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.2s;
+      outline: none;
+    }
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      background-size: 16px;
+      padding-right: 40px !important;
+    }
+    input[type="text"]:focus, input[type="password"]:focus, input[type="tel"]:focus, select:focus {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+    }
+    input::placeholder { color: #94a3b8; }
+
+    /* Custom File Uploaders */
+    .file-upload-box {
+      border: 1px dashed #cbd5e1;
+      border-radius: 6px;
+      background: #ffffff;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 100px;
+    }
+    .file-upload-box:hover {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.02);
+    }
+    .file-upload-box input[type="file"] {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .file-upload-box .upload-icon {
+      width: 24px; height: 24px;
+      stroke: #94a3b8;
+      fill: none;
+    }
+    .file-upload-box:hover .upload-icon {
+      stroke: #ef4444;
+    }
+    .file-upload-box p {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+    .file-upload-box strong {
+      color: #b91c1c;
+    }
+
+    .preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .preview-item {
+      width: 80px; height: 80px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      position: relative;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+    .preview-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .preview-remove-btn {
+      position: absolute;
+      top: 2px; right: 2px;
+      background: rgba(15, 23, 42, 0.6);
+      color: #ffffff;
+      border: none;
+      border-radius: 50%;
+      width: 18px; height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+    .preview-remove-btn:hover {
+      background: rgba(239, 68, 68, 0.9);
+    }
+
+    /* Hours grid */
+    .hours-picker-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+    .hours-picker-grid span {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    /* Weekday selector */
+    .weekday-selector {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .day-pill {
+      flex: 1;
+      min-width: 44px;
+      height: 44px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      color: #64748b;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .day-pill:hover {
+      border-color: #ef4444;
+      color: #b91c1c;
+    }
+    .day-pill.active {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: #ffffff;
+    }
+    .day-pill.active:hover {
+      background: #b91c1c;
+      border-color: #b91c1c;
+      color: #ffffff;
+    }
+
+    /* Bank Account grid */
+    .bank-account-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 10px;
+    }
+
+    .notice-box {
+      margin-top: 32px;
+      padding: 16px 20px;
+      background: rgba(239, 68, 68, 0.05);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #b91c1c;
+      line-height: 1.5;
+    }
+
+    .btn-submit-apply {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+    }
+    .btn-submit-apply:hover:not(:disabled) {
+      filter: brightness(1.08);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    }
+    .btn-submit-apply:active { transform: scale(0.99); }
+    .btn-submit-apply:disabled {
+      background: #e2e8f0;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .error-msg {
+      display: none;
+      color: #ef4444;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 16px;
+      text-align: left;
+    }
+    .error-msg.show { display: block; }
+
+    /* Success Screen */
+    .success-screen {
+      text-align: center;
+      padding: 40px 0;
+      display: none;
+    }
+    .success-icon-svg {
+      width: 64px; height: 64px;
+      stroke: #ef4444;
+      fill: none;
+      margin-bottom: 24px;
+    }
+    .success-screen h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 12px;
+    }
+    .success-screen p {
+      font-size: 1rem;
+      color: #64748b;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .btn-success-go {
+      display: inline-block;
+      padding: 16px 32px;
+      background: #ef4444;
+      color: #ffffff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+    .btn-success-go:hover {
+      background: #b91c1c;
+    }
+
+    .spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%; 
+      animation: spin 0.8s linear infinite;
+    }
+    .btn-submit-apply.loading .spinner { display: block; }
+    .btn-submit-apply.loading .btn-text { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) {
+      body {
+        background: #ffffff;
+        background-image: none;
+        padding: 0;
+        align-items: flex-start;
+      }
+      .bg-decorations {
+        display: none;
+      }
+      .apply-card {
+        border: none;
+        border-top: 4px solid #ef4444;
+        padding: 40px 20px 32px 20px;
+        box-shadow: none;
+        background: #ffffff;
+        min-height: 100vh;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .full-width {
+        grid-column: span 1;
+      }
+      .bank-account-grid {
+        grid-template-columns: 1fr;
+      }
+      .logo-title {
+        font-size: 1.8rem;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Fixed background decoration circles -->
+  <div class="bg-decorations">
+    <div class="decor-circle decor-top"></div>
+    <div class="decor-circle decor-bottom"></div>
+  </div>
+
+  <div class="apply-card" id="apply-card-container">
+    <!-- 신청 폼 화면 -->
+    <div id="form-view">
+      <div class="logo-area">
+        <span class="logo-subtitle">재입점 신청</span>
+        <h1 class="logo-title">가맹점 정보 수정</h1>
+      </div>
+
+      <!-- 반려 안내 띠 -->
+      <div class="rejection-banner" id="rejection-banner">
+        <strong>
+          <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          입점 신청 반려 안내
+        </strong>
+        반려 사유: <span id="rejection-reason-text" style="font-weight: 700;">-</span>
+        <p style="margin-top: 10px; font-size: 0.8rem; color: #7f1d1d;">위 사유를 확인하시어 아래 입력폼의 정보를 알맞게 수정한 후 다시 신청해주시기 바랍니다.</p>
+      </div>
+
+      <form id="form-merchant-apply" novalidate>
+        <!-- 1. 가맹점 정보 -->
+        <h3 class="section-title">가맹점 정보</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="owner-name">대표자 성명 <span class="required-mark">*</span></label>
+            <input type="text" id="owner-name" placeholder="대표자 성명을 입력하세요" required />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">연락처 <span class="required-mark">*</span></label>
+            <input type="tel" id="phone" placeholder="010-0000-0000" maxlength="13" required />
+          </div>
+
+          <div class="form-group">
+            <label for="shop-name">상호명 <span class="required-mark">*</span></label>
+            <input type="text" id="shop-name" placeholder="가게 상호명을 입력하세요" required />
+          </div>
+
+          <div class="form-group">
+            <label for="store-phone">가게 전화번호</label>
+            <input type="tel" id="store-phone" placeholder="지역번호 또는 일반 번호" maxlength="12" />
+          </div>
+
+          <div class="form-group">
+            <label for="category">카테고리 <span class="required-mark">*</span></label>
+            <select id="category" required>
+              <option value="">선택해 주세요</option>
+              <option value="음식점">음식점</option>
+              <option value="숙박">숙박</option>
+              <option value="수산물·농산물">수산물·농산물</option>
+              <option value="관광·레저">관광·레저</option>
+              <option value="쇼핑">쇼핑</option>
+              <option value="교통">교통</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="address">위치 <span class="required-mark">*</span></label>
+            <input type="text" id="address" placeholder="예: 인천광역시 옹진군 백령면 ..." required />
+          </div>
+        </div>
+
+        <!-- 2. 운영 정보 -->
+        <h3 class="section-title">운영 정보</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>영업시간 <span class="required-mark">*</span></label>
+            <div class="hours-picker-grid">
+              <select id="open-time" required>
+                <option value="">오픈 시간</option>
+              </select>
+              <span>~</span>
+              <select id="close-time" required>
+                <option value="">마감 시간</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group full-width" style="margin-top: 10px;">
+            <label>영업 요일 <span class="required-mark">*</span> <span style="font-weight:400;color:#64748b;margin-left:5px;">(영업하는 요일을 모두 선택해 주세요)</span></label>
+            <div class="weekday-selector">
+              <button type="button" class="day-pill" data-day="월">월</button>
+              <button type="button" class="day-pill" data-day="화">화</button>
+              <button type="button" class="day-pill" data-day="수">수</button>
+              <button type="button" class="day-pill" data-day="목">목</button>
+              <button type="button" class="day-pill" data-day="금">금</button>
+              <button type="button" class="day-pill" data-day="토">토</button>
+              <button type="button" class="day-pill" data-day="일">일</button>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>가게 이미지 <span class="required-mark">*</span> <span style="font-weight:400;color:#64748b;margin-left:5px;">(최대 5장 등록 가능)</span></label>
+            <div class="file-upload-box">
+              <svg class="upload-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <p>파일을 끌어놓거나 <strong>여기를 클릭</strong>하여 업로드하세요</p>
+              <input type="file" id="store-images" multiple accept="image/*" />
+            </div>
+            <div class="preview-container" id="store-images-previews"></div>
+          </div>
+        </div>
+
+        <!-- 3. 서류 및 계좌 정보 -->
+        <h3 class="section-title">서류 및 정산 정보</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="business-no">사업자등록번호 <span class="required-mark">*</span></label>
+            <input type="text" id="business-no" placeholder="000-00-00000" maxlength="12" required />
+          </div>
+
+          <div class="form-group">
+            <label>사업자등록증 <span class="required-mark">*</span></label>
+            <div class="file-upload-box" style="min-height: 80px; padding: 10px;">
+              <p><strong>사업자등록증 이미지 등록</strong></p>
+              <input type="file" id="business-cert" accept="image/*" />
+            </div>
+            <div class="preview-container" id="business-cert-preview"></div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>정산 계좌 정보 <span class="required-mark">*</span></label>
+            <div class="bank-account-grid">
+              <select id="bank-name" required>
+                <option value="">은행 선택</option>
+                <option value="농협">농협은행</option>
+                <option value="신한">신한은행</option>
+                <option value="국민">KB국민은행</option>
+                <option value="우리">우리은행</option>
+                <option value="하나">하나은행</option>
+                <option value="기업">IBK기업은행</option>
+                <option value="우체국">우체국</option>
+                <option value="수협">수협은행</option>
+                <option value="카카오뱅크">카카오뱅크</option>
+                <option value="토스뱅크">토스뱅크</option>
+              </select>
+              <input type="text" id="account-no" placeholder="계좌번호를 입력하세요 (- 제외)" required />
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>통장사본 <span class="required-mark">*</span></label>
+            <div class="file-upload-box" style="min-height: 80px; padding: 10px;">
+              <p><strong>통장사본 이미지 등록</strong></p>
+              <input type="file" id="bankbook" accept="image/*" />
+            </div>
+            <div class="preview-container" id="bankbook-preview"></div>
+          </div>
+        </div>
+
+        <!-- 계정 정보 (아이디 노출, 읽기 전용) -->
+        <h3 class="section-title">로그인 계정 정보</h3>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="username">아이디</label>
+            <input type="text" id="username" disabled style="background-color: #f1f5f9; color: #64748b; cursor: not-allowed;" />
+          </div>
+        </div>
+
+        <div class="notice-box">
+          정보를 다시 수정하여 재심사를 요청합니다.<br />
+          승인 완료 시 기존 아이디로 정상 로그인이 가능해집니다.
+        </div>
+
+        <div class="error-msg" id="error-msg"></div>
+
+        <button type="submit" class="btn-submit-apply" id="btn-submit">
+          <span class="btn-text">수정 정보로 재입점 신청하기</span>
+          <span class="spinner"></span>
+        </button>
+      </form>
+    </div>
+
+    <!-- 신청 성공 화면 -->
+    <div class="success-screen" id="success-view">
+      <svg class="success-icon-svg" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <h2>재신청 완료</h2>
+      <p>
+        가맹점 수정 정보가 성공적으로 제출되었습니다.<br />
+        관리자의 확인을 거쳐 영업일 기준 1~2일 내에 심사가 진행됩니다.<br />
+        승인 처리 시 가입 시 작성해주신 대표자 번호로 안내 문자가 발송됩니다.
+      </p>
+      <a href="/tourist/apply-pending.html" class="btn-success-go">심사 대기 화면으로 이동</a>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { api, showToast, requireAuth } from '../shared/js/api.js';
+
+    if (!requireAuth('/merchant/login.html')) throw new Error('not auth');
+
+    // ── 영업시간 옵션 생성 ──
+    const openSelect = document.getElementById('open-time');
+    const closeSelect = document.getElementById('close-time');
+
+    for (let hour = 0; hour < 24; hour++) {
+      const hStr = String(hour).padStart(2, '0');
+      const opt1 = document.createElement('option');
+      opt1.value = `${hStr}:00`; opt1.textContent = `${hStr}:00`;
+      openSelect.appendChild(opt1);
+
+      const opt2 = document.createElement('option');
+      opt2.value = `${hStr}:30`; opt2.textContent = `${hStr}:30`;
+      openSelect.appendChild(opt2.cloneNode(true));
+      
+      const opt3 = document.createElement('option');
+      opt3.value = `${hStr}:00`; opt3.textContent = `${hStr}:00`;
+      closeSelect.appendChild(opt3);
+
+      const opt4 = document.createElement('option');
+      opt4.value = `${hStr}:30`; opt4.textContent = `${hStr}:30`;
+      closeSelect.appendChild(opt4.cloneNode(true));
+    }
+
+    // ── 포맷터 적용 ──
+    function formatPhoneInput(e) {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.length < 4) {
+        e.target.value = val;
+      } else if (val.length < 8) {
+        e.target.value = val.substring(0, 3) + '-' + val.substring(3);
+      } else {
+        e.target.value = val.substring(0, 3) + '-' + val.substring(3, 7) + '-' + val.substring(7, 11);
+      }
+    }
+    document.getElementById('phone').addEventListener('input', formatPhoneInput);
+
+    function formatStorePhoneInput(e) {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.startsWith('02')) {
+        if (val.length < 3) e.target.value = val;
+        else if (val.length < 6) e.target.value = val.substring(0, 2) + '-' + val.substring(2);
+        else if (val.length < 10) e.target.value = val.substring(0, 2) + '-' + val.substring(2, 5) + '-' + val.substring(5);
+        else e.target.value = val.substring(0, 2) + '-' + val.substring(2, 6) + '-' + val.substring(6, 10);
+      } else {
+        if (val.length < 4) e.target.value = val;
+        else if (val.length < 7) e.target.value = val.substring(0, 3) + '-' + val.substring(3);
+        else if (val.length < 11) e.target.value = val.substring(0, 3) + '-' + val.substring(3, 6) + '-' + val.substring(6);
+        else e.target.value = val.substring(0, 3) + '-' + val.substring(3, 7) + '-' + val.substring(7, 11);
+      }
+    }
+    document.getElementById('store-phone').addEventListener('input', formatStorePhoneInput);
+
+    function formatBusinessNo(e) {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.length < 4) {
+        e.target.value = val;
+      } else if (val.length < 6) {
+        e.target.value = val.substring(0, 3) + '-' + val.substring(3);
+      } else {
+        e.target.value = val.substring(0, 3) + '-' + val.substring(3, 5) + '-' + val.substring(5, 10);
+      }
+    }
+    document.getElementById('business-no').addEventListener('input', formatBusinessNo);
+
+    // ── 파일 상태 ──
+    const fileStates = {
+      storeImages: [],
+      businessCert: null,
+      bankbook: null
+    };
+
+    function readAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    // 1. 가게 이미지
+    document.getElementById('store-images').addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      const remainingSlots = 5 - fileStates.storeImages.length;
+      
+      if (files.length > remainingSlots) {
+        showToast(`가게 이미지는 최대 5장까지 등록 가능합니다.`, 'error');
+      }
+      
+      const filesToProcess = files.slice(0, remainingSlots);
+      for (const file of filesToProcess) {
+        try {
+          const b64 = await readAsBase64(file);
+          fileStates.storeImages.push(b64);
+        } catch (err) {
+          showToast('이미지 변환 중 오류가 발생했습니다.', 'error');
+        }
+      }
+      renderStoreImagesPreviews();
+      e.target.value = '';
+    });
+
+    function renderStoreImagesPreviews() {
+      const container = document.getElementById('store-images-previews');
+      container.innerHTML = fileStates.storeImages.map((img, idx) => `
+        <div class="preview-item">
+          <img src="${img}" alt="가게 이미지" />
+          <button type="button" class="preview-remove-btn" onclick="window.removeStoreImage(${idx})">X</button>
+        </div>
+      `).join('');
+    }
+
+    window.removeStoreImage = (idx) => {
+      fileStates.storeImages.splice(idx, 1);
+      renderStoreImagesPreviews();
+    };
+
+    // 2. 사업자등록증 단일 업로드
+    document.getElementById('business-cert').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        try {
+          fileStates.businessCert = await readAsBase64(file);
+          renderSinglePreview('business-cert-preview', fileStates.businessCert, () => {
+            fileStates.businessCert = null;
+          });
+        } catch (err) {
+          showToast('사업자등록증 이미지 변환 실패', 'error');
+        }
+      }
+    });
+
+    // 3. 통장사본 단일 업로드
+    document.getElementById('bankbook').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        try {
+          fileStates.bankbook = await readAsBase64(file);
+          renderSinglePreview('bankbook-preview', fileStates.bankbook, () => {
+            fileStates.bankbook = null;
+          });
+        } catch (err) {
+          showToast('통장사본 이미지 변환 실패', 'error');
+        }
+      }
+    });
+
+    function renderSinglePreview(containerId, b64, clearCallback) {
+      const container = document.getElementById(containerId);
+      if (!b64) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = `
+        <div class="preview-item" style="width: 100px; height: 100px;">
+          <img src="${b64}" alt="첨부서류" />
+          <button type="button" class="preview-remove-btn" id="btn-clear-${containerId}">X</button>
+        </div>
+      `;
+      document.getElementById(`btn-clear-${containerId}`).onclick = () => {
+        clearCallback();
+        container.innerHTML = '';
+      };
+    }
+
+    // 요일 토글
+    document.querySelectorAll('.day-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+      });
+    });
+
+    // ── 데이터 로드 및 채우기 ──
+    async function loadMerchantData() {
+      try {
+        const res = await api.get('/merchant/my-info');
+        if (res.success && res.data) {
+          const m = res.data;
+          
+          if (m.status !== 'rejected') {
+            showToast('잘못된 접근입니다. 반려된 가맹점만 수정 가능합니다.', 'error');
+            setTimeout(() => { window.location.href = '/merchant/scan.html'; }, 1500);
+            return;
+          }
+
+          document.getElementById('rejection-reason-text').innerText = m.rejection_reason || '확인할 수 없음';
+          
+          document.getElementById('owner-name').value = m.owner_name || '';
+          document.getElementById('phone').value = m.phone || '';
+          document.getElementById('shop-name').value = m.name || '';
+          document.getElementById('store-phone').value = m.store_phone || '';
+          document.getElementById('category').value = m.category || '';
+          document.getElementById('address').value = m.address || '';
+          document.getElementById('business-no').value = m.business_no || '';
+          document.getElementById('bank-name').value = m.bank_name || '';
+          document.getElementById('account-no').value = m.account_no || '';
+          document.getElementById('username').value = m.username || '';
+
+          // 기존 이미지 복사
+          if (m.images) {
+            try { fileStates.storeImages = JSON.parse(m.images) || []; } catch(e) { fileStates.storeImages = []; }
+            renderStoreImagesPreviews();
+          }
+          if (m.business_cert_image) {
+            fileStates.businessCert = m.business_cert_image;
+            renderSinglePreview('business-cert-preview', fileStates.businessCert, () => { fileStates.businessCert = null; });
+          }
+          if (m.bankbook_image) {
+            fileStates.bankbook = m.bankbook_image;
+            renderSinglePreview('bankbook-preview', fileStates.bankbook, () => { fileStates.bankbook = null; });
+          }
+
+          // 영업시간 파싱
+          const hoursStr = m.business_hours || '';
+          const timesMatch = hoursStr.match(/(\d{2}:\d{2})\s*~\s*(\d{2}:\d{2})/);
+          if (timesMatch) {
+            document.getElementById('open-time').value = timesMatch[1];
+            document.getElementById('close-time').value = timesMatch[2];
+          }
+
+          // 요일 세팅
+          document.querySelectorAll('.day-pill').forEach(btn => btn.classList.remove('active'));
+          if (hoursStr.includes('매일') || hoursStr.includes('연중무휴')) {
+            document.querySelectorAll('.day-pill').forEach(btn => btn.classList.add('active'));
+          } else if (hoursStr.includes('평일')) {
+            document.querySelectorAll('.day-pill').forEach(btn => {
+              const day = btn.getAttribute('data-day');
+              if (['월', '화', '수', '목', '금'].includes(day)) {
+                btn.classList.add('active');
+              }
+            });
+          } else {
+            const daysPartMatch = hoursStr.match(/영업일:\s*([^(\n]+)/);
+            if (daysPartMatch) {
+              const days = daysPartMatch[1].split(',').map(d => d.trim());
+              document.querySelectorAll('.day-pill').forEach(btn => {
+                const day = btn.getAttribute('data-day');
+                if (days.includes(day)) {
+                  btn.classList.add('active');
+                }
+              });
+            } else {
+              document.querySelectorAll('.day-pill').forEach(btn => btn.classList.add('active'));
+            }
+          }
+        }
+      } catch (err) {
+        showToast('가맹점 정보를 불러오는 데 실패했습니다.', 'error');
+      }
+    }
+
+    loadMerchantData();
+
+    // ── 폼 제출 ──
+    document.getElementById('form-merchant-apply').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const ownerName = document.getElementById('owner-name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const shopName = document.getElementById('shop-name').value.trim();
+      const storePhone = document.getElementById('store-phone').value.trim();
+      const category = document.getElementById('category').value;
+      const address = document.getElementById('address').value.trim();
+      
+      const openTime = document.getElementById('open-time').value;
+      const closeTime = document.getElementById('close-time').value;
+      
+      const activePills = Array.from(document.querySelectorAll('.day-pill.active'));
+      const selectedDays = activePills.map(btn => btn.getAttribute('data-day'));
+
+      const businessNo = document.getElementById('business-no').value.trim();
+      const bankName = document.getElementById('bank-name').value;
+      const accountNo = document.getElementById('account-no').value.trim();
+
+      const btn = document.getElementById('btn-submit');
+      const errEl = document.getElementById('error-msg');
+      errEl.classList.remove('show');
+
+      if (!ownerName || !phone || !shopName || !category || !address || !openTime || !closeTime || selectedDays.length === 0 || !businessNo || !bankName || !accountNo) {
+        errEl.textContent = '필수 항목(*)을 모두 입력 또는 선택해 주세요.';
+        errEl.classList.add('show');
+        window.scrollTo({ top: errEl.offsetTop - 100, behavior: 'smooth' });
+        return;
+      }
+
+      if (phone.replace(/\D/g, '').length < 10) {
+        errEl.textContent = '올바른 대표자 연락처를 입력해 주세요.';
+        errEl.classList.add('show');
+        return;
+      }
+
+      if (fileStates.storeImages.length === 0) {
+        errEl.textContent = '가게 이미지를 최소 1장 이상 등록해 주세요.';
+        errEl.classList.add('show');
+        return;
+      }
+
+      if (!fileStates.businessCert) {
+        errEl.textContent = '사업자등록증 이미지를 등록해 주세요.';
+        errEl.classList.add('show');
+        return;
+      }
+
+      if (!fileStates.bankbook) {
+        errEl.textContent = '통장사본 이미지를 등록해 주세요.';
+        errEl.classList.add('show');
+        return;
+      }
+
+      // 영업시간 조합
+      let businessHours = '';
+      if (selectedDays.length === 7) {
+        businessHours = `매일 ${openTime} ~ ${closeTime} (연중무휴)`;
+      } else if (selectedDays.length === 5 && !selectedDays.includes('토') && !selectedDays.includes('일')) {
+        businessHours = `평일 ${openTime} ~ ${closeTime} (주말 휴무)`;
+      } else {
+        businessHours = `영업일: ${selectedDays.join(', ')} (${openTime} ~ ${closeTime})`;
+      }
+
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      const submitPayload = async (lat = null, lng = null) => {
+        const payload = {
+          ownerName,
+          phone,
+          shopName,
+          storePhone,
+          category,
+          address,
+          images: fileStates.storeImages,
+          businessHours,
+          businessNo,
+          businessCertImage: fileStates.businessCert,
+          bankName,
+          accountNo,
+          bankbookImage: fileStates.bankbook,
+          lat,
+          lng
+        };
+
+        try {
+          const res = await api.post('/merchant/reapply', payload);
+          if (res.success) {
+            // 로컬에 저장된 사용자 상태 객체 갱신 (pending으로 변경하여 재로그인 시 대기 화면 진입하도록 함)
+            const userStr = localStorage.getItem('ongjin_user');
+            if (userStr) {
+              const u = JSON.parse(userStr);
+              u.status = 'pending';
+              localStorage.setItem('ongjin_user', JSON.stringify(u));
+            }
+            
+            document.getElementById('form-view').style.display = 'none';
+            document.getElementById('success-view').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        } catch (err) {
+          errEl.textContent = err.message || '입점 재신청 중 오류가 발생했습니다.';
+          errEl.classList.add('show');
+          btn.disabled = false;
+          btn.classList.remove('loading');
+          window.scrollTo({ top: errEl.offsetTop - 100, behavior: 'smooth' });
+        }
+      };
+
+      if (window.naver && window.naver.maps && window.naver.maps.Service && window.naver.maps.Service.geocode) {
+        naver.maps.Service.geocode({ query: address }, function(status, response) {
+          if (status === naver.maps.Service.Status.OK && response.v2 && response.v2.addresses.length > 0) {
+            const first = response.v2.addresses[0];
+            submitPayload(parseFloat(first.y), parseFloat(first.x));
+          } else {
+            submitPayload(null, null);
+          }
+        });
+      } else {
+        submitPayload(null, null);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -60,6 +60,9 @@ router.get('/stats/summary', authenticate, authorize('admin'), async (req, res, 
     const [[{ merchantCount }]] = await pool.execute(
       `SELECT COUNT(*) AS merchantCount FROM merchants WHERE status = 'approved'`
     );
+    const [[{ pendingCount }]] = await pool.execute(
+      `SELECT COUNT(*) AS pendingCount FROM merchants WHERE status = 'pending'`
+    );
     const [[{ fdsCount }]] = await pool.execute(
       `SELECT COUNT(*) AS fdsCount FROM fds_alerts WHERE resolved = 0`
     );
@@ -76,6 +79,7 @@ router.get('/stats/summary', authenticate, authorize('admin'), async (req, res, 
       txCount: txStats.txCount,
       userCount,
       merchantCount,
+      pendingCount,
       fdsCount,
       couponIssued,
       couponUsed,
@@ -181,6 +185,38 @@ router.get('/merchants/:id', authenticate, authorize('admin'), async (req, res, 
   } catch (err) { next(err); }
 });
 
+// ── 정산 가능 연월 목록 조회 (필터용) ───────────────
+router.get('/settlements/periods', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const [settlementPeriods] = await pool.execute(
+      `SELECT DISTINCT period AS yr_mo FROM settlements`
+    );
+    const [txPeriods] = await pool.execute(
+      `SELECT DISTINCT DATE_FORMAT(scanned_at, '%Y-%m') AS yr_mo FROM coupon_transactions WHERE scanned_at IS NOT NULL`
+    );
+
+    const periodsSet = new Set();
+    settlementPeriods.forEach(r => {
+      if (r.yr_mo) periodsSet.add(r.yr_mo);
+    });
+    txPeriods.forEach(r => {
+      if (r.yr_mo) periodsSet.add(r.yr_mo);
+    });
+
+    if (periodsSet.size === 0) {
+      const now = new Date();
+      const curPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const prevPeriod = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
+      periodsSet.add(curPeriod);
+      periodsSet.add(prevPeriod);
+    }
+
+    const sortedPeriods = Array.from(periodsSet).sort().reverse();
+    res.json({ success: true, data: sortedPeriods });
+  } catch (err) { next(err); }
+});
+
 // ── 정산 목록 조회 ────────────────────────────────
 router.get('/settlements', authenticate, authorize('admin'), async (req, res, next) => {
   const { period } = req.query; // 'YYYY-MM'
@@ -246,6 +282,60 @@ router.post('/settlements/generate', authenticate, authorize('admin'), async (re
   } finally {
     connection.release();
   }
+});
+
+// ── 전체 예산 조회 ────────────────────────────────
+router.get('/budget', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const [settings] = await pool.execute(
+      `SELECT setting_value FROM system_settings WHERE setting_key = 'total_budget'`
+    );
+    const totalBudget = settings.length > 0 ? Number(settings[0].setting_value) : 0;
+
+    const [allocations] = await pool.execute(
+      `SELECT SUM(face_value * total_count) AS allocated FROM issuer_allocations`
+    );
+    const allocatedBudget = allocations[0].allocated ? Number(allocations[0].allocated) : 0;
+    const remainingBudget = totalBudget - allocatedBudget;
+
+    res.json({
+      success: true,
+      data: {
+        totalBudget,
+        allocatedBudget,
+        remainingBudget
+      }
+    });
+  } catch (err) { next(err); }
+});
+
+// ── 전체 예산 설정 ────────────────────────────────
+router.post('/budget', authenticate, authorize('admin'), async (req, res, next) => {
+  const { totalBudget } = req.body;
+  if (totalBudget === undefined || isNaN(Number(totalBudget)) || Number(totalBudget) < 0) {
+    return res.status(400).json({ success: false, message: '올바른 예산 금액을 입력해주세요.' });
+  }
+  try {
+    const [allocations] = await pool.execute(
+      `SELECT SUM(face_value * total_count) AS allocated FROM issuer_allocations`
+    );
+    const allocatedBudget = allocations[0].allocated ? Number(allocations[0].allocated) : 0;
+
+    if (Number(totalBudget) < allocatedBudget) {
+      return res.status(400).json({
+        success: false,
+        message: `설정하려는 예산 금액(${Number(totalBudget).toLocaleString()}원)이 이미 배정된 쿠폰 예산 총액(${allocatedBudget.toLocaleString()}원)보다 작을 수 없습니다.`
+      });
+    }
+
+    await pool.execute(
+      `INSERT INTO system_settings (setting_key, setting_value) 
+       VALUES ('total_budget', ?) 
+       ON DUPLICATE KEY UPDATE setting_value = ?`,
+      [String(totalBudget), String(totalBudget)]
+    );
+    res.json({ success: true, message: '전체 예산이 설정되었습니다.' });
+  } catch (err) { next(err); }
 });
 
 // ── FDS 알림 목록 조회 ──────────────────────────────
@@ -599,6 +689,38 @@ router.post('/issuers/allocations', authenticate, authorize('admin'), async (req
     return res.status(400).json({ success: false, message: '발행처, 배정 금액, 배정 수량을 올바르게 입력해주세요.' });
   }
   try {
+    // 이미 다른 금액권이 배정되어 있는지 검사
+    const [existing] = await pool.execute(
+      `SELECT DISTINCT face_value FROM issuer_allocations WHERE issuer_id = ?`,
+      [issuerId]
+    );
+    if (existing.length > 0 && existing.some(e => Number(e.face_value) !== Number(faceValue))) {
+      return res.status(400).json({
+        success: false,
+        message: `이미 이 발행처에는 다른 금액권(${Number(existing[0].face_value).toLocaleString()}원)이 배정되어 있습니다. 한 발행처에는 동일한 금액권만 배정할 수 있습니다.`
+      });
+    }
+
+    // 예산 초과 검사
+    const [settings] = await pool.execute(
+      `SELECT setting_value FROM system_settings WHERE setting_key = 'total_budget'`
+    );
+    const totalBudget = settings.length > 0 ? Number(settings[0].setting_value) : 0;
+
+    const [allocations] = await pool.execute(
+      `SELECT SUM(face_value * total_count) AS allocated FROM issuer_allocations`
+    );
+    const allocatedBudget = allocations[0].allocated ? Number(allocations[0].allocated) : 0;
+    const remainingBudget = totalBudget - allocatedBudget;
+
+    const requestedAmount = Number(faceValue) * Number(totalCount);
+    if (requestedAmount > remainingBudget) {
+      return res.status(400).json({
+        success: false,
+        message: `신규 배정 금액 총액(${requestedAmount.toLocaleString()}원)이 남은 예산(${remainingBudget.toLocaleString()}원)을 초과합니다.`
+      });
+    }
+
     await pool.execute(
       `INSERT INTO issuer_allocations (issuer_id, face_value, total_count) VALUES (?, ?, ?)`,
       [issuerId, faceValue, totalCount]
@@ -613,13 +735,17 @@ router.get('/coupons/status-list', authenticate, authorize('admin'), async (req,
     const [rows] = await pool.execute(
       `SELECT c.id, c.coupon_type, c.face_value, c.status, c.issued_at, c.used_at,
               u.nickname AS tourist_nickname, u.email AS tourist_email,
-              i.name AS issuer_name
+              i.name AS issuer_name,
+              m.name AS used_merchant_name
        FROM coupons c
        LEFT JOIN users u ON c.issued_to = u.id
        LEFT JOIN issuer_allocations ia ON c.issuer_allocation_id = ia.id
        LEFT JOIN issuers i ON ia.issuer_id = i.id
+       LEFT JOIN coupon_transactions ct ON c.id = ct.coupon_id
+       LEFT JOIN merchants m ON ct.merchant_id = m.id
        ORDER BY c.issued_at DESC LIMIT 200`
     );
+    res.json({ success: true, data: rows });
   } catch (err) { next(err); }
 });
 

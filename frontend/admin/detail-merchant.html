@@ -114,11 +114,6 @@
       cursor: pointer;
       position: relative;
       background: #f8fafc;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-    .gallery-img-box:hover {
-      transform: scale(1.03);
-      border-color: #94a3b8;
     }
     .gallery-img-box img {
       width: 100%; height: 100%;
@@ -158,10 +153,6 @@
       object-fit: contain;
       background: #fff;
       display: block;
-      transition: transform 0.2s;
-    }
-    .doc-img-view:hover {
-      transform: scale(1.01);
     }
 
     /* 관리자 하단 버튼 영역 */
@@ -180,14 +171,18 @@
     .status-badge-lg {
       display: inline-flex;
       align-items: center;
-      padding: 6px 12px;
-      border-radius: 20px;
+      justify-content: center;
+      padding: 6px 14px;
+      border-radius: 99px;
       font-size: 0.8rem;
-      font-weight: 700;
+      font-weight: 600;
+      line-height: 1;
+      border: 1px solid transparent;
+      white-space: nowrap;
     }
-    .status-approved { background: #dcfce7; color: #166534; }
-    .status-pending { background: #fef9c3; color: #854d0e; }
-    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .status-approved { background: #eafaf1; color: #10b981; border-color: #a7f3d0; }
+    .status-pending { background: #fffbeb; color: #f59e0b; border-color: #fde68a; }
+    .status-rejected { background: #fdf2f2; color: #ef4444; border-color: #fecaca; }
 
     /* 인쇄 전용 스타일 */
     @media print {
@@ -229,6 +224,26 @@
         break-after: page !important;
       }
     }
+
+    /* 모달 스타일 */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-container {
+      background: #fff; border-radius: 12px; width: 480px; max-width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: translateY(20px); transition: transform 0.25s ease; overflow: hidden;
+    }
+    .modal-overlay.active .modal-container { transform: translateY(0); }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+    .modal-body { padding: 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
+    .modal-close-x { background: none; border: none; cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center; }
+    .modal-close-x:hover { color: #0f172a; }
   </style>
 </head>
 <body>
@@ -466,8 +481,8 @@
           document.getElementById('info-status').innerHTML = `
             <span class="status-badge-lg status-${m.status || 'pending'}">${statusLabel}</span>
             ${m.status === 'rejected' && m.rejection_reason ? `
-              <div style="margin-top: 8px; padding: 10px; background: #fee2e2; border-radius: 6px; color: #991b1b; font-size: 0.8rem;">
-                <strong>반려 사유:</strong> ${m.rejection_reason}
+              <div style="margin-top: 8px; color: #ef4444; font-size: 0.88rem; font-weight: 500;">
+                반려 사유: ${m.rejection_reason}
               </div>
             ` : ''}
           `;
@@ -522,18 +537,51 @@
 
     window.updateMerchantStatus = async (status) => {
       const label = status === 'approved' ? '승인' : '반려';
-      let reason = '';
 
       if (status === 'rejected') {
-        reason = prompt('반려 사유를 입력해주세요:', '서류 미비 (사업자등록증 확인 불가)');
-        if (!reason) return;
+        // 모달 띄우기
+        document.querySelectorAll('input[name="reject-reason"]').forEach(cb => cb.checked = false);
+        document.getElementById('reject-custom-reason').value = '';
+        document.getElementById('reject-modal').classList.add('active');
       } else {
         if (!confirm(`가맹점을 ${label} 처리하시겠습니까?`)) return;
+        try {
+          await api.patch(`/admin/merchants/${merchantId}/status`, { status, reason: null });
+          showToast(`${label} 처리가 완료되었습니다.`, 'success');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1200);
+        } catch (err) {
+          showToast(`처리 실패: ${err.message}`, 'error');
+        }
+      }
+    };
+
+    window.closeRejectModal = () => {
+      document.getElementById('reject-modal').classList.remove('active');
+    };
+
+    window.submitRejection = async () => {
+      const checkedBoxes = document.querySelectorAll('input[name="reject-reason"]:checked');
+      const reasons = Array.from(checkedBoxes).map(cb => cb.value);
+      const customReason = document.getElementById('reject-custom-reason').value.trim();
+      
+      if (reasons.length === 0 && !customReason) {
+        alert('최소 하나 이상의 반려 사유를 체크하거나 직접 입력해 주세요.');
+        return;
+      }
+      
+      let finalReason = '';
+      if (reasons.length > 0) {
+        finalReason = `[사유] ${reasons.join(', ')}`;
+      }
+      if (customReason) {
+        finalReason = finalReason ? `${finalReason} (${customReason})` : customReason;
       }
 
       try {
-        await api.patch(`/admin/merchants/${merchantId}/status`, { status, reason });
-        showToast(`${label} 처리가 완료되었습니다.`, 'success');
+        await api.patch(`/admin/merchants/${merchantId}/status`, { status: 'rejected', reason: finalReason });
+        showToast('반려 처리가 완료되었습니다.', 'success');
         setTimeout(() => {
           window.location.reload();
         }, 1200);
@@ -542,5 +590,47 @@
       }
     };
   </script>
+
+  <!-- 반려 사유 체크리스트 모달 -->
+  <div id="reject-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 style="font-weight: 700; color: #0f172a; margin: 0; font-size: 1.1rem;">입점 신청 반려</h3>
+        <button class="modal-close-x" onclick="window.closeRejectModal()">
+          <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px; text-align: left;">반려 사유에 해당하는 항목을 체크해주세요. 체크된 항목들이 가맹점주에게 반려 사유로 전달됩니다.</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem; text-align: left;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #334155; font-weight: 500;">
+            <input type="checkbox" name="reject-reason" value="사업자등록증 식별 불가" style="width: 16px; height: 16px;" />
+            사업자등록증 식별 불가 (첨부 파일 확인 불가)
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #334155; font-weight: 500;">
+            <input type="checkbox" name="reject-reason" value="통장사본 계좌번호 불일치" style="width: 16px; height: 16px;" />
+            정산 통장 사본 계좌번호/예금주명 불일치
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #334155; font-weight: 500;">
+            <input type="checkbox" name="reject-reason" value="가맹점 정보 미비" style="width: 16px; height: 16px;" />
+            소재지 주소 또는 연락처 등 가맹점 기본 정보 오류
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #334155; font-weight: 500;">
+            <input type="checkbox" name="reject-reason" value="중복 신청 계정" style="width: 16px; height: 16px;" />
+            이미 등록되었거나 중복된 입점 신청 정보
+          </label>
+          <div style="margin-top: 8px;">
+            <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; color: #475569; text-align: left;">기타 상세 사유 입력 (선택)</label>
+            <textarea id="reject-custom-reason" placeholder="추가적인 반려 사유가 있다면 작성해 주세요." style="width: 100%; height: 80px; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; resize: none; box-sizing: border-box;"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-neutral btn-sm" onclick="window.submitRejection()" style="background-color: #ef4444; border-color: #ef4444; color: #fff;">반려 처리 완료</button>
+        <button class="btn btn-neutral-outline btn-sm" onclick="window.closeRejectModal()">취소</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

@@ -659,15 +659,19 @@
       try {
         const userObj = JSON.parse(existingUser);
         if (userObj.role === 'merchant') {
-          document.getElementById('verify-loading').classList.add('active');
-          api.get('/merchant/transactions') // 가맹점 전용 API 권한 확인
-            .then(() => {
-              window.location.replace('/merchant/scan.html');
-            })
-            .catch(() => {
-              clearMerchantTokens();
-              document.getElementById('verify-loading').classList.remove('active');
-            });
+          if (userObj.status === 'rejected') {
+            window.location.replace('/merchant/reapply.html');
+          } else {
+            document.getElementById('verify-loading').classList.add('active');
+            api.get('/merchant/transactions') // 가맹점 전용 API 권한 확인
+              .then(() => {
+                window.location.replace('/merchant/scan.html');
+              })
+              .catch(() => {
+                clearMerchantTokens();
+                document.getElementById('verify-loading').classList.remove('active');
+              });
+          }
         }
       } catch (e) {
         clearMerchantTokens();
@@ -717,7 +721,8 @@
             id: res.merchant.id,
             shopName: res.merchant.name,
             username: res.merchant.username,
-            role: 'merchant'
+            role: 'merchant',
+            status: res.merchant.status
           }));
 
           btnText.textContent = 'SUCCESS';
@@ -726,7 +731,11 @@
           btn.style.background = '#059669'; 
 
           setTimeout(() => {
-            window.location.replace('/merchant/scan.html');
+            if (res.merchant.status === 'rejected') {
+              window.location.replace('/merchant/reapply.html');
+            } else {
+              window.location.replace('/merchant/scan.html');
+            }
           }, 600);
         }
       } catch (err) {

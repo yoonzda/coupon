@@ -33,6 +33,15 @@
       border-radius: var(--radius);
       border: 1px solid var(--border);
       box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease-in-out;
+    }
+    .stat-card.clickable {
+      cursor: pointer;
+    }
+    .stat-card.clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: #3b82f6;
     }
     .stat-label { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; }
     .stat-value { font-size: 1.8rem; font-weight: 900; color: var(--text-primary); }
@@ -101,7 +110,7 @@
           <div class="stat-value" id="stat-users">0</div>
           <div class="stat-trend" style="color: var(--text-muted); font-size:0.8rem;">누적 회원</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card clickable" onclick="location.href='/admin/merchants.html'">
           <div class="stat-label" data-i18n="stat_merchants">승인 가맹점</div>
           <div class="stat-value" id="stat-merchants">0</div>
           <div class="stat-trend" id="stat-pending" style="color: var(--text-muted); font-size:0.8rem;">대기 0곳</div>
@@ -159,6 +168,18 @@
         document.getElementById('stat-tx-count').textContent = `결제 ${stats.txCount || 0}건`;
         document.getElementById('stat-users').textContent = (stats.userCount || 0).toLocaleString();
         document.getElementById('stat-merchants').textContent = stats.merchantCount || 0;
+        
+        const pendingCount = stats.pendingCount || 0;
+        const pendingEl = document.getElementById('stat-pending');
+        pendingEl.textContent = `대기 ${pendingCount}곳`;
+        if (pendingCount > 0) {
+          pendingEl.style.color = '#ef4444';
+          pendingEl.style.fontWeight = '700';
+        } else {
+          pendingEl.style.color = 'var(--text-muted)';
+          pendingEl.style.fontWeight = 'normal';
+        }
+
         document.getElementById('stat-fds').textContent = stats.fdsCount || 0;
 
         const issued = stats.couponIssued || 0;

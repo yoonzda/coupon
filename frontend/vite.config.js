@@ -20,6 +20,7 @@ export default defineConfig({
         'merchant-index':   resolve(__dirname, 'merchant/index.html'),
         'merchant-scan':    resolve(__dirname, 'merchant/scan.html'),
         'merchant-history': resolve(__dirname, 'merchant/history.html'),
+        'merchant-reapply': resolve(__dirname, 'merchant/reapply.html'),
 
         // 발행처 포털
         'issuer-login':     resolve(__dirname, 'issuer/login.html'),
@@ -44,6 +45,7 @@ export default defineConfig({
         'admin-edit-manager': resolve(__dirname, 'admin/edit-manager.html'),
         'admin-edit-issuer': resolve(__dirname, 'admin/edit-issuer.html'),
         'admin-allocate-coupon': resolve(__dirname, 'admin/allocate-coupon.html'),
+        'admin-register-budget': resolve(__dirname, 'admin/register-budget.html'),
       },
     },
     outDir: 'dist',      // 빌드 결과 → dist/ 폴더 (도커 빌드용)

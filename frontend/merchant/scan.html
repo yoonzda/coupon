@@ -202,6 +202,19 @@
 
     if (!requireAuth('/merchant/login.html')) throw new Error('not authenticated')
 
+    const userStr = localStorage.getItem('ongjin_user');
+    if (userStr) {
+      try {
+        const userObj = JSON.parse(userStr);
+        if (userObj.role === 'merchant' && userObj.status === 'rejected') {
+          window.location.replace('/merchant/reapply.html');
+          throw new Error('rejected status');
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     // ── 오프라인 큐 (LocalStorage, AES 암호화 생략 → 개발 단계) ──
     const QUEUE_KEY = 'ongjin_scan_queue'
 

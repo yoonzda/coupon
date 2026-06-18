@@ -106,6 +106,19 @@
 
     if (!requireAuth('/merchant/login.html')) throw new Error('not auth')
 
+    const userStr = localStorage.getItem('ongjin_user');
+    if (userStr) {
+      try {
+        const userObj = JSON.parse(userStr);
+        if (userObj.role === 'merchant' && userObj.status === 'rejected') {
+          window.location.replace('/merchant/reapply.html');
+          throw new Error('rejected status');
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     async function load() {
       // [DEV] 테스트용 더미 데이터 주입
       if (localStorage.getItem('ongjin_token') === 'test_dummy_merchant_token') {
