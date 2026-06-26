@@ -163,47 +163,27 @@
       <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; margin-top: 8px;">
         <h2 class="table-title" style="margin: 0;">발행처 목록</h2>
         <button class="btn btn-neutral-outline btn-sm" style="height: 30px; padding: 0 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.8rem;" onclick="location.href='register-issuer.html'">발행처 등록</button>
-      </div>
-      <div class="table-container">
-        <table class="admin-table" style="text-align: center;">
-          <thead>
-            <tr>
-              <th style="width: 25%; text-align: center;">기관명</th>
-              <th style="width: 25%; text-align: center;">ID</th>
-              <th style="width: 25%; text-align: center;">쿠폰 현황</th>
-              <th style="width: 25%; text-align: center;">관리</th>
-            </tr>
-          </thead>
-          <tbody id="issuer-list">
-            <tr><td colspan="4" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- 2. 발행처 쿠폰 배정 현황 -->
-      <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; margin-top: 24px;">
-        <h2 class="table-title" style="margin: 0;">쿠폰 배정현황</h2>
-        <div class="toggle-container">
+        <div class="toggle-container" style="margin-left: auto;">
           <span class="toggle-label">배정 필요</span>
           <label class="switch">
-            <input type="checkbox" id="filter-alloc" onchange="window.filterAllocations()" />
+            <input type="checkbox" id="filter-alloc" onchange="window.filterIssuers()" />
             <span class="slider round"></span>
           </label>
         </div>
       </div>
       <div class="table-container">
-        <table class="admin-table">
+        <table class="admin-table" style="text-align: center;">
           <thead>
             <tr>
               <th style="width: 20%; text-align: center;">기관명</th>
               <th style="width: 15%; text-align: center;">쿠폰 금액</th>
-              <th style="width: 15%; text-align: center;">발급 수량</th>
+              <th style="width: 15%; text-align: center;">발행 수량</th>
               <th style="width: 15%; text-align: center;">잔여 수량</th>
-              <th style="width: 15%; text-align: center;">총 배정 수량</th>
+              <th style="width: 15%; text-align: center;">상세</th>
               <th style="width: 20%; text-align: center;">관리</th>
             </tr>
           </thead>
-          <tbody id="allocation-list">
+          <tbody id="issuer-list">
             <tr><td colspan="6" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
           </tbody>
         </table>
@@ -231,61 +211,11 @@
           issuersCache = issuers || [];
           allocationsCache = allocations || [];
           
-          renderIssuers(issuersCache, allocationsCache);
-          filterAllocations();
+          window.filterIssuers();
         }
       } catch (err) {
         showToast('데이터 조회에 실패했습니다: ' + err.message, 'error');
       }
-    }
-
-    // 발행처 목록 렌더링
-    function renderIssuers(issuers, allocations) {
-      const list = document.getElementById('issuer-list');
-      if (!issuers || issuers.length === 0) {
-        list.innerHTML = `<tr><td colspan="4" class="text-center" style="padding: 30px; color:#64748b;">등록된 발행처가 없습니다.</td></tr>`;
-        return;
-      }
-      const allocs = allocations || [];
-      list.innerHTML = issuers.map(i => {
-        const issuerAllocations = allocs.filter(a => a.issuer_id === i.id);
-        let couponStatusText = '';
-        if (issuerAllocations.length === 0) {
-          couponStatusText = '<span style="color: #94a3b8; font-weight: 500;">-</span>';
-        } else {
-          const totalAllocated = issuerAllocations.reduce((sum, a) => sum + a.total_count, 0);
-          const totalIssued = issuerAllocations.reduce((sum, a) => sum + a.issued_count, 0);
-          
-          if (totalAllocated === 0) {
-            couponStatusText = '<span style="color: #94a3b8; font-weight: 500;">-</span>';
-          } else {
-            const pct = Math.round((totalIssued / totalAllocated) * 100);
-            let badgeStyle = 'background: #f1f5f9; color: #475569;'; // 0% 일 때 기본 회색 뱃지
-            if (pct >= 90) {
-              badgeStyle = 'background: #ffe4e6; color: #b91c1c;'; // 90% 이상일 때 경고 로즈레드 뱃지
-            } else if (pct > 0) {
-              badgeStyle = 'background: #ccfbf1; color: #0f766e;'; // 사용 진행 중일 때 세련된 청록색 뱃지
-            }
-            couponStatusText = `<span class="badge" style="${badgeStyle}">${pct}%</span>`;
-          }
-        }
-
-        const manageButtons = `
-          <div style="display: flex; gap: 6px; justify-content: center;">
-            <a href="edit-issuer.html?id=${i.id}" class="btn-table-edit">수정</a>
-            <button class="btn-table-delete" onclick="window.deleteIssuer(${i.id}, '${escapeHtml(i.name)}')">삭제</button>
-          </div>
-        `;
-
-        return `
-          <tr>
-            <td style="color: var(--text-primary); font-size: 0.9rem;">${escapeHtml(i.name)}</td>
-            <td style="color: var(--text-secondary); font-size: 0.9rem;">${escapeHtml(i.username)}</td>
-            <td style="color: var(--text-secondary); font-size: 0.9rem;">${couponStatusText}</td>
-            <td>${manageButtons}</td>
-          </tr>
-        `;
-      }).join('');
     }
 
     window.deleteIssuer = async function(id, name) {
@@ -303,7 +233,7 @@
     }
 
     // 배정 데이터 조인 및 필터 렌더링
-    window.filterAllocations = function() {
+    window.filterIssuers = function() {
       const isUnallocatedOnly = document.getElementById('filter-alloc').checked;
       let joinedList = [];
       
@@ -339,22 +269,32 @@
         joinedList = joinedList.filter(item => item.isUnallocated || (item.remaining !== null && item.remaining <= item.totalCount * 0.5));
       }
       
-      renderAllocationsTable(joinedList);
+      renderIssuersTable(joinedList);
     }
 
-    function renderAllocationsTable(list) {
-      const tbody = document.getElementById('allocation-list');
+    function renderIssuersTable(list) {
+      const tbody = document.getElementById('issuer-list');
       if (!list || list.length === 0) {
         const isUnallocatedOnly = document.getElementById('filter-alloc')?.checked;
         if (isUnallocatedOnly) {
-          tbody.innerHTML = '';
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding: 30px; color:#64748b;">조건에 맞는 발행처가 없습니다.</td></tr>';
         } else {
-          tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding: 30px; color:#64748b;">배정된 쿠폰 내역이 없습니다.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding: 30px; color:#64748b;">등록된 발행처가 없습니다.</td></tr>`;
         }
         return;
       }
       
       tbody.innerHTML = list.map(item => {
+        const manageButtons = `
+          <div style="display: flex; gap: 6px; justify-content: center;">
+            <a href="edit-issuer.html?id=${item.issuerId}" class="btn-table-edit">수정</a>
+            <button class="btn-table-delete" onclick="window.deleteIssuer(${item.issuerId}, '${escapeHtml(item.issuerName)}')">삭제</button>
+          </div>
+        `;
+        const detailButton = `
+          <a href="detail-issuer.html?id=${item.issuerId}" class="btn-table-edit">보기</a>
+        `;
+
         if (item.isUnallocated) {
           return `
             <tr>
@@ -362,12 +302,8 @@
               <td style="color:#94a3b8;">-</td>
               <td style="color:#94a3b8;">-</td>
               <td style="color:#94a3b8;">-</td>
-              <td style="color:#94a3b8;">-</td>
-              <td>
-                <div style="display: flex; gap: 6px; justify-content: center;">
-                  <a href="allocate-coupon.html?issuerId=${item.issuerId}" class="btn-table-edit">쿠폰 배정</a>
-                </div>
-              </td>
+              <td>${detailButton}</td>
+              <td>${manageButtons}</td>
             </tr>
           `;
         } else {
@@ -379,19 +315,13 @@
               <td style="color: ${item.remaining === 0 ? '#ef4444' : '#10b981'};">
                 ${item.remaining.toLocaleString()}장
               </td>
-              <td>${item.totalCount.toLocaleString()}장</td>
-              <td>
-                <div style="display: flex; gap: 6px; justify-content: center;">
-                  <a href="allocate-coupon.html?issuerId=${item.issuerId}" class="btn-table-edit">쿠폰 배정</a>
-                </div>
-              </td>
+              <td>${detailButton}</td>
+              <td>${manageButtons}</td>
             </tr>
           `;
         }
       }).join('');
     }
-
-
 
     function escapeHtml(string) {
       const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };

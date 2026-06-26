@@ -288,9 +288,10 @@ router.post('/settlements/generate', authenticate, authorize('admin'), async (re
 router.get('/budget', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const [settings] = await pool.execute(
-      `SELECT setting_value FROM system_settings WHERE setting_key = 'total_budget'`
+      `SELECT setting_value, updated_at FROM system_settings WHERE setting_key = 'total_budget'`
     );
     const totalBudget = settings.length > 0 ? Number(settings[0].setting_value) : 0;
+    const updatedAt = settings.length > 0 ? settings[0].updated_at : null;
 
     const [allocations] = await pool.execute(
       `SELECT SUM(face_value * total_count) AS allocated FROM issuer_allocations`
@@ -298,12 +299,27 @@ router.get('/budget', authenticate, authorize('admin'), async (req, res, next) =
     const allocatedBudget = allocations[0].allocated ? Number(allocations[0].allocated) : 0;
     const remainingBudget = totalBudget - allocatedBudget;
 
+    // 실제 발행(발급) 완료된 쿠폰액 집계
+    const [issuedRes] = await pool.execute(
+      `SELECT SUM(face_value) AS issued FROM coupons`
+    );
+    const issuedBudget = issuedRes[0].issued ? Number(issuedRes[0].issued) : 0;
+
+    // 실제 사용(결제) 완료된 쿠폰액 집계 (정산 대상 금액)
+    const [usedRes] = await pool.execute(
+      `SELECT SUM(face_value) AS used FROM coupons WHERE status = 'used'`
+    );
+    const usedBudget = usedRes[0].used ? Number(usedRes[0].used) : 0;
+
     res.json({
       success: true,
       data: {
         totalBudget,
         allocatedBudget,
-        remainingBudget
+        remainingBudget,
+        issuedBudget,
+        usedBudget,
+        updatedAt
       }
     });
   } catch (err) { next(err); }

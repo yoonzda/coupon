@@ -137,29 +137,8 @@
         </div>
       </header>
 
-      <!-- 예산 현황 영역 -->
-      <div style="margin-top: 24px; margin-bottom: 12px;">
-        <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">예산 현황</h3>
-      </div>
-      <div class="admin-card" style="margin-bottom: 24px; padding: 24px; border-radius: 8px;">
-        <!-- 큼직한 배정액 / 전체예산 표시 -->
-        <div style="text-align: center; margin: 16px 0 16px 0; display: flex; align-items: baseline; justify-content: center;">
-          <span id="budget-allocated" style="font-family: 'Inter', sans-serif; font-size: 2.5rem; font-weight: 800; color: #0284c7; line-height: 1;">—</span>
-          <span style="font-family: 'Inter', sans-serif; font-size: 1.8rem; font-weight: 400; color: #cbd5e1; margin: 0 14px; line-height: 1;">/</span>
-          <span id="budget-total" style="font-family: 'Inter', sans-serif; font-size: 2.5rem; font-weight: 800; color: #0f172a; line-height: 1;">—</span>
-          <span style="font-size: 1.2rem; font-weight: 600; color: #475569; margin-left: 6px;">원</span>
-        </div>
-        <!-- 프로그레스 바 -->
-        <div style="background: #e2e8f0; height: 10px; border-radius: 99px; overflow: hidden; display: flex; margin-bottom: 20px;">
-          <div id="budget-progress-bar" style="background: #0284c7; width: 0%; height: 100%; transition: width 0.3s ease;"></div>
-        </div>
-        <!-- 중앙 정렬된 예산 설정 수정 버튼 -->
-        <div style="display: flex; justify-content: center;">
-          <button class="btn btn-neutral btn-sm" onclick="location.href='register-budget.html'" style="height: 38px; padding: 0 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin: 0;">예산 설정 수정</button>
-        </div>
-      </div>
 
-      <!-- 필터 및 쿠폰 배정 영역 (동일 라인 배치) -->
+      <!-- 필터 영역 (쿠폰 배정하기 버튼 제거) -->
       <div class="filter-bar" style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px; justify-content: space-between; flex-wrap: wrap;">
         <div style="display: flex; gap: 16px; align-items: center;">
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -178,7 +157,6 @@
             </select>
           </div>
         </div>
-        <button class="btn btn-neutral btn-sm" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer; margin: 0;" onclick="location.href='allocate-coupon.html'">쿠폰 배정하기</button>
       </div>
 
       <!-- 전체 쿠폰 발급 및 사용 현황 -->
@@ -197,25 +175,6 @@
             <tr><td colspan="5" class="text-center" style="padding: 30px; color:#64748b;">데이터를 불러오는 중입니다...</td></tr>
           </tbody>
         </table>
-      </div>
-
-      <!-- 쿠폰 배정 내역 -->
-      <div style="margin-top: 32px; margin-bottom: 12px;">
-        <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">쿠폰 배정 내역</h3>
-      </div>
-      <div id="comparison-section" class="admin-card" style="border-radius: 6px;">
-        <div class="comparison-container">
-          <table class="comparison-table">
-            <thead>
-              <tr id="comparison-header">
-                <!-- 지표명 및 발행처 헤더 동적 로드 -->
-              </tr>
-            </thead>
-            <tbody id="comparison-body">
-              <!-- 비교 항목별 행 데이터 렌더링 -->
-            </tbody>
-          </table>
-        </div>
       </div>
     </main>
   </div>
@@ -245,7 +204,7 @@
     function renderCouponStatusTable(data) {
       const list = document.getElementById('coupon-status-list');
       if (!data || data.length === 0) {
-        list.innerHTML = `<tr><td colspan="5" class="text-center" style="padding: 30px; color:#64748b;">쿠폰 내역이 없습니다.</td></tr>`;
+        list.innerHTML = `<tr><td colspan="5" class="text-center" style="padding: 30px; color:#64748b;">발행된 쿠폰 내역이 없습니다.</td></tr>`;
         return;
       }
       list.innerHTML = data.map(c => {
@@ -418,61 +377,9 @@
             reissueCount: 0
           };
         });
-        
-        renderComparisonTable(comparisonList);
       } catch (err) {
         console.error('비교 데이터 로드 실패', err);
-        renderComparisonTable([]);
       }
-    }
-
-    function renderComparisonTable(list) {
-      const headerTr = document.getElementById('comparison-header');
-      const body = document.getElementById('comparison-body');
-      
-      let headerHtml = `<th style="width: 220px; min-width: 220px;">분류</th>`;
-      if (list.length === 0) {
-        headerHtml += `<th style="min-width: 200px; color: #94a3b8; font-style: italic;">등록된 발행처 없음</th>`;
-      } else {
-        list.forEach((item) => {
-          headerHtml += `
-            <th style="min-width: 200px;">
-              <div style="font-weight: 700; font-size: 0.9rem; padding: 6px 0;">${escapeHtml(item.name)}</div>
-            </th>
-          `;
-        });
-      }
-      headerTr.innerHTML = headerHtml;
-      
-      const rows = [
-        { label: '쿠폰 금액', key: 'faceValue', format: val => val > 0 ? `<strong>${val.toLocaleString()}원</strong>` : '—' },
-        { label: '발행 쿠폰 수', key: 'totalIssued', format: val => `${val.toLocaleString()}장` },
-        { 
-          label: '사용현황', 
-          key: 'usedCount', 
-          format: (val, item) => {
-            const pct = item.totalIssued > 0 ? Math.round((val / item.totalIssued) * 100) : 0;
-            return `사용완료: ${val.toLocaleString()}장 (${pct}%)`;
-          }
-        },
-        { label: '최근 발행일시', key: 'latestDate', format: val => val },
-        { label: '총 발행 수', key: 'totalAllocated', format: val => `${val.toLocaleString()}장` }
-      ];
-      
-      let bodyHtml = '';
-      rows.forEach((row) => {
-        bodyHtml += `<tr>`;
-        bodyHtml += `<td>${row.label}</td>`;
-        if (list.length === 0) {
-          bodyHtml += `<td style="color: #cbd5e1;">—</td>`;
-        } else {
-          list.forEach((item) => {
-            bodyHtml += `<td>${row.format(item[row.key], item)}</td>`;
-          });
-        }
-        bodyHtml += `</tr>`;
-      });
-      body.innerHTML = bodyHtml;
     }
 
     window.reissueCoupons = function(issuerName) {
@@ -481,52 +388,6 @@
     
     window.editCouponSettings = function(issuerName) {
       showToast(`${issuerName}의 쿠폰 설정 수정 화면으로 이동합니다. (데모)`, 'info');
-    }
-
-    async function loadBudgetStatus() {
-      try {
-        const res = await api.get('/admin/budget');
-        if (res.success && res.data) {
-          const { totalBudget, allocatedBudget, remainingBudget } = res.data;
-          
-          document.getElementById('budget-total').innerText = fmtMoney(totalBudget).replace('원', '');
-          document.getElementById('budget-allocated').innerText = fmtMoney(allocatedBudget).replace('원', '');
-          
-          const remEl = document.getElementById('budget-remaining');
-          if (remEl) {
-            remEl.innerHTML = `<strong>${fmtMoney(remainingBudget)}</strong>`;
-            if (remainingBudget < 0) {
-              remEl.style.color = '#ef4444';
-            } else {
-              remEl.style.color = '#16a34a';
-            }
-          }
-
-          const pct = totalBudget > 0 ? Math.round((allocatedBudget / totalBudget) * 100) : 0;
-          const bar = document.getElementById('budget-progress-bar');
-          bar.style.width = `${Math.min(pct, 100)}%`;
-          
-          if (pct >= 100) {
-            bar.style.background = '#ef4444';
-          } else if (pct >= 80) {
-            bar.style.background = '#f97316';
-          } else {
-            bar.style.background = '#0284c7';
-          }
-
-          const pctEl = document.getElementById('budget-percent-used');
-          if (pctEl) {
-            pctEl.innerText = `사용률: ${pct}%`;
-          }
-          const statusEl = document.getElementById('budget-status-text');
-          if (statusEl) {
-            statusEl.innerText = pct >= 100 ? '예산 초과' : pct >= 80 ? '예산 소진 임박' : '안정적';
-            statusEl.style.color = pct >= 100 ? '#ef4444' : pct >= 80 ? '#f97316' : '#64748b';
-          }
-        }
-      } catch (err) {
-        console.error('예산 데이터 로드 실패', err);
-      }
     }
 
     function renderStarsHtml(rating) {
@@ -544,7 +405,6 @@
     // 초기 로드
     loadCouponStatusList();
     loadComparisonData();
-    loadBudgetStatus();
   </script>
 </body>
 </html>
