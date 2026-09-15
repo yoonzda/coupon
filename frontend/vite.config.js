@@ -19,7 +19,9 @@ export default defineConfig({
         'merchant-login':   resolve(__dirname, 'merchant/login.html'),
         'merchant-index':   resolve(__dirname, 'merchant/index.html'),
         'merchant-scan':    resolve(__dirname, 'merchant/scan.html'),
+        'merchant-manual':  resolve(__dirname, 'merchant/manual.html'),
         'merchant-history': resolve(__dirname, 'merchant/history.html'),
+        'merchant-etc':     resolve(__dirname, 'merchant/etc.html'),
         'merchant-reapply': resolve(__dirname, 'merchant/reapply.html'),
 
         // 발행처 포털
@@ -54,7 +56,7 @@ export default defineConfig({
     target: 'esnext',   // top-level await 지원
   },
   server: {
-    port: 5173,
+    port: 5180,
     proxy: {
       // 개발 중 백엔드 API 프록시 (Express 3010)
       '/api': 'http://localhost:3010',

@@ -156,14 +156,13 @@ router.post('/merchant/login',
         return res.status(401).json({ success: false, message: '등록되지 않은 가맹점 아이디이거나 비밀번호가 틀립니다.' });
       }
 
-      if (merchant.status !== 'approved' && merchant.status !== 'rejected') {
-        const msg = merchant.status === 'pending' ? '아직 승인 대기 중인 가맹점 계정입니다.' : '정지된 가맹점 계정입니다. 관리자에게 문의해 주세요.';
-        return res.status(403).json({ success: false, message: msg });
-      }
-
       const match = await bcrypt.compare(password, merchant.password_hash);
       if (!match) {
         return res.status(401).json({ success: false, message: '등록되지 않은 가맹점 아이디이거나 비밀번호가 틀립니다.' });
+      }
+
+      if (merchant.status === 'suspended') {
+        return res.status(403).json({ success: false, message: '정지된 가맹점 계정입니다. 관리자에게 문의해 주세요.' });
       }
 
       const tokens = issueTokens({ id: merchant.id, role: 'merchant' });
@@ -308,7 +307,9 @@ router.post('/tourist/otp/verify',
         user = { id: insertResult.insertId, nickname: formattedPhone, role: 'tourist' };
       }
 
-      // 4. JWT 토큰 발급
+
+
+      // 5. JWT 토큰 발급
       const tokens = issueTokens({ id: user.id, role: 'tourist' });
       res.json({
         success: true,

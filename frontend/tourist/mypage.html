@@ -3,377 +3,298 @@
 <head>
   <link rel="icon" href="../shared/images/favicon.png" />
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="내 쿠폰 지갑 — 옹진관광 쿠폰 마이페이지" />
-  <title>내 쿠폰 지갑 | 옹진관광 쿠폰</title>
-  <link rel="stylesheet" href="../shared/css/main.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="나의 쿠폰함 — 옹진관광 쿠폰" />
+  <title>나의 쿠폰함 | 옹진관광 쿠폰</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
+
+  <!-- 🌟 진짜 지도 타일 렌더링용 Leaflet 오픈스트리트맵 CSS & JS (Head에서 즉시 로드) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link rel="stylesheet" href="./css/tourist-theme.css" />
   <style>
-    /* 파란색/남색 포인트 및 밝은 테마 설정 */
-    :root {
-      --primary: #0284c7;       /* Vibrant Sky Blue */
-      --primary-dark: #1e3a8a;  /* Deep Navy Point */
-      --primary-light: #e0f2fe; /* Soft Light Blue */
-      --bg: #f0f9ff;            /* Bright light blue tint background */
-      --surface: #ffffff;
-      --border: #bae6fd;        /* Light blue border for soft, bright look */
-      --text-primary: #0f172a;
-      --text-secondary: #334155;
-      --text-muted: #64748b;
-      --shadow-sm: 0 4px 12px rgba(2, 132, 199, 0.05);
-      --shadow: 0 8px 24px rgba(2, 132, 199, 0.08);
-    }
-
-    body {
-      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-    }
-
-    .app-shell {
-      background: #f8fafc;
-      box-shadow: 0 10px 30px rgba(2, 132, 199, 0.1);
-    }
-
-    /* 헤더 스타일 정리 */
-    .app-header {
-      background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
-      height: 60px;
-      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.15);
-      border-bottom: none;
-    }
-    
-    .app-header .logo {
-      font-size: 1.25rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: #ffffff !important;
-    }
-
-    .section-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--primary-dark);
-      border-left: 4px solid var(--primary);
-      padding-left: 10px;
-      margin-top: 20px;
-      margin-bottom: 14px;
-      line-height: 1.25;
-    }
-
-    /* 쿠폰 카드 */
-    .coupon-card {
-      background: var(--surface);
-      border: 1.5px solid #bae6fd;
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      position: relative;
-      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
-    }
-    .coupon-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-    }
-    .coupon-card.used, .coupon-card.expired {
-      opacity: 0.65;
-      background: #f8fafc;
-      border-color: #e2e8f0;
-    }
-    .coupon-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .coupon-value {
-      font-size: 1.6rem;
-      font-weight: 900;
-      color: var(--primary-dark);
-    }
-    .coupon-card.used .coupon-value {
-      color: var(--text-muted);
-      text-decoration: line-through;
-    }
-    .coupon-info-grid {
-      display: grid;
-      grid-template-columns: 75px 1fr;
-      row-gap: 6px;
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-      border-top: 1px dashed #bae6fd;
-      padding-top: 8px;
-    }
-    .coupon-card.used .coupon-info-grid {
-      border-top-color: #cbd5e1;
-    }
-    .coupon-info-label {
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-    .coupon-info-value {
-      color: var(--text-primary);
-      font-weight: 600;
-    }
-
-    /* 가맹점 카드 */
-    .merchant-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    .merchant-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
-      display: flex;
-      flex-direction: column;
-    }
-    .merchant-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-    }
-    .merchant-img-container {
-      height: 150px;
-      position: relative;
-      background: #f1f5f9;
-    }
-    .merchant-img {
+    .view-content {
+      display: none !important;
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .merchant-category {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: var(--radius-sm);
-      background: rgba(30, 41, 59, 0.8);
-      color: #fff;
-      backdrop-filter: blur(4px);
-    }
-    .merchant-body {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex-grow: 1;
-    }
-    .merchant-name {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--primary-dark);
-    }
-    .merchant-desc {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      line-height: 1.45;
-      margin-bottom: 6px;
-    }
-    .merchant-address {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
 
-    /* 사용 QR 모달 */
-    .use-modal-backdrop {
+    .view-content.active-view {
+      display: block !important;
+    }
+
+    /* 🌟 진짜 지도 타일 렌더링을 위한 명확한 높이 지정 */
+    .real-map-wrapper {
+      width: 100%;
+      height: calc(100vh - 120px);
+      min-height: 550px;
+      position: relative;
+      background: #e2e8f0;
+    }
+
+    #real-map {
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 550px !important;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+    }
+
+    /* 검색 바 상단 오버레이 */
+    .map-floating-search {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 100;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
+      border: 1px solid var(--border-color);
+    }
+
+    .map-floating-input {
+      flex: 1;
+      height: 40px;
+      border: none;
+      background: transparent;
+      padding: 0 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      outline: none;
+      color: var(--text-dark);
+    }
+
+    /* 커스텀 마커 팝업 스타일 */
+    .leaflet-popup-content-wrapper {
+      border-radius: 12px !important;
+      padding: 4px 6px !important;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.18) !important;
+    }
+    .leaflet-popup-content {
+      margin: 10px 12px !important;
+      font-family: 'Pretendard', sans-serif !important;
+    }
+
+    /* QR 사용 모달 바텀시트 */
+    .qr-modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.6);
       backdrop-filter: blur(8px);
-      z-index: 1000;
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
+      z-index: 2000;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.25s var(--ease);
+      transition: opacity 0.25s ease;
     }
-    .use-modal-backdrop.active {
+
+    .qr-modal-backdrop.active {
       opacity: 1;
       pointer-events: auto;
     }
-    .use-modal-sheet {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      width: 90%;
-      max-width: 360px;
-      padding: 28px 24px;
+
+    .qr-modal-sheet {
+      width: 100vw;
+      max-width: 480px;
+      background: #ffffff;
+      border-radius: 20px 20px 0 0;
+      padding: 32px 24px 40px;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+      border-top: 3px solid var(--primary-blue);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       text-align: center;
-      box-shadow: var(--shadow-lg);
-      transform: scale(0.92);
-      transition: transform 0.25s var(--ease);
-    }
-    .use-modal-backdrop.active .use-modal-sheet {
-      transform: scale(1);
-    }
-    .qr-container {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin: 16px 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      aspect-ratio: 1;
-    }
-    .qr-img {
-      width: 100%;
-      height: 100%;
-      max-width: 200px;
-      max-height: 200px;
     }
 
-    /* 발급 QR 모달 백드롭 (기존 Kiosk 발급 연동 유지용) */
-    .qr-modal-backdrop {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(10px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    .qr-modal-backdrop.active .qr-modal-sheet {
+      transform: translateY(0);
     }
-    .qr-modal-backdrop.active { opacity: 1; pointer-events: auto; }
-    .qr-modal-sheet {
-      background: #fff;
+
+    .qr-image-wrap {
+      width: 220px;
+      height: 220px;
+      margin: 20px auto;
+      border: 2px solid var(--primary-blue);
+      padding: 12px;
+      background: #ffffff;
+      border-radius: 12px;
+    }
+
+    .qr-timer {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 400;
+      color: var(--primary-blue);
+      margin-bottom: 20px;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       🖼️ [시원시원하고 넓직한 비주얼 이미지 가맹점 카드 5종]
+    ───────────────────────────────────────────────────────────── */
+
+    /* 1번 넓은 시안: 큼직한 시그니처 썸네일 카드 (Wide Thumbnail Card) */
+    .m-wide-1 {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+      transition: all 0.2s ease;
+    }
+    .m-wide-1:hover {
+      border-color: #0284c7;
+      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.12);
+    }
+
+    /* 2번 넓은 시안: 풀-Width 탑 배너 카드 (Hero Top Banner Card) */
+    .m-wide-2 {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
       border-radius: 20px;
-      width: 85%;
-      max-width: 340px;
-      padding: 32px 20px;
-      text-align: center;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-      transform: scale(0.9);
-      transition: transform 0.25s ease;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 22px rgba(15, 23, 42, 0.06);
     }
-    .qr-modal-backdrop.active .qr-modal-sheet { transform: scale(1); }
+
+    /* 3번 넓은 시안: 모던 아일랜드 매장 카드 (Modern Island Store Card) */
+    .m-wide-3 {
+      background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+      border: 1.5px solid #bae6fd;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      box-shadow: 0 4px 18px rgba(2, 132, 199, 0.08);
+    }
+
+    /* 4번 넓은 시안: 풀-와이드 스플릿 비주얼 카드 (Full-Wide Split Visual Card) */
+    .m-wide-4 {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-left: 6px solid #0284c7;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.04);
+    }
+
+    /* 5번 넓은 시안: 럭셔리 라운드 갤러리 카드 (Luxury Gallery Pill Card) */
+    .m-wide-5 {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 24px;
+      padding: 18px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <!-- 헤더 -->
-    <header class="app-header">
-      <div class="logo">옹진 관광 쿠폰</div>
+  <div class="tourist-app" id="app-container" style="padding-bottom: 100px;">
+    <!-- 상단 헤더 -->
+    <header class="header-clean">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <img src="../shared/images/favicon.png" alt="옹진군 로고" style="width: 24px; height: 24px; object-fit: contain;" />
+        <h1 class="header-title" id="header-title-text">나의 <span>쿠폰함</span></h1>
+      </div>
+      <a href="#" id="nav-logout" style="font-size: 0.82rem; color: var(--text-slate); font-weight: 700; text-decoration: none;">로그아웃</a>
     </header>
 
-    <!-- 컨텐츠 -->
-    <main class="page-content">
-      <!-- 쿠폰 목록 영역 -->
-      <section>
-        <h3 class="section-title">내 쿠폰 목록</h3>
-        <div id="coupon-list" style="display:flex;flex-direction:column;gap:12px;">
-          <!-- 쿠폰 스켈레톤 로더 -->
-          <div class="skeleton" style="height:150px;"></div>
-          <div class="skeleton" style="height:150px;"></div>
-        </div>
-      </section>
+    <!-- 1. 쿠폰함 뷰 (Wallet View) -->
+    <main class="wallet-container view-content active-view" id="view-wallet">
+      <div class="section-title-wrap">
+        <h2 class="section-title">사용 가능 쿠폰</h2>
+      </div>
 
-      <!-- 사용 가맹점 영역 -->
-      <section style="margin-top: 24px;">
-        <h3 class="section-title">사용 가능한 가맹점</h3>
-        <div id="merchant-list" class="merchant-grid">
-          <!-- 가맹점 스켈레톤 로더 -->
-          <div class="skeleton" style="height:240px;"></div>
-          <div class="skeleton" style="height:240px;"></div>
-        </div>
-      </section>
+      <!-- 쿠폰 카드 목록 -->
+      <div id="coupon-list">
+        <div style="padding: 40px; text-align: center; color: var(--text-slate);">쿠폰 정보를 불러오고 있습니다...</div>
+      </div>
+
+      <div class="section-title-wrap" style="margin-top: 40px;">
+        <h2 class="section-title">쿠폰 사용처</h2>
+      </div>
+
+      <!-- 🌟 시원시원하고 넓직한 비주얼 이미지 가맹점 카드 5종 시안 -->
+      <div id="merchant-list">
+        <div style="padding: 20px; text-align: center; color: var(--text-slate);">가맹점 목록을 불러오는 중...</div>
+      </div>
     </main>
 
-    <!-- 바텀 네비 -->
-    <nav class="bottom-nav">
-      <a href="/tourist/mypage.html" class="active" style="color: var(--primary);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <path d="M3 9h18"/>
-        </svg>
-        내 쿠폰
-      </a>
-      <a href="/tourist/map.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-          <circle cx="12" cy="9" r="2.5"/>
-        </svg>
-        지도
-      </a>
-      <a href="/tourist/apply-merchant.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-        입점신청
-      </a>
-      <a href="/tourist/index.html" id="nav-logout">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        로그아웃
-      </a>
-    </nav>
-  </div>
+    <!-- 2. 지도 뷰 (Map View) -->
+    <main class="view-content" id="view-map" style="padding:0;">
+      <div class="real-map-wrapper">
+        <div class="map-floating-search">
+          <svg style="width:20px;height:20px;color:var(--primary-blue);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" id="map-search-input" class="map-floating-input" placeholder="가맹점 이름을 검색하세요" />
+        </div>
+        <div id="real-map"></div>
+      </div>
+    </main>
 
-  <!-- 쿠폰 사용 QR 모달 -->
-  <div class="use-modal-backdrop" id="use-qr-modal">
-    <div class="use-modal-sheet" style="position: relative;">
-      <!-- 상단 X 닫기 버튼 -->
-      <button class="close-x" onclick="window.closeUseModal()" style="position: absolute; top: 16px; right: 18px; font-size: 1.6rem; font-weight: 300; color: var(--text-muted); cursor: pointer; border: none; background: none; line-height: 1;">&times;</button>
-      
-      <!-- QR 및 타이머 영역 -->
-      <div id="use-modal-qr-container" style="margin-top: 14px;">
-        <div class="qr-container">
-          <img id="use-modal-qr-img" class="qr-img" src="" alt="쿠폰 결제용 QR 코드" />
-        </div>
-        
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 20px;">
-          <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500;">남은 시간</div>
-          <div id="use-modal-timer" style="font-size: 1.25rem; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums;">03:00</div>
-        </div>
-      </div>
-      
-      <!-- 만료된 화면 오버레이 -->
-      <div id="use-modal-expired-container" style="display: none; margin: 30px 0; text-align: center;">
-        <div style="font-size: 2.5rem; margin-bottom: 12px;">⏰</div>
-        <p style="font-size: 0.88rem; color: var(--danger); font-weight: 700; margin-bottom: 6px;">유효 시간이 만료되었습니다</p>
-        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 20px;">보안을 위해 QR 코드가 소멸되었습니다.</p>
-        <button class="btn btn-outline" onclick="window.regenerateQr()" style="padding: 8px 16px; font-size: 0.8rem; border-radius: var(--radius-sm); border-color: var(--primary); color: var(--primary); margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 4px;">🔄 다시 받기</button>
-      </div>
-      
-      <!-- 완료 버튼 -->
-      <button class="btn btn-primary btn-full" id="btn-complete-payment" onclick="window.completePayment()" style="background: linear-gradient(135deg, #0284c7 0%, #1e3a8a 100%); border-radius: var(--radius-sm); font-weight: 700; border: none; color: #fff;">완료</button>
+    <!-- 하단 알약 슬라이딩 네비게이션 -->
+    <div class="floating-pill-nav" id="pill-nav">
+      <div class="pill-slider" id="pill-slider"></div>
+      <button class="pill-tab active" data-tab="wallet" title="쿠폰함" onclick="window.switchTab('wallet')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5zM5 15a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2H5z" />
+        </svg>
+        <span class="pill-label">쿠폰함</span>
+      </button>
+      <button class="pill-tab" data-tab="map" title="가맹점 지도" onclick="window.switchTab('map')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        </svg>
+        <span class="pill-label">가맹점 지도</span>
+      </button>
     </div>
   </div>
 
-  <!-- Kiosk 자동 발급을 위한 기존 발급 처리 모달 (삭제되지 않음) -->
-  <div class="qr-modal-backdrop" id="qr-modal">
+  <!-- QR 제시 모달 바텀시트 -->
+  <div class="qr-modal-backdrop" id="use-qr-modal">
     <div class="qr-modal-sheet">
-      <div id="qr-state-loading" style="display: block;">
-        <div class="spinner" style="width: 48px; height: 48px; border: 4px solid #e0f2fe; border-top-color: #0ea5e9; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
-        <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">QR 코드 분석 중</h3>
-        <p style="font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.4;">카메라로 촬영된 이미지를 디코딩하여<br>쿠폰을 발급받고 있습니다. 잠시만 기다려주세요.</p>
-      </div>
-      
-      <div id="qr-state-success" style="display: none;">
-        <div style="font-size: 3.5rem; margin-bottom: 16px; animation: bounce 0.6s ease-out;">🎉</div>
-        <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">쿠폰 발급 성공!</h3>
-        <p id="qr-success-msg" style="font-size: 0.9rem; color: #0ea5e9; font-weight: 700; margin-bottom: 24px;">쿠폰이 지갑에 등록되었습니다.</p>
-        <button class="btn btn-primary btn-full" id="btn-qr-success-ok" style="padding: 12px 0;">확인</button>
+      <div style="width: 40px; height: 4px; background: #cbd5e1; border-radius: 99px; margin: 0 auto 20px;"></div>
+      <h3 style="font-family: 'Gowun Dodum', sans-serif; font-size: 1.5rem; font-weight: 400; color: var(--text-dark); margin-bottom: 6px;">가맹점 결제용 QR 코드</h3>
+      <p style="font-size: 0.85rem; color: var(--text-slate); margin-bottom: 16px;">가맹점 대표님께 QR 코드를 보여주세요.</p>
+
+      <div id="use-modal-qr-container">
+        <div class="qr-image-wrap">
+          <img id="use-modal-qr-img" src="" alt="결제 QR" style="width:100%;height:100%;object-fit:contain;" />
+        </div>
+        <div class="qr-timer" id="use-modal-timer">03:00</div>
+        <button class="btn-outline" style="width:100%; height:48px; border:1px solid #cbd5e1; border-radius:8px; font-weight:700; cursor:pointer;" onclick="window.closeUseModal()">닫기</button>
       </div>
 
-      <div id="qr-state-error" style="display: none;">
-        <div style="font-size: 3.5rem; margin-bottom: 16px;">❌</div>
-        <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">인식 실패</h3>
-        <p id="qr-error-msg" style="font-size: 0.85rem; color: #ef4444; margin-bottom: 24px; line-height: 1.4;">QR 코드를 찾을 수 없습니다.<br>밝은 곳에서 흔들림 없이 다시 찍어주세요.</p>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-outline" id="btn-qr-error-close" style="flex: 1; padding: 12px 0;">닫기</button>
-        </div>
+      <div id="use-modal-expired-container" style="display: none;">
+        <p style="font-size: 0.9rem; color: #DC2626; font-weight: 700; margin: 20px 0;">유효 시간이 만료되었습니다.</p>
+        <button class="btn-blue-fill" style="width:100%; height:48px;" id="btn-re-qr">QR 코드 재생성</button>
       </div>
     </div>
   </div>
@@ -381,461 +302,418 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { api, requireAuth, showToast, fmtMoney, clearTokens, isTokenExpired, setTokens } from '../shared/js/api.js'
+    import { api, requireAuth, showToast, fmtMoney, clearTokens } from '../shared/js/api.js';
 
-    // ── 세션 만료 모니터링 (10초 주기) ──
-    setInterval(() => {
-      const token = localStorage.getItem('ongjin_token');
-      if (token && token !== 'test_dummy_jwt_token') {
-        if (isTokenExpired(token)) {
-          const refreshToken = localStorage.getItem('ongjin_refresh');
-          if (refreshToken) {
-            api.post('/auth/refresh', { refreshToken })
-              .then(res => {
-                if (res.success) {
-                  setTokens(res.token, res.refresh);
-                } else {
-                  handleSessionExpired();
-                }
-              })
-              .catch(() => {
-                handleSessionExpired();
-              });
-          } else {
-            handleSessionExpired();
-          }
-        }
-      } else if (!token) {
-        window.location.href = '/tourist/index.html';
-      }
-    }, 10000);
-
-    function handleSessionExpired() {
-      clearTokens();
-      alert('인증 세션이 만료되었습니다. 다시 로그인해 주세요.');
+    const token = localStorage.getItem('ongjin_token');
+    if (!token) {
       window.location.href = '/tourist/index.html';
     }
 
-    if (!requireAuth()) throw new Error('not authenticated');
+    document.getElementById('nav-logout').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm('로그아웃 하시겠습니까?')) {
+        clearTokens();
+        window.location.href = '/tourist/index.html';
+      }
+    });
 
-    // ── 가맹점 카테고리별 매핑 정보 ──
-    const categoryImages = {
-      '음식점': 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=80',
-      '수산물': 'https://images.unsplash.com/photo-1534482421-64566f976cfa?auto=format&fit=crop&w=500&q=80',
-      '카페': 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=500&q=80',
-      '숙박': 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=80',
-      '기념품': 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=500&q=80',
-      '체험': 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=500&q=80'
-    };
-    const defaultImage = 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=500&q=80';
+    let leafMap = null;
+    let leafMarkers = [];
+    let merchantsData = [];
 
-    const merchantDescriptions = {
-      '백령도 해물칼국수': '백령도 바다의 신선한 해물을 듬뿍 담은 깊은 맛의 해물칼국수 전문점',
-      '연평도 꽃게직판장': '연평도에서 갓 잡아 올린 알이 꽉 찬 명품 꽃게 직판장 및 요리 전문점',
-      '대청도 서풍받이 카페': '서풍받이 해안 절벽의 비경을 감상하며 즐기는 오션뷰 디저트 카페',
-      '소청도 민박 파도소리': '소청도 파도 소리를 들으며 힐링할 수 있는 편안하고 아늑한 민박집',
-      '덕적도 솔밭 기념품': '덕적도 솔밭 명물 특산품과 직접 제작한 정성 어린 기념품 판매점',
-      '자월도 해수욕장 식당': '자월도 모래사장 앞 시원한 바람과 함께 즐기는 활어회와 제철 수산물',
-      '이작도 낚시체험': '아름다운 이작도 바다에서 초보자도 쉽게 즐기는 짜릿한 배낚시 체험 프로그램'
-    };
+    function initRealMap() {
+      const container = document.getElementById('real-map');
+      if (!container || typeof L === 'undefined') return;
 
-    // ── 날짜 & 시간 포맷 헬퍼 ──
-    function formatDateTime(dateStr) {
-      if (!dateStr) return '-';
-      const d = new Date(dateStr);
-      const pad = n => String(n).padStart(2, '0');
-      return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    }
-
-    function getExpiryDateString(dateStr) {
-      if (!dateStr) return '-';
-      const d = new Date(dateStr);
-      d.setFullYear(d.getFullYear() + 1);
-      d.setDate(d.getDate() - 1);
-      const pad = n => String(n).padStart(2, '0');
-      return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`;
-    }
-
-    let allCoupons = [];
-    let qrTimerInterval = null;
-    let qrPollInterval = null;
-    let currentCouponId = null;
-    let currentCodeHash = null;
-
-    // ── 내 쿠폰 목록 로드 ──
-    async function loadWallet() {
-      // 데모/테스트 모드용 더미 주입
-      if (localStorage.getItem('ongjin_token') === 'test_dummy_jwt_token') {
-        const dummyData = [
-          { id: 999, code_hash: 'PASS', coupon_type: 'digital', status: 'available', face_value: 10000, issued_at: '2026-05-26T10:00:00Z', issuer_name: '소야' },
-          { id: 998, code_hash: 'USED_TEST', coupon_type: 'paper', status: 'used', face_value: 5000, issued_at: '2026-05-25T11:20:00Z', used_at: '2026-05-25T15:30:00Z', issuer_name: '연안부두 안내소', used_merchant_name: '백령도 해물칼국수' }
-        ];
-        allCoupons = dummyData;
-        renderCoupons(dummyData);
-        return;
+      if (leafMap) {
+        leafMap.remove();
+        leafMap = null;
       }
 
+      let centerLat = 37.2600;
+      let centerLng = 126.4900;
+
+      if (merchantsData.length > 0) {
+        const firstM = merchantsData[0];
+        if (firstM.lat || firstM.latitude) centerLat = parseFloat(firstM.lat || firstM.latitude);
+        if (firstM.lng || firstM.longitude) centerLng = parseFloat(firstM.lng || firstM.longitude);
+      }
+
+      leafMap = L.map('real-map', {
+        center: [centerLat, centerLng],
+        zoom: 12,
+        zoomControl: false
+      });
+
+      L.control.zoom({ position: 'bottomright' }).addTo(leafMap);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(leafMap);
+
+      leafMarkers = [];
+      merchantsData.forEach(m => {
+        const lat = parseFloat(m.lat || m.latitude) || 37.2600;
+        const lng = parseFloat(m.lng || m.longitude) || 126.4900;
+
+        const marker = L.marker([lat, lng]).addTo(leafMap);
+        const popupContent = `
+          <div style="text-align:left;">
+            <div style="font-size:0.98rem; font-weight:800; color:#0f172a; margin-bottom:4px;">${m.name}</div>
+            <div style="font-size:0.8rem; color:#475569; margin-bottom:4px;">대표자: ${m.owner_name || m.representative_name || '대표'}</div>
+            <div style="font-size:0.78rem; color:#64748b; margin-bottom:6px;">${m.address || '인천광역시 옹진군'}</div>
+            <span style="font-size:0.72rem; font-weight:800; color:#0284c7; background:#e0f2fe; padding:2px 8px; border-radius:4px;">
+              옹진관광 승인 가맹점
+            </span>
+          </div>
+        `;
+        marker.bindPopup(popupContent);
+        marker.openPopup();
+        leafMarkers.push({ id: m.id, name: m.name, lat, lng, marker });
+      });
+
+      const input = document.getElementById('map-search-input');
+      if (input) {
+        input.addEventListener('input', (e) => {
+          const q = e.target.value.trim().toLowerCase();
+          if (!q) return;
+
+          const match = leafMarkers.find(m => m.name.toLowerCase().includes(q));
+          if (match && leafMap) {
+            leafMap.flyTo([match.lat, match.lng], 14, { duration: 1 });
+            match.marker.openPopup();
+          }
+        });
+      }
+    }
+
+    window.switchTab = function(tabName) {
+      const tabs = document.querySelectorAll('.pill-tab');
+      const headerTitle = document.getElementById('header-title-text');
+
+      tabs.forEach(t => t.classList.remove('active'));
+      const targetBtn = document.querySelector(`.pill-tab[data-tab="${tabName}"]`);
+      if (targetBtn) targetBtn.classList.add('active');
+
+      const walletView = document.getElementById('view-wallet');
+      const mapView = document.getElementById('view-map');
+
+      if (tabName === 'wallet') {
+        walletView.classList.add('active-view');
+        mapView.classList.remove('active-view');
+        headerTitle.innerHTML = '나의 <span>쿠폰함</span>';
+        window.scrollTo(0, 0);
+      } else {
+        walletView.classList.remove('active-view');
+        mapView.classList.add('active-view');
+        headerTitle.innerHTML = '가맹점 <span>지도</span>';
+        window.scrollTo(0, 0);
+
+        setTimeout(() => {
+          initRealMap();
+          if (leafMap) {
+            leafMap.invalidateSize();
+          }
+        }, 50);
+      }
+
+      updateSliderPosition(targetBtn);
+    };
+
+    function updateSliderPosition(targetBtn) {
+      const slider = document.getElementById('pill-slider');
+      const nav = document.getElementById('pill-nav');
+      if (!targetBtn || !slider || !nav) return;
+
+      const navRect = nav.getBoundingClientRect();
+      const btnRect = targetBtn.getBoundingClientRect();
+
+      const leftOffset = btnRect.left - navRect.left;
+      slider.style.left = `${leftOffset}px`;
+      slider.style.width = `${btnRect.width}px`;
+    }
+
+    window.addEventListener('resize', () => {
+      const activeBtn = document.querySelector('.pill-tab.active');
+      if (activeBtn) updateSliderPosition(activeBtn);
+      if (leafMap) leafMap.invalidateSize();
+    });
+
+    let timerInterval = null;
+
+    function getActualExpireDate(expiresAtStr, issuedAtStr) {
+      let targetDate;
+      if (expiresAtStr) {
+        targetDate = new Date(expiresAtStr);
+      } else if (issuedAtStr) {
+        targetDate = new Date(issuedAtStr);
+        targetDate.setFullYear(targetDate.getFullYear() + 1);
+      } else {
+        targetDate = new Date();
+        targetDate.setFullYear(targetDate.getFullYear() + 1);
+      }
+
+      const y = targetDate.getFullYear();
+      const m = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const d = String(targetDate.getDate()).padStart(2, '0');
+      return `${y}.${m}.${d}`;
+    }
+
+    function getDDayStr(expiresAtStr, issuedAtStr) {
+      let targetDate;
+      if (expiresAtStr) {
+        targetDate = new Date(expiresAtStr);
+      } else if (issuedAtStr) {
+        targetDate = new Date(issuedAtStr);
+        targetDate.setFullYear(targetDate.getFullYear() + 1);
+      } else {
+        targetDate = new Date();
+        targetDate.setFullYear(targetDate.getFullYear() + 1);
+      }
+
+      const now = new Date();
+      const diffTime = targetDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 0) return '만료';
+      if (diffDays === 0) return 'D-Day';
+      return `D-${diffDays}`;
+    }
+
+    async function loadData() {
       try {
-        const { data } = await api.get('/coupon/my');
-        allCoupons = data;
-        renderCoupons(data);
+        const [couponsRes, merchantsRes] = await Promise.all([
+          api.get('/coupon/my'),
+          api.get('/merchant/map')
+        ]);
+
+        merchantsData = merchantsRes.data || [];
+
+        renderCoupons(couponsRes.data || []);
+        renderWideImageMerchantConcepts(merchantsData);
+
+        setTimeout(() => {
+          const activeBtn = document.querySelector('.pill-tab.active');
+          if (activeBtn) updateSliderPosition(activeBtn);
+        }, 50);
       } catch (e) {
-        showToast('쿠폰 정보를 불러오지 못했습니다.', 'error');
+        if (e.status === 403 || (e.message && e.message.includes('인증'))) {
+          clearTokens();
+          showToast('본인인증 후 이용 가능합니다.', 'info');
+          setTimeout(() => {
+            window.location.href = '/tourist/index.html';
+          }, 600);
+        } else {
+          showToast(e.message || '데이터를 불러오는 중 오류가 발생했습니다.', 'error');
+        }
       }
     }
 
-    // ── 쿠폰 목록 렌더링 ──
-    function renderCoupons(data) {
-      const listEl = document.getElementById('coupon-list');
-      if (data.length === 0) {
-        listEl.innerHTML = `
-          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 0.9rem;">
-            등록된 쿠폰이 없습니다.
+    function renderCoupons(coupons) {
+      const el = document.getElementById('coupon-list');
+      if (coupons.length === 0) {
+        el.innerHTML = `
+          <div style="background:#ffffff; border:1.5px dashed #cbd5e1; border-radius:12px; text-align:center; padding: 48px 20px; box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+            <div style="font-family: 'Gowun Dodum', sans-serif; font-size:1.4rem; font-weight:400; color:var(--text-dark); margin-bottom:6px;">보유 중인 쿠폰이 없습니다</div>
+            <div style="font-size:0.85rem; color:var(--text-slate);">발행처 현장에서 QR 스캔 후 등록해보세요.</div>
           </div>`;
         return;
       }
 
-      // 사용 가능 쿠폰을 상단으로 오도록 정렬
-      const sorted = data.sort((a, b) => {
-        if (a.status === 'available' && b.status !== 'available') return -1;
-        if (a.status !== 'available' && b.status === 'available') return 1;
-        return new Date(b.issued_at) - new Date(a.issued_at);
-      });
-
-      listEl.innerHTML = sorted.map(c => {
-        const isAvailable = c.status === 'available';
-        const isUsed = c.status === 'used';
-        const isExpired = c.status === 'expired';
-        
-        let cardClass = 'coupon-card';
-        if (isUsed) cardClass += ' used';
-        if (isExpired) cardClass += ' expired';
+      el.innerHTML = coupons.map(c => {
+        const couponId = c.id;
+        const faceValue = fmtMoney(c.face_value);
+        const expireDateStr = getActualExpireDate(c.expires_at, c.issued_at);
+        const ddayStr = getDDayStr(c.expires_at, c.issued_at);
 
         return `
-          <div class="${cardClass}">
-            <div class="coupon-card-header">
-              <div class="coupon-value">${fmtMoney(c.face_value)}</div>
+          <div class="coupon-card-final">
+            <div class="notch-l"></div>
+            <div class="notch-r"></div>
+            <div class="top-line">
+              <span class="title-text">옹진 관광 섬 특별 할인 쿠폰</span>
+              <span class="dday-badge">${ddayStr}</span>
             </div>
-            
-            <div class="coupon-info-grid">
-              <span class="coupon-info-label">발행처</span>
-              <span class="coupon-info-value">${c.issuer_name || '옹진군청'}</span>
-              
-              <span class="coupon-info-label">발행 일시</span>
-              <span class="coupon-info-value">${formatDateTime(c.issued_at)}</span>
-              
-              <span class="coupon-info-label">유효기간</span>
-              <span class="coupon-info-value">~ ${getExpiryDateString(c.issued_at)}</span>
-              
-              ${isUsed ? `
-                <span class="coupon-info-label" style="color: var(--success);">사용처</span>
-                <span class="coupon-info-value" style="color: var(--success);">${c.used_merchant_name || '등록 가맹점'}</span>
-                
-                <span class="coupon-info-label" style="color: var(--success);">사용 일시</span>
-                <span class="coupon-info-value" style="color: var(--success);">${formatDateTime(c.used_at)}</span>
-              ` : ''}
-            </div>
-
-            ${isAvailable ? `
-              <button class="btn btn-primary btn-full" onclick="window.useCoupon(${c.id}, '${c.code_hash}')" style="padding: 10px 0; font-size: 0.85rem; border-radius: var(--radius-sm); margin-top: 4px; background: linear-gradient(135deg, #0284c7 0%, #1e3a8a 100%); border: none;">
-                사용하기
+            <div class="mid-line">
+              <div class="price-text">${faceValue}</div>
+              <button class="btn-use-blue" onclick="window.openUseModal('${couponId}')">
+                쿠폰 QR 사용
               </button>
-            ` : ''}
+            </div>
+            <div class="bottom-line">
+              <span>유효기간 ~ ${expireDateStr}</span>
+            </div>
           </div>
         `;
       }).join('');
     }
 
-    // ── 쿠폰 사용하기 모달 ──
-    window.useCoupon = function(couponId, codeHash) {
-      currentCouponId = couponId;
-      currentCodeHash = codeHash;
+    // 🌟 [넓직하고 시원한 비주얼 이미지 5가지 가맹점 카드 시안 렌더링]
+    function renderWideImageMerchantConcepts(merchants) {
+      const el = document.getElementById('merchant-list');
+      if (!merchants || merchants.length === 0) {
+        merchants = [{
+          id: 'm-yoonji',
+          name: '윤지과일',
+          owner_name: '정윤지',
+          phone: '010-9801-2559',
+          category: '수산물·농산물',
+          address: '인천 옹진군 영흥면 영흥남로9번길 221-63 머드포레'
+        }];
+      }
 
-      const modal = document.getElementById('use-qr-modal');
-      const modalQr = document.getElementById('use-modal-qr-img');
+      const m = merchants[0];
+      const imgFruit = '../shared/images/yoonji_fruit.png';
+      const imgSeafood = '../shared/images/seafood.png';
 
-      // QR Code API 연동 (qrserver.com 활용)
-      modalQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(codeHash)}`;
-      
-      // 상태 화면 초기화
-      document.getElementById('use-modal-qr-container').style.display = 'block';
-      document.getElementById('use-modal-expired-container').style.display = 'none';
+      el.innerHTML = `
+        <!-- 시안 1: 큼직한 시그니처 썸네일 카드 (Wide Thumbnail Card) -->
+        <div class="m-wide-1" onclick="window.focusMerchantMap('${m.id}')" style="cursor:pointer;">
+          <img src="${imgFruit}" alt="가맹점 대표 사진" style="width:90px; height:90px; border-radius:14px; object-fit:cover; flex-shrink:0; box-shadow:0 4px 12px rgba(0,0,0,0.1);" />
+          <div style="flex:1;">
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+              <span style="font-size:0.75rem; font-weight:800; color:#0284c7; background:#e0f2fe; padding:3px 8px; border-radius:6px;">${m.category || '수산물·농산물'}</span>
+              <span style="font-size:0.75rem; color:#64748b;">${m.owner_name || '정윤지'} 대표</span>
+            </div>
+            <div style="font-size:1.15rem; font-weight:800; color:#0f172a; margin-bottom:4px;">${m.name}</div>
+            <div style="font-size:0.8rem; color:#475569; line-height:1.3;">${m.address}</div>
+          </div>
+          <div style="align-self:flex-end; font-size:0.78rem; font-weight:800; color:#0284c7; white-space:nowrap;">
+            지도 위치 >
+          </div>
+        </div>
 
-      modal.classList.add('active');
+        <!-- 시안 2: 풀-Width 탑 배너 카드 (Hero Top Banner Card) -->
+        <div class="m-wide-2" onclick="window.focusMerchantMap('${m.id}')" style="cursor:pointer;">
+          <div style="width:100%; height:130px; position:relative; overflow:hidden;">
+            <img src="${imgFruit}" alt="가맹점 배경 배너" style="width:100%; height:100%; object-fit:cover;" />
+            <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(15,23,42,0.7) 0%, transparent 60%);"></div>
+            <span style="position:absolute; top:12px; left:14px; font-size:0.75rem; font-weight:800; color:#ffffff; background:rgba(2,132,199,0.9); padding:3px 10px; border-radius:99px; backdrop-filter:blur(4px);">
+              옹진관광 정식 가맹점
+            </span>
+            <div style="position:absolute; bottom:10px; left:14px; color:#ffffff; font-size:1.2rem; font-weight:800;">
+              ${m.name}
+            </div>
+          </div>
+          <div style="padding:14px 18px; display:flex; align-items:center; justify-content:space-between; background:#ffffff;">
+            <div>
+              <div style="font-size:0.82rem; font-weight:700; color:#334155;">${m.category} • ${m.owner_name || '정윤지'} 대표</div>
+              <div style="font-size:0.78rem; color:#64748b; margin-top:2px;">${m.address}</div>
+            </div>
+            <span style="font-size:0.78rem; font-weight:800; color:#ffffff; background:#0284c7; padding:8px 14px; border-radius:10px; flex-shrink:0;">
+              가맹점 지도보기
+            </span>
+          </div>
+        </div>
 
-      // 3분 보안 타이머 시작
-      startQrTimer(180);
-      
-      // 실시간 가맹점 스캔 대기 폴링 시작 (2초 주기)
-      startQrPolling(couponId, codeHash);
+        <!-- 시안 3: 모던 아일랜드 매장 카드 (Modern Island Store Card) -->
+        <div class="m-wide-3" onclick="window.focusMerchantMap('${m.id}')" style="cursor:pointer;">
+          <img src="${imgSeafood}" alt="매장 이미지" style="width:84px; height:84px; border-radius:14px; object-fit:cover; flex-shrink:0;" />
+          <div style="flex:1;">
+            <div style="font-size:1.1rem; font-weight:800; color:#0369a1; margin-bottom:3px;">${m.name}</div>
+            <div style="font-size:0.8rem; color:#334155; margin-bottom:4px;">${m.address}</div>
+            <span style="font-size:0.72rem; font-weight:800; color:#0369a1; background:#ffffff; border:1px solid #7dd3fc; padding:2px 8px; border-radius:4px;">
+              할인 쿠폰 결제 가능
+            </span>
+          </div>
+        </div>
+
+        <!-- 시안 4: 풀-와이드 스플릿 비주얼 카드 (Full-Wide Split Visual Card) -->
+        <div class="m-wide-4" onclick="window.focusMerchantMap('${m.id}')" style="cursor:pointer;">
+          <img src="${imgFruit}" alt="과일 스토어" style="width:88px; height:88px; border-radius:12px; object-fit:cover; flex-shrink:0;" />
+          <div style="flex:1;">
+            <div style="font-size:1.1rem; font-weight:800; color:#0f172a;">${m.name}</div>
+            <div style="font-size:0.8rem; color:#64748b; margin-top:3px;">${m.address}</div>
+            <div style="font-size:0.75rem; color:#0284c7; font-weight:700; margin-top:4px;">TEL: ${m.phone || '010-9801-2559'}</div>
+          </div>
+          <div style="width:36px; height:36px; border-radius:50%; background:#e0f2fe; display:flex; align-items:center; justify-content:center; color:#0284c7; flex-shrink:0;">
+            <svg style="width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- 시안 5: 럭셔리 라운드 갤러리 카드 (Luxury Gallery Pill Card) -->
+        <div class="m-wide-5" onclick="window.focusMerchantMap('${m.id}')" style="cursor:pointer;">
+          <img src="${imgFruit}" alt="럭셔리 가맹점" style="width:96px; height:96px; border-radius:18px; object-fit:cover; flex-shrink:0; box-shadow:0 6px 16px rgba(0,0,0,0.12);" />
+          <div style="flex:1;">
+            <span style="font-size:0.74rem; font-weight:800; color:#ffffff; background:#0284c7; padding:3px 10px; border-radius:99px; display:inline-block; margin-bottom:6px;">
+              옹진 수산·농산물
+            </span>
+            <div style="font-size:1.15rem; font-weight:800; color:#0f172a; margin-bottom:4px;">${m.name}</div>
+            <div style="font-size:0.78rem; color:#475569;">${m.address}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    window.focusMerchantMap = function(merchantId) {
+      window.switchTab('map');
+      setTimeout(() => {
+        const target = leafMarkers.find(m => m.id === merchantId);
+        if (target && leafMap) {
+          leafMap.flyTo([target.lat, target.lng], 14, { duration: 1 });
+          target.marker.openPopup();
+        }
+      }, 200);
     };
 
-    // 3분 타이머 구현
-    function startQrTimer(duration) {
-      if (qrTimerInterval) clearInterval(qrTimerInterval);
-      
-      let timeLeft = duration;
-      const timerEl = document.getElementById('use-modal-timer');
-      
-      const updateDisplay = () => {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        
-        if (timeLeft <= 30) {
-          timerEl.style.color = '#ef4444'; // 빨간색 경고
-        } else {
-          timerEl.style.color = 'var(--primary)';
+    window.openUseModal = async function(couponId) {
+      document.getElementById('use-modal-expired-container').style.display = 'none';
+      document.getElementById('use-modal-qr-container').style.display = 'block';
+      document.getElementById('use-qr-modal').classList.add('active');
+
+      await generateQrCode(couponId);
+      startTimer(180);
+    };
+
+    window.closeUseModal = function() {
+      document.getElementById('use-qr-modal').classList.remove('active');
+      stopTimer();
+    };
+
+    async function generateQrCode(couponId) {
+      try {
+        const res = await api.post(`/coupon/${couponId}/use-qr`);
+        if (res.success && res.qrToken) {
+          const img = document.getElementById('use-modal-qr-img');
+          img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(res.qrToken)}`;
         }
-      };
+      } catch (e) {
+        showToast(e.message || 'QR 코드 생성 실패', 'error');
+      }
+    }
 
-      updateDisplay();
+    function startTimer(seconds) {
+      stopTimer();
+      let left = seconds;
+      const el = document.getElementById('use-modal-timer');
+      
+      function update() {
+        const m = String(Math.floor(left / 60)).padStart(2, '0');
+        const s = String(left % 60).padStart(2, '0');
+        el.textContent = `${m}:${s}`;
+      }
+      update();
 
-      qrTimerInterval = setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) {
-          clearInterval(qrTimerInterval);
-          clearInterval(qrPollInterval);
-          // QR 가리고 만료 화면 표시
+      timerInterval = setInterval(() => {
+        left--;
+        if (left <= 0) {
+          stopTimer();
           document.getElementById('use-modal-qr-container').style.display = 'none';
           document.getElementById('use-modal-expired-container').style.display = 'block';
         } else {
-          updateDisplay();
+          update();
         }
       }, 1000);
     }
 
-    // 폴링 구현
-    function startQrPolling(couponId, codeHash) {
-      if (qrPollInterval) clearInterval(qrPollInterval);
-
-      // 데모 모니터링: 만약 토큰이 데모 토큰이고 codeHash가 'PASS'면 5초 후에 사용완료 처리 시뮬레이션
-      if (localStorage.getItem('ongjin_token') === 'test_dummy_jwt_token' && codeHash === 'PASS') {
-        qrPollInterval = setInterval(async () => {
-          clearInterval(qrPollInterval);
-          clearInterval(qrTimerInterval);
-          // 더미 데이터 상태 변경 후 갱신
-          const dummyTarget = allCoupons.find(c => c.id === couponId);
-          if (dummyTarget) {
-            dummyTarget.status = 'used';
-            dummyTarget.used_at = new Date().toISOString();
-            dummyTarget.used_merchant_name = '백령도 해물칼국수';
-          }
-          document.getElementById('use-qr-modal').classList.remove('active');
-          showToast('쿠폰 사용이 완료되었습니다!', 'success');
-          renderCoupons(allCoupons);
-        }, 5000);
-        return;
-      }
-
-      qrPollInterval = setInterval(async () => {
-        try {
-          const { data } = await api.get('/coupon/my');
-          const current = data.find(c => c.id === couponId);
-          if (current && current.status === 'used') {
-            clearInterval(qrPollInterval);
-            clearInterval(qrTimerInterval);
-            document.getElementById('use-qr-modal').classList.remove('active');
-            showToast('쿠폰 사용이 완료되었습니다!', 'success');
-            allCoupons = data;
-            renderCoupons(data);
-          }
-        } catch (e) {
-          console.error('쿠폰 상태 체크 오류:', e);
-        }
-      }, 2000);
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
     }
 
-    // QR 만료 후 다시 받기
-    window.regenerateQr = function() {
-      document.getElementById('use-modal-qr-container').style.display = 'block';
-      document.getElementById('use-modal-expired-container').style.display = 'none';
-      
-      startQrTimer(180);
-      startQrPolling(currentCouponId, currentCodeHash);
-    };
-
-    // 사용 완료 버튼 클릭 처리 (수동 완료 확인용)
-    window.completePayment = async function() {
-      window.closeUseModal();
-      
-      if (localStorage.getItem('ongjin_token') === 'test_dummy_jwt_token') {
-        // 데모 환경 처리
-        const dummyTarget = allCoupons.find(c => c.id === currentCouponId);
-        if (dummyTarget && dummyTarget.status !== 'used') {
-          dummyTarget.status = 'used';
-          dummyTarget.used_at = new Date().toISOString();
-          dummyTarget.used_merchant_name = '백령도 해물칼국수';
-          showToast('데모 결제가 완료 처리되었습니다.', 'success');
-        }
-        renderCoupons(allCoupons);
-        return;
-      }
-
-      try {
-        // 최신 상태 갱신
-        const { data } = await api.get('/coupon/my');
-        allCoupons = data;
-        renderCoupons(data);
-
-        const current = data.find(c => c.id === currentCouponId);
-        if (current && current.status === 'used') {
-          showToast('결제가 성공적으로 완료되었습니다!', 'success');
-        } else {
-          showToast('결제 대기 상태입니다. 가맹점에서 정상 스캔되면 즉시 반영됩니다.', '');
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    // 사용 모달 닫기
-    window.closeUseModal = function() {
-      document.getElementById('use-qr-modal').classList.remove('active');
-      if (qrTimerInterval) {
-        clearInterval(qrTimerInterval);
-        qrTimerInterval = null;
-      }
-      if (qrPollInterval) {
-        clearInterval(qrPollInterval);
-        qrPollInterval = null;
-      }
-    };
-
-    // ── 사용 가맹점 리스트 로드 ──
-    async function loadMerchants() {
-      const listEl = document.getElementById('merchant-list');
-      try {
-        const res = await api.get('/merchant/map');
-        const merchants = res.data || [];
-        
-        if (merchants.length === 0) {
-          listEl.innerHTML = `
-            <div style="text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.85rem;">
-              사용 가능한 가맹점이 없습니다.
-            </div>`;
-          return;
-        }
-        
-        listEl.innerHTML = merchants.map(m => {
-          const img = categoryImages[m.category] || defaultImage;
-          const desc = merchantDescriptions[m.name] || `옹진군 공인 ${m.category || '관광'} 추천 가맹점입니다. 친절과 정성으로 모시겠습니다.`;
-          return `
-            <div class="merchant-card">
-              <div class="merchant-img-container">
-                <img class="merchant-img" src="${img}" alt="${m.name}" />
-                <span class="merchant-category">${m.category || '가맹점'}</span>
-              </div>
-              <div class="merchant-body">
-                <h4 class="merchant-name">${m.name}</h4>
-                <p class="merchant-desc">${desc}</p>
-                <div class="merchant-address">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right: 2px;">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                    <circle cx="12" cy="9" r="2.5"/>
-                  </svg>
-                  <span>${m.address || '주소 정보 없음'}</span>
-                </div>
-                <button class="btn btn-outline btn-full" onclick="window.openNaverMap(${m.lat}, ${m.lng}, '${m.name}', '${m.address}')" style="padding: 10px 0; font-size: 0.82rem; border-radius: var(--radius-sm); margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 4px; border-color: var(--primary); color: var(--primary);">
-                  📍 길찾기
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      } catch (e) {
-        console.error(e);
-        listEl.innerHTML = `
-          <div style="text-align: center; padding: 30px; color: var(--danger); font-size: 0.85rem;">
-            가맹점 정보를 불러오지 못했습니다.
-          </div>`;
-      }
-    }
-
-    // ── 네이버 지도 연동 (앱 딥링크 및 웹 폴백) ──
-    window.openNaverMap = function(lat, lng, name, address) {
-      const appUrl = lat && lng 
-        ? `navermap://route/walk?dlat=${lat}&dlng=${lng}&dname=${encodeURIComponent(name)}&appname=ongjin`
-        : `navermap://search?query=${encodeURIComponent(address || name)}`;
-      
-      const webUrl = lat && lng
-        ? `https://map.naver.com/v5/directions/-,/-,${lat},${lng},${encodeURIComponent(name)}`
-        : `https://map.naver.com/v5/search/${encodeURIComponent(address || name)}`;
-
-      const start = Date.now();
-      window.location.href = appUrl;
-
-      // 앱 실행 실패 시 1초 대기 후 웹 지도로 이동
-      setTimeout(() => {
-        if (Date.now() - start < 1500) {
-          window.open(webUrl, '_blank');
-        }
-      }, 1000);
-    };
-
-    // ── 로그아웃 ──
-    function logout() {
-      clearTokens();
-      window.location.href = '/tourist/index.html';
-    }
-    document.getElementById('nav-logout').onclick = e => { e.preventDefault(); logout(); };
-
-    // ── Kiosk 발급용 수신 처리 및 초기 로드 ──
-    const urlParams = new URLSearchParams(window.location.search);
-    const action = urlParams.get('action');
-    const allocationIdVal = urlParams.get('allocationId');
-    if (action === 'issue' && allocationIdVal) {
-      sessionStorage.setItem('pending_qr_issue', allocationIdVal);
-    }
-
-    const qrModal = document.getElementById('qr-modal');
-    const qrStateLoading = document.getElementById('qr-state-loading');
-    const qrStateSuccess = document.getElementById('qr-state-success');
-    const qrStateError = document.getElementById('qr-state-error');
-
-    function openQrModalState(state) {
-      qrStateLoading.style.display = state === 'loading' ? 'block' : 'none';
-      qrStateSuccess.style.display = state === 'success' ? 'block' : 'none';
-      qrStateError.style.display = state === 'error' ? 'block' : 'none';
-      qrModal.classList.add('active');
-    }
-
-    document.getElementById('btn-qr-success-ok').onclick = () => {
-      qrModal.classList.remove('active');
-    };
-
-    // 대기 데이터 및 가맹점 데이터 전체 초기 로드
-    loadWallet().then(async () => {
-      // 대기 중인 QR 발급 건이 있다면 자동으로 처리
-      const pendingAllocationId = sessionStorage.getItem('pending_qr_issue');
-      if (pendingAllocationId) {
-        sessionStorage.removeItem('pending_qr_issue');
-
-        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-        window.history.replaceState({}, '', cleanUrl);
-
-        const allocationId = parseInt(pendingAllocationId);
-        if (!isNaN(allocationId)) {
-          openQrModalState('loading');
-          try {
-            const res = await api.post('/coupon/issue-by-qr', { allocationId });
-            if (res.success) {
-              document.getElementById('qr-success-msg').textContent = `${fmtMoney(res.faceValue || 10000)} 쿠폰이 지갑에 성공적으로 발급되었습니다!`;
-              openQrModalState('success');
-              await loadWallet();
-            } else {
-              document.getElementById('qr-error-msg').textContent = res.message || '쿠폰 발급에 실패했습니다.';
-              openQrModalState('error');
-            }
-          } catch (err) {
-            document.getElementById('qr-error-msg').textContent = err.message || '쿠폰 발급 중 오류가 발생했습니다.';
-            openQrModalState('error');
-          }
-        }
-      }
-    });
-
-    loadMerchants();
+    loadData();
   </script>
 </body>
 </html>

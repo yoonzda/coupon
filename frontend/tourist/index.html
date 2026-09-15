@@ -3,603 +3,135 @@
 <head>
   <link rel="icon" href="../shared/images/favicon.png" />
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="옹진관광 쿠폰 플랫폼 — 백령도·연평도·덕적도 여행 필수 할인 쿠폰을 한 곳에서 관리하세요." />
-  <title>옹진관광 쿠폰 | 서해의 보석, 옹진군</title>
-  <link rel="stylesheet" href="../shared/css/main.css" />
-  <style>
-    /* ── 페이지 전체 배경 ── */
-    body {
-      background: #0c1a2e;
-    }
-    @media (min-width: 768px) {
-      body { background: linear-gradient(160deg, #0c1a2e 0%, #0d2d4a 100%); }
-    }
-
-    .app-shell {
-      background: #0c1a2e;
-      box-shadow: none;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* ── 히어로 ── */
-    .hero {
-      position: relative;
-      min-height: 340px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      padding-bottom: 56px;
-      overflow: hidden;
-    }
-
-    /* 배경 그라디언트 — 서해 석양 */
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 120% 60% at 50% 110%, #f97316 0%, transparent 55%),
-        radial-gradient(ellipse 80% 50% at 30% 90%, #fb923c44 0%, transparent 60%),
-        linear-gradient(180deg, #0c1a2e 0%, #0d3060 40%, #1a4a7a 70%, #c2520a 100%);
-    }
-
-    /* SVG 섬 실루엣 */
-    .hero-islands {
-      position: absolute;
-      bottom: 32px;
-      left: 0; right: 0;
-      width: 100%;
-      height: 120px;
-    }
-
-    /* 물결 반짝임 */
-    .hero-glitter {
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(circle 1px at 20% 65%, rgba(255,200,80,.7) 0%, transparent 1px),
-        radial-gradient(circle 1px at 55% 70%, rgba(255,200,80,.5) 0%, transparent 1px),
-        radial-gradient(circle 1px at 75% 60%, rgba(255,200,80,.6) 0%, transparent 1px),
-        radial-gradient(circle 1px at 40% 75%, rgba(255,200,80,.4) 0%, transparent 1px),
-        radial-gradient(circle 1.5px at 85% 68%, rgba(255,200,80,.6) 0%, transparent 1.5px),
-        radial-gradient(circle 1px at 10% 72%, rgba(255,200,80,.5) 0%, transparent 1px);
-      animation: glitter 3s ease-in-out infinite alternate;
-    }
-    @keyframes glitter {
-      from { opacity: .6; }
-      to   { opacity: 1; }
-    }
-
-    /* 로고 텍스트 영역 */
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      padding: 0 24px;
-    }
-
-    .hero-emblem {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.18);
-      backdrop-filter: blur(8px);
-      border-radius: 999px;
-      padding: 6px 16px;
-      margin-bottom: 14px;
-    }
-    .hero-emblem-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #f97316;
-      animation: pulse-dot 2s ease-in-out infinite;
-    }
-    @keyframes pulse-dot {
-      0%,100% { transform: scale(1); opacity:1; }
-      50%      { transform: scale(1.5); opacity:.7; }
-    }
-    .hero-emblem span {
-      font-size: .72rem;
-      font-weight: 600;
-      color: rgba(255,255,255,.85);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-
-    .hero-title {
-      font-size: 2rem;
-      font-weight: 900;
-      color: #fff;
-      line-height: 1.15;
-      letter-spacing: -1px;
-      text-shadow: 0 2px 16px rgba(0,0,0,.4);
-    }
-    .hero-title .highlight {
-      color: #fdba74;
-      display: block;
-    }
-    .hero-subtitle {
-      margin-top: 8px;
-      font-size: .88rem;
-      color: rgba(255,255,255,.7);
-      font-weight: 400;
-      line-height: 1.6;
-    }
-
-    /* 파도 구분선 */
-    .hero-wave {
-      position: absolute;
-      bottom: -1px;
-      left: 0; right: 0;
-    }
-
-    /* ── 섬 카드 슬라이더 ── */
-    .island-scroll {
-      display: flex;
-      gap: 12px;
-      padding: 20px 20px 4px;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-      background: #0c1a2e;
-    }
-    .island-scroll::-webkit-scrollbar { display: none; }
-
-    .island-chip {
-      flex-shrink: 0;
-      scroll-snap-align: start;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 999px;
-      padding: 8px 16px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: .78rem;
-      font-weight: 600;
-      color: rgba(255,255,255,.8);
-      white-space: nowrap;
-      transition: all .2s;
-      cursor: pointer;
-    }
-    .island-chip.active,
-    .island-chip:hover {
-      background: rgba(249,115,22,.2);
-      border-color: #f97316;
-      color: #fdba74;
-    }
-    .island-chip .chip-icon { font-size: .9rem; }
-
-    /* ── 특징 카드 ── */
-    .features-section {
-      padding: 24px 20px 8px;
-      background: #0c1a2e;
-    }
-    .features-label {
-      font-size: .7rem;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.4);
-      margin-bottom: 12px;
-    }
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-    .feature-card {
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.09);
-      border-radius: 16px;
-      padding: 16px 8px;
-      text-align: center;
-      transition: all .25s;
-      cursor: default;
-    }
-    .feature-card:hover {
-      background: rgba(249,115,22,.1);
-      border-color: rgba(249,115,22,.3);
-      transform: translateY(-2px);
-    }
-    .feature-icon {
-      font-size: 1.7rem;
-      margin-bottom: 8px;
-      display: block;
-    }
-    .feature-name {
-      font-size: .68rem;
-      font-weight: 700;
-      color: rgba(255,255,255,.75);
-      line-height: 1.4;
-    }
-
-    /* ── 로그인 섹션 ── */
-    .login-section {
-      padding: 20px 20px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: #0c1a2e;
-    }
-    .login-label {
-      font-size: .7rem;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.4);
-      text-align: center;
-      margin-bottom: 2px;
-    }
-
-    .social-btn {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 15px 20px;
-      border-radius: 14px;
-      font-size: .95rem;
-      font-weight: 700;
-      transition: all .2s;
-      width: 100%;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .social-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
-    .social-btn:active { transform: none; filter: brightness(.97); }
-    .social-btn .sicon { width: 22px; height: 22px; flex-shrink: 0; }
-    .social-btn span   { flex: 1; text-align: center; }
-
-    .btn-kakao  { background: #FEE500; color: #191919; }
-    .btn-naver  { background: #03C75A; color: #fff; }
-    .btn-google {
-      background: rgba(255,255,255,.08);
-      color: rgba(255,255,255,.9);
-      border: 1px solid rgba(255,255,255,.15) !important;
-    }
-    .btn-test {
-      background: rgba(249,115,22,.12);
-      color: #fdba74;
-      border: 1.5px solid rgba(249,115,22,.35) !important;
-    }
-
-    /* 구분선 */
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: rgba(255,255,255,.25);
-      font-size: .78rem;
-    }
-    .divider::before, .divider::after {
-      content: ''; flex: 1;
-      height: 1px;
-      background: rgba(255,255,255,.1);
-    }
-
-    /* ── 가맹점 링크 ── */
-    .merchant-link {
-      text-align: center;
-      padding: 18px 16px 32px;
-      font-size: .82rem;
-      color: rgba(255,255,255,.4);
-      background: #0c1a2e;
-    }
-    .merchant-link a {
-      color: #fdba74;
-      font-weight: 600;
-    }
-
-    /* ── 배경 별빛 데코 ── */
-    .star {
-      position: absolute;
-      border-radius: 50%;
-      background: #fff;
-      animation: twinkle 3s ease-in-out infinite;
-    }
-    @keyframes twinkle {
-      0%,100% { opacity: .15; }
-      50%      { opacity: .6; }
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>옹진 관광 쿠폰 | 본인인증</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/tourist-theme.css" />
 </head>
 <body>
-  <div class="app-shell">
-
-    <!-- 히어로 -->
-    <div class="hero">
-      <div class="hero-bg"></div>
-      <div class="hero-glitter"></div>
-
-      <!-- 별빛 데코 -->
-      <div class="star" style="width:2px;height:2px;top:8%;left:15%;animation-delay:.3s"></div>
-      <div class="star" style="width:3px;height:3px;top:12%;left:70%;animation-delay:1.1s"></div>
-      <div class="star" style="width:2px;height:2px;top:20%;left:45%;animation-delay:.7s"></div>
-      <div class="star" style="width:2px;height:2px;top:5%;left:85%;animation-delay:1.8s"></div>
-      <div class="star" style="width:3px;height:3px;top:18%;left:28%;animation-delay:2.2s"></div>
-
-      <div style="position: absolute; top: 16px; right: 16px; z-index: 10;">
-        <select id="lang-switcher-tourist" style="padding: 4px 8px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; backdrop-filter: blur(4px);">
-          <option value="ko" style="color:#000">한국어</option>
-          <option value="en" style="color:#000">English</option>
-          <option value="zh" style="color:#000">中文</option>
-        </select>
-      </div>
-
-      <!-- 섬 실루엣 SVG -->
-      <svg class="hero-islands" viewBox="0 0 480 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- 멀리 있는 섬 (어둡게) -->
-        <ellipse cx="60" cy="95" rx="55" ry="18" fill="#0a2040" opacity=".9"/>
-        <!-- 가운데 큰 섬 -->
-        <path d="M160,100 Q185,70 220,78 Q240,72 260,80 Q285,68 310,82 Q330,76 355,95 Z" fill="#0d2d4a"/>
-        <!-- 오른쪽 작은 섬 -->
-        <ellipse cx="420" cy="98" rx="40" ry="14" fill="#0a2040" opacity=".85"/>
-        <!-- 등대 -->
-        <rect x="217" y="60" width="5" height="20" fill="#1e4a7a"/>
-        <polygon points="217,60 222,60 219.5,54" fill="#c2520a"/>
-        <circle cx="219.5" cy="54" r="2.5" fill="#fcd34d" opacity=".9">
-          <animate attributeName="opacity" values=".5;1;.5" dur="2s" repeatCount="indefinite"/>
-        </circle>
-        <!-- 파도 라인 -->
-        <path d="M0,108 Q60,102 120,108 Q180,114 240,108 Q300,102 360,108 Q420,114 480,108 L480,120 L0,120 Z" fill="#0c1a2e" opacity=".8"/>
-      </svg>
-
-      <!-- 로고 콘텐츠 -->
-      <div class="hero-content">
-        <div class="hero-emblem">
-          <div class="hero-emblem-dot"></div>
-          <span>Ongjin · 서해의 보석</span>
+  <div class="tourist-app">
+    <div class="auth-app-wrapper">
+      <!-- 깨끗한 흰색 중앙 모바일 본인인증 카드 -->
+      <div style="width: 100%; max-width: 360px; margin: 0 auto; text-align: center;">
+        <div class="logo-area">
+          <img src="../shared/images/favicon.png" alt="옹진군 로고" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 12px;" />
+          <div class="logo-subtitle">옹진군 관광 쿠폰</div>
+          <h1 class="logo-title">나의 옹진 쿠폰</h1>
+          <p class="logo-desc">
+            휴대폰 본인 인증 후 수령 및 등록된 옹진관광 할인 쿠폰을 바로 확인하고 사용하실 수 있습니다.
+          </p>
         </div>
-        <h1 class="hero-title">
-          옹진관광
-          <span class="highlight">쿠폰 지갑</span>
-        </h1>
-        <p class="hero-subtitle">
-          백령도부터 덕적도까지<br>섬마다 넘치는 할인 혜택
-        </p>
-      </div>
 
-      <!-- 파도 구분선 -->
-      <svg class="hero-wave" viewBox="0 0 480 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0,24 C80,4 160,40 240,20 C320,0 400,36 480,20 L480,40 L0,40 Z" fill="#0c1a2e"/>
-      </svg>
-    </div>
+        <form id="otp-send-form" style="width: 100%;">
+          <div class="form-group">
+            <label style="text-align: center;">휴대폰 번호</label>
+            <input type="tel" id="phone" placeholder="휴대폰 번호를 입력해 주세요" maxlength="13" required autocomplete="off" />
+          </div>
+          <button type="submit" class="btn-submit" id="btn-send">인증번호 발송</button>
+        </form>
 
-    <!-- 섬 선택 칩 -->
-    <div class="island-scroll">
-      <div class="island-chip active"><span class="chip-icon">🏝️</span> 전체</div>
-      <div class="island-chip"><span class="chip-icon">⛵</span> 백령도</div>
-      <div class="island-chip"><span class="chip-icon">🐟</span> 연평도</div>
-      <div class="island-chip"><span class="chip-icon">🌊</span> 덕적도</div>
-      <div class="island-chip"><span class="chip-icon">🦀</span> 자월도</div>
-      <div class="island-chip"><span class="chip-icon">🌅</span> 영흥도</div>
-    </div>
-
-    <!-- 서비스 특징 -->
-    <div class="features-section">
-      <p class="features-label">주요 서비스</p>
-      <div class="features-grid">
-        <div class="feature-card">
-          <span class="feature-icon">🎟️</span>
-          <div class="feature-name">디지털<br>쿠폰 지갑</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">📍</span>
-          <div class="feature-name">내 주변<br>가맹점 지도</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">📷</span>
-          <div class="feature-name">종이쿠폰<br>스캔 등록</div>
-        </div>
+        <form id="otp-verify-form" style="display: none; width: 100%; margin-top: 24px;">
+          <div class="form-group">
+            <label style="text-align: center;">인증번호 6자리</label>
+            <input type="text" id="otp-code" placeholder="인증번호 6자리" maxlength="6" style="letter-spacing: 6px; font-size: 1.15rem;" required />
+          </div>
+          <button type="submit" class="btn-outline" id="btn-verify">인증하기</button>
+        </form>
       </div>
     </div>
-
-    <!-- 로그인 -->
-    <div class="login-section" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); padding: 20px; border-radius: 18px; margin: 24px 20px 16px;">
-      <p class="login-label" style="text-align: left; font-weight: 800; color: #fdba74; margin-bottom: 12px;">휴대폰 번호 본인 인증</p>
-      
-      <!-- 휴대폰 번호 입력 -->
-      <div style="margin-bottom: 16px; text-align: left;">
-        <label for="phone-input" style="display: block; font-size: 0.8rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">휴대폰 번호</label>
-        <div style="display: flex; gap: 8px;">
-          <input type="tel" id="phone-input" placeholder="010-0000-0000" maxlength="13" style="flex: 1; padding: 14px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 0.95rem; font-weight: 600; outline: none; transition: border 0.2s;" />
-          <button id="btn-send-otp" style="padding: 0 16px; border-radius: 10px; background: #f97316; border: none; color: #fff; font-size: 0.88rem; font-weight: 800; cursor: pointer; transition: background 0.2s; white-space: nowrap;">인증 요청</button>
-        </div>
-      </div>
-      
-      <!-- 인증 번호 입력 (초기 숨김) -->
-      <div id="otp-group" style="display: none; margin-bottom: 20px; text-align: left;">
-        <label for="otp-input" style="display: block; font-size: 0.8rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">인증번호 6자리</label>
-        <div style="position: relative; display: flex; align-items: center;">
-          <input type="tel" id="otp-input" placeholder="인증번호 입력" maxlength="6" style="width: 100%; padding: 14px; padding-right: 60px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 0.95rem; font-weight: 600; outline: none; transition: border 0.2s;" />
-          <span id="otp-timer" style="position: absolute; right: 14px; font-size: 0.85rem; font-weight: 700; color: #f43f5e; pointer-events: none;">03:00</span>
-        </div>
-      </div>
-
-      <!-- 개발자 전용 알림 표시창 -->
-      <div id="dev-otp-notice" style="display: none; background: rgba(249, 115, 22, 0.1); border: 1px dashed rgba(249, 115, 22, 0.3); padding: 12px; border-radius: 10px; margin-bottom: 20px; font-size: 0.78rem; color: #fdba74; line-height: 1.4; text-align: left;">
-        ℹ️ <strong>개발 테스트 모드 활성화</strong><br>
-        인증번호가 아래 칸에 자동으로 채워졌습니다. (발송된 코드: <strong id="dev-otp-code">------</strong>)
-      </div>
-
-      <!-- 인증 완료 및 시작하기 버튼 (초기 숨김) -->
-      <button id="btn-verify-otp" class="social-btn" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #fff; font-weight: 800; border: none; box-shadow: 0 8px 20px rgba(249, 115, 22, 0.2); width: 100%; display: none; padding: 16px; border-radius: 14px; font-size: 0.95rem; justify-content: center; align-items: center; cursor: pointer;">
-        <span>인증 완료 및 시작하기</span>
-      </button>
-    </div>
-
-    <!-- 가맹점 링크 -->
-    <div class="merchant-link">
-      사장님이신가요?
-      <a href="/merchant/index.html">가맹점 로그인 →</a>
-    </div>
-
-    <!-- 스크립트 -->
-    <script>
-      // 섬 칩 인터랙션
-      document.querySelectorAll('.island-chip').forEach(function(chip) {
-        chip.addEventListener('click', function() {
-          document.querySelectorAll('.island-chip').forEach(function(c) { c.classList.remove('active'); });
-          chip.classList.add('active');
-        });
-      });
-    </script>
-
-    <script type="module">
-      import { api, getToken, setTokens, clearTokens, isTokenExpired } from '../shared/js/api.js'
-      import { t, bindLanguageSwitcher } from '../shared/js/i18n.js';
-      bindLanguageSwitcher('lang-switcher-tourist');
-      
-      async function checkAuthAndRedirect() {
-        const token = getToken();
-        if (token && token !== 'test_dummy_jwt_token') {
-          if (isTokenExpired(token)) {
-            const refreshToken = localStorage.getItem('ongjin_refresh');
-            if (refreshToken) {
-              try {
-                const res = await api.post('/auth/refresh', { refreshToken });
-                if (res.success) {
-                  setTokens(res.token, res.refresh);
-                  window.location.href = '/tourist/mypage.html';
-                  return;
-                }
-              } catch (e) {
-                clearTokens();
-              }
-            } else {
-              clearTokens();
-            }
-          } else {
-            window.location.href = '/tourist/mypage.html';
-          }
-        }
-      }
-      checkAuthAndRedirect();
-
-      // ── 휴대폰 인증번호 자동 하이픈 바인딩 ──
-      const phoneInput = document.getElementById('phone-input');
-      if (phoneInput) {
-        phoneInput.oninput = function(e) {
-          let val = e.target.value.replace(/[^0-9]/g, '');
-          if (val.length > 3 && val.length <= 7) {
-            val = val.slice(0, 3) + '-' + val.slice(3);
-          } else if (val.length > 7) {
-            val = val.slice(0, 3) + '-' + val.slice(3, 7) + '-' + val.slice(7, 11);
-          }
-          e.target.value = val;
-        };
-      }
-
-      let timerInterval = null;
-      function startTimer(durationSeconds) {
-        clearInterval(timerInterval);
-        let remaining = durationSeconds;
-        const timerEl = document.getElementById('otp-timer');
-        
-        function updateDisplay() {
-          const m = Math.floor(remaining / 60);
-          const s = remaining % 60;
-          timerEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        }
-
-        updateDisplay();
-
-        timerInterval = setInterval(() => {
-          remaining--;
-          if (remaining <= 0) {
-            clearInterval(timerInterval);
-            timerEl.textContent = '만료';
-            document.getElementById('btn-verify-otp').disabled = true;
-            alert('인증 제한 시간이 초과되었습니다. 인증 요청을 다시 진행해 주세요.');
-          } else {
-            updateDisplay();
-          }
-        }, 1000);
-      }
-
-      // ── OTP 인증번호 전송 ──
-      document.getElementById('btn-send-otp').onclick = async function() {
-        const rawPhone = phoneInput.value.replace(/[^0-9]/g, '');
-        if (!rawPhone || !/^01[0-9]{8,9}$/.test(rawPhone)) {
-          alert('올바른 휴대폰 번호를 입력해 주세요. (예: 010-1234-5678)');
-          return;
-        }
-
-        const btnSend = document.getElementById('btn-send-otp');
-        btnSend.disabled = true;
-        btnSend.textContent = '재발송';
-
-        try {
-          const res = await api.post('/auth/tourist/otp/send', { phone: rawPhone });
-          if (res.success) {
-            document.getElementById('otp-group').style.display = 'block';
-            document.getElementById('btn-verify-otp').style.display = 'flex';
-            document.getElementById('btn-verify-otp').disabled = false;
-            
-            startTimer(180); // 3분
-
-            if (res.devOtp) {
-              document.getElementById('dev-otp-notice').style.display = 'block';
-              document.getElementById('dev-otp-code').textContent = res.devOtp;
-              document.getElementById('otp-input').value = res.devOtp;
-            } else {
-              document.getElementById('dev-otp-notice').style.display = 'none';
-            }
-            
-            alert('인증번호 6자리가 휴대폰으로 전송되었습니다.');
-          } else {
-            alert(res.message || '인증번호 발송 실패');
-            btnSend.disabled = false;
-            btnSend.textContent = '인증 요청';
-          }
-        } catch (err) {
-          alert(err.message || '인증번호 요청 중 오류가 발생했습니다.');
-          btnSend.disabled = false;
-          btnSend.textContent = '인증 요청';
-        }
-      };
-
-      // ── OTP 인증번호 확인 ──
-      document.getElementById('btn-verify-otp').onclick = async function() {
-        const rawPhone = phoneInput.value.replace(/[^0-9]/g, '');
-        const otpCode = document.getElementById('otp-input').value.trim();
-
-        if (!otpCode || otpCode.length !== 6) {
-          alert('인증번호 6자리를 올바르게 입력해 주세요.');
-          return;
-        }
-
-        const btnVerify = document.getElementById('btn-verify-otp');
-        btnVerify.disabled = true;
-        btnVerify.textContent = '인증 처리 중...';
-
-        try {
-          const res = await api.post('/auth/tourist/otp/verify', { phone: rawPhone, otp: otpCode });
-          if (res.success) {
-            clearInterval(timerInterval);
-            
-            localStorage.setItem('ongjin_token', res.token);
-            if (res.refresh) localStorage.setItem('ongjin_refresh', res.refresh);
-            localStorage.setItem('ongjin_user', JSON.stringify(res.user));
-
-            alert('인증에 성공했습니다.');
-            window.location.href = '/tourist/mypage.html';
-          } else {
-            alert(res.message || '인증에 실패했습니다.');
-            btnVerify.disabled = false;
-            btnVerify.textContent = '인증 완료 및 시작하기';
-          }
-        } catch (err) {
-          alert(err.message || '인증 처리 중 에러가 발생했습니다.');
-          btnVerify.disabled = false;
-          btnVerify.textContent = '인증 완료 및 시작하기';
-        }
-      };
-    </script>
   </div>
+
+  <!-- 화면을 밀지 않는 상단 고정 토스트 컨테이너 -->
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { api, showToast, setTokens } from '../shared/js/api.js';
+
+    // 이미 유효한 토큰이 있다면 쿠폰함으로 이동
+    const token = localStorage.getItem('ongjin_token');
+    if (token) {
+      window.location.href = '/tourist/mypage.html';
+    }
+
+    const sendForm = document.getElementById('otp-send-form');
+    const verifyForm = document.getElementById('otp-verify-form');
+    const phoneInput = document.getElementById('phone');
+    const otpInput = document.getElementById('otp-code');
+    const btnSend = document.getElementById('btn-send');
+
+    phoneInput.value = '';
+
+    phoneInput.addEventListener('input', (e) => {
+      let val = e.target.value.replace(/[^0-9]/g, '');
+      if (val.length >= 11) {
+        val = val.substring(0, 11).replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+      } else if (val.length >= 7) {
+        val = val.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3');
+      }
+      e.target.value = val;
+    });
+
+    sendForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rawPhone = phoneInput.value.replace(/[^0-9]/g, '');
+      if (rawPhone.length < 10) {
+        showToast('올바른 휴대폰 번호를 입력해주세요.', 'error');
+        return;
+      }
+
+      btnSend.disabled = true;
+      btnSend.textContent = '발송 중...';
+
+      try {
+        const res = await api.post('/auth/tourist/otp/send', { phone: rawPhone });
+        if (res.success) {
+          showToast('인증번호가 발송되었습니다.', 'info');
+          verifyForm.style.display = 'block';
+
+          // 개발 중일 때 발송 성공 시 6자리 인증번호 자동 채움
+          if (res.devOtp) {
+            otpInput.value = res.devOtp;
+          }
+
+          otpInput.focus();
+        } else {
+          showToast(res.message || '인증번호 발송 실패', 'error');
+        }
+      } catch (err) {
+        showToast(err.message || '인증번호 발송 오류', 'error');
+      } finally {
+        btnSend.disabled = false;
+        btnSend.textContent = '인증번호 재발송';
+      }
+    });
+
+    verifyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rawPhone = phoneInput.value.replace(/[^0-9]/g, '');
+      const otp = otpInput.value.trim();
+
+      if (otp.length !== 6) {
+        showToast('6자리 인증번호를 입력해 주세요.', 'error');
+        return;
+      }
+
+      try {
+        const res = await api.post('/auth/tourist/otp/verify', { phone: rawPhone, otp });
+        if (res.success) {
+          setTokens(res.token, res.refresh);
+          showToast('본인인증 완료!', 'info');
+          setTimeout(() => {
+            window.location.href = '/tourist/mypage.html';
+          }, 400);
+        } else {
+          showToast(res.message || '인증번호가 일치하지 않습니다.', 'error');
+        }
+      } catch (err) {
+        showToast(err.message || '인증 실패', 'error');
+      }
+    });
+  </script>
 </body>
 </html>

@@ -1073,8 +1073,9 @@
         targetOrigin = targetOrigin.slice(0, -1);
       }
       
-      // QR 상세 화면에는 kioskSessionId를 실어서 모바일이 발급 시 전송하도록 구성
-      const payload = `${targetOrigin}/tourist/landing.html?allocationId=${cachedAllocation.id}&kioskSessionId=${currentKioskSessionId}`;
+      // QR 상세 화면에는 단순 숫자 ID 대신 추측 불가능한 암호화 보안 토큰(token)을 실어 어뷰징 방지
+      const secureParam = cachedAllocation.secure_token ? `token=${cachedAllocation.secure_token}` : `allocationId=${cachedAllocation.id}`;
+      const payload = `${targetOrigin}/tourist/landing.html?${secureParam}&kioskSessionId=${currentKioskSessionId}`;
       document.getElementById('kiosk-qr-large-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(payload)}`;
       
       // 모달 활성화 및 성공 오버레이 비활성화

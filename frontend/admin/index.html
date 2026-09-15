@@ -47,7 +47,6 @@
     .stat-label { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; }
     .stat-value { font-size: 1.8rem; font-weight: 900; color: var(--text-primary); }
     .stat-trend { font-size: 0.75rem; margin-top: 4px; }
-    .trend-up { color: var(--success); }
 
     /* 데이터 테이블 */
     .admin-card {
@@ -99,7 +98,7 @@
         </div>
       </header>
 
-      <!-- 통계 -->
+      <!-- 기본 통계 지표 -->
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label" data-i18n="stat_total_amount">금월 누적 결제액</div>
@@ -131,7 +130,7 @@
       <!-- 최근 FDS 알림 -->
       <div class="admin-card">
         <div class="card-header">
-          <div class="card-title" data-i18n="fds_recent_title">️ 최근 이상거래 의심 내역 (FDS)</div>
+          <div class="card-title" data-i18n="fds_recent_title">최근 이상거래 의심 내역 (FDS)</div>
           <a href="/admin/fds.html" class="btn btn-neutral-outline" data-i18n="btn_view_all" style="padding: 6px 12px; font-size: 0.8rem;">전체보기</a>
         </div>
         <table class="admin-table">
@@ -139,13 +138,12 @@
             <tr>
               <th data-i18n="th_date">탐지 일시</th>
               <th data-i18n="th_merchant">가맹점</th>
-              <th data-i18n="th_user">사용자</th>
-              <th data-i18n="th_rule">탐지 규칙</th>
+              <th data-i18n="th_user">관광객</th>
+              <th data-i18n="th_rule">룰 ID</th>
               <th data-i18n="th_status">상태</th>
             </tr>
           </thead>
           <tbody id="fds-recent-list">
-            <!-- JS로 렌더링 -->
             <tr><td colspan="5" class="text-center" style="padding: 40px; color: var(--text-muted);">데이터를 불러오고 있습니다...</td></tr>
           </tbody>
         </table>
@@ -154,12 +152,10 @@
   </div>
 
   <script type="module">
-    import { api, fmtMoney, fmtDate } from '../shared/js/api.js'
-    import { requireAdminAuth } from '../shared/js/admin-guard.js'
+    import { api, fmtMoney, fmtDate } from '../shared/js/api.js';
+    import { requireAdminAuth } from '../shared/js/admin-guard.js';
 
-    // 관리자 인증 체크
     await requireAdminAuth();
-    
 
     async function loadDashboard() {
       try {
@@ -184,20 +180,24 @@
         document.getElementById('stat-fds').textContent = stats.fdsCount || 0;
 
         const issued = stats.couponIssued || 0;
-        const used   = stats.couponUsed   || 0;
-        const rate   = issued > 0 ? ((used / issued) * 100).toFixed(1) : 0;
-        document.getElementById('stat-coupon-issued').textContent = `${issued.toLocaleString()} / ${used.toLocaleString()}`;
-        document.getElementById('stat-coupon-rate').textContent  = `사용률 ${rate}%`;
+        const used = stats.couponUsed || 0;
+        const rate = issued > 0 ? ((used / issued) * 100).toFixed(1) : 0;
+        if (document.getElementById('stat-coupon-issued')) {
+          document.getElementById('stat-coupon-issued').textContent = `${issued.toLocaleString()} / ${used.toLocaleString()}`;
+        }
+        if (document.getElementById('stat-coupon-rate')) {
+          document.getElementById('stat-coupon-rate').textContent = `사용률 ${rate}%`;
+        }
 
       } catch (e) {
         console.error('통계 로드 실패', e);
       }
 
       try {
-        const fds  = await api.get('/admin/fds/recent');
+        const fds = await api.get('/admin/fds/recent');
         const list = document.getElementById('fds-recent-list');
         if (!fds || fds.length === 0) {
-          list.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:40px; color:var(--text-muted);"> 이상 거래가 탐지되지 않았습니다.</td></tr>`;
+          list.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:40px; color:var(--text-muted);">이상 거래가 탐지되지 않았습니다.</td></tr>`;
           return;
         }
         list.innerHTML = fds.map(item => `
@@ -206,7 +206,7 @@
             <td>${item.merchant_name || '—'}</td>
             <td>${item.nickname || '익명'}</td>
             <td><span class="badge badge-danger">${item.rule_id}</span></td>
-            <td>${item.resolved ? ' 해결됨' : '<span style="color:#ef4444;">️ 미해결</span>'}</td>
+            <td>${item.resolved ? '해결됨' : '<span style="color:#ef4444;">미해결</span>'}</td>
           </tr>
         `).join('');
       } catch (e) {

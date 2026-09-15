@@ -43,7 +43,47 @@ router.get('/dashboard', authenticate, authorize('admin'), async (req, res, next
   } catch (err) { next(err); }
 });
 
-// ── 대시보드 요약 통계 (index.html용) ───────────────
+// ── 대시보드 통계 (3단계 쿠폰 라이프사이클 & 예산 4대 지표) ─────────────────────────────────
+router.get('/dashboard', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const [[couponStats]] = await pool.execute(
+      `SELECT
+         COUNT(*) AS total_issued,
+         SUM(face_value) AS total_face_value,
+         SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END) AS total_used,
+         SUM(CASE WHEN status = 'used' THEN face_value ELSE 0 END) AS total_used_value
+       FROM coupons`
+    );
+    const [[merchantStats]] = await pool.execute(
+      `SELECT
+         COUNT(*) AS total,
+         SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
+         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending
+       FROM merchants`
+    );
+    const [dailyTrend] = await pool.execute(
+      `SELECT DATE(scanned_at) AS date, COUNT(*) AS count, SUM(amount) AS total
+       FROM coupon_transactions
+       WHERE scanned_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+       GROUP BY DATE(scanned_at)
+       ORDER BY date ASC`
+    );
+    const [fdsAlerts] = await pool.execute(
+      `SELECT * FROM fds_alerts WHERE resolved = 0 ORDER BY detected_at DESC LIMIT 10`
+    );
+
+    const recovery_rate = couponStats.total_issued > 0
+      ? ((couponStats.total_used / couponStats.total_issued) * 100).toFixed(1)
+      : 0;
+
+    res.json({
+      success: true,
+      data: { couponStats: { ...couponStats, recovery_rate }, merchantStats, dailyTrend, fdsAlerts },
+    });
+  } catch (err) { next(err); }
+});
+
+// ── 대시보드 요약 통계 (index.html용 - 3단계 라이프사이클 및 예산 4대 지표) ───────────────
 router.get('/stats/summary', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const now = new Date();
@@ -66,12 +106,41 @@ router.get('/stats/summary', authenticate, authorize('admin'), async (req, res, 
     const [[{ fdsCount }]] = await pool.execute(
       `SELECT COUNT(*) AS fdsCount FROM fds_alerts WHERE resolved = 0`
     );
-    const [[{ couponIssued }]] = await pool.execute(
-      `SELECT COUNT(*) AS couponIssued FROM coupons`
+
+    // 3단계 쿠폰 카운트 집계
+    // 1단계 [쿠폰 발급]: 발행처 결제 발생으로 생성된 쿠폰 총 수량
+    // 2단계 [쿠폰 등록]: 관광객 본인인증으로 지갑 등록된 수량 (issued_to IS NOT NULL)
+    // 3단계 [쿠폰 사용]: 가맹점에서 결제 사용 완료된 수량 (status = 'used')
+    const [[{ stage1_issued }]] = await pool.execute(
+      `SELECT COALESCE(SUM(issued_count), 0) AS stage1_issued FROM issuer_allocations`
     );
-    const [[{ couponUsed }]] = await pool.execute(
-      `SELECT COUNT(*) AS couponUsed FROM coupons WHERE status = 'used'`
+    const [[{ stage2_registered }]] = await pool.execute(
+      `SELECT COUNT(*) AS stage2_registered FROM coupons WHERE issued_to IS NOT NULL`
     );
+    const [[{ stage3_used }]] = await pool.execute(
+      `SELECT COUNT(*) AS stage3_used FROM coupons WHERE status = 'used'`
+    );
+
+    // 예산 4대 회계 지표 계산 (기본 2,000,000원 설정)
+    const [[settingRow]] = await pool.execute(
+      `SELECT setting_value FROM system_settings WHERE setting_key = 'total_budget' LIMIT 1`
+    );
+    const totalBudget = settingRow ? Number(settingRow.setting_value) : 2000000;
+
+    // 3단계 사용 지출액 (실제 집행 예산)
+    const [[{ executedBudget }]] = await pool.execute(
+      `SELECT COALESCE(SUM(face_value), 0) AS executedBudget FROM coupons WHERE status = 'used'`
+    );
+    // 발행처 배정 예산 (관리자가 각 발행처에 배정한 총 금액)
+    const [[{ allocatedBudget }]] = await pool.execute(
+      `SELECT COALESCE(SUM(face_value * total_count), 0) AS allocatedBudget FROM issuer_allocations`
+    );
+    // 1단계 & 2단계 미사용 잠정 묶임 금액 (점유/예약 예산)
+    const [[{ reservedBudget }]] = await pool.execute(
+      `SELECT COALESCE(SUM(face_value), 0) AS reservedBudget FROM coupons WHERE status != 'used' AND status != 'expired'`
+    );
+    // 추가 배정 가능 잔액 (집행 가능 잔여 예산)
+    const availableBudget = Math.max(0, totalBudget - Number(allocatedBudget));
 
     res.json({
       success: true,
@@ -81,8 +150,19 @@ router.get('/stats/summary', authenticate, authorize('admin'), async (req, res, 
       merchantCount,
       pendingCount,
       fdsCount,
-      couponIssued,
-      couponUsed,
+      // 3단계 파이프라인 수치
+      stage1_issued: Number(stage1_issued) || 0,
+      stage2_registered: Number(stage2_registered) || 0,
+      stage3_used: Number(stage3_used) || 0,
+      // 하위 호환 필드
+      couponIssued: Number(stage2_registered) || 0,
+      couponUsed: Number(stage3_used) || 0,
+      // 예산 지표
+      totalBudget,
+      allocatedBudget: Number(allocatedBudget),
+      executedBudget: Number(executedBudget),
+      reservedBudget: Number(reservedBudget),
+      availableBudget
     });
   } catch (err) { next(err); }
 });
@@ -745,14 +825,19 @@ router.post('/issuers/allocations', authenticate, authorize('admin'), async (req
   } catch (err) { next(err); }
 });
 
-// ── 4. 전체 쿠폰 상태 목록 조회 (사용 현황) ──
+// ── 4. 전체 쿠폰 상태 목록 조회 (3단계 쿠폰 라이프사이클) ──
 router.get('/coupons/status-list', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const [rows] = await pool.execute(
-      `SELECT c.id, c.coupon_type, c.face_value, c.status, c.issued_at, c.used_at,
-              u.nickname AS tourist_nickname, u.email AS tourist_email,
-              i.name AS issuer_name,
-              m.name AS used_merchant_name
+      `SELECT c.id, c.code_hash, c.coupon_type, c.face_value, c.status, c.issued_at, c.used_at,
+              COALESCE(u.nickname, u.provider_id, '- (미등록 대기)') AS tourist_phone,
+              COALESCE(i.name, '발행처') AS issuer_name,
+              COALESCE(m.name, '-') AS used_merchant_name,
+              CASE
+                WHEN c.status = 'used' THEN '3단계: 쿠폰 사용'
+                WHEN c.issued_to IS NOT NULL THEN '2단계: 쿠폰 등록'
+                ELSE '1단계: 쿠폰 발급'
+              END AS stage_label
        FROM coupons c
        LEFT JOIN users u ON c.issued_to = u.id
        LEFT JOIN issuer_allocations ia ON c.issuer_allocation_id = ia.id

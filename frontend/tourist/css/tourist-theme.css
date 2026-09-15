@@ -1,0 +1,473 @@
+/* 옹진 관광 쿠폰 플랫폼 - 관광객 마이페이지 & 본인인증 통합 테마 CSS (타이틀 폰트 & 확정 7번 원본 스타일) */
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg-page: #ffffff;
+  /* 🌊 옹진 청정 바다 시그니처 컬러 팔레트 */
+  --primary-blue: #0284c7;
+  --primary-blue-dark: #0369a1;
+  --primary-blue-light: #f0f9ff;
+  --text-dark: #0f172a;
+  --text-slate: #475569;
+  --text-muted: #94a3b8;
+  --border-color: #e2e8f0;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  word-break: keep-all;
+}
+
+html, body {
+  min-height: 100vh;
+  width: 100vw;
+  font-family: 'Pretendard', sans-serif;
+  background: #ffffff !important;
+  color: #1e293b !important;
+  overflow-x: hidden;
+}
+
+/* 메인 레이아웃 컨테이너 */
+.tourist-app {
+  width: 100vw;
+  max-width: 480px;
+  min-height: 100vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start !important;
+  padding: 0;
+  position: relative;
+  background: #ffffff;
+}
+
+/* 상단 헤더 타이틀 원본 폰트 스타일 */
+.header-clean {
+  width: 100%;
+  height: 60px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-title {
+  font-family: 'Gowun Dodum', sans-serif !important;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.header-title span {
+  color: var(--primary-blue);
+  font-weight: 700;
+}
+
+/* 메인 지갑 영역 */
+.wallet-container {
+  padding: 24px 20px 100px;
+  width: 100%;
+}
+
+.section-title-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.section-title {
+  font-family: 'Gowun Dodum', sans-serif !important;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  position: relative;
+  padding-bottom: 6px;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 24px;
+  height: 2px;
+  background: var(--primary-blue);
+  border-radius: 99px;
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   🔐 본인인증(index.html) 및 랜딩 페이지(landing.html) 전용 스타일
+───────────────────────────────────────────────────────────── */
+.auth-app-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+}
+
+.logo-area {
+  margin-bottom: 32px;
+}
+
+.logo-subtitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary-blue);
+  letter-spacing: -0.3px;
+}
+
+.logo-title {
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 4px 0 12px;
+}
+
+.logo-desc {
+  font-size: 0.88rem;
+  color: #64748b;
+  line-height: 1.55;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.form-group label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+  width: 100%;
+}
+
+.form-group input {
+  width: 100%;
+  height: 48px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+}
+
+.form-group input:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.btn-submit {
+  width: 100%;
+  height: 48px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.btn-submit:hover {
+  opacity: 0.95;
+}
+
+.btn-submit:active {
+  transform: translateY(1px);
+}
+
+.btn-outline {
+  width: 100%;
+  height: 48px;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-outline:hover {
+  background: #f8fafc;
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   🌟 [사용자 최종 확정 쿠폰 카드 디자인: 7번 원본 명확한 타이틀 적용]
+───────────────────────────────────────────────────────────── */
+.coupon-card-final {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  position: relative;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.coupon-card-final:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.08);
+}
+
+/* 좌측/우측 펀칭 홈 노치 절취선 포인트 */
+.coupon-card-final .notch-l {
+  position: absolute;
+  left: -9px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 50%;
+  clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%);
+}
+
+.coupon-card-final .notch-r {
+  position: absolute;
+  right: -9px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 50%;
+  clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);
+}
+
+/* 상단 라인: 쿠폰 명칭 타이틀 & D-Day 뱃지 원본 선명 스타일 */
+.coupon-card-final .top-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.coupon-card-final .title-text {
+  font-family: 'Pretendard', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: -0.2px;
+}
+
+.coupon-card-final .dday-badge {
+  background: #ff4d4f;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* 중앙 라인: 혜택 금액 & QR 결제 사용 버튼 */
+.coupon-card-final .mid-line {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.coupon-card-final .price-text {
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.coupon-card-final .btn-use-blue {
+  height: 42px;
+  padding: 0 20px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.18);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.coupon-card-final .btn-use-blue:hover {
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+}
+
+.coupon-card-final .btn-use-blue:active {
+  opacity: 0.9;
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.15);
+}
+
+/* 하단 라인: 은은한 점선 분리선 & 유효기간 */
+.coupon-card-final .bottom-line {
+  padding-top: 10px;
+  border-top: 1.5px dashed #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.76rem;
+  color: #94a3b8;
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   공통 UI 컴포넌트 & 하단 알약 슬라이딩 네비게이션
+───────────────────────────────────────────────────────────── */
+.btn-blue-fill {
+  height: 38px;
+  padding: 0 18px;
+  background: var(--primary-blue);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.floating-pill-nav {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #e2e8f0;
+  border-radius: 99px;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+}
+
+.pill-tab {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 99px;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'Pretendard', sans-serif;
+  transition: color 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  outline: none;
+}
+
+.pill-tab svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.2;
+  flex-shrink: 0;
+  transition: opacity 0.35s ease;
+}
+
+.pill-tab .pill-label {
+  display: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pill-tab.active {
+  color: #ffffff !important;
+}
+
+.pill-tab.active svg {
+  display: none !important;
+}
+
+.pill-tab.active .pill-label {
+  display: inline-block !important;
+}
+
+.pill-slider {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  height: 44px;
+  background: var(--primary-blue);
+  border-radius: 99px;
+  z-index: 1;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+  transition: all 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.merchant-item-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+#toast-container {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  width: 90%;
+  max-width: 400px;
+}
+
+.toast {
+  pointer-events: auto;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}

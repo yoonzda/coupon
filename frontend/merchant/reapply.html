@@ -24,9 +24,9 @@
       align-items: center;
       justify-content: center;
       font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
-      background: #fdf2f2; /* Light red/rose background tint for reapply */
+      background: #f0fdf4;
       background-image: 
-        radial-gradient(circle at 10% 20%, #fee2e2 0%, #fdf2f2 100%);
+        radial-gradient(circle at 10% 20%, #dcfce7 0%, #f0fdf4 100%);
       position: relative;
       overflow-y: auto;
       overflow-x: hidden;
@@ -47,28 +47,28 @@
     }
     .decor-top {
       width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(239, 68, 68, 0.06) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
       top: -200px; right: -200px;
     }
     .decor-bottom {
       width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(248, 113, 113, 0.04) 0%, transparent 60%);
+      background: radial-gradient(circle, rgba(74, 222, 128, 0.06) 0%, transparent 60%);
       bottom: -150px; left: -150px;
     }
 
     .apply-card {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(239, 68, 68, 0.15);
-      border-top: 4px solid #ef4444; /* Red border for rejection/reapply state */
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      border-top: 4px solid #10b981;
       border-radius: 0; 
       padding: 56px 48px;
       width: 100%;
       max-width: 680px;
       position: relative;
       z-index: 1;
-      box-shadow: 0 20px 40px rgba(239, 68, 68, 0.04), 0 1px 3px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 20px 40px rgba(16, 185, 129, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
       animation: fadeIn 0.5s ease-out;
     }
 
@@ -81,7 +81,7 @@
     .logo-subtitle {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #dc2626;
+      color: #059669;
       letter-spacing: 1.5px;
       margin-bottom: 8px;
       text-transform: uppercase;
@@ -120,7 +120,7 @@
       color: #0f172a;
       margin: 32px 0 16px 0;
       padding-bottom: 8px;
-      border-bottom: 2px solid rgba(239, 68, 68, 0.15);
+      border-bottom: 2px solid rgba(16, 185, 129, 0.15);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -180,8 +180,8 @@
       padding-right: 40px !important;
     }
     input[type="text"]:focus, input[type="password"]:focus, input[type="tel"]:focus, select:focus {
-      border-color: #ef4444;
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
     }
     input::placeholder { color: #94a3b8; }
 
@@ -203,8 +203,8 @@
       min-height: 100px;
     }
     .file-upload-box:hover {
-      border-color: #ef4444;
-      background: rgba(239, 68, 68, 0.02);
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.02);
     }
     .file-upload-box input[type="file"] {
       position: absolute;
@@ -218,14 +218,14 @@
       fill: none;
     }
     .file-upload-box:hover .upload-icon {
-      stroke: #ef4444;
+      stroke: #10b981;
     }
     .file-upload-box p {
       font-size: 0.8rem;
       color: #64748b;
     }
     .file-upload-box strong {
-      color: #b91c1c;
+      color: #059669;
     }
 
     .preview-container {
@@ -304,17 +304,17 @@
       outline: none;
     }
     .day-pill:hover {
-      border-color: #ef4444;
-      color: #b91c1c;
+      border-color: #10b981;
+      color: #059669;
     }
     .day-pill.active {
-      background: #ef4444;
-      border-color: #ef4444;
+      background: #10b981;
+      border-color: #10b981;
       color: #ffffff;
     }
     .day-pill.active:hover {
-      background: #b91c1c;
-      border-color: #b91c1c;
+      background: #059669;
+      border-color: #059669;
       color: #ffffff;
     }
 
@@ -328,20 +328,20 @@
     .notice-box {
       margin-top: 32px;
       padding: 16px 20px;
-      background: rgba(239, 68, 68, 0.05);
-      border: 1px solid rgba(239, 68, 68, 0.15);
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.15);
       border-radius: 6px;
       text-align: center;
       font-size: 0.9rem;
       font-weight: 600;
-      color: #b91c1c;
+      color: #047857;
       line-height: 1.5;
     }
 
     .btn-submit-apply {
       width: 100%;
       padding: 18px;
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
       border: none;
       border-radius: 8px;
@@ -356,10 +356,11 @@
       justify-content: center;
       gap: 10px;
       font-family: inherit;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
     }
     .btn-submit-apply:hover:not(:disabled) {
       filter: brightness(1.08);
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
     }
     .btn-submit-apply:active { transform: scale(0.99); }
     .btn-submit-apply:disabled {
@@ -483,16 +484,6 @@
         <h1 class="logo-title">가맹점 정보 수정</h1>
       </div>
 
-      <!-- 반려 안내 띠 -->
-      <div class="rejection-banner" id="rejection-banner">
-        <strong>
-          <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-          입점 신청 반려 안내
-        </strong>
-        반려 사유: <span id="rejection-reason-text" style="font-weight: 700;">-</span>
-        <p style="margin-top: 10px; font-size: 0.8rem; color: #7f1d1d;">위 사유를 확인하시어 아래 입력폼의 정보를 알맞게 수정한 후 다시 신청해주시기 바랍니다.</p>
-      </div>
-
       <form id="form-merchant-apply" novalidate>
         <!-- 1. 가맹점 정보 -->
         <h3 class="section-title">가맹점 정보</h3>
@@ -540,7 +531,7 @@
         <!-- 2. 운영 정보 -->
         <h3 class="section-title">운영 정보</h3>
         <div class="form-grid">
-          <div class="form-group">
+          <div class="form-group full-width">
             <label>영업시간 <span class="required-mark">*</span></label>
             <div class="hours-picker-grid">
               <select id="open-time" required>
@@ -584,12 +575,12 @@
         <!-- 3. 서류 및 계좌 정보 -->
         <h3 class="section-title">서류 및 정산 정보</h3>
         <div class="form-grid">
-          <div class="form-group">
+          <div class="form-group full-width">
             <label for="business-no">사업자등록번호 <span class="required-mark">*</span></label>
             <input type="text" id="business-no" placeholder="000-00-00000" maxlength="12" required />
           </div>
 
-          <div class="form-group">
+          <div class="form-group full-width">
             <label>사업자등록증 <span class="required-mark">*</span></label>
             <div class="file-upload-box" style="min-height: 80px; padding: 10px;">
               <p><strong>사업자등록증 이미지 등록</strong></p>
@@ -628,24 +619,14 @@
           </div>
         </div>
 
-        <!-- 계정 정보 (아이디 노출, 읽기 전용) -->
-        <h3 class="section-title">로그인 계정 정보</h3>
-        <div class="form-grid">
-          <div class="form-group full-width">
-            <label for="username">아이디</label>
-            <input type="text" id="username" disabled style="background-color: #f1f5f9; color: #64748b; cursor: not-allowed;" />
-          </div>
-        </div>
-
         <div class="notice-box">
-          정보를 다시 수정하여 재심사를 요청합니다.<br />
-          승인 완료 시 기존 아이디로 정상 로그인이 가능해집니다.
+          신청서 작성 후 제출하시면 관리자 심사를 거쳐 최종 입점 승인이 진행됩니다.
         </div>
 
         <div class="error-msg" id="error-msg"></div>
 
         <button type="submit" class="btn-submit-apply" id="btn-submit">
-          <span class="btn-text">수정 정보로 재입점 신청하기</span>
+          <span class="btn-text">가맹점 입점 신청 완료하기</span>
           <span class="spinner"></span>
         </button>
       </form>
@@ -653,7 +634,7 @@
 
     <!-- 신청 성공 화면 -->
     <div class="success-screen" id="success-view">
-      <svg class="success-icon-svg" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="success-icon-svg" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="stroke: #10b981;">
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
         <polyline points="22 4 12 14.01 9 11.01"></polyline>
       </svg>
@@ -663,7 +644,7 @@
         관리자의 확인을 거쳐 영업일 기준 1~2일 내에 심사가 진행됩니다.<br />
         승인 처리 시 가입 시 작성해주신 대표자 번호로 안내 문자가 발송됩니다.
       </p>
-      <a href="/tourist/apply-pending.html" class="btn-success-go">심사 대기 화면으로 이동</a>
+      <a href="/tourist/apply-pending.html" class="btn-success-go" style="background: #10b981;">심사 대기 화면으로 이동</a>
     </div>
   </div>
 
@@ -859,7 +840,8 @@
             return;
           }
 
-          document.getElementById('rejection-reason-text').innerText = m.rejection_reason || '확인할 수 없음';
+          const rejEl = document.getElementById('rejection-reason-text');
+          if (rejEl) rejEl.innerText = m.rejection_reason || '확인할 수 없음';
           
           document.getElementById('owner-name').value = m.owner_name || '';
           document.getElementById('phone').value = m.phone || '';
@@ -870,7 +852,9 @@
           document.getElementById('business-no').value = m.business_no || '';
           document.getElementById('bank-name').value = m.bank_name || '';
           document.getElementById('account-no').value = m.account_no || '';
-          document.getElementById('username').value = m.username || '';
+
+          const userEl = document.getElementById('username');
+          if (userEl) userEl.value = m.username || '';
 
           // 기존 이미지 복사
           if (m.images) {

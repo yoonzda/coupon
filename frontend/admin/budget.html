@@ -124,20 +124,39 @@
         <button class="btn btn-neutral btn-sm" id="btn-action-trigger" onclick="enterEditMode()" style="height: 38px; display: inline-flex; align-items: center;">예산 금액 수정</button>
       </div>
 
-      <div class="budget-container" style="max-width: 600px; margin: 0;">
-        <!-- 단일 통합 관리 카드 -->
+      <div class="budget-container" style="max-width: 100%; margin: 0;">
+        <!-- 예산 실시간 회계 관리 카드 -->
         <div class="dashboard-budget-card" id="budget-card">
           <!-- [조회 모드] -->
           <div id="view-mode" style="width: 100%; display: block;">
-            <div style="display: flex; flex-direction: column; gap: 14px;">
-              <div style="font-size: 1rem; font-weight: 600; color: var(--text-secondary); display: flex; align-items: baseline; gap: 8px;">
-                <span>전체 예산 :</span>
-                <span id="display-total-budget" style="font-family: 'Inter', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">—</span>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; width: 100%;">
+              <div style="background: #ffffff; border: 1.5px solid #e2e8f0; padding: 18px;">
+                <div style="font-size: 0.82rem; font-weight: 600; color: #475569;">① 총 사업 예산</div>
+                <div id="display-total-budget" style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-top: 4px;">—</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">전체 설정 예산</div>
               </div>
-              <div style="font-size: 1rem; font-weight: 600; color: var(--text-secondary); display: flex; align-items: baseline; gap: 8px;">
-                <span>배정 금액 :</span>
-                <span id="display-allocated-budget" style="font-family: 'Inter', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">—</span>
+              <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 18px;">
+                <div style="font-size: 0.82rem; font-weight: 700; color: #166534;">② 발행처 배정 예산</div>
+                <div id="display-allocated-budget" style="font-size: 1.5rem; font-weight: 800; color: #15803d; margin-top: 4px;">—</div>
+                <div style="font-size: 0.75rem; color: #166534; margin-top: 2px;">발행처에 배정 완료된 쿠폰액</div>
               </div>
+              <div style="background: #faf5ff; border: 1.5px solid #e9d5ff; padding: 18px;">
+                <div style="font-size: 0.82rem; font-weight: 700; color: #6b21a8;">③ 실제 집행 예산 (지출)</div>
+                <div id="display-executed-budget" style="font-size: 1.5rem; font-weight: 800; color: #7e22ce; margin-top: 4px;">—</div>
+                <div style="font-size: 0.75rem; color: #6b21a8; margin-top: 2px;">3단계 가맹점 할인 사용액</div>
+              </div>
+              <div style="background: #fffbeb; border: 1.5px solid #fde68a; padding: 18px;">
+                <div style="font-size: 0.82rem; font-weight: 700; color: #92400e;">④ 점유/예약 예산 (대기)</div>
+                <div id="display-reserved-budget" style="font-size: 1.5rem; font-weight: 800; color: #b45309; margin-top: 4px;">—</div>
+                <div style="font-size: 0.75rem; color: #92400e; margin-top: 2px;">1·2단계 사용 대기 묶임 금액</div>
+              </div>
+              <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; padding: 18px;">
+                <div style="font-size: 0.82rem; font-weight: 700; color: #1e40af;">⑤ 추가 배정 가능 잔액</div>
+                <div id="display-remaining-budget" style="font-size: 1.5rem; font-weight: 800; color: #1d4ed8; margin-top: 4px;">—</div>
+                <div style="font-size: 0.75rem; color: #1e40af; margin-top: 2px;">발행처 추가 배정 가능 가용 잔액</div>
+              </div>
+            </div>
+          </div>
               <div style="font-size: 1rem; font-weight: 600; color: var(--text-secondary); display: flex; align-items: baseline; gap: 8px;">
                 <span>발행 금액 :</span>
                 <span id="display-issued-budget" style="font-family: 'Inter', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">—</span>
@@ -221,30 +240,30 @@
 
     async function loadBudgetStatus() {
       try {
+        const stats = await api.get('/admin/stats/summary');
         const res = await api.get('/admin/budget');
         if (res.success && res.data) {
           const data = res.data;
-          totalBudget = data.totalBudget || 0;
+          totalBudget = stats.totalBudget || data.totalBudget || 2000000;
           allocatedBudget = data.allocatedBudget || 0;
           hasLoadedBudget = totalBudget > 0;
 
-          if (!hasLoadedBudget) {
-            displayEl.innerText = '등록된 예산이 없습니다.';
-            displayEl.style.color = 'var(--text-muted)';
-            displayAllocatedEl.innerText = '—';
-            displayIssuedEl.innerText = '—';
-            displayUsedEl.innerText = '—';
-            actionBtn.innerText = '예산 금액 등록';
-            inputEl.value = '';
-          } else {
-            // 메인 화면에는 숫자를 제외하고 한글 포맷 결과만 직접 노출
-            displayEl.innerText = getKoreanNumberText(totalBudget);
-            displayEl.style.color = 'var(--text-primary)';
-            displayAllocatedEl.innerText = getKoreanNumberText(allocatedBudget);
-            displayIssuedEl.innerText = getKoreanNumberText(data.issuedBudget || 0);
-            displayUsedEl.innerText = getKoreanNumberText(data.usedBudget || 0);
-            actionBtn.innerText = '예산 금액 수정';
-            inputEl.value = Number(totalBudget).toLocaleString('ko-KR');
+          const executed = stats.executedBudget || 0;
+          const reserved = stats.reservedBudget || 0;
+          const available = stats.availableBudget || Math.max(0, totalBudget - executed - reserved);
+
+          if (document.getElementById('display-total-budget')) document.getElementById('display-total-budget').innerText = fmtMoney(totalBudget);
+          if (document.getElementById('display-executed-budget')) document.getElementById('display-executed-budget').innerText = fmtMoney(executed);
+          if (document.getElementById('display-reserved-budget')) document.getElementById('display-reserved-budget').innerText = fmtMoney(reserved);
+          if (document.getElementById('display-remaining-budget')) document.getElementById('display-remaining-budget').innerText = fmtMoney(available);
+
+          if (displayAllocatedEl) displayAllocatedEl.innerText = fmtMoney(allocatedBudget);
+          if (displayIssuedEl) displayIssuedEl.innerText = fmtMoney(data.issuedBudget || 0);
+          if (displayUsedEl) displayUsedEl.innerText = fmtMoney(executed);
+
+          if (actionBtn) {
+            actionBtn.style.display = 'inline-flex';
+            actionBtn.textContent = '예산 금액 수정';
           }
         }
       } catch (err) {

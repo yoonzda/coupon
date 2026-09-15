@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="icon" href="../shared/images/favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>기타 | 옹진관광 가맹점</title>
+  <link rel="stylesheet" href="../shared/css/main.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      border-radius: 0 !important;
+    }
+
+    html, body {
+      background: #f8fafc !important;
+      color: #0f172a !important;
+      min-height: 100dvh;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* 좌측 상단 원형 동그라미 뒤로가기 버튼 */
+    .btn-top-back {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #334155;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 50% !important;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      z-index: 50;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    .btn-top-back:hover {
+      color: #059669;
+      border-color: #059669;
+      background: #fafdfb;
+      transform: scale(1.05);
+    }
+
+    /* 화면 전체 중앙 스케일 컨테이너 */
+    .etc-fullscreen-container {
+      width: 100vw;
+      min-height: 100dvh;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .etc-content-wrapper {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    /* 준비 중 안내 카드 */
+    .preparing-card {
+      width: 100%;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      padding: 52px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 18px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02);
+    }
+
+    .preparing-icon-box {
+      width: 68px;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #059669;
+      margin-bottom: 2px;
+    }
+
+    .preparing-heading {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin: 0;
+    }
+
+    .preparing-desc {
+      font-size: 0.96rem;
+      color: #64748b;
+      line-height: 1.65;
+      margin: 0;
+      word-break: keep-all;
+    }
+
+    .contact-notice {
+      font-size: 0.92rem;
+      color: #475569;
+      margin-top: 10px;
+      padding-top: 16px;
+      border-top: 1px solid #f1f5f9;
+      width: 100%;
+      word-break: keep-all;
+    }
+
+    .contact-phone {
+      font-weight: 700;
+      color: #059669;
+    }
+  </style>
+</head>
+<body>
+  <!-- 좌측 상단 원형 동그라미 뒤로가기 버튼 -->
+  <a class="btn-top-back" href="/merchant/index.html" title="메인 메뉴로 이동">
+    <svg style="width: 22px; height: 22px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+    </svg>
+  </a>
+
+  <!-- 모던 준비 중 레이아웃 -->
+  <div class="etc-fullscreen-container">
+    <div class="etc-content-wrapper">
+      <div class="preparing-card">
+        <div class="preparing-icon-box">
+          <svg style="width: 52px; height: 52px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.35">
+            <path stroke-linecap="square" stroke-linejoin="miter" d="M12 6v6l4 2M12 21a9 9 0 100-18 9 9 0 000 18z" />
+          </svg>
+        </div>
+        <h2 class="preparing-heading">서비스 준비 중입니다</h2>
+        <!-- 원상 복원된 상단 안내 문구 -->
+        <p class="preparing-desc">
+          가맹점 사장님들을 위한 추가 기능 및 서비스 안내가 준비 중입니다.<br/>
+          더 편리한 기능으로 곧 찾아뵙겠습니다.
+        </p>
+
+        <!-- 정돈된 하단 문의처 -->
+        <div class="contact-notice">
+          서비스 개선 및 문의사항: <span class="contact-phone">032-899-2210</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { requireAuth } from '../shared/js/api.js'
+
+    if (!requireAuth('/merchant/login.html')) throw new Error('not authenticated')
+  </script>
+</body>
+</html>

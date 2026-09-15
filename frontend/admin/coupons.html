@@ -209,25 +209,23 @@
       }
       list.innerHTML = data.map(c => {
         let statusBadge = '';
-        if (c.status === 'available') {
-          statusBadge = '<span class="badge" style="background:#dcfce7; color:#166534; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">사용전</span>';
-        } else if (c.status === 'used') {
-          statusBadge = '<span class="badge" style="background:#e0f2fe; color:#0369a1; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">사용 완료</span>';
-        } else if (c.status === 'expired') {
-          statusBadge = '<span class="badge" style="background:#f1f5f9; color:#64748b; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">만료</span>';
+        if (c.status === 'used') {
+          statusBadge = '<span class="badge" style="background:#f3e8ff; color:#6b21a8; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">3단계: 쿠폰 사용</span>';
+        } else if (c.tourist_phone && c.tourist_phone !== '- (미등록 대기)') {
+          statusBadge = '<span class="badge" style="background:#dcfce7; color:#166534; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">2단계: 쿠폰 등록</span>';
         } else {
-          statusBadge = `<span class="badge" style="background:#fee2e2; color:#991b1b; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">${c.status}</span>`;
+          statusBadge = '<span class="badge" style="background:#dbeafe; color:#1e40af; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight:700;">1단계: 쿠폰 발급</span>';
         }
 
-        let phoneDisplay = '<span style="color:#94a3b8;">미수령</span>';
-        if (c.tourist_nickname) {
-          const clean = c.tourist_nickname.replace(/[^0-9]/g, '');
+        let phoneDisplay = '<span style="color:#94a3b8; font-weight:600;">- (미등록 대기)</span>';
+        if (c.tourist_phone && c.tourist_phone !== '- (미등록 대기)') {
+          const clean = c.tourist_phone.replace(/[^0-9]/g, '');
           if (clean.startsWith('010') && clean.length >= 10) {
             const part1 = clean.substring(0, 3);
             const part3 = clean.substring(clean.length - 4);
             phoneDisplay = `${part1}-****-${part3}`;
           } else {
-            phoneDisplay = escapeHtml(c.tourist_nickname);
+            phoneDisplay = escapeHtml(c.tourist_phone);
           }
         }
 
@@ -290,7 +288,15 @@
 
       let filtered = couponsCache;
       if (statusFilter !== 'all') {
-        filtered = filtered.filter(c => c.status === statusFilter);
+        if (statusFilter === 'stage1') {
+          filtered = filtered.filter(c => !c.tourist_phone || c.tourist_phone === '- (미등록 대기)');
+        } else if (statusFilter === 'stage2') {
+          filtered = filtered.filter(c => c.tourist_phone && c.tourist_phone !== '- (미등록 대기)' && c.status !== 'used');
+        } else if (statusFilter === 'stage3') {
+          filtered = filtered.filter(c => c.status === 'used');
+        } else {
+          filtered = filtered.filter(c => c.status === statusFilter);
+        }
       }
       if (issuerFilter !== 'all') {
         if (issuerFilter === 'none') {

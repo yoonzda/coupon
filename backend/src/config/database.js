@@ -77,7 +77,17 @@ async function initializeDatabase(retries = 10, delay = 2000) {
         }
       }
 
-      // 가맹점 자동 주입 제거 완료 (사용자 요청에 의한 깔끔한 초기 상태 보장)
+      // coupons 테이블에 active_qr_token, active_qr_expires_at 추가
+      const couponCols = [
+        { name: 'active_qr_token', type: 'VARCHAR(64) NULL' },
+        { name: 'active_qr_expires_at', type: 'DATETIME NULL' }
+      ];
+      for (const col of couponCols) {
+        try {
+          await conn.execute(`ALTER TABLE coupons ADD COLUMN ${col.name} ${col.type}`);
+          logger.info(`✅ DB 스키마 업데이트 성공 (coupons.${col.name} 추가)`);
+        } catch (err) {}
+      }
 
       conn.release();
       return;

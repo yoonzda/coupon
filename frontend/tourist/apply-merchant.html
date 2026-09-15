@@ -364,6 +364,20 @@
     }
     .error-msg.show { display: block; }
 
+    /* Input Error / Highlight Style */
+    input.invalid-highlight, select.invalid-highlight, .file-upload-box.invalid-highlight, .weekday-selector.invalid-highlight {
+      border-color: #ef4444 !important;
+      background-color: rgba(239, 68, 68, 0.04) !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+      animation: shake 0.3s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
     /* Success Screen */
     .success-screen {
       text-align: center;
@@ -517,7 +531,7 @@
         <!-- 2. 운영 정보 -->
         <h3 class="section-title">운영 정보</h3>
         <div class="form-grid">
-          <div class="form-group">
+          <div class="form-group full-width">
             <label>영업시간 <span class="required-mark">*</span></label>
             <div class="hours-picker-grid">
               <select id="open-time" required>
@@ -563,12 +577,12 @@
         <!-- 3. 서류 및 계좌 정보 -->
         <h3 class="section-title">서류 및 정산 정보</h3>
         <div class="form-grid">
-          <div class="form-group">
+          <div class="form-group full-width">
             <label for="business-no">사업자등록번호 <span class="required-mark">*</span></label>
             <input type="text" id="business-no" placeholder="000-00-00000" maxlength="12" required />
           </div>
 
-          <div class="form-group">
+          <div class="form-group full-width">
             <label>사업자등록증 <span class="required-mark">*</span></label>
             <div class="file-upload-box" style="min-height: 80px; padding: 10px;">
               <p><strong>사업자등록증 이미지 등록</strong></p>
@@ -835,70 +849,103 @@
       });
     });
 
+    // 입력 시 에러 하이라이트 제거
+    document.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('input', () => el.classList.remove('invalid-highlight'));
+      el.addEventListener('change', () => el.classList.remove('invalid-highlight'));
+    });
+
     // ── 신청 양식 제출 ──
     document.getElementById('form-merchant-apply').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const ownerName = document.getElementById('owner-name').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const shopName = document.getElementById('shop-name').value.trim();
-      const storePhone = document.getElementById('store-phone').value.trim();
-      const category = document.getElementById('category').value;
-      const address = document.getElementById('address').value.trim();
+      const ownerNameInput = document.getElementById('owner-name');
+      const phoneInput = document.getElementById('phone');
+      const shopNameInput = document.getElementById('shop-name');
+      const storePhoneInput = document.getElementById('store-phone');
+      const categoryInput = document.getElementById('category');
+      const addressInput = document.getElementById('address');
       
-      const openTime = document.getElementById('open-time').value;
-      const closeTime = document.getElementById('close-time').value;
+      const openTimeInput = document.getElementById('open-time');
+      const closeTimeInput = document.getElementById('close-time');
       
+      const weekdaySelectorEl = document.querySelector('.weekday-selector');
       const activePills = Array.from(document.querySelectorAll('.day-pill.active'));
       const selectedDays = activePills.map(btn => btn.getAttribute('data-day'));
 
-      const businessNo = document.getElementById('business-no').value.trim();
-      const bankName = document.getElementById('bank-name').value;
-      const accountNo = document.getElementById('account-no').value.trim();
+      const storeImagesBox = document.getElementById('store-images').closest('.file-upload-box');
+      const businessNoInput = document.getElementById('business-no');
+      const businessCertBox = document.getElementById('business-cert').closest('.file-upload-box');
+      const bankNameInput = document.getElementById('bank-name');
+      const accountNoInput = document.getElementById('account-no');
+      const bankbookBox = document.getElementById('bankbook').closest('.file-upload-box');
 
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      const passwordConfirm = document.getElementById('password-confirm').value;
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const passwordConfirmInput = document.getElementById('password-confirm');
 
       const btn = document.getElementById('btn-submit');
       const errEl = document.getElementById('error-msg');
+
+      // 이전 하이라이트 및 에러 초기화
+      document.querySelectorAll('.invalid-highlight').forEach(el => el.classList.remove('invalid-highlight'));
       errEl.classList.remove('show');
 
-      // 필수 항목 유효성 체크
-      if (!ownerName || !phone || !shopName || !category || !address || !openTime || !closeTime || selectedDays.length === 0 || !businessNo || !bankName || !accountNo || !username || !password) {
-        errEl.textContent = '필수 항목(*)을 모두 입력 또는 선택해 주세요.';
-        errEl.classList.add('show');
-        window.scrollTo({ top: errEl.offsetTop - 100, behavior: 'smooth' });
-        return;
+      let firstInvalidEl = null;
+      function markInvalid(el) {
+        if (el) {
+          el.classList.add('invalid-highlight');
+          if (!firstInvalidEl) firstInvalidEl = el;
+        }
       }
 
-      if (phone.replace(/\D/g, '').length < 10) {
-        errEl.textContent = '올바른 대표자 연락처를 입력해 주세요.';
-        errEl.classList.add('show');
-        return;
-      }
+      const ownerName = ownerNameInput.value.trim();
+      const phone = phoneInput.value.trim();
+      const shopName = shopNameInput.value.trim();
+      const storePhone = storePhoneInput.value.trim();
+      const category = categoryInput.value;
+      const address = addressInput.value.trim();
+      const openTime = openTimeInput.value;
+      const closeTime = closeTimeInput.value;
+      const businessNo = businessNoInput.value.trim();
+      const bankName = bankNameInput.value;
+      const accountNo = accountNoInput.value.trim();
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+      const passwordConfirm = passwordConfirmInput.value;
 
-      if (fileStates.storeImages.length === 0) {
-        errEl.textContent = '가게 이미지를 최소 1장 이상 등록해 주세요.';
-        errEl.classList.add('show');
-        return;
-      }
+      // 유효성 체크
+      if (!ownerName) markInvalid(ownerNameInput);
+      if (!phone || phone.replace(/\D/g, '').length < 10) markInvalid(phoneInput);
+      if (!shopName) markInvalid(shopNameInput);
+      if (!category) markInvalid(categoryInput);
+      if (!address) markInvalid(addressInput);
+      if (!openTime) markInvalid(openTimeInput);
+      if (!closeTime) markInvalid(closeTimeInput);
+      if (selectedDays.length === 0) markInvalid(weekdaySelectorEl);
+      if (fileStates.storeImages.length === 0) markInvalid(storeImagesBox);
+      if (!businessNo) markInvalid(businessNoInput);
+      if (!fileStates.businessCert) markInvalid(businessCertBox);
+      if (!bankName) markInvalid(bankNameInput);
+      if (!accountNo) markInvalid(accountNoInput);
+      if (!fileStates.bankbook) markInvalid(bankbookBox);
+      if (!username) markInvalid(usernameInput);
+      if (!password) markInvalid(passwordInput);
+      if (!passwordConfirm || password !== passwordConfirm) markInvalid(passwordConfirmInput);
 
-      if (!fileStates.businessCert) {
-        errEl.textContent = '사업자등록증 이미지를 등록해 주세요.';
+      if (firstInvalidEl) {
+        if (password && passwordConfirm && password !== passwordConfirm) {
+          errEl.textContent = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
+        } else {
+          errEl.textContent = '필수 입력 항목(*)을 확인 후 입력해 주세요.';
+        }
         errEl.classList.add('show');
-        return;
-      }
 
-      if (!fileStates.bankbook) {
-        errEl.textContent = '통장사본 이미지를 등록해 주세요.';
-        errEl.classList.add('show');
-        return;
-      }
-
-      if (password !== passwordConfirm) {
-        errEl.textContent = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
-        errEl.classList.add('show');
+        // 미입력 항목 중 첫 번째(상단) 항목으로 부드럽게 스크롤 & 포커스
+        firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof firstInvalidEl.focus === 'function') {
+          firstInvalidEl.focus({ preventScroll: true });
+        }
         return;
       }
 
