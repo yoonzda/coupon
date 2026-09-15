@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>관리자 대시보드 | 옹진 관광 쿠폰</title>
@@ -10,7 +11,7 @@
         document.documentElement.classList.add('sidebar-collapsed');
       }
     })();
-  </script>
+  </script>
   <style>
     body { 
       margin: 0 !important; padding: 0 !important; 
@@ -32,11 +33,19 @@
       border-radius: var(--radius);
       border: 1px solid var(--border);
       box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease-in-out;
+    }
+    .stat-card.clickable {
+      cursor: pointer;
+    }
+    .stat-card.clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: #3b82f6;
     }
     .stat-label { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; }
     .stat-value { font-size: 1.8rem; font-weight: 900; color: var(--text-primary); }
     .stat-trend { font-size: 0.75rem; margin-top: 4px; }
-    .trend-up { color: var(--success); }
 
     /* 데이터 테이블 */
     .admin-card {
@@ -72,11 +81,11 @@
     }
     .admin-table tr:hover { background: var(--surface-2); }
   </style>
-  <script type="module" crossorigin src="/assets/admin-index-Cj9KiR02.js"></script>
+  <script type="module" crossorigin src="/assets/admin-index-DpqPURQu.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-yYhXsohp.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-D2w6DInN.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BUpdExfZ.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-BrJ7NzZM.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
 </head>
 <body>
   <div class="app-shell">
@@ -93,7 +102,7 @@
         </div>
       </header>
 
-      <!-- 통계 -->
+      <!-- 기본 통계 지표 -->
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label" data-i18n="stat_total_amount">금월 누적 결제액</div>
@@ -105,7 +114,7 @@
           <div class="stat-value" id="stat-users">0</div>
           <div class="stat-trend" style="color: var(--text-muted); font-size:0.8rem;">누적 회원</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card clickable" onclick="location.href='/admin/merchants.html'">
           <div class="stat-label" data-i18n="stat_merchants">승인 가맹점</div>
           <div class="stat-value" id="stat-merchants">0</div>
           <div class="stat-trend" id="stat-pending" style="color: var(--text-muted); font-size:0.8rem;">대기 0곳</div>
@@ -125,7 +134,7 @@
       <!-- 최근 FDS 알림 -->
       <div class="admin-card">
         <div class="card-header">
-          <div class="card-title" data-i18n="fds_recent_title">️ 최근 이상거래 의심 내역 (FDS)</div>
+          <div class="card-title" data-i18n="fds_recent_title">최근 이상거래 의심 내역 (FDS)</div>
           <a href="/admin/fds.html" class="btn btn-neutral-outline" data-i18n="btn_view_all" style="padding: 6px 12px; font-size: 0.8rem;">전체보기</a>
         </div>
         <table class="admin-table">
@@ -133,13 +142,12 @@
             <tr>
               <th data-i18n="th_date">탐지 일시</th>
               <th data-i18n="th_merchant">가맹점</th>
-              <th data-i18n="th_user">사용자</th>
-              <th data-i18n="th_rule">탐지 규칙</th>
+              <th data-i18n="th_user">관광객</th>
+              <th data-i18n="th_rule">룰 ID</th>
               <th data-i18n="th_status">상태</th>
             </tr>
           </thead>
           <tbody id="fds-recent-list">
-            <!-- JS로 렌더링 -->
             <tr><td colspan="5" class="text-center" style="padding: 40px; color: var(--text-muted);">데이터를 불러오고 있습니다...</td></tr>
           </tbody>
         </table>

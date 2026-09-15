@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>쿠폰 관리 | 옹진 관광 관리자</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <script>
     (function() {
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
@@ -119,11 +122,11 @@
       background: #f1f5f9 !important;
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-coupons-BtDYfzZG.js"></script>
+  <script type="module" crossorigin src="/assets/admin-coupons-C7gbGIvw.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-yYhXsohp.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-D2w6DInN.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BUpdExfZ.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-BrJ7NzZM.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
 </head>
 <body>
   <div class="app-shell">
@@ -138,24 +141,26 @@
         </div>
       </header>
 
-      <!-- 쿠폰 조작 버튼 영역 -->
-      <div class="table-actions-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px; justify-content: flex-start;">
-        <button class="btn btn-neutral btn-sm" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer;" onclick="location.href='allocate-coupon.html'">쿠폰 배정하기</button>
-      </div>
 
-      <!-- 필터 영역 (버튼 아래 줄, 왼쪽 정렬) -->
-      <div class="filter-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; justify-content: flex-start;">
-        <select id="filter-status" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 120px; outline: none;">
-          <option value="all">전체 상태</option>
-          <option value="available">사용 가능</option>
-          <option value="used">사용 완료</option>
-          <option value="expired">기간 만료</option>
-        </select>
-        <select id="filter-type" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 120px; outline: none;">
-          <option value="all">전체 구분</option>
-          <option value="digital">디지털 쿠폰</option>
-          <option value="paper">종이 쿠폰</option>
-        </select>
+      <!-- 필터 영역 (쿠폰 배정하기 버튼 제거) -->
+      <div class="filter-bar" style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px; justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">상태 :</span>
+            <select id="filter-status" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 100px; outline: none;">
+              <option value="all">전체</option>
+              <option value="available">사용전</option>
+              <option value="used">사용 완료</option>
+              <option value="expired">만료</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">발행처 :</span>
+            <select id="filter-issuer" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 130px; outline: none;">
+              <option value="all">전체</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <!-- 전체 쿠폰 발급 및 사용 현황 -->
@@ -163,39 +168,17 @@
         <table class="admin-table">
           <thead>
             <tr>
-              <th>쿠폰 ID</th>
-              <th>구분</th>
-              <th>액면가</th>
-              <th>수령인 (관광객)</th>
-              <th>발행처 / 출처</th>
+              <th>금액</th>
+              <th>전화번호</th>
+              <th>발행처</th>
               <th>상태</th>
-              <th>발급일시</th>
-              <th>사용일시</th>
+              <th>사용처</th>
             </tr>
           </thead>
           <tbody id="coupon-status-list">
-            <tr><td colspan="8" class="text-center" style="padding: 30px; color:#64748b;">데이터를 불러오는 중입니다...</td></tr>
+            <tr><td colspan="5" class="text-center" style="padding: 30px; color:#64748b;">데이터를 불러오는 중입니다...</td></tr>
           </tbody>
         </table>
-      </div>
-
-      <!-- 쿠폰 배정 내역 -->
-      <div style="margin-top: 32px; margin-bottom: 12px;">
-        <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">쿠폰 배정 내역</h3>
-      </div>
-      <div id="comparison-section" class="admin-card" style="border-radius: 6px;">
-        <div class="comparison-container">
-          <table class="comparison-table">
-            <thead>
-              <tr id="comparison-header">
-                <!-- 지표명 및 발행처 헤더 동적 로드 -->
-              </tr>
-            </thead>
-            <tbody id="comparison-body">
-              <!-- 비교 항목별 행 데이터 렌더링 -->
-            </tbody>
-          </table>
-        </div>
       </div>
     </main>
   </div>

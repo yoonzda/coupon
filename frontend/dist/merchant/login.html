@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>가맹점 로그인 | 옹진 관광 쿠폰</title>
@@ -422,21 +423,32 @@
       letter-spacing: 0.3px;
     }
 
-    .apply-notice-container {
-      margin-top: 32px;
+    /* Secondary Outline Button (입점 신청하기) */
+    .btn-apply-outline {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      margin-top: 12px;
+      background: #ffffff;
+      border: 1px solid #10b981;
+      color: #059669;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
       text-align: center;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
     }
-    .btn-apply-text-link {
-      font-size: 0.88rem;
-      color: #059669; /* green point color */
-      font-weight: 600;
-      text-decoration: underline;
-      text-underline-offset: 4px;
-      transition: color 0.2s;
-      outline: none;
+    .btn-apply-outline:hover {
+      background: #f0fdf4;
+      border-color: #059669;
+      color: #047857;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
     }
-    .btn-apply-text-link:hover {
-      color: #10b981;
+    .btn-apply-outline:active {
+      transform: scale(0.99);
     }
 
     /* ── Responsive & Mobile First Styles ── */
@@ -520,9 +532,9 @@
       to { opacity: 1; transform: translateY(0); }
     }
   </style>
-  <script type="module" crossorigin src="/assets/merchant-login-Dzm67XCS.js"></script>
+  <script type="module" crossorigin src="/assets/merchant-login-BIHJ-pi4.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-yYhXsohp.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-BrJ7NzZM.js">
 </head>
 <body>
   <div class="login-card" id="login-card-container">
@@ -588,9 +600,7 @@
         <span class="spinner"></span>
       </button>
 
-      <div class="apply-notice-container">
-        <a href="/tourist/apply-merchant.html" class="btn-apply-text-link">입점 신청하기</a>
-      </div>
+      <a href="/tourist/apply-merchant.html" class="btn-apply-outline">입점 신청하기</a>
     </form>
   </div>
 
@@ -631,6 +641,6 @@
   </button>
 
   <div id="toast-container"></div>
-
+
 </body>
 </html>

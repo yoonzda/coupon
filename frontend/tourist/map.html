@@ -1,166 +1,1588 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link rel="icon" href="../shared/images/favicon.png" />
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>가맹점 지도 | 옹진관광 쿠폰</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./css/tourist-theme.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="옹진 섬패스 쿠폰">
+  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 섬패스로 더 알뜰한 옹진 여행">
+  <meta property="og:image" content="/og-image.png">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="description" content="내 주변 가맹점 찾기 — 옹진관광 쿠폰 지도" />
+  <title>가맹점 지도 | 옹진 섬 패스 쿠폰</title>
+    <!-- 네이버 지도 API (NCP Client ID) -->
+  <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=x0h48m56fw"></script>
+  <link rel="stylesheet" href="../shared/css/brex-tokens.css?v=20260915_fix_all_tabs" />
+  <link rel="stylesheet" href="../shared/css/app-styles.css?v=20260915_fix_all_tabs" />
   <style>
-    .map-wrapper {
-      width: 100%;
-      height: calc(100vh - 60px);
-      position: relative;
+    .subpage-container {
+      min-height: 100dvh;
+      background: #FFFFFF;
+      display: flex;
+      flex-direction: column;
     }
-
+    .subpage-header {
+      height: 64px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #FFFFFF;
+      border-bottom: 1px solid #EEF0F2;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .subpage-header .btn-back {
+      position: absolute;
+      left: 14px;
+      background: none;
+      border: none;
+      padding: 8px;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--fg-strong, #111827);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .subpage-header .btn-back:hover {
+      background: rgba(0, 104, 249, 0.08);
+      color: var(--primary, #0068F9);
+      transform: translateX(-2px);
+    }
+    .subpage-header .btn-back:active {
+      transform: scale(0.92);
+    }
+    .subpage-header .title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--fg-strong, #111827);
+      letter-spacing: -0.04em;
+      text-align: center;
+    }
+    
+    .map-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 84px;
+    }
+    .map-viewport-wrap {
+      position: relative;
+      width: 100%;
+      height: 440px;
+      background: #E5E7EB;
+    }
     #map {
       width: 100%;
       height: 100%;
     }
-
-    .map-search-bar {
+    .map-fab {
       position: absolute;
-      top: 16px;
-      left: 16px;
+      bottom: 16px;
       right: 16px;
-      z-index: 10;
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 6px 14px;
+      width: 44px;
+      height: 44px;
+      border-radius: 100px;
+      background: #FFFFFF;
+      border: 1px solid #EEF0F2;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
       display: flex;
       align-items: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      border: 1px solid var(--border-color);
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      color: var(--fg-strong);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .map-fab:active {
+      transform: scale(0.94);
+      background: #F3F4F6;
     }
 
-    .map-search-input {
-      flex: 1;
-      height: 42px;
-      border: none;
-      background: transparent;
-      padding: 0 10px;
-      font-size: 0.95rem;
+    .filter-chip-bar {
+      padding: 12px 16px;
+      background: #FFFFFF;
+      border-bottom: 1px solid #EEF0F2;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-chip-bar::-webkit-scrollbar { display: none; }
+    .chip {
+      padding: 7px 14px;
+      border-radius: 100px;
+      background: #F3F4F6;
+      border: 1px solid #E5E7EB;
+      color: var(--fg-secondary);
+      font-size: 13.5px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chip[data-active="true"] {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #FFFFFF;
       font-weight: 600;
-      outline: none;
-      color: var(--text-dark);
     }
 
-    .map-search-input::placeholder {
-      color: #94A3B8;
+    .list-section-head {
+      padding: 35px 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .list-section-head h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--fg-strong);
+      margin: 0;
+      letter-spacing: -0.04em;
+    }
+    .list-section-head .count {
+      font-size: 13.5px;
+      color: var(--fg-secondary);
+      font-weight: 500;
+      background: none;
+      padding: 0;
+      border-radius: 0;
+      letter-spacing: -0.03em;
+    }
+    .list-section-head .count .num {
+      color: var(--primary);
+      font-weight: 700;
+      margin: 0 1px;
+    }
+
+    .merchant-list-wrap {
+      padding: 0 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .merchant-card-item {
+      background: #FFFFFF;
+      border: 1.5px solid #EEF0F2;
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+    .merchant-card-item:hover,
+    .merchant-card-item.active {
+      background: #F4F8FE;
+      border-color: var(--primary, #0068F9);
+    }
+    .m-thumb-box {
+      width: 62px;
+      height: 62px;
+      border-radius: 14px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--powder-blue);
+    }
+    .m-thumb-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .m-info-box {
+      flex: 1;
+      min-width: 0;
+    }
+    .m-info-box .island-tag {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--primary);
+      letter-spacing: -0.035em;
+      margin-bottom: 2px;
+    }
+    .m-info-box .name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fg-strong);
+      letter-spacing: -0.04em;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .m-info-box .meta {
+      font-size: 12.5px;
+      color: var(--fg-secondary);
+      letter-spacing: -0.035em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      line-height: 1.3;
+    }
+    .m-coupon-chip {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #FFFFFF;
+      background: #0068F9;
+      padding: 7px 13px;
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      letter-spacing: -0.03em;
+      box-shadow: 0 2px 6px rgba(0, 104, 249, 0.2);
+    }
+
+    /* 2차 분류 카테고리 탭 (1차 탭과 동일한 알약 형태, 노라인 그레이 배경 + 파란색 포인트 active) */
+    .tabs.category-tabs {
+      gap: 8px;
+    }
+    .sub-tab {
+      flex: 0 0 auto;
+      padding: 8px 16px;
+      border-radius: 100px;
+      background: #F3F4F6;
+      border: none;
+      color: var(--fg-secondary);
+      font-size: 14.5px;
+      font-weight: 500;
+      letter-spacing: -0.03em;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.18s ease;
+      user-select: none;
+    }
+    .sub-tab:hover {
+      background: #E5E7EB;
+      color: var(--fg-strong);
+    }
+    .sub-tab[data-active="true"] {
+      background: var(--primary);
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    /* ── 가맹점 상세 바텀시트 모달 ── */
+    .bottom-sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.48);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .bottom-sheet-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .merchant-detail-sheet {
+      background: #FFFFFF;
+      border-radius: 28px 28px 0 0;
+      width: 100%;
+      max-width: 440px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bottom-sheet-overlay.active .merchant-detail-sheet {
+      transform: translateY(0);
+    }
+    .sheet-drag-handle {
+      width: 36px;
+      height: 4px;
+      border-radius: 100px;
+      background: #D1D5DB;
+      margin: 10px auto 4px;
+      flex-shrink: 0;
+    }
+    .sheet-close-btn {
+      display: none;
+    }
+    .sheet-scroll-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 50px;
+    }
+
+    /* 상단 1:1 정사각형 이미지 슬라이더 (상단 여백 & 둥근 카드 모서리) */
+    .detail-img-slider-wrap {
+      position: relative;
+      width: calc(100% - 32px);
+      margin: 12px 16px 0;
+      aspect-ratio: 1;
+      background: #F3F4F6;
+      border-radius: 20px;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .detail-img-slider {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      touch-action: pan-x;
+      scroll-behavior: smooth;
+    }
+    .detail-img-slider::-webkit-scrollbar { display: none; }
+    .detail-img-slider img {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      scroll-snap-align: start;
+      user-select: none;
+      -webkit-user-drag: none;
+      -khtml-user-drag: none;
+      -moz-user-drag: none;
+      -o-user-drag: none;
+      pointer-events: auto;
+    }
+    .img-fallback {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f2f5;
+      font-size: 56px;
+      scroll-snap-align: start;
+    }
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 12;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+      opacity: 0.9;
+    }
+    .slider-btn:hover {
+      background: #FFFFFF;
+      transform: translateY(-50%) scale(1.08);
+      opacity: 1;
+    }
+    .slider-btn:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+    .slider-btn.prev-btn { left: 12px; }
+    .slider-btn.next-btn { right: 12px; }
+    .slider-btn.is-hidden { display: none !important; }
+
+    .detail-glass-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      left: auto;
+      padding: 5px 13px;
+      border-radius: 100px;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .detail-glass-badge .sep { opacity: 0.6; font-size: 12px; margin: 0 1px; color: rgba(255,255,255,0.7); }
+
+    /* 하단 상세 정보 세션 */
+    .detail-info-section {
+      padding: 24px 20px 20px;
+    }
+    .detail-island-name {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+    .detail-shop-name {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--fg-strong);
+      letter-spacing: -0.035em;
+      margin: 0 0 20px;
+      line-height: 1.25;
+    }
+    .detail-meta-list {
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      border-top: 2px solid #111827;
+    }
+    .detail-meta-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 14px 4px;
+      border-bottom: 1px solid #E5E7EB;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .detail-meta-item .meta-label {
+      width: 76px;
+      color: #6B7280;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .detail-meta-item .meta-val {
+      color: #111827;
+      font-weight: 600;
+      flex: 1;
+      word-break: keep-all;
+    }
+
+    /* ── 상세 바텀시트 하단 액션 (위치 보기 버튼) ── */
+    .detail-action-row {
+      margin-top: 24px;
+    }
+    .btn-view-map {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px 20px;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 104, 249, 0.22);
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .btn-view-map:hover {
+      background: #0052c9;
+    }
+    .btn-view-map:active {
+      transform: scale(0.98);
+    }
+
+    /* ── 사용 가능 쿠폰 카드 섹션 ── */
+    .detail-coupon-section {
+      margin-top: 32px;
+    }
+    .detail-coupon-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--fg-strong);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      letter-spacing: -0.03em;
+    }
+    .detail-coupon-title .count-badge {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--powder-blue);
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+    .detail-coupon-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      background: #FFFFFF;
+      border: 1px solid #EEF0F2;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+    .detail-coupon-card .c-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .detail-coupon-card .c-name {
+      font-size: 15.5px;
+      font-weight: 500;
+      color: var(--fg-strong);
+      letter-spacing: -0.02em;
+    }
+    .detail-coupon-card .c-val {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+    .detail-coupon-card .btn-use-c {
+      padding: 10px 18px;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 3px 8px rgba(0, 104, 249, 0.25);
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .detail-coupon-card .btn-use-c:hover {
+      background: #004ecc;
+    }
+    .detail-coupon-card .btn-use-c:active {
+      transform: scale(0.97);
+    }
+
+    /* ── 상세 바텀시트 대표 메뉴 목록 스타일 ── */
+    .detail-shop-desc-box {
+      margin: 10px 0 16px;
+      padding: 12px 14px;
+      background: #F8FAFC;
+      border-radius: 12px;
+      font-size: 13.5px;
+      color: #334155;
+      line-height: 1.5;
+      border-left: 3px solid var(--primary, #0068F9);
+    }
+    .detail-menu-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #FFFFFF;
+      border: 1px solid #EEF0F2;
+      border-radius: 14px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+    .detail-menu-thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #E5E7EB;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .detail-menu-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .detail-menu-thumb .placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .detail-menu-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .detail-menu-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .detail-menu-name {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--fg-strong);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .detail-badge-sig {
+      font-size: 10px;
+      font-weight: 700;
+      color: #D97706;
+      background: #FEF3C7;
+      padding: 2px 5px;
+      border-radius: 4px;
+      border: 1px solid #FDE68A;
+      flex-shrink: 0;
+    }
+    .detail-menu-price {
+      font-size: 14px;
+      font-weight: 800;
+      color: #059669;
+    }
+    .detail-menu-desc {
+      font-size: 11.5px;
+      color: var(--fg-quiet);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── 상단 검색바 래퍼 및 인풋 스타일 ── */
+    .map-search-wrap {
+      padding: 12px 20px 4px;
+      background: #FFFFFF;
+    }
+    .map-search-bar {
+      height: 46px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 999px;
+      background: #F9FAFB;
+      transition: all 0.2s ease;
+    }
+    .map-search-bar:focus-within {
+      background: #FFFFFF;
+      border-color: var(--primary, #0068F9);
+      box-shadow: 0 0 0 3px rgba(0, 104, 249, 0.12);
+    }
+    .map-search-bar svg.search-ico {
+      color: var(--fg-tertiary, #9CA3AF);
+      flex-shrink: 0;
+    }
+    .map-search-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--fg-strong, #111827);
+      min-width: 0;
+    }
+    .map-search-bar input::placeholder {
+      color: var(--fg-tertiary, #9CA3AF);
+      font-size: 14px;
+    }
+    .map-search-bar .btn-clear-search {
+      border: none;
+      background: #E5E7EB;
+      color: #6B7280;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+      visibility: hidden;
+      opacity: 0;
+    }
+    .map-search-bar .btn-clear-search.visible {
+      visibility: visible;
+      opacity: 1;
+    }
+    .map-search-bar .btn-clear-search:hover {
+      background: #D1D5DB;
+      color: #111827;
+    }
+
+    /* 검색 결과 없음 Empty State */
+    .empty-search-box {
+      text-align: center;
+      padding: 48px 20px 36px;
+      background: #FFFFFF;
+      border-radius: 18px;
+      margin: 12px 0;
+    }
+    .empty-search-box .empty-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: #F3F4F6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9CA3AF;
+    }
+    .empty-search-box .empty-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--fg-strong, #111827);
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+    .empty-search-box .empty-desc {
+      font-size: 13.5px;
+      color: var(--fg-tertiary, #6B7280);
+      margin-bottom: 20px;
+    }
+    .empty-search-box .btn-reset-search {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 22px;
+      background: var(--powder-blue, #E8F2FF);
+      color: var(--primary, #0068F9);
+      border: 1px solid rgba(0, 104, 249, 0.2);
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+    .empty-search-box .btn-reset-search:hover {
+      background: #D0E5FF;
+    }
+    .empty-search-box .btn-reset-search:active {
+      transform: scale(0.97);
     }
   </style>
+  <!-- 네이버 지도 API -->
+  <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=x0h48m56fw"></script>
 </head>
 <body>
-  <div class="tourist-app" style="padding-bottom: 0;">
-    <!-- 🌟 헤더 (파비콘 로고 이미지 적용) -->
-    <header class="header-clean">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <img src="../shared/images/favicon.png" alt="옹진군 로고" style="width: 24px; height: 24px; object-fit: contain;" />
-        <h1 class="header-title">가맹점 <span>지도</span></h1>
-      </div>
-      <a href="/tourist/mypage.html" style="font-size: 0.82rem; color: var(--text-slate); font-weight: 700; text-decoration: none;">쿠폰함 ➔</a>
-    </header>
+  <div class="app-container">
+    <div class="subpage-container">
 
-    <div class="map-wrapper">
-      <div class="map-search-bar">
-        <svg style="width:20px;height:20px;color:#10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input type="text" id="search-input" class="map-search-input" placeholder="가맹점 이름 또는 섬 이름을 검색하세요" />
+      <!-- 서브페이지 공통 헤더 -->
+      <div class="subpage-header">
+        <a href="/tourist/index.html" class="btn-back" title="메인 페이지로 이동">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </a>
+        <div class="title">가맹점 지도</div>
       </div>
 
-      <div id="map"></div>
-    </div>
+      <!-- 상단 상시 검색바 (검색창 유지 및 즉시 재검색 지원) -->
+      <div class="map-search-wrap">
+        <div class="map-search-bar">
+          <svg class="search-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="map-search-input" placeholder="가맹점명 또는 업종 검색 (예: 덕적, 해물탕)" autocomplete="off" />
+          <button type="button" class="btn-clear-search" id="btn-clear-map-search" title="검색어 지우기">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
 
-    <!-- 하단 알약 슬라이딩 네비게이션 -->
-    <div class="floating-pill-nav">
-      <div class="pill-slider" style="left: calc(100% - 110px); width: 104px;"></div>
-      <a href="/tourist/mypage.html" class="pill-tab" title="쿠폰함">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5zM5 15a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2H5z" />
-        </svg>
-        <span class="pill-label">쿠폰함</span>
+      <!-- 섬 탭 (메인페이지와 동일한 디자인) -->
+      <div class="tabs" id="island-filter-chips" style="background: #FFFFFF; padding: 12px 20px 16px;">
+        <button class="tab" data-active="true" data-island="all">전체</button>
+        <button class="tab" data-island="백령도">백령도</button>
+        <button class="tab" data-island="대청도">대청도</button>
+        <button class="tab" data-island="소청도">소청도</button>
+        <button class="tab" data-island="연평도">연평도</button>
+        <button class="tab" data-island="덕적도">덕적도</button>
+        <button class="tab" data-island="자월도">자월도</button>
+      </div>
+
+      <!-- 지도 및 가맹점 본문 -->
+      <div class="map-body">
+        <div class="map-viewport-wrap">
+          <div id="map"></div>
+          <button class="map-fab" id="btn-my-location" title="내 위치">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
+          </button>
+        </div>
+
+        <div class="list-section-head">
+          <h3>가맹점 목록</h3>
+          <span class="count" id="merchant-count">총 <span class="num">0</span>개의 가맹점</span>
+        </div>
+
+        <!-- 2차 분류: 카테고리 탭 (입점신청 업종 항목 반영 - 심플 미니 탭 스타일) -->
+        <div class="tabs category-tabs" id="category-filter-chips" style="background: #FFFFFF; padding: 20px 20px 20px;">
+          <button class="sub-tab" data-active="true" data-category="all">전체</button>
+          <button class="sub-tab" data-category="음식점">음식점</button>
+          <button class="sub-tab" data-category="카페">카페</button>
+          <button class="sub-tab" data-category="숙박">숙박</button>
+          <button class="sub-tab" data-category="기타">기타</button>
+        </div>
+
+        <div class="merchant-list-wrap" id="merchant-list">
+          <!-- 스크립트 동적 렌더링 -->
+        </div>
+      </div>
+
+    </div><!-- /.subpage-container -->
+
+    <!-- 하단 네비게이션 -->
+    <nav class="tabbar tab-bar" style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; max-width: 440px !important; margin: 0 auto !important; height: calc(68px + env(safe-area-inset-bottom, 0px)) !important; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important; background: rgba(255, 255, 255, 0.98) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-top: 1px solid #E2E8F0 !important; display: flex !important; flex-direction: row !important; justify-content: space-around !important; align-items: center !important; z-index: 9999 !important; box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05) !important; box-sizing: border-box !important;">
+      <a class="tab-item" href="/tourist/index.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-5a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9.5z"/></svg>
+        <span class="label" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">Home</span>
       </a>
-      <a href="/tourist/mypage.html#map" class="pill-tab active" title="가맹점 지도">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-        </svg>
-        <span class="pill-label">가맹점 지도</span>
+      <a class="tab-item" href="/tourist/about-pass.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span class="label" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">옹진섬패스</span>
       </a>
+      <a class="tab-item active" data-active="true" href="/tourist/map.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: var(--primary, #059669) !important; font-weight: 700 !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>
+        <span class="label" style="font-size: 11px !important; font-weight: 700 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">가맹점지도</span>
+      </a>
+      <a class="tab-item" href="/tourist/apply-merchant.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l2-6h12l2 6M4 10v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V10M4 10h16M10 21v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/></svg>
+        <span class="label" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">입점신청</span>
+      </a>
+      <a class="tab-item" href="/tourist/mypage.html" id="tab-my-page" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="label" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">My</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- ── 가맹점 상세 정보 바텀시트 모달 (최상위 z-index 계층) ── -->
+  <div class="bottom-sheet-overlay" id="modal-merchant-detail">
+    <div class="merchant-detail-sheet">
+      <div class="sheet-drag-handle"></div>
+      <button class="sheet-close-btn" id="btn-close-merchant-detail" title="닫기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <div class="sheet-scroll-body">
+        <!-- 상단 1:1 정사각형 이미지 슬라이더 & 글래스모피즘 뱃지 -->
+        <div class="detail-img-slider-wrap">
+          <div class="detail-img-slider" id="detail-img-slider">
+            <!-- 동적 <img> -->
+          </div>
+          <button class="slider-btn prev-btn" id="detail-slider-prev" title="이전 이미지">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button class="slider-btn next-btn" id="detail-slider-next" title="다음 이미지">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <div class="detail-glass-badge">
+            <span id="detail-current-slide">1</span>
+            <span class="sep">/</span>
+            <span id="detail-total-slides">1</span>
+          </div>
+        </div>
+
+        <!-- 하단 정보 영역 -->
+        <div class="detail-info-section">
+          <div class="detail-island-name" id="detail-island">백령도</div>
+          <h2 class="detail-shop-name" id="detail-name">가게 상호명</h2>
+          <div class="detail-shop-desc-box" id="detail-desc-box" style="display:none;">
+            <div id="detail-desc"></div>
+          </div>
+
+          <div class="detail-meta-list">
+            <div class="detail-meta-item">
+              <span class="meta-label">분류</span>
+              <span class="meta-val" id="detail-category">음식점</span>
+            </div>
+            <div class="detail-meta-item">
+              <span class="meta-label">연락처</span>
+              <span class="meta-val" id="detail-phone">032-836-1234</span>
+            </div>
+            <div class="detail-meta-item">
+              <span class="meta-label">주소</span>
+              <span class="meta-val" id="detail-address">인천광역시 옹진군...</span>
+            </div>
+            <div class="detail-meta-item">
+              <span class="meta-label">운영정보</span>
+              <span class="meta-val" id="detail-hours">09:00 ~ 17:00 (토, 일 휴무)</span>
+            </div>
+          </div>
+
+          <!-- 가맹점 등록 메뉴 및 가격 안내 섹션 -->
+          <div class="detail-menu-section" id="detail-menu-section" style="margin-top: 24px;">
+            <div class="detail-menu-title" style="font-size: 17px; font-weight: 700; color: var(--fg-strong); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+              <span>🍽️ 대표 메뉴 및 가격</span>
+              <span class="count-badge" id="detail-menu-count" style="font-size: 12px; color: #059669; background: #ECFDF5; padding: 3px 8px; border-radius: 6px; font-weight: 600;"></span>
+            </div>
+            <div id="detail-menu-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- 동적 메뉴 카드 -->
+            </div>
+          </div>
+
+          <!-- 위치 보기 액션 버튼 (텍스트만 큼직하게) -->
+          <div class="detail-action-row">
+            <button class="btn-view-map" id="btn-detail-view-map">
+              위치 보기
+            </button>
+          </div>
+
+          <!-- 사용 가능 쿠폰 리스트 -->
+          <div class="detail-coupon-section">
+            <div class="detail-coupon-title">
+              <span>사용 가능 쿠폰</span>
+              <span class="count-badge" id="detail-coupon-badge">2장 보유</span>
+            </div>
+            <div id="detail-coupon-list">
+              <!-- 동적 렌더링 -->
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div id="toast-container"></div>
-
-  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=KAKAO_APP_KEY_DUMMY&libraries=services"></script>
   <script type="module">
     import { api, showToast } from '../shared/js/api.js';
 
-    let map = null;
-    let markers = [];
+    let map, markers = [], allMerchants = [], currentRenderedMerchants = [], currentIsland = 'all', currentCategory = 'all';
 
-    function initMap() {
-      const container = document.getElementById('map');
-      const options = {
-        center: new kakao.maps.LatLng(37.2433, 126.1550),
-        level: 8
+    const categoryIcons = {
+      '음식점': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>',
+      '카페': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>',
+      '숙박': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>'
+    };
+    const defaultIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>';
+
+    // ── PC 마우스 부드러운 드래그 스크롤 (메인페이지와 동일) ──
+    function enableDragScroll(el) {
+      if (!el) return;
+      let isDown = false;
+      let startX, scrollLeft;
+
+      el.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - el.offsetLeft;
+        scrollLeft = el.scrollLeft;
+        el.style.scrollSnapType = 'none';
+        el.style.scrollBehavior = 'auto';
+        el.style.cursor = 'grabbing';
+      });
+
+      const endDrag = () => {
+        if (!isDown) return;
+        isDown = false;
+        el.style.cursor = 'grab';
+        el.style.scrollSnapType = '';
+        el.style.scrollBehavior = 'smooth';
       };
-      map = new kakao.maps.Map(container, options);
-      loadMerchants();
-    }
 
-    async function loadMerchants(query = '') {
-      try {
-        const res = await api.get(`/merchant/map${query ? `?q=${encodeURIComponent(query)}` : ''}`);
-        if (res.success && res.data) {
-          renderMarkers(res.data);
+      el.addEventListener('mouseleave', endDrag);
+      el.addEventListener('mouseup', endDrag);
+
+      el.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - el.offsetLeft;
+        const walk = (x - startX) * 1.2;
+        el.scrollLeft = scrollLeft - walk;
+      });
+
+      el.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          el.scrollLeft += e.deltaY;
         }
-      } catch (e) {
-        showToast('가맹점 지도 정보를 불러오지 못했습니다.', 'error');
-      }
+      }, { passive: false });
     }
 
-    function renderMarkers(data) {
-      markers.forEach(m => m.setMap(null));
-      markers = [];
+    const islandTabsContainer = document.getElementById('island-filter-chips');
+    const categoryTabsContainer = document.getElementById('category-filter-chips');
+    enableDragScroll(islandTabsContainer);
+    enableDragScroll(categoryTabsContainer);
 
-      data.forEach(item => {
-        if (!item.lat || !item.lng) return;
-        const position = new kakao.maps.LatLng(item.lat, item.lng);
-        const marker = new kakao.maps.Marker({
-          position,
-          map
-        });
-        markers.push(marker);
+    // 탭 클릭 시 선택된 탭을 중앙으로 부드럽게 스크롤
+    function scrollTabToCenter(container, tab) {
+      if (!container || !tab) return;
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = tab.getBoundingClientRect();
+      const scrollTarget = tab.offsetLeft - (containerRect.width / 2) + (tabRect.width / 2);
+      container.scrollTo({ left: scrollTarget, behavior: 'smooth' });
+    }
 
-        const infowindow = new kakao.maps.InfoWindow({
-          content: `<div style="padding:8px 12px; font-size:0.85rem; font-weight:700; color:#0f172a;">${item.name}</div>`
-        });
+    // 1차 필터: 섬 탭
+    document.querySelectorAll('#island-filter-chips .tab[data-island]').forEach(chip => {
+      chip.addEventListener('click', function() {
+        document.querySelectorAll('#island-filter-chips .tab[data-island]').forEach(c => c.setAttribute('data-active', 'false'));
+        this.setAttribute('data-active', 'true');
+        currentIsland = this.dataset.island;
+        scrollTabToCenter(islandTabsContainer, this);
+        filterAndRender();
+      });
+    });
 
-        kakao.maps.event.addListener(marker, 'click', () => {
-          infowindow.open(map, marker);
-        });
+    // 2차 필터: 카테고리 탭 (심플 미니 탭)
+    document.querySelectorAll('#category-filter-chips .sub-tab[data-category]').forEach(chip => {
+      chip.addEventListener('click', function() {
+        document.querySelectorAll('#category-filter-chips .sub-tab[data-category]').forEach(c => c.setAttribute('data-active', 'false'));
+        this.setAttribute('data-active', 'true');
+        currentCategory = this.dataset.category;
+        scrollTabToCenter(categoryTabsContainer, this);
+        filterAndRender();
+      });
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentSearchQuery = (urlParams.get('search') || '').trim();
+
+    const mapSearchInput = document.getElementById('map-search-input');
+    const btnClearMapSearch = document.getElementById('btn-clear-map-search');
+
+    if (mapSearchInput) {
+      if (currentSearchQuery) {
+        mapSearchInput.value = currentSearchQuery;
+        if (btnClearMapSearch) btnClearMapSearch.classList.add('visible');
+      }
+
+      function handleSearchUpdate(val) {
+        currentSearchQuery = (val || '').trim();
+        if (btnClearMapSearch) {
+          btnClearMapSearch.classList.toggle('visible', currentSearchQuery.length > 0);
+        }
+        // 브라우저 주소창 파라미터 동기화 (새로고침 없이 유지)
+        const newUrl = new URL(window.location.href);
+        if (currentSearchQuery) {
+          newUrl.searchParams.set('search', currentSearchQuery);
+        } else {
+          newUrl.searchParams.delete('search');
+        }
+        window.history.replaceState(null, '', newUrl.toString());
+
+        filterAndRender();
+      }
+
+      // 실시간 타이핑 시 필터링
+      mapSearchInput.addEventListener('input', (e) => {
+        handleSearchUpdate(e.target.value);
+      });
+
+      // 엔터 입력 시 키보드 닫기 및 검색 확정
+      mapSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          handleSearchUpdate(mapSearchInput.value);
+          mapSearchInput.blur();
+        }
       });
     }
 
-    document.getElementById('search-input').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        loadMerchants(e.target.value.trim());
+    if (btnClearMapSearch) {
+      btnClearMapSearch.addEventListener('click', () => {
+        if (mapSearchInput) {
+          mapSearchInput.value = '';
+          mapSearchInput.focus();
+        }
+        if (typeof handleSearchUpdate === 'function') {
+          handleSearchUpdate('');
+        } else {
+          currentSearchQuery = '';
+          btnClearMapSearch.classList.remove('visible');
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.delete('search');
+          window.history.replaceState(null, '', newUrl.toString());
+          filterAndRender();
+        }
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function filterAndRender() {
+      const q = currentSearchQuery.toLowerCase();
+      const filtered = allMerchants.filter(m => {
+        const matchIsland = currentIsland === 'all' || (m.island_name || m.address || '').includes(currentIsland);
+        const matchCategory = currentCategory === 'all' || (m.category || '') === currentCategory;
+        const matchSearch = !q || 
+          (m.name || '').toLowerCase().includes(q) || 
+          (m.category || '').toLowerCase().includes(q) || 
+          (m.address || '').toLowerCase().includes(q) ||
+          (m.island_name || '').toLowerCase().includes(q);
+        return matchIsland && matchCategory && matchSearch;
+      });
+
+      currentRenderedMerchants = filtered;
+
+      markers.forEach(m => m.setMap(null));
+      markers = [];
+
+      if (map) {
+        filtered.forEach(m => {
+          if (!m.lat || !m.lng) return;
+          const pos = new naver.maps.LatLng(m.lat, m.lng);
+          const marker = new naver.maps.Marker({ position: pos, map });
+          naver.maps.Event.addListener(marker, 'click', () => {
+            map.setCenter(pos);
+            map.setZoom(15);
+          });
+          markers.push(marker);
+        });
+      }
+
+      renderList(filtered);
+    }
+
+    const defaultThumbs = {
+      '음식점': 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200&auto=format&fit=crop&q=80',
+      '카페': 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=200&auto=format&fit=crop&q=80',
+      '숙박': 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200&auto=format&fit=crop&q=80',
+      '체험': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200&auto=format&fit=crop&q=80',
+      '기념품': 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=200&auto=format&fit=crop&q=80'
+    };
+
+    function renderList(merchants) {
+      const listEl = document.getElementById('merchant-list');
+      document.getElementById('merchant-count').innerHTML = `총 <span class="num">${merchants.length}</span>개의 가맹점`;
+
+      if (merchants.length === 0) {
+        if (currentSearchQuery) {
+          listEl.innerHTML = `
+            <div class="empty-search-box">
+              <div class="empty-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              </div>
+              <div class="empty-title">'${escapeHtml(currentSearchQuery)}' 검색 결과가 없습니다</div>
+              <div class="empty-desc">단어의 철자가 정확한지 확인하거나 다른 검색어로 찾아보세요.</div>
+              <button type="button" class="btn-reset-search" id="btn-reset-search-state">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                전체 가맹점 보기
+              </button>
+            </div>`;
+          const btnReset = document.getElementById('btn-reset-search-state');
+          if (btnReset) {
+            btnReset.addEventListener('click', () => {
+              if (mapSearchInput) {
+                mapSearchInput.value = '';
+                mapSearchInput.focus();
+              }
+              currentSearchQuery = '';
+              if (btnClearMapSearch) btnClearMapSearch.classList.remove('visible');
+              const newUrl = new URL(window.location.href);
+              newUrl.searchParams.delete('search');
+              window.history.replaceState(null, '', newUrl.toString());
+              filterAndRender();
+            });
+          }
+        } else {
+          listEl.innerHTML = `
+            <div style="text-align: center; padding: 40px 16px; color: var(--fg-tertiary); font-size: 13.5px;">
+              조건에 맞는 등록된 가맹점이 없습니다.
+            </div>`;
+        }
+        return;
+      }
+
+      listEl.innerHTML = merchants.map((m, idx) => {
+        const thumbUrl = m.image_url || defaultThumbs[m.category] || defaultThumbs['음식점'];
+        const islandName = m.island_name || ((m.address || '').includes('대청') ? '대청도' : (m.address || '').includes('소청') ? '소청도' : '백령도');
+        const couponCount = m.coupon_count || 2;
+        const hoursText = m.business_hours || (m.category === '숙박' ? '24시간 운영 (연중무휴)' : m.category === '카페' ? '09:00 ~ 21:00 (매일)' : '09:00 ~ 17:00 (토, 일 휴무)');
+
+        return `
+          <div class="merchant-card-item" data-idx="${idx}" onclick="window.openMerchantDetail(${idx})" style="cursor: pointer;">
+            <div class="m-thumb-box">
+              <img src="${thumbUrl}" alt="${m.name}" />
+            </div>
+            <div class="m-info-box">
+              <div class="island-tag">${islandName}</div>
+              <div class="name">${m.name}</div>
+              <div class="meta">${m.category || '음식점'} · ${hoursText}</div>
+            </div>
+            <div class="m-coupon-chip">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8a2 2 0 0 1 2-2z"/></svg>
+              <span>${couponCount}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 카드 클릭 이벤트 델리게이션 (ES 모듈 스코프 이슈 방지)
+    const listContainer = document.getElementById('merchant-list');
+    if (listContainer) {
+      listContainer.addEventListener('click', (e) => {
+        const card = e.target.closest('.merchant-card-item');
+        if (card && card.dataset.idx !== undefined) {
+          const idx = parseInt(card.dataset.idx, 10);
+          if (!isNaN(idx)) {
+            window.openMerchantDetail(idx);
+          }
+        }
+      });
+    }
+
+    // ── 가맹점 상세 바텀시트 모달 오픈 ──
+    window.openMerchantDetail = function(idx) {
+      const m = currentRenderedMerchants[idx] || allMerchants[idx];
+      if (!m) return;
+
+      if (map && window.naver && window.naver.maps && m.lat && m.lng) {
+        map.setCenter(new naver.maps.LatLng(m.lat, m.lng));
+        map.setZoom(15);
+      }
+
+      const sliderEl = document.getElementById('detail-img-slider');
+      const baseThumb = m.image_url || defaultThumbs[m.category] || defaultThumbs['음식점'];
+      let images = [];
+      if (Array.isArray(m.images) && m.images.length > 0) {
+        images = m.images;
+      } else if (idx === 0) {
+        images = [
+          baseThumb,
+          'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+          'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80',
+          'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&auto=format&fit=crop&q=80'
+        ];
+      } else if (idx === 1) {
+        images = [
+          baseThumb,
+          'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop&q=80',
+          'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&auto=format&fit=crop&q=80'
+        ];
+      } else {
+        images = [baseThumb];
+      }
+
+      const prevBtn = document.getElementById('detail-slider-prev');
+      const nextBtn = document.getElementById('detail-slider-next');
+      const glassBadge = document.querySelector('#modal-merchant-detail .detail-glass-badge');
+
+      if (sliderEl) {
+        sliderEl.innerHTML = images.length > 0
+          ? images.map((imgSrc, i) => `<img src="${imgSrc}" alt="${m.name} 이미지 ${i+1}" draggable="false" onerror="this.style.display='none';this.parentNode.insertAdjacentHTML('beforeend','<div class=\\'img-fallback\\'>🏪</div>')" />`).join('')
+          : `<div class="img-fallback">🏪</div>`;
+        sliderEl.scrollLeft = 0;
+
+        const isMulti = images.length > 1;
+        if (prevBtn) prevBtn.classList.toggle('is-hidden', !isMulti);
+        if (nextBtn) nextBtn.classList.toggle('is-hidden', !isMulti);
+        if (glassBadge) glassBadge.style.setProperty('display', isMulti ? 'flex' : 'none', 'important');
+
+        if (isMulti) {
+          const currBadge = document.getElementById('detail-current-slide');
+          const totalBadge = document.getElementById('detail-total-slides');
+          if (currBadge) currBadge.textContent = '1';
+          if (totalBadge) totalBadge.textContent = String(images.length);
+        }
+
+        sliderEl.onscroll = () => {
+          const width = sliderEl.clientWidth;
+          if (width > 0) {
+            const activeIdx = Math.round(sliderEl.scrollLeft / width) + 1;
+            const currBadge = document.getElementById('detail-current-slide');
+            if (currBadge) currBadge.textContent = String(Math.min(activeIdx, images.length));
+          }
+        };
+
+        if (prevBtn) {
+          prevBtn.onclick = (e) => {
+            e.stopPropagation();
+            const width = sliderEl.clientWidth;
+            sliderEl.scrollBy({ left: -width, behavior: 'smooth' });
+          };
+        }
+        if (nextBtn) {
+          nextBtn.onclick = (e) => {
+            e.stopPropagation();
+            const width = sliderEl.clientWidth;
+            sliderEl.scrollBy({ left: width, behavior: 'smooth' });
+          };
+        }
+
+        if (!sliderEl.dataset.dragEnabled && typeof enableDragScroll === 'function') {
+          enableDragScroll(sliderEl);
+          sliderEl.dataset.dragEnabled = 'true';
+        }
+      }
+
+      const islandName = m.island_name || ((m.address || '').includes('대청') ? '대청도' : (m.address || '').includes('소청') ? '소청도' : '백령도');
+      const phoneText = m.phone || m.store_phone || '032-836-1234';
+      const addressText = m.address || '인천광역시 옹진군 백령면 백령로 234번길 15-8';
+      const hoursText = m.business_hours || (m.category === '숙박' ? '24시간 운영 (연중무휴)' : m.category === '카페' ? '09:00 ~ 21:00 (매일)' : '09:00 ~ 17:00 (토, 일 휴무)');
+
+      document.getElementById('detail-island').textContent = islandName;
+      document.getElementById('detail-name').textContent = m.name;
+      document.getElementById('detail-category').textContent = m.category || '음식점';
+      document.getElementById('detail-phone').textContent = phoneText;
+      document.getElementById('detail-address').textContent = addressText;
+      document.getElementById('detail-hours').textContent = hoursText;
+
+      // 매장 소개글 렌더링
+      const descBoxEl = document.getElementById('detail-desc-box');
+      const descEl = document.getElementById('detail-desc');
+      if (m.description && m.description.trim()) {
+        descEl.textContent = m.description.trim();
+        descBoxEl.style.display = 'block';
+      } else {
+        descBoxEl.style.display = 'none';
+      }
+
+      // 등록 메뉴 및 가격 안내 동적 렌더링
+      const menuSectionEl = document.getElementById('detail-menu-section');
+      const menuListEl = document.getElementById('detail-menu-list');
+      const menuCountEl = document.getElementById('detail-menu-count');
+
+      const menus = Array.isArray(m.menus) ? m.menus : [];
+      if (menus.length > 0) {
+        menuSectionEl.style.display = 'block';
+        menuCountEl.textContent = `${menus.length}개 메뉴 안내`;
+        menuListEl.innerHTML = menus.map(item => {
+          const formattedPrice = Number(item.price).toLocaleString('ko-KR');
+          const thumbHtml = item.image_url 
+            ? `<img src="${item.image_url}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/100?text=Food'" />`
+            : `<div class="placeholder">🍲</div>`;
+
+          return `
+            <div class="detail-menu-card">
+              <div class="detail-menu-thumb">
+                ${thumbHtml}
+              </div>
+              <div class="detail-menu-info">
+                <div class="detail-menu-title-row">
+                  <span class="detail-menu-name">${item.name}</span>
+                  ${item.is_signature ? '<span class="detail-badge-sig">⭐ 대표</span>' : ''}
+                </div>
+                <div class="detail-menu-price">₩ ${formattedPrice}</div>
+                ${item.description ? `<div class="detail-menu-desc">${item.description}</div>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        menuSectionEl.style.display = 'none';
+      }
+
+      // 지도에서 위치 보기 버튼 핸들러
+      const btnViewMap = document.getElementById('btn-detail-view-map');
+      if (btnViewMap) {
+        btnViewMap.onclick = () => {
+          document.getElementById('modal-merchant-detail').classList.remove('active');
+          if (map && window.naver && window.naver.maps && m.lat && m.lng) {
+            map.setCenter(new naver.maps.LatLng(m.lat, m.lng));
+            map.setZoom(16);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        };
+      }
+
+      // 사용 가능 쿠폰 카드 리스트 동적 렌더링
+      const couponListEl = document.getElementById('detail-coupon-list');
+      const couponBadgeEl = document.getElementById('detail-coupon-badge');
+      const sampleCoupons = [
+        { name: `${m.name} 디지털 할인 쿠폰`, value: '₩10,000' },
+        { name: '옹진 섬패스 방문 웰컴 쿠폰', value: '₩5,000' }
+      ];
+      if (couponBadgeEl) couponBadgeEl.textContent = `${sampleCoupons.length}장 사용 가능`;
+      if (couponListEl) {
+        couponListEl.innerHTML = sampleCoupons.map(c => `
+          <div class="detail-coupon-card">
+            <div class="c-info">
+              <div class="c-name">${c.name}</div>
+              <div class="c-val">${c.value}</div>
+            </div>
+            <button class="btn-use-c" onclick="location.href='/tourist/mypage.html'">쿠폰 사용</button>
+          </div>
+        `).join('');
+      }
+
+      const modal = document.getElementById('modal-merchant-detail');
+      if (modal) modal.classList.add('active');
+    };
+
+    document.getElementById('btn-close-merchant-detail').addEventListener('click', () => {
+      document.getElementById('modal-merchant-detail').classList.remove('active');
+    });
+    document.getElementById('modal-merchant-detail').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        document.getElementById('modal-merchant-detail').classList.remove('active');
       }
     });
 
-    if (typeof kakao !== 'undefined' && kakao.maps) {
+    window.focusMerchant = function(lat, lng) {
+      if (map && lat && lng) {
+        map.setCenter(new naver.maps.LatLng(lat, lng));
+        map.setZoom(15);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    function initMap(lat = 37.4553, lng = 126.4344) {
+      const container = document.getElementById('map');
+      if (window.naver && window.naver.maps) {
+        map = new naver.maps.Map(container, {
+          center: new naver.maps.LatLng(lat, lng),
+          zoom: 11,
+        });
+      }
+      loadMerchants();
+    }
+
+    async function loadMerchants() {
+      try {
+        const { data } = await api.get('/merchant/map');
+        allMerchants = (data && data.length > 0) ? data : getDemoMerchants();
+        filterAndRender();
+      } catch (e) {
+        allMerchants = getDemoMerchants();
+        filterAndRender();
+      }
+    }
+
+    function getDemoMerchants() {
+      return [
+        {
+          name: '백령도 해물칼국수',
+          category: '음식점',
+          island_name: '백령도',
+          phone: '032-836-1234',
+          address: '인천광역시 옹진군 백령면 백령로 234번길 15-8 1층 (진촌리)',
+          business_hours: '09:00 ~ 17:00 (토, 일 휴무)',
+          lat: 37.9654, lng: 124.6621,
+          coupon_count: 2,
+          images: [
+            'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&auto=format&fit=crop&q=80'
+          ]
+        },
+        {
+          name: '사곶 해변카페',
+          category: '카페',
+          island_name: '백령도',
+          phone: '032-836-5678',
+          address: '인천광역시 옹진군 백령면 사곶길 88번길 12',
+          business_hours: '10:00 ~ 21:00 (매일 운영)',
+          lat: 37.9540, lng: 124.6710,
+          coupon_count: 1,
+          images: [
+            'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80'
+          ]
+        },
+        {
+          name: '대청 쉼터 리조트',
+          category: '숙박',
+          island_name: '대청도',
+          phone: '032-836-9012',
+          address: '인천광역시 옹진군 대청면 대청북로 89번길 12 쉼터타워',
+          business_hours: '24시간 운영 (연중무휴)',
+          lat: 37.8321, lng: 124.7082,
+          coupon_count: 3,
+          images: [
+            'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&auto=format&fit=crop&q=80'
+          ]
+        },
+        {
+          name: '소청도 전망대 민박',
+          category: '숙박',
+          island_name: '소청도',
+          phone: '032-836-3456',
+          address: '인천광역시 옹진군 소청면 소청중앙로 45번길 8 소청리 204',
+          business_hours: '08:00 ~ 22:00 (체크인 15:00)',
+          lat: 37.7712, lng: 124.7456,
+          coupon_count: 1,
+          images: [
+            'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=600&auto=format&fit=crop&q=80'
+          ]
+        },
+        {
+          name: '서포리 수산물 직매장',
+          category: '수산물·농산물',
+          island_name: '덕적도',
+          phone: '032-836-7890',
+          address: '인천광역시 옹진군 덕적면 서포리 해안로 102',
+          business_hours: '08:00 ~ 19:00 (매주 수요일 휴무)',
+          lat: 37.2245, lng: 126.1210,
+          coupon_count: 2,
+          images: [
+            'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=600&auto=format&fit=crop&q=80'
+          ]
+        }
+      ];
+    }
+
+    document.getElementById('btn-my-location').addEventListener('click', () => {
+      if (!navigator.geolocation) return showToast('위치 정보를 사용할 수 없습니다.', 'error');
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          if (map) {
+            const pos = new naver.maps.LatLng(coords.latitude, coords.longitude);
+            map.setCenter(pos);
+            map.setZoom(15);
+          }
+        },
+        () => showToast('위치 권한을 허용해 주세요.', 'error')
+      );
+    });
+
+    if (window.naver && window.naver.maps) {
       initMap();
     } else {
-      document.getElementById('map').innerHTML = `
-        <div style="padding:120px 20px; text-align:center; color:var(--text-slate);">
-          <div style="font-family:'Gowun Dodum', sans-serif; font-size:1.4rem; color:var(--text-dark);">옹진군 가맹점 위치 지도</div>
-          <div style="font-size:0.88rem; margin-top:6px; color:var(--text-slate);">카카오 맵 연동 시 옹진군 전역의 스마트 쿠폰 가맹점 위치가 표출됩니다.</div>
-        </div>`;
+      loadMerchants();
     }
   </script>
 </body>
 </html>
+
+

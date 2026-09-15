@@ -1,107 +1,300 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>거래 내역 | 옹진관광 가맹점</title>
   <style>
-    .summary-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    * {
+      box-sizing: border-box;
+      border-radius: 0 !important;
     }
-    .summary-box {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 14px;
-      text-align: center;
-    }
-    .summary-value { font-size: 1.3rem; font-weight: 900; color: var(--primary-dark); }
-    .summary-label { font-size: .72rem; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
 
-    .tx-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
+    html, body {
+      background: #f8fafc !important;
+      color: #0f172a !important;
+      min-height: 100dvh;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow-x: hidden;
+      position: relative;
     }
-    .tx-item:last-child { border-bottom: none; }
-    .tx-icon {
-      width: 40px; height: 40px;
-      background: var(--primary-light);
-      border-radius: 50%;
+
+    /* 좌측 상단 원형 동그라미 뒤로가기 버튼 */
+    .btn-top-back {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
+      color: #334155;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 50% !important;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      z-index: 50;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
     }
-    .tx-icon.offline { background: #fef9c3; }
-    .tx-info { flex: 1; min-width: 0; }
-    .tx-type { font-size: .82rem; font-weight: 700; color: var(--text-primary); }
-    .tx-date { font-size: .72rem; color: var(--text-muted); margin-top: 2px; }
-    .tx-amount { font-size: 1rem; font-weight: 800; color: var(--success); flex-shrink: 0; }
+
+    .btn-top-back:hover {
+      color: #059669;
+      border-color: #059669;
+      background: #fafdfb;
+      transform: scale(1.05);
+    }
+
+    /* 화면 전체 레이아웃 */
+    .history-fullscreen-container {
+      width: 100vw;
+      min-height: 100dvh;
+      padding: 80px 24px 40px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .history-content-wrapper {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .history-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* 타이틀 */
+    .history-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e293b;
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
+
+    /* 2행 양끝 정렬 보드 */
+    .summary-rows-board {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 4px 4px 20px 4px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .summary-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* 라벨과 수치/단위의 폰트 크기(1rem) 및 굵기(600) 완벽 동일 통합 스타일 */
+    .summary-row-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .summary-val-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .num-text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .unit-text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* 거래 내역 섹션 */
+    .tx-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .tx-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1.5px solid #f1f5f9;
+    }
+
+    .tx-section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+
+    .tx-section-sub {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .tx-list-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 플랫 거래 행 */
+    .tx-item-row {
+      padding: 18px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .tx-info-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tx-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 9px;
+      color: #059669;
+      background: #ecfdf5;
+      border: 1.5px solid #a7f3d0;
+    }
+
+    .tx-badge.paper {
+      color: #0284c7;
+      background: #f0f9ff;
+      border-color: #bae6fd;
+    }
+
+    .tx-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .tx-sub {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 3px;
+    }
+
+    .tx-val-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tx-val-num {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #059669;
+    }
+
+    /* 빈 데이터 상태 */
+    .empty-state {
+      text-align: center;
+      padding: 56px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: #64748b;
+    }
+
+    .empty-icon {
+      width: 44px;
+      height: 44px;
+      color: #cbd5e1;
+      stroke-width: 1.2;
+    }
+
+    .empty-text {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
   </style>
-  <script type="module" crossorigin src="/assets/merchant-history-ykfEbo6e.js"></script>
+  <script type="module" crossorigin src="/assets/merchant-history-C814RKrc.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-yYhXsohp.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BUpdExfZ.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-BrJ7NzZM.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
 </head>
 <body>
-  <div class="app-shell">
-    <header class="app-header">
-      <button onclick="history.back()" style="padding:8px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 12H5M12 5l-7 7 7 7"/>
-        </svg>
-      </button>
-      <div class="logo">📋 거래 내역</div>
-    </header>
+  <!-- 좌측 상단 원형 동그라미 뒤로가기 버튼 -->
+  <a class="btn-top-back" href="/merchant/index.html" title="메인 메뉴로 이동">
+    <svg style="width: 22px; height: 22px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+    </svg>
+  </a>
 
-    <main class="page-content">
-      <!-- 요약 -->
-      <div class="summary-row" id="summary-row">
-        <div class="summary-box skeleton" style="height:72px;"></div>
-        <div class="summary-box skeleton" style="height:72px;"></div>
+  <!-- 폰트 크기와 굵기가 동일하게 통일된 양끝 정렬 레이아웃 -->
+  <div class="history-fullscreen-container">
+    <div class="history-content-wrapper">
+      <div class="history-header">
+        <h1 class="history-title">가맹점 거래 내역</h1>
       </div>
 
-      <!-- 목록 -->
-      <div class="card" style="overflow:hidden;">
-        <div id="tx-list">
-          <div class="tx-item"><div class="skeleton" style="height:40px;width:100%;"></div></div>
-          <div class="tx-item"><div class="skeleton" style="height:40px;width:100%;"></div></div>
-          <div class="tx-item"><div class="skeleton" style="height:40px;width:100%;"></div></div>
+      <!-- 라벨과 수치/단위의 폰트 크기(1rem) 및 굵기(600)가 완전히 통일된 스코어 보드 -->
+      <div class="summary-rows-board">
+        <div class="summary-row">
+          <span class="summary-row-label">총 정산 금액</span>
+          <div class="summary-val-wrap">
+            <span class="num-text" id="total-amount-num">0</span>
+            <span class="unit-text">원</span>
+          </div>
+        </div>
+        <div class="summary-row">
+          <span class="summary-row-label">총 결제 건수</span>
+          <div class="summary-val-wrap">
+            <span class="num-text" id="total-count-num">0</span>
+            <span class="unit-text">건</span>
+          </div>
         </div>
       </div>
-    </main>
 
-    <nav class="bottom-nav">
-      <a href="/merchant/scan.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/>
-          <rect x="2" y="14" width="8" height="8" rx="1"/>
-          <path d="M14 14h2v2h-2zm4 0h2v2h-2zm0 4h2v2h-2zm-4 0h2v4h-2z"/>
-        </svg>
-        스캔
-      </a>
-      <a href="/merchant/history.html" class="active">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-          <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
-        </svg>
-        거래 내역
-      </a>
-      <a href="/merchant/login.html" id="nav-logout">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        로그아웃
-      </a>
-    </nav>
+      <!-- 거래 상세 목록 섹션 -->
+      <div class="tx-section">
+        <div class="tx-section-header">
+          <h3 class="tx-section-title">결제 승인 내역</h3>
+          <span class="tx-section-sub">최근 순</span>
+        </div>
+
+        <div class="tx-list-container" id="tx-list">
+          <div class="empty-state">
+            <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="square" stroke-linejoin="miter" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+            <span class="empty-text">조회된 거래 내역이 없습니다.</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
   <div id="toast-container"></div>
 
 </body>

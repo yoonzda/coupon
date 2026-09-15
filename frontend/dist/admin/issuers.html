@@ -142,11 +142,11 @@
       border-radius: 50%;
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-issuers-C6XNhkXm.js"></script>
+  <script type="module" crossorigin src="/assets/admin-issuers-DbrEPKPO.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-yYhXsohp.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-D2w6DInN.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BUpdExfZ.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-BrJ7NzZM.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
 </head>
 <body>
   <div class="app-shell">
@@ -167,47 +167,27 @@
       <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; margin-top: 8px;">
         <h2 class="table-title" style="margin: 0;">발행처 목록</h2>
         <button class="btn btn-neutral-outline btn-sm" style="height: 30px; padding: 0 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.8rem;" onclick="location.href='register-issuer.html'">발행처 등록</button>
-      </div>
-      <div class="table-container">
-        <table class="admin-table" style="text-align: center;">
-          <thead>
-            <tr>
-              <th style="width: 25%; text-align: center;">기관명</th>
-              <th style="width: 25%; text-align: center;">ID</th>
-              <th style="width: 25%; text-align: center;">쿠폰 현황</th>
-              <th style="width: 25%; text-align: center;">관리</th>
-            </tr>
-          </thead>
-          <tbody id="issuer-list">
-            <tr><td colspan="4" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- 2. 발행처 쿠폰 배정 현황 -->
-      <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; margin-top: 24px;">
-        <h2 class="table-title" style="margin: 0;">쿠폰 배정현황</h2>
-        <div class="toggle-container">
+        <div class="toggle-container" style="margin-left: auto;">
           <span class="toggle-label">배정 필요</span>
           <label class="switch">
-            <input type="checkbox" id="filter-alloc" onchange="window.filterAllocations()" />
+            <input type="checkbox" id="filter-alloc" onchange="window.filterIssuers()" />
             <span class="slider round"></span>
           </label>
         </div>
       </div>
       <div class="table-container">
-        <table class="admin-table">
+        <table class="admin-table" style="text-align: center;">
           <thead>
             <tr>
               <th style="width: 20%; text-align: center;">기관명</th>
               <th style="width: 15%; text-align: center;">쿠폰 금액</th>
-              <th style="width: 15%; text-align: center;">발급 수량</th>
+              <th style="width: 15%; text-align: center;">발행 수량</th>
               <th style="width: 15%; text-align: center;">잔여 수량</th>
-              <th style="width: 15%; text-align: center;">총 배정 수량</th>
+              <th style="width: 15%; text-align: center;">상세</th>
               <th style="width: 20%; text-align: center;">관리</th>
             </tr>
           </thead>
-          <tbody id="allocation-list">
+          <tbody id="issuer-list">
             <tr><td colspan="6" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
           </tbody>
         </table>

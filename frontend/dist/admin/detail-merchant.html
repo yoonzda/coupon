@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>가맹점 상세 정보 | 옹진 관광 쿠폰</title>
@@ -10,14 +11,14 @@
         document.documentElement.classList.add('sidebar-collapsed');
       }
     })();
-  </script>
-  
+  </script>
   <style>
-    body { 
-      margin: 0; padding: 0; 
-      width: 100%; max-width: none; 
-      background: #f1f5f9;
-      color: #1e293b; 
+    body {
+      background: #f8fafc;
+      color: #0f172a; 
+    }
+    .admin-content {
+      padding-bottom: 130px !important;
     }
 
     .back-link {
@@ -42,164 +43,426 @@
       transform: translateX(-4px);
     }
 
-    /* 상세 페이지 레이아웃 */
-    .detail-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-bottom: 32px;
-    }
-    @media (max-width: 1024px) {
-      .detail-container {
-        grid-template-columns: 1fr;
-      }
+    /* 완전 오픈형 플랫 문서 레이아웃 (박스/테두리 완전 제거) */
+    .document-paper {
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      margin-bottom: 24px;
+      box-shadow: none;
     }
 
-    .merchant-detail-card {
-      background: #fff;
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
-      padding: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+    /* 공공기관 / ERP 표준 정갈한 상세 데이터 테이블 */
+    .detail-table-wrap {
+      width: 100%;
+      margin-bottom: 28px;
+      overflow-x: auto;
     }
-    .card-title {
-      font-size: 1.05rem;
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 0.92rem;
+    }
+    .detail-table th {
+      background: #f1f5f9;
+      color: #334155;
       font-weight: 700;
+      padding: 13px 16px;
+      border: 1px solid #cbd5e1;
+      width: 140px;
+      text-align: left;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    .detail-table td {
+      background: #ffffff;
       color: #0f172a;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #f1f5f9;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card-title svg {
-      width: 18px;
-      height: 18px;
-      color: #64748b;
-    }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: 120px 1fr;
-      gap: 14px 10px;
-      font-size: 0.9rem;
+      padding: 13px 16px;
+      border: 1px solid #cbd5e1;
+      vertical-align: middle;
+      font-weight: 500;
       line-height: 1.5;
     }
-    .info-label {
+
+    .section-title {
+      font-size: 1.1rem;
       font-weight: 700;
-      color: #64748b;
-    }
-    .info-val {
-      color: #1e293b;
-    }
-    .info-val-strong {
-      font-weight: 800;
       color: #0f172a;
+      margin: 32px 0 14px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      letter-spacing: -0.3px;
+    }
+    .section-title:first-of-type {
+      margin-top: 0;
+    }
+
+    /* 1:1 대조 검증 구역 (Comparison Block) - 위/아래 수직 배치 */
+    .comparison-block {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .comparison-data-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .comparison-data-header {
+      background: #f1f5f9;
+      padding: 12px 16px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #0f172a;
+      border-bottom: 1px solid #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      height: 100%;
+    }
+    .comparison-table th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      padding: 12px 14px;
+      border-bottom: 1px solid #e2e8f0;
+      width: 140px;
+      text-align: left;
+      vertical-align: middle;
+    }
+    .comparison-table td {
+      padding: 12px 14px;
+      color: #0f172a;
+      border-bottom: 1px solid #e2e8f0;
+      font-weight: 500;
+      vertical-align: middle;
+    }
+    .comparison-table tr:last-child th,
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+    .highlight-val {
+      font-weight: 800;
+      color: #059669;
+      font-size: 0.98rem;
+    }
+
+    .doc-viewer-box {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .doc-viewer-toolbar {
+      background: #f8fafc;
+      border-bottom: 1px solid #cbd5e1;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .doc-viewer-body {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+      max-height: 420px;
+      background: #f8fafc;
+      overflow: auto;
+    }
+    .doc-viewer-img,
+    #cert-img-container img,
+    #bankbook-img-container img {
+      max-width: 100%;
+      max-height: 380px;
+      object-fit: contain;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.25s ease;
+      background: #ffffff;
+      border-radius: 0;
     }
 
     /* 이미지 갤러리 */
     .images-gallery {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .gallery-img-box-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
     }
     .gallery-img-box {
-      width: 110px; height: 110px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
+      width: 140px; height: 100px;
+      border-radius: 6px;
       overflow: hidden;
-      cursor: pointer;
+      border: 1px solid #cbd5e1;
       position: relative;
       background: #f8fafc;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-    .gallery-img-box:hover {
-      transform: scale(1.03);
-      border-color: #94a3b8;
     }
     .gallery-img-box img {
       width: 100%; height: 100%;
       object-fit: cover;
     }
 
-    /* 첨부 서류 이미지 */
-    .document-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 10px;
+    /* 하단 고정 심사 처리 바 (Sticky Bottom Action Bar) */
+    .sticky-action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 240px;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid #cbd5e1;
+      padding: 12px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 99;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+      transition: left 0.3s ease;
     }
-    @media (max-width: 640px) {
-      .document-grid {
-        grid-template-columns: 1fr;
+    html.sidebar-collapsed .sticky-action-bar {
+      left: 80px;
+    }
+    @media (max-width: 768px) {
+      .sticky-action-bar {
+        left: 0;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
       }
     }
-    .document-box {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 14px;
-      background: #f8fafc;
+    .sticky-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
     }
-    .document-title {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #64748b;
-      margin-bottom: 8px;
-    }
-    .doc-img-view {
-      width: 100%;
-      max-height: 160px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      cursor: pointer;
-      object-fit: contain;
-      background: #fff;
-      display: block;
-      transition: transform 0.2s;
-    }
-    .doc-img-view:hover {
-      transform: scale(1.01);
+    .sticky-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
     }
 
-    /* 관리자 하단 버튼 영역 */
-    .management-bar {
-      margin-top: 32px;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 16px 24px;
+    /* 모던 세그먼티드 칩 패널 (Segmented Floating Chips) */
+    .segmented-action-panel {
+      display: inline-flex;
+      align-items: center;
+      background: #f1f5f9;
+      padding: 5px;
+      border-radius: 99px;
+      border: 1px solid #cbd5e1;
+      gap: 6px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    /* 고급 모던 툴팁 팝오버 (Modern Tooltip Popover) */
+    .status-tooltip-popover {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translate(-50%, 14px);
+      margin-bottom: 14px;
+      padding: 10px 22px;
+      border-radius: 99px;
+      font-size: 0.93rem;
+      font-weight: 500;
+      white-space: nowrap;
+      z-index: 100;
+      pointer-events: none;
+      line-height: 1.4;
       display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.05);
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* 화면 로드 후 450ms 딜레이 뒤 부드러운 '스룽' 등장 */
+    .status-tooltip-popover.show-pop-in {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    /* 3.5초 후 스르륵 아래로 슬라이드되며 소멸 */
+    .status-tooltip-popover.auto-fade-out {
+      opacity: 0;
+      transform: translate(-50%, 10px);
+    }
+
+    /* 버튼 영역에 마우스 호버 시 툴팁이 똑같이 '스룽' 하고 등장 */
+    .action-panel-wrapper:hover .status-tooltip-popover {
+      opacity: 1 !important;
+      transform: translate(-50%, 0) !important;
+    }
+
+    /* 반려 툴팁 스타일 */
+    .status-tooltip-popover.type-rejected {
+      background: #ffffff;
+      border: 1px solid #fecaca;
+      color: #9f1239;
+      box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.16), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    }
+    .status-tooltip-popover.type-rejected strong {
+      color: #e11d48;
+      font-weight: 700;
+    }
+    .status-tooltip-popover.type-rejected::before {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 9px;
+      border-style: solid;
+      border-color: #fecaca transparent transparent transparent;
+    }
+    .status-tooltip-popover.type-rejected::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 8px;
+      border-style: solid;
+      border-color: #ffffff transparent transparent transparent;
+    }
+
+    /* 승인 완료 툴팁 스타일 */
+    .status-tooltip-popover.type-approved {
+      background: #ffffff;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.16), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    }
+    .status-tooltip-popover.type-approved strong {
+      color: #059669;
+      font-weight: 700;
+    }
+    .status-tooltip-popover.type-approved::before {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 9px;
+      border-style: solid;
+      border-color: #a7f3d0 transparent transparent transparent;
+    }
+    .status-tooltip-popover.type-approved::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 8px;
+      border-style: solid;
+      border-color: #ffffff transparent transparent transparent;
+    }
+
+    @keyframes popoverFadeIn {
+      from { opacity: 0; transform: translate(-50%, 4px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    .action-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 22px;
+      border-radius: 99px;
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: #64748b;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      line-height: 1;
+    }
+    .action-chip svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 승인 칩 호버/활성 */
+    .action-chip-approve:hover {
+      background: #ffffff;
+      color: #059669;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+      transform: translateY(-1px);
+    }
+    .action-chip-approve.active {
+      background: #059669;
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(5, 150, 105, 0.3);
+    }
+
+    /* 반려 칩 호버/활성 */
+    .action-chip-reject:hover {
+      background: #ffffff;
+      color: #dc2626;
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+      transform: translateY(-1px);
+    }
+    .action-chip-reject.active {
+      background: #dc2626;
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(220, 38, 38, 0.3);
     }
 
     .status-badge-lg {
       display: inline-flex;
       align-items: center;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
+      justify-content: center;
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 0.82rem;
       font-weight: 700;
+      line-height: 1;
+      border: 1px solid transparent;
+      white-space: nowrap;
     }
-    .status-approved { background: #dcfce7; color: #166534; }
-    .status-pending { background: #fef9c3; color: #854d0e; }
-    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .status-approved { background: #dcfce7; color: #059669; border-color: #a7f3d0; }
+    .status-pending { background: #fef3c7; color: #d97706; border-color: #fde68a; }
+    .status-rejected { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
 
     /* 인쇄 전용 스타일 */
     @media print {
       body {
         background: #fff !important;
         color: #000 !important;
+        padding-bottom: 0 !important;
       }
       .admin-sidebar, 
       .dashboard-header, 
       .back-link-container, 
       .subpage-title-area, 
       .print-hide, 
-      .management-bar,
+      .sticky-action-bar,
       #toast-container {
         display: none !important;
       }
@@ -208,32 +471,196 @@
         padding: 0 !important;
         width: 100% !important;
       }
-      .detail-container {
-        grid-template-columns: 1fr !important;
-        gap: 20px !important;
-      }
-      .merchant-detail-card {
-        border: 1px solid #cbd5e1 !important;
+      .document-paper {
+        border: none !important;
         box-shadow: none !important;
-        page-break-inside: avoid;
+        padding: 0 !important;
       }
-      .doc-img-view {
-        max-height: 550px !important;
-        width: auto !important;
-        margin: 0 auto !important;
-        display: block !important;
+      .wide-doc-img {
+        max-height: 750px !important;
+        width: 100% !important;
       }
       .print-page {
         page-break-after: always !important;
         break-after: page !important;
       }
     }
+
+    /* 모던 슬라이드 오버 드로어 패널 (Drawer Slide-Over Panel) */
+    .drawer-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+      z-index: 1000; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .drawer-overlay.active {
+      opacity: 1; pointer-events: auto;
+    }
+    .drawer-panel {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 520px; max-width: 92%;
+      background: #ffffff;
+      z-index: 1001;
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .drawer-overlay.active .drawer-panel {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 30px 32px 22px 32px;
+      border-bottom: 1px solid #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      background: #ffffff;
+    }
+    .drawer-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 6px 0;
+      letter-spacing: -0.4px;
+      line-height: 1.25;
+    }
+    .drawer-subtitle {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.55;
+    }
+    .drawer-close-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      margin-top: 2px;
+      cursor: pointer;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: color 0.2s ease;
+    }
+    .drawer-close-btn:hover {
+      color: #0f172a;
+    }
+
+    .drawer-body {
+      padding: 32px;
+      flex: 1;
+      overflow-y: auto;
+      background: #ffffff;
+    }
+
+    /* 사유 선택 칩 리스트 (체크박스와 한글 글자 Y축 칼 수직 정렬) */
+    .reject-reason-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f1f5f9;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      user-select: none;
+    }
+    .reject-reason-card:hover {
+      background: transparent;
+    }
+    .reject-reason-card.selected {
+      background: transparent;
+    }
+    .reject-reason-card input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      padding: 0;
+      flex-shrink: 0;
+      accent-color: #dc2626;
+      cursor: pointer;
+      transform: translateY(2px);
+    }
+    .reject-reason-text {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1e293b;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    .drawer-form-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #334155;
+      margin: 24px 0 8px 0;
+    }
+    .drawer-textarea {
+      width: 100%;
+      height: 120px;
+      padding: 14px 16px;
+      border: 1.5px solid #cbd5e1;
+      font-size: 0.92rem;
+      font-family: inherit;
+      resize: none;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .drawer-textarea:focus {
+      border-color: #0f172a;
+    }
+
+    .drawer-footer {
+      padding: 20px 32px 24px 32px;
+      border-top: 1px solid #cbd5e1;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .drawer-footer-phone-text {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .drawer-phone-val {
+      color: #1d4ed8;
+      font-weight: 700;
+      text-decoration: none;
+      margin-left: 4px;
+    }
+    .drawer-phone-val:hover {
+      text-decoration: underline;
+    }
+    .btn-drawer-danger {
+      width: 100%;
+      height: 48px;
+      font-size: 1rem;
+      font-weight: 700;
+      background: #dc2626;
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-drawer-danger:hover {
+      background: #b91c1c;
+    }
   </style>
-  <script type="module" crossorigin src="/assets/admin-detail-merchant-BG3NHoK6.js"></script>
+  <script type="module" crossorigin src="/assets/admin-detail-merchant-Cg7W26NW.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-yYhXsohp.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-D2w6DInN.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BUpdExfZ.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-BrJ7NzZM.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
 </head>
 <body>
   <div class="app-shell">
@@ -259,120 +686,212 @@
             목록으로
           </a>
         </div>
-        <div style="display: flex; gap: 10px; align-items: center;" class="print-hide" id="top-action-buttons">
-          <button class="btn btn-neutral btn-sm" onclick="window.printMerchant()">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.821V21h10.56v-7.179m-10.56 0a2.25 2.25 0 01-1.636-2.17V9.582a2.25 2.25 0 011.636-2.17m10.56 0a2.25 2.25 0 011.636 2.17v2.07a2.25 2.25 0 01-1.636 2.17m-10.56 0h10.56M9 3h6v4.5H9V3z" />
-            </svg>
-            PDF / 파일 저장
-          </button>
-        </div>
       </div>
 
-      <div class="detail-container print-page">
-        <!-- 1. 기본 정보 카드 -->
-        <div class="merchant-detail-card">
-          <h3 class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h2.25m-2.25 0a2.25 2.25 0 002.25-2.25V11.08c0-.472-.121-.933-.353-1.34l-2.45-4.3A2.25 2.25 0 0015.48 4.25H8.52a2.25 2.25 0 00-1.97 1.13L4.1 9.68a2.25 2.25 0 00-.35 1.399v7.17A2.25 2.25 0 006 20.63m12 0v-2.25" />
-            </svg>
-            가맹점 기본 정보
-          </h3>
-          <div class="info-grid">
-            <div class="info-label">상호명</div>
-            <div class="info-val info-val-strong" id="info-name">-</div>
+      <!-- 박스 없는 모던 오픈 문서 종이 (Document Paper) -->
+      <div class="document-paper print-page">
+        <!-- 1. 최상단: 가맹점 기본 정보 (상단 종합 테이블) -->
+        <div class="section-title">
+          <span>가맹점 기본 정보</span>
+        </div>
+        <div class="detail-table-wrap" style="margin-bottom: 36px;">
+          <table class="detail-table">
+            <tbody>
+              <tr>
+                <th>상호명</th>
+                <td class="val-bold" id="info-name">-</td>
+                <th>대표자 성명</th>
+                <td id="info-owner-name">-</td>
+              </tr>
+              <tr>
+                <th>대표자 연락처</th>
+                <td id="info-phone">-</td>
+                <th>가게 전화번호</th>
+                <td id="info-store-phone">-</td>
+              </tr>
+              <tr>
+                <th>카테고리</th>
+                <td id="info-category">-</td>
+                <th>영업시간</th>
+                <td id="info-business-hours">-</td>
+              </tr>
+              <tr>
+                <th>소재지 주소</th>
+                <td colspan="3" id="info-address">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-            <div class="info-label">대표자 성명</div>
-            <div class="info-val" id="info-owner-name">-</div>
+        <!-- 2. 하단: 사업자등록증 & 정산 통장 사본 1:1 대조 심사 (좌/우 2열 Side-by-Side 병렬) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 36px;">
+          <!-- 1열: 사업자등록증 대조 심사 -->
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="section-title" style="margin: 0;">
+              <span>사업자등록증 대조 심사</span>
+            </div>
+            
+            <div class="comparison-data-card">
+              <div class="comparison-data-header">
+                <span>사업자 대조 항목</span>
+              </div>
+              <table class="comparison-table">
+                <tbody>
+                  <tr>
+                    <th>사업자등록번호</th>
+                    <td class="highlight-val" id="cmp-business-no">-</td>
+                  </tr>
+                  <tr>
+                    <th>대표자 성명</th>
+                    <td id="cmp-owner-name">-</td>
+                  </tr>
+                  <tr>
+                    <th>상호명</th>
+                    <td id="cmp-name">-</td>
+                  </tr>
+                  <tr>
+                    <th>소재지 주소</th>
+                    <td id="cmp-address">-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-            <div class="info-label">연락처</div>
-            <div class="info-val" id="info-phone">-</div>
+            <div class="doc-viewer-box">
+              <div class="doc-viewer-toolbar">
+                <span style="font-size: 0.88rem; font-weight: 700; color: #475569;">첨부 사업자등록증 사본</span>
+              </div>
+              <div class="doc-viewer-body">
+                <div id="cert-img-container"><span style="color:#94a3b8;font-size:0.88rem;">등록된 사업자등록증이 없습니다.</span></div>
+              </div>
+            </div>
+          </div>
 
-            <div class="info-label">가게 전화번호</div>
-            <div class="info-val" id="info-store-phone">-</div>
+          <!-- 2열: 정산 통장 사본 대조 심사 -->
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="section-title" style="margin: 0;">
+              <span>정산 통장 사본 대조 심사</span>
+            </div>
+            
+            <div class="comparison-data-card">
+              <div class="comparison-data-header">
+                <span>정산 계좌 대조 항목</span>
+              </div>
+              <table class="comparison-table">
+                <tbody>
+                  <tr>
+                    <th>은행명</th>
+                    <td id="cmp-bank-name">-</td>
+                  </tr>
+                  <tr>
+                    <th>정산 계좌번호</th>
+                    <td class="highlight-val" id="cmp-account-no">-</td>
+                  </tr>
+                  <tr>
+                    <th>예금주 성명</th>
+                    <td id="cmp-account-holder">-</td>
+                  </tr>
+                  <tr>
+                    <th>가입 희망 ID</th>
+                    <td id="cmp-username">-</td>
+                  </tr>
+                  <tr>
+                    <th>신청 일시</th>
+                    <td id="cmp-applied-at">-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-            <div class="info-label">카테고리</div>
-            <div class="info-val" id="info-category">-</div>
-
-            <div class="info-label">영업시간</div>
-            <div class="info-val" id="info-business-hours">-</div>
-
-            <div class="info-label">소재지 주소</div>
-            <div class="info-val" id="info-address">-</div>
+            <div class="doc-viewer-box">
+              <div class="doc-viewer-toolbar">
+                <span style="font-size: 0.88rem; font-weight: 700; color: #475569;">첨부 정산 통장 사본</span>
+              </div>
+              <div class="doc-viewer-body">
+                <div id="bankbook-img-container"><span style="color:#94a3b8;font-size:0.88rem;">등록된 통장 사본이 없습니다.</span></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- 2. 서류 및 정산 정보 카드 -->
-        <div class="merchant-detail-card">
-          <h3 class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-            </svg>
-            서류 및 정산 정보
-          </h3>
-          <div class="info-grid">
-            <div class="info-label">사업자번호</div>
-            <div class="info-val info-val-strong" id="info-business-no">-</div>
-
-            <div class="info-label">은행명</div>
-            <div class="info-val" id="info-bank-name">-</div>
-
-            <div class="info-label">정산 계좌번호</div>
-            <div class="info-val info-val-strong" id="info-account-no">-</div>
-
-            <div class="info-label">가입 희망 ID</div>
-            <div class="info-val" id="info-username">-</div>
-
-            <div class="info-label">신청 일시</div>
-            <div class="info-val" id="info-applied-at">-</div>
-
-            <div class="info-label">심사 상태</div>
-            <div class="info-val" id="info-status">-</div>
-          </div>
+        <!-- 3. 등록 가게 이미지 -->
+        <div class="section-title print-hide">
+          <span>등록 가게 이미지</span>
         </div>
-
-      <!-- 3. 증빙 서류 카드: 사업자등록증 사본 (Page 2) -->
-      <div class="merchant-detail-card print-page" style="margin-top: 24px;">
-        <h3 class="card-title">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-          </svg>
-          입점 증빙 첨부서류 - 사업자등록증 사본
-        </h3>
-        <div class="document-box" style="background: #fff; border: none; padding: 0;">
-          <div id="cert-img-container">등록된 파일이 없습니다.</div>
-        </div>
-      </div>
-
-      <!-- 4. 증빙 서류 카드: 정산 통장 사본 (Page 3) -->
-      <div class="merchant-detail-card" style="margin-top: 24px;">
-        <h3 class="card-title">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-          </svg>
-          입점 증빙 첨부서류 - 정산 통장 사본
-        </h3>
-        <div class="document-box" style="background: #fff; border: none; padding: 0;">
-          <div id="bankbook-img-container">등록된 파일이 없습니다.</div>
-        </div>
-      </div>
-
-      <!-- 5. 가게 이미지 갤러리 카드 (홈페이지 전용, 인쇄 차단) -->
-      <div class="merchant-detail-card print-hide" style="margin-top: 24px;">
-        <h3 class="card-title">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375 0 11-.75 0 .375 0 01.75 0z" />
-          </svg>
-          등록 가게 이미지
-        </h3>
-        <div class="images-gallery" id="store-images-gallery">
+        <div class="images-gallery print-hide" id="store-images-gallery">
           <!-- JS 렌더링 -->
         </div>
       </div>
     </main>
   </div>
 
-  <div id="toast-container"></div>
+  <!-- 하단 고정 심사 액션 바 (Sticky Bottom Action Bar) -->
+  <div class="sticky-action-bar print-hide" style="justify-content: center;">
+    <!-- Center: 큼직한 승인 / 반려 액션 버튼 -->
+    <div class="sticky-center" id="sticky-center-actions">
+      <!-- Dynamic text actions -->
+    </div>
+  </div>
 
+  <div id="toast-container"></div>
+
+
+  <!-- 반려 사유 우측 슬라이드 오버 드로어 (Slide-Over Drawer) -->
+  <div id="reject-modal" class="drawer-overlay" onclick="if(event.target===this) window.closeRejectModal()">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <div>
+          <h3 class="drawer-title">입점 신청 반려 처리</h3>
+          <p class="drawer-subtitle">반려 사유에 해당하는 항목을 선택해 주세요.<br/>선택된 항목은 신청 가맹점주에게 안내 사유로 발송됩니다.</p>
+        </div>
+        <button class="drawer-close-btn" onclick="window.closeRejectModal()" title="닫기">
+          <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="drawer-body">
+        <div style="display: flex; flex-direction: column;">
+          <label class="reject-reason-card">
+            <input type="checkbox" name="reject-reason" value="사업자등록증 식별 불가" onchange="this.parentElement.classList.toggle('selected', this.checked)" />
+            <div class="reject-reason-text">사업자등록증 식별 불가</div>
+          </label>
+
+          <label class="reject-reason-card">
+            <input type="checkbox" name="reject-reason" value="통장사본 계좌번호 불일치" onchange="this.parentElement.classList.toggle('selected', this.checked)" />
+            <div class="reject-reason-text">정산 통장 사본 계좌번호 또는 예금주 성명 불일치</div>
+          </label>
+
+          <label class="reject-reason-card">
+            <input type="checkbox" name="reject-reason" value="가맹점 정보 미비" onchange="this.parentElement.classList.toggle('selected', this.checked)" />
+            <div class="reject-reason-text">소재지 주소, 사업자등록번호 등 가맹점 기본 입력 정보 오류</div>
+          </label>
+
+          <label class="reject-reason-card">
+            <input type="checkbox" name="reject-reason" value="중복 신청 계정" onchange="this.parentElement.classList.toggle('selected', this.checked)" />
+            <div class="reject-reason-text">이미 등록된 사업자이거나 중복 입점 신청 계정</div>
+          </label>
+
+          <label class="reject-reason-card">
+            <input type="checkbox" name="reject-reason" value="유선 안내 완료" onchange="this.parentElement.classList.toggle('selected', this.checked)" />
+            <div class="reject-reason-text">유선 안내 완료</div>
+          </label>
+
+          <div>
+            <label class="drawer-form-label">기타 상세 사유 입력</label>
+            <textarea id="reject-custom-reason" class="drawer-textarea"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-footer">
+        <div class="drawer-footer-phone-text">
+          대표자 연락처 : <a id="drawer-phone-link" href="#" class="drawer-phone-val">-</a>
+        </div>
+        <button class="btn-drawer-danger" onclick="window.submitRejection()">반려 처리</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
