@@ -682,11 +682,58 @@ router.get('/users/:id/coupons', authenticate, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ── 0.5 쿠폰 지급 규정 목록 조회 및 수정 ──
+router.get('/issuance-rules', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const [rules] = await pool.execute(
+      `SELECT id, min_amount, max_amount, face_value, rule_name, display_order 
+       FROM coupon_issuance_rules ORDER BY display_order ASC, min_amount ASC`
+    );
+    res.json({ success: true, data: rules });
+  } catch (err) { next(err); }
+});
+
+router.put('/issuance-rules', authenticate, authorize('admin'), async (req, res, next) => {
+  const { rules } = req.body;
+  if (!rules || !Array.isArray(rules)) {
+    return res.status(400).json({ success: false, message: '규정 데이터가 올바르지 않습니다.' });
+  }
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    for (let i = 0; i < rules.length; i++) {
+      const r = rules[i];
+      const maxAmt = (r.max_amount === null || r.max_amount === '' || r.max_amount === undefined) ? null : Number(r.max_amount);
+      if (r.id) {
+        await connection.execute(
+          `UPDATE coupon_issuance_rules 
+           SET min_amount = ?, max_amount = ?, face_value = ?, rule_name = ?, display_order = ?
+           WHERE id = ?`,
+          [Number(r.min_amount), maxAmt, Number(r.face_value), r.rule_name || null, i + 1, r.id]
+        );
+      } else {
+        await connection.execute(
+          `INSERT INTO coupon_issuance_rules (min_amount, max_amount, face_value, rule_name, display_order)
+           VALUES (?, ?, ?, ?, ?)`,
+          [Number(r.min_amount), maxAmt, Number(r.face_value), r.rule_name || null, i + 1]
+        );
+      }
+    }
+    await connection.commit();
+    res.json({ success: true, message: '쿠폰 지급 규정이 저장되었습니다.' });
+  } catch (err) {
+    await connection.rollback();
+    next(err);
+  } finally {
+    connection.release();
+  }
+});
+
 // ── 1. 발행처 목록 및 배정 현황 조회 ──
 router.get('/issuers', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const [issuers] = await pool.execute(
-      `SELECT id, username, name, created_at FROM issuers ORDER BY created_at ASC`
+      `SELECT id, username, name, product_name, product_price, created_at FROM issuers ORDER BY created_at ASC`
     );
     const [allocations] = await pool.execute(
       `SELECT id, issuer_id, face_value, total_count, issued_count, created_at 
@@ -698,16 +745,19 @@ router.get('/issuers', authenticate, authorize('admin'), async (req, res, next) 
 
 // ── 2. 신규 발행처 등록 ──
 router.post('/issuers', authenticate, authorize('admin'), async (req, res, next) => {
-  const { username, password, name } = req.body;
+  const { username, password, name, productName, productPrice } = req.body;
   if (!username || !password || !name) {
     return res.status(400).json({ success: false, message: '아이디, 비밀번호, 발행처명을 모두 입력해주세요.' });
+  }
+  if (!productName || productPrice === undefined || productPrice === null || isNaN(productPrice) || Number(productPrice) < 0) {
+    return res.status(400).json({ success: false, message: '입장권(제품)명과 제품 금액을 정확히 입력해주세요.' });
   }
   try {
     const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.execute(
-      `INSERT INTO issuers (username, password_hash, name) VALUES (?, ?, ?)`,
-      [username, hashedPassword, name]
+      `INSERT INTO issuers (username, password_hash, name, product_name, product_price) VALUES (?, ?, ?, ?, ?)`,
+      [username, hashedPassword, name, productName, Number(productPrice)]
     );
     res.json({ success: true, message: '발행처가 등록되었습니다.' });
   } catch (err) {
@@ -723,7 +773,7 @@ router.get('/issuers/:id', authenticate, authorize('admin'), async (req, res, ne
   const { id } = req.params;
   try {
     const [rows] = await pool.execute(
-      `SELECT id, username, name, created_at FROM issuers WHERE id = ?`,
+      `SELECT id, username, name, product_name, product_price, created_at FROM issuers WHERE id = ?`,
       [id]
     );
     if (rows.length === 0) {
@@ -736,24 +786,34 @@ router.get('/issuers/:id', authenticate, authorize('admin'), async (req, res, ne
 // ── 2.6 발행처 정보 수정 ──
 router.put('/issuers/:id', authenticate, authorize('admin'), async (req, res, next) => {
   const { id } = req.params;
-  const { name, password } = req.body;
+  const { name, password, productName, productPrice } = req.body;
   if (!name) {
     return res.status(400).json({ success: false, message: '기관명을 입력해주세요.' });
   }
   try {
+    const updateFields = ['name = ?'];
+    const updateParams = [name];
+
+    if (productName !== undefined) {
+      updateFields.push('product_name = ?');
+      updateParams.push(productName);
+    }
+    if (productPrice !== undefined && !isNaN(productPrice)) {
+      updateFields.push('product_price = ?');
+      updateParams.push(Number(productPrice));
+    }
     if (password) {
       const bcrypt = require('bcryptjs');
       const hashedPassword = await bcrypt.hash(password, 10);
-      await pool.execute(
-        `UPDATE issuers SET name = ?, password_hash = ? WHERE id = ?`,
-        [name, hashedPassword, id]
-      );
-    } else {
-      await pool.execute(
-        `UPDATE issuers SET name = ? WHERE id = ?`,
-        [name, id]
-      );
+      updateFields.push('password_hash = ?');
+      updateParams.push(hashedPassword);
     }
+
+    updateParams.push(id);
+    await pool.execute(
+      `UPDATE issuers SET ${updateFields.join(', ')} WHERE id = ?`,
+      updateParams
+    );
     res.json({ success: true, message: '발행처 정보가 수정되었습니다.' });
   } catch (err) { next(err); }
 });

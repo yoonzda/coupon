@@ -49,6 +49,7 @@ export default defineConfig({
         'admin-edit-issuer': resolve(__dirname, 'admin/edit-issuer.html'),
         'admin-allocate-coupon': resolve(__dirname, 'admin/allocate-coupon.html'),
         'admin-budget': resolve(__dirname, 'admin/budget.html'),
+        'admin-edit-rules': resolve(__dirname, 'admin/edit-rules.html'),
       },
     },
     outDir: 'dist',      // 빌드 결과 → dist/ 폴더 (도커 빌드용)

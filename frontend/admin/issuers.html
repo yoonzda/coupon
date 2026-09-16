@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>발행처 관리 | 옹진 관광 쿠폰</title>
+  <link rel="icon" href="../shared/images/favicon.png" />
   <script>
     (function() {
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
@@ -175,16 +176,18 @@
         <table class="admin-table" style="text-align: center;">
           <thead>
             <tr>
-              <th style="width: 20%; text-align: center;">기관명</th>
-              <th style="width: 15%; text-align: center;">쿠폰 금액</th>
-              <th style="width: 15%; text-align: center;">발행 수량</th>
-              <th style="width: 15%; text-align: center;">잔여 수량</th>
-              <th style="width: 15%; text-align: center;">상세</th>
-              <th style="width: 20%; text-align: center;">관리</th>
+              <th style="width: 16%; text-align: center;">기관명</th>
+              <th style="width: 16%; text-align: center;">취급 제품(입장권)</th>
+              <th style="width: 12%; text-align: center;">제품 금액</th>
+              <th style="width: 12%; text-align: center;">쿠폰 금액</th>
+              <th style="width: 11%; text-align: center;">발행 수량</th>
+              <th style="width: 11%; text-align: center;">잔여 수량</th>
+              <th style="width: 8%; text-align: center;">상세</th>
+              <th style="width: 14%; text-align: center;">관리</th>
             </tr>
           </thead>
           <tbody id="issuer-list">
-            <tr><td colspan="6" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
+            <tr><td colspan="8" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
           </tbody>
         </table>
       </div>
@@ -244,6 +247,8 @@
           joinedList.push({
             issuerId: issuer.id,
             issuerName: issuer.name,
+            productName: issuer.product_name,
+            productPrice: issuer.product_price,
             faceValue: null,
             issuedCount: null,
             totalCount: null,
@@ -255,6 +260,8 @@
             joinedList.push({
               issuerId: issuer.id,
               issuerName: issuer.name,
+              productName: issuer.product_name,
+              productPrice: issuer.product_price,
               faceValue: a.face_value,
               issuedCount: a.issued_count,
               totalCount: a.total_count,
@@ -277,9 +284,9 @@
       if (!list || list.length === 0) {
         const isUnallocatedOnly = document.getElementById('filter-alloc')?.checked;
         if (isUnallocatedOnly) {
-          tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding: 30px; color:#64748b;">조건에 맞는 발행처가 없습니다.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding: 30px; color:#64748b;">조건에 맞는 발행처가 없습니다.</td></tr>';
         } else {
-          tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding: 30px; color:#64748b;">등록된 발행처가 없습니다.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding: 30px; color:#64748b;">등록된 발행처가 없습니다.</td></tr>`;
         }
         return;
       }
@@ -295,10 +302,19 @@
           <a href="detail-issuer.html?id=${item.issuerId}" class="btn-table-edit">보기</a>
         `;
 
+        const prodNameHtml = item.productName 
+          ? `<span style="font-weight: 500; color: #1e293b;">${escapeHtml(item.productName)}</span>`
+          : `<span style="color:#94a3b8;">-</span>`;
+        const prodPriceHtml = (item.productPrice !== null && item.productPrice !== undefined && item.productPrice > 0)
+          ? `<span style="font-weight: 500; color: #334155;">${fmtMoney(item.productPrice)}</span>`
+          : `<span style="color:#94a3b8;">-</span>`;
+
         if (item.isUnallocated) {
           return `
             <tr>
               <td>${escapeHtml(item.issuerName)}</td>
+              <td>${prodNameHtml}</td>
+              <td>${prodPriceHtml}</td>
               <td style="color:#94a3b8;">-</td>
               <td style="color:#94a3b8;">-</td>
               <td style="color:#94a3b8;">-</td>
@@ -310,9 +326,11 @@
           return `
             <tr>
               <td>${escapeHtml(item.issuerName)}</td>
-              <td style="color:#0f172a;">${fmtMoney(item.faceValue)}</td>
+              <td>${prodNameHtml}</td>
+              <td>${prodPriceHtml}</td>
+              <td style="color:#0f172a; font-weight: 600;">${fmtMoney(item.faceValue)}</td>
               <td>${item.issuedCount.toLocaleString()}장</td>
-              <td style="color: ${item.remaining === 0 ? '#ef4444' : '#10b981'};">
+              <td style="color: ${item.remaining === 0 ? '#ef4444' : '#10b981'}; font-weight: 600;">
                 ${item.remaining.toLocaleString()}장
               </td>
               <td>${detailButton}</td>

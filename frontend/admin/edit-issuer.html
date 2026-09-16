@@ -64,6 +64,26 @@
     .btn-register-submit:active {
       background: #0f172a;
     }
+    /* input-group & input-unit 스타일 */
+    .input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .input-group input {
+      width: 100%;
+      padding-right: 36px !important;
+      text-align: right;
+    }
+    .input-group .input-unit {
+      position: absolute;
+      right: 14px;
+      font-size: 0.88rem;
+      color: #64748b;
+      font-weight: 600;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -111,6 +131,17 @@
             <label for="issuer-password">새 비밀번호</label>
             <input type="password" id="issuer-password" placeholder="비밀번호 변경 시에만 입력" />
           </div>
+          <div class="form-group">
+            <label for="issuer-product-name">입장권 / 제품명</label>
+            <input type="text" id="issuer-product-name" placeholder="예: 백령도 편도 승선권" required />
+          </div>
+          <div class="form-group">
+            <label for="issuer-product-price">제품 결제 금액</label>
+            <div class="input-group">
+              <input type="text" id="issuer-product-price" placeholder="0" required autocomplete="off" />
+              <span class="input-unit">원</span>
+            </div>
+          </div>
 
           <div class="form-actions">
             <button type="submit" class="btn-register-submit">수정하기</button>
@@ -137,12 +168,22 @@
       setTimeout(() => { location.href = 'issuers.html'; }, 1000);
     }
 
+    const priceInput = document.getElementById('issuer-product-price');
+    priceInput.addEventListener('input', (e) => {
+      const val = e.target.value.replace(/[^0-9]/g, '');
+      e.target.value = val ? parseInt(val, 10).toLocaleString() : '';
+    });
+
     async function loadIssuerData() {
       try {
         const res = await api.get(`/admin/issuers/${issuerId}`);
         if (res.success && res.data) {
-          document.getElementById('issuer-name').value = res.data.name;
-          document.getElementById('issuer-username').value = res.data.username;
+          document.getElementById('issuer-name').value = res.data.name || '';
+          document.getElementById('issuer-username').value = res.data.username || '';
+          document.getElementById('issuer-product-name').value = res.data.product_name || '';
+          if (res.data.product_price !== null && res.data.product_price !== undefined) {
+            document.getElementById('issuer-product-price').value = parseInt(res.data.product_price, 10).toLocaleString();
+          }
         } else {
           showToast('발행처 정보를 찾을 수 없습니다.', 'error');
         }
@@ -155,14 +196,34 @@
       e.preventDefault();
       const name = document.getElementById('issuer-name').value.trim();
       const password = document.getElementById('issuer-password').value;
+      const productName = document.getElementById('issuer-product-name').value.trim();
+      const rawPrice = document.getElementById('issuer-product-price').value.replace(/,/g, '').trim();
 
       if (!name) {
         showToast('기관명을 입력해주세요.', 'error');
         return;
       }
+      if (!productName) {
+        showToast('입장권 / 제품명을 입력해주세요.', 'error');
+        return;
+      }
+      if (!rawPrice || isNaN(rawPrice)) {
+        showToast('제품 결제 금액을 입력해주세요.', 'error');
+        return;
+      }
+
+      const productPrice = parseInt(rawPrice, 10);
 
       try {
-        const res = await api.put(`/admin/issuers/${issuerId}`, { name, password: password || null });
+        const payload = {
+          name,
+          productName,
+          productPrice
+        };
+        if (password) {
+          payload.password = password;
+        }
+        const res = await api.put(`/admin/issuers/${issuerId}`, payload);
         showToast(res.message || '발행처 정보가 수정되었습니다.', 'success');
         
         setTimeout(() => {

@@ -173,6 +173,28 @@
             <span class="profile-detail-value" id="profile-regdate">-</span>
           </div>
         </div>
+        <div class="profile-detail-card">
+          <div class="profile-detail-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+            </svg>
+          </div>
+          <div class="profile-detail-info">
+            <span class="profile-detail-label">취급 제품(입장권)</span>
+            <span class="profile-detail-value" id="profile-product-name">-</span>
+          </div>
+        </div>
+        <div class="profile-detail-card">
+          <div class="profile-detail-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="profile-detail-info">
+            <span class="profile-detail-label">제품 결제 금액</span>
+            <span class="profile-detail-value" id="profile-product-price">-</span>
+          </div>
+        </div>
       </div>
 
       <!-- 배정 이력 테이블 -->
@@ -243,6 +265,8 @@
           document.getElementById('profile-name').textContent = issuer.name;
           document.getElementById('profile-username').textContent = issuer.username;
           document.getElementById('profile-regdate').textContent = fmtDate(issuer.created_at);
+          document.getElementById('profile-product-name').textContent = issuer.product_name || '-';
+          document.getElementById('profile-product-price').textContent = (issuer.product_price !== null && issuer.product_price !== undefined) ? fmtMoney(issuer.product_price) : '-';
 
           // 이력 필터 및 바인딩
           const history = (allocations || []).filter(a => a.issuer_id === issuerId);
