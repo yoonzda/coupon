@@ -140,9 +140,15 @@
 
     await requireAdminAuth();
 
-    // URL 파라미터에서 issuerId 추출
+    // URL 파라미터에서 issuerId, faceValue 추출
     const urlParams = new URLSearchParams(window.location.search);
     const targetIssuerId = urlParams.get('issuerId');
+    const targetFaceValue = urlParams.get('faceValue');
+
+    if (targetFaceValue) {
+      const faceInput = document.getElementById('allocation-face-value');
+      if (faceInput) faceInput.value = targetFaceValue;
+    }
 
     async function loadIssuers() {
       try {

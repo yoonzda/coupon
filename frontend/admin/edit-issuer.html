@@ -118,7 +118,7 @@
         <form id="form-edit-issuer" onsubmit="updateIssuer(event)">
           <div class="form-group">
             <label for="issuer-name">기관명</label>
-            <input type="text" id="issuer-name" placeholder="" required />
+            <input type="text" id="issuer-name" required />
           </div>
           <div class="form-group">
             <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
@@ -128,22 +128,33 @@
             <input type="text" id="issuer-username" readonly style="background: #e2e8f0 !important; cursor: not-allowed;" />
           </div>
           <div class="form-group">
+            <label for="issuer-phone">전화번호</label>
+            <input type="text" id="issuer-phone" placeholder="예: 032-899-3810" />
+          </div>
+          <div class="form-group">
+            <label for="issuer-address">위치 (주소)</label>
+            <input type="text" id="issuer-address" placeholder="예: 인천광역시 옹진군 자월면 소야리" />
+          </div>
+          <div class="form-group">
             <label for="issuer-password">새 비밀번호</label>
-            <input type="password" id="issuer-password" placeholder="비밀번호 변경 시에만 입력" />
-          </div>
-          <div class="form-group">
-            <label for="issuer-product-name">입장권 / 제품명</label>
-            <input type="text" id="issuer-product-name" placeholder="예: 백령도 편도 승선권" required />
-          </div>
-          <div class="form-group">
-            <label for="issuer-product-price">제품 결제 금액</label>
-            <div class="input-group">
-              <input type="text" id="issuer-product-price" placeholder="0" required autocomplete="off" />
-              <span class="input-unit">원</span>
-            </div>
+            <input type="password" id="issuer-password" placeholder="변경 시에만 입력" />
           </div>
 
-          <div class="form-actions">
+          <!-- 상품 입력 영역 (박스 없이 기본 폼 스타일과 100% 동일하게 배치) -->
+          <div id="product-list-container">
+            <!-- dynamic products -->
+          </div>
+
+          <div style="margin-top: 4px; margin-bottom: 24px;">
+            <button type="button" class="btn btn-neutral-outline btn-sm" onclick="window.addProductRow()" style="height: 36px; padding: 0 16px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width: 14px; height: 14px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              상품 추가
+            </button>
+          </div>
+
+          <div class="form-actions" style="margin-top: 16px;">
             <button type="submit" class="btn-register-submit">수정하기</button>
           </div>
         </form>
@@ -168,11 +179,96 @@
       setTimeout(() => { location.href = 'issuers.html'; }, 1000);
     }
 
-    const priceInput = document.getElementById('issuer-product-price');
-    priceInput.addEventListener('input', (e) => {
-      const val = e.target.value.replace(/[^0-9]/g, '');
-      e.target.value = val ? parseInt(val, 10).toLocaleString() : '';
-    });
+    const productContainer = document.getElementById('product-list-container');
+
+    window.addProductRow = function(name = '', price = '') {
+      const currentCount = productContainer.querySelectorAll('.product-item').length;
+      const rowId = 'prod-item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
+      const itemEl = document.createElement('div');
+      itemEl.className = 'product-item';
+      itemEl.id = rowId;
+
+      const formattedPrice = (price !== '' && price !== null && price !== undefined)
+        ? Number(price).toLocaleString('ko-KR')
+        : '';
+
+      if (currentCount === 0) {
+        // 첫 번째 상품은 다른 기본 필드와 완벽히 동일한 연속 레이아웃
+        itemEl.innerHTML = `
+          <div class="form-group">
+            <label>상품명</label>
+            <input type="text" class="prod-name-input" required value="${escapeHtml(name)}" />
+          </div>
+          <div class="form-group">
+            <label>금액</label>
+            <div class="input-group">
+              <input type="text" class="prod-price-input" required autocomplete="off" value="${formattedPrice}" />
+              <span class="input-unit">원</span>
+            </div>
+          </div>
+        `;
+      } else {
+        // 추가 상품: 구분선 + 상품명 라벨 우측에 삭제 버튼 인라인 배치 (소제목 제거)
+        itemEl.style.marginTop = '24px';
+        itemEl.style.paddingTop = '18px';
+        itemEl.style.borderTop = '1px dashed #cbd5e1';
+
+        itemEl.innerHTML = `
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="margin-bottom: 0;">상품명</label>
+              <button type="button" onclick="window.removeProductRow('${rowId}')" style="background: none; border: none; color: #be123c; font-size: 0.82rem; font-weight: 600; cursor: pointer; padding: 2px 4px;">삭제</button>
+            </div>
+            <input type="text" class="prod-name-input" required value="${escapeHtml(name)}" />
+          </div>
+          <div class="form-group">
+            <label>금액</label>
+            <div class="input-group">
+              <input type="text" class="prod-price-input" required autocomplete="off" value="${formattedPrice}" />
+              <span class="input-unit">원</span>
+            </div>
+          </div>
+        `;
+      }
+
+      productContainer.appendChild(itemEl);
+
+      const priceInput = itemEl.querySelector('.prod-price-input');
+      priceInput.addEventListener('input', (e) => {
+        const clean = e.target.value.replace(/[^0-9]/g, '');
+        e.target.value = clean ? Number(clean).toLocaleString('ko-KR') : '';
+      });
+    };
+
+    window.removeProductRow = function(rowId) {
+      const items = productContainer.querySelectorAll('.product-item');
+      if (items.length <= 1) {
+        showToast('최소 1개 이상의 상품이 필요합니다.', 'error');
+        return;
+      }
+      const target = document.getElementById(rowId);
+      if (target) target.remove();
+      renumberProducts();
+    };
+
+    function renumberProducts() {
+      const items = productContainer.querySelectorAll('.product-item');
+      items.forEach((item, index) => {
+        if (index === 0) {
+          item.style.marginTop = '0';
+          item.style.paddingTop = '0';
+          item.style.borderTop = 'none';
+          const delBtn = item.querySelector('button[onclick*="removeProductRow"]');
+          if (delBtn) delBtn.remove();
+        }
+      });
+    }
+
+    function escapeHtml(string) {
+      if (!string) return '';
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return String(string).replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
 
     async function loadIssuerData() {
       try {
@@ -180,9 +276,19 @@
         if (res.success && res.data) {
           document.getElementById('issuer-name').value = res.data.name || '';
           document.getElementById('issuer-username').value = res.data.username || '';
-          document.getElementById('issuer-product-name').value = res.data.product_name || '';
-          if (res.data.product_price !== null && res.data.product_price !== undefined) {
-            document.getElementById('issuer-product-price').value = parseInt(res.data.product_price, 10).toLocaleString();
+          document.getElementById('issuer-phone').value = res.data.phone || '';
+          document.getElementById('issuer-address').value = res.data.address || '';
+          
+          productContainer.innerHTML = '';
+          const prods = res.data.products || [];
+          if (prods.length > 0) {
+            prods.forEach(p => {
+              window.addProductRow(p.product_name, p.price);
+            });
+          } else if (res.data.product_name) {
+            window.addProductRow(res.data.product_name, res.data.product_price);
+          } else {
+            window.addProductRow();
           }
         } else {
           showToast('발행처 정보를 찾을 수 없습니다.', 'error');
@@ -195,30 +301,44 @@
     window.updateIssuer = async function(e) {
       e.preventDefault();
       const name = document.getElementById('issuer-name').value.trim();
+      const phone = document.getElementById('issuer-phone').value.trim();
+      const address = document.getElementById('issuer-address').value.trim();
       const password = document.getElementById('issuer-password').value;
-      const productName = document.getElementById('issuer-product-name').value.trim();
-      const rawPrice = document.getElementById('issuer-product-price').value.replace(/,/g, '').trim();
 
       if (!name) {
         showToast('기관명을 입력해주세요.', 'error');
         return;
       }
-      if (!productName) {
-        showToast('입장권 / 제품명을 입력해주세요.', 'error');
-        return;
-      }
-      if (!rawPrice || isNaN(rawPrice)) {
-        showToast('제품 결제 금액을 입력해주세요.', 'error');
-        return;
+
+      // 상품 목록 수집
+      const productItems = productContainer.querySelectorAll('.product-item');
+      const products = [];
+      for (const item of productItems) {
+        const pName = item.querySelector('.prod-name-input').value.trim();
+        const pPriceRaw = item.querySelector('.prod-price-input').value.replace(/[^0-9]/g, '');
+        if (!pName || !pPriceRaw) {
+          showToast('모든 상품명과 금액을 입력해주세요.', 'error');
+          return;
+        }
+        const pPrice = Number(pPriceRaw);
+        if (isNaN(pPrice) || pPrice < 0) {
+          showToast('올바른 상품 금액을 입력해주세요.', 'error');
+          return;
+        }
+        products.push({ productName: pName, price: pPrice });
       }
 
-      const productPrice = parseInt(rawPrice, 10);
+      if (products.length === 0) {
+        showToast('최소 1개 이상의 상품을 등록해주세요.', 'error');
+        return;
+      }
 
       try {
         const payload = {
           name,
-          productName,
-          productPrice
+          phone,
+          address,
+          products
         };
         if (password) {
           payload.password = password;
@@ -232,7 +352,7 @@
       } catch (err) {
         showToast(err.message || '수정에 실패했습니다.', 'error');
       }
-    }
+    };
 
     loadIssuerData();
   </script>

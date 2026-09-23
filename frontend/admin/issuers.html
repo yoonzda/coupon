@@ -21,128 +21,141 @@
       color: #1e293b; 
     }
 
-    .table-container {
-      background: #fff; border-radius: 0 !important; border: 1px solid #e2e8f0; 
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 32px;
+    /* 카드 그리드 스타일 - 넓고 시원한 밸런스 */
+    .issuer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(460px, 580px));
+      gap: 24px;
+      margin-bottom: 32px;
     }
-    .table-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; margin-top: 8px; }
-    
-    .admin-table { width: 100%; border-collapse: collapse; text-align: center; }
-    .admin-table th { background: #f8fafc; padding: 14px 24px; text-align: center; font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
-    .admin-table td { padding: 16px 24px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; vertical-align: middle; }
-    .admin-table tr:hover { background: #f8fafc; }
-
-    /* Modal Layout */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    .issuer-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 0;
+      padding: 26px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .modal-overlay.active { opacity: 1; pointer-events: auto; }
-    .modal-container {
-      background: #fff; border-radius: 12px; width: 480px; max-width: 90%;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      transform: translateY(20px); transition: transform 0.25s ease; overflow: hidden;
+    .issuer-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
     }
-    .modal-overlay.active .modal-container { transform: translateY(0); }
-    .modal-header { padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-    .modal-body { padding: 24px; }
-    .modal-footer { padding: 16px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-start; gap: 8px; background: #f8fafc; }
-    
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem; color: #334155; }
-    .form-group input, .form-group select {
-      width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px;
-      font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+    .issuer-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
     }
-    .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
-
-    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
-    .badge-info { background: #e0f2fe; color: #0369a1; }
-    .badge-success { background: #dcfce7; color: #166534; }
-    .badge-warning { background: #fef9c3; color: #854d0e; }
-
-    /* 삭제 버튼 스타일 (수정 버튼과 조화를 이루는 프리미엄 적색 테마 - 덜 쨍하고 고급스러운 딥 로즈 레드) */
-    .btn-table-delete {
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      padding: 6px 12px !important;
-      font-size: 0.78rem !important;
-      font-weight: 600 !important;
-      color: #be123c !important;                 /* 톤다운된 차분한 딥 로즈 레드 */
-      background-color: #fff1f2 !important;       /* 은은하고 편안한 연분홍 배경 */
-      border: 1px solid #ffe4e6 !important;       /* 연하고 자연스러운 테두리 */
-      border-radius: 6px !important;
-      text-decoration: none !important;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      cursor: pointer !important;
-      line-height: 1 !important;
-      box-shadow: 0 1px 2px 0 rgba(190, 18, 60, 0.03) !important;
+    .issuer-card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
     }
-    .btn-table-delete:hover {
-      background-color: #be123c !important;       /* 차분한 딥 로즈 레드로 반전 */
-      border-color: #be123c !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 6px -1px rgba(190, 18, 60, 0.15), 0 2px 4px -1px rgba(190, 18, 60, 0.08) !important;
-    }
-
-    /* 토글 온오프 스위치 스타일 */
-    .toggle-container {
+    .issuer-card-actions {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .toggle-label {
+
+    /* 단정하고 차분한 모노톤 헤더 버튼 */
+    .btn-card-del {
+      padding: 5px 12px;
       font-size: 0.82rem;
-      color: #475569;
-      font-weight: 500;
-      user-select: none;
-    }
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 26px;
-    }
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .slider {
-      position: absolute;
+      font-weight: 600;
+      color: #64748b;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
       cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #cbd5e1;
-      transition: .3s;
+      transition: all 0.15s ease;
+      line-height: 1.4;
     }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 5px;
-      bottom: 5px;
-      background-color: white;
-      transition: .3s;
+    .btn-card-del:hover {
+      color: #e11d48;
+      border-color: #fecdd3;
+      background: #fff1f2;
     }
-    input:checked + .slider {
-      background-color: #2563eb;
+    .btn-card-edit {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #ffffff;
+      background: #0f172a;
+      border: 1px solid #0f172a;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      line-height: 1.4;
     }
-    input:focus + .slider {
-      box-shadow: 0 0 1px #2563eb;
+    .btn-card-edit:hover {
+      background: #334155;
+      border-color: #334155;
     }
-    input:checked + .slider:before {
-      transform: translateX(18px);
+
+    /* 위치 & 전화번호 & 아이디 정보 */
+    .issuer-meta-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 0;
     }
-    .slider.round {
-      border-radius: 34px;
+    .issuer-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
     }
-    .slider.round:before {
-      border-radius: 50%;
+    .meta-label {
+      width: 65px;
+      color: #64748b;
+      font-weight: 500;
+      font-size: 0.95rem;
+      flex-shrink: 0;
     }
+    .meta-val {
+      color: #1e293b;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .issuer-card-divider {
+      height: 1px;
+      background: #f1f5f9;
+      margin: 12px 0;
+    }
+
+    /* 상품 및 금액 목록 (동일한 폰트 크기, 괄호 없음) */
+    .issuer-product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .issuer-product-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+    .issuer-product-name {
+      color: #1e293b;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+    .issuer-product-val {
+      font-weight: 600;
+      color: #0f172a;
+      font-size: 0.95rem;
+    }
+
+    .table-title { font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; }
   </style>
 </head>
 <body>
@@ -160,36 +173,15 @@
         </div>
       </header>
 
-      <!-- 1. 발행처 목록 -->
-      <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; margin-top: 8px;">
-        <h2 class="table-title" style="margin: 0;">발행처 목록</h2>
-        <button class="btn btn-neutral-outline btn-sm" style="height: 30px; padding: 0 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.8rem;" onclick="location.href='register-issuer.html'">발행처 등록</button>
-        <div class="toggle-container" style="margin-left: auto;">
-          <span class="toggle-label">배정 필요</span>
-          <label class="switch">
-            <input type="checkbox" id="filter-alloc" onchange="window.filterIssuers()" />
-            <span class="slider round"></span>
-          </label>
-        </div>
+      <!-- 1. 상단 헤더 바 (배정 필요 토글 삭제, 심플한 등록 버튼) -->
+      <div style="display: flex; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 8px;">
+        <h2 class="table-title">발행처 목록</h2>
+        <button class="btn btn-neutral-outline btn-sm" style="height: 34px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;" onclick="location.href='register-issuer.html'">발행처 등록</button>
       </div>
-      <div class="table-container">
-        <table class="admin-table" style="text-align: center;">
-          <thead>
-            <tr>
-              <th style="width: 16%; text-align: center;">기관명</th>
-              <th style="width: 16%; text-align: center;">취급 제품(입장권)</th>
-              <th style="width: 12%; text-align: center;">제품 금액</th>
-              <th style="width: 12%; text-align: center;">쿠폰 금액</th>
-              <th style="width: 11%; text-align: center;">발행 수량</th>
-              <th style="width: 11%; text-align: center;">잔여 수량</th>
-              <th style="width: 8%; text-align: center;">상세</th>
-              <th style="width: 14%; text-align: center;">관리</th>
-            </tr>
-          </thead>
-          <tbody id="issuer-list">
-            <tr><td colspan="8" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
-          </tbody>
-        </table>
+
+      <!-- 2. 깔끔한 카드 그리드 -->
+      <div id="issuer-grid" class="issuer-grid">
+        <div style="grid-column: 1 / -1; padding: 48px; text-align: center; color: #64748b;">데이터를 불러오는 중입니다...</div>
       </div>
     </main>
   </div>
@@ -197,13 +189,12 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { api, showToast, fmtDate, fmtMoney } from '../shared/js/api.js'
+    import { api, showToast, fmtMoney } from '../shared/js/api.js'
     import { requireAdminAuth } from '../shared/js/admin-guard.js'
 
     await requireAdminAuth();
 
     let issuersCache = [];
-    let allocationsCache = [];
 
     // 데이터 로드
     async function loadData() {
@@ -211,10 +202,32 @@
         const res = await api.get('/admin/issuers');
         if (res.success) {
           const { issuers, allocations } = res.data;
-          issuersCache = issuers || [];
-          allocationsCache = allocations || [];
+          const allocationsCache = allocations || [];
           
-          window.filterIssuers();
+          issuersCache = (issuers || []).map(issuer => {
+            const issuerAllocations = allocationsCache.filter(a => a.issuer_id === issuer.id);
+            const prods = issuer.products || [];
+            
+            let couponValues = [];
+            if (issuerAllocations.length > 0) {
+              couponValues = [...new Set(issuerAllocations.map(a => a.face_value).filter(Boolean))];
+            }
+            if (couponValues.length === 0 && prods.length > 0) {
+              couponValues = [...new Set(prods.map(p => p.coupon_face_value).filter(Boolean))];
+            }
+
+            return {
+              issuerId: issuer.id,
+              issuerName: issuer.name,
+              username: issuer.username,
+              phone: issuer.phone,
+              address: issuer.address,
+              products: prods,
+              couponValues: couponValues
+            };
+          });
+          
+          renderIssuersCards(issuersCache);
         }
       } catch (err) {
         showToast('데이터 조회에 실패했습니다: ' + err.message, 'error');
@@ -222,122 +235,89 @@
     }
 
     window.deleteIssuer = async function(id, name) {
-      if (confirm(`${name} 발행처 계정을 정말 삭제하시겠습니까?`)) {
+      if (confirm(`'${name}' 발행처 계정을 정말 삭제하시겠습니까?`)) {
         try {
           const res = await api.delete(`/admin/issuers/${id}`);
           showToast(res.message || '발행처가 삭제되었습니다.', 'success');
           setTimeout(() => {
             loadData();
-          }, 1000);
+          }, 600);
         } catch (err) {
           showToast(err.message || '삭제에 실패했습니다.', 'error');
         }
       }
-    }
+    };
 
-    // 배정 데이터 조인 및 필터 렌더링
-    window.filterIssuers = function() {
-      const isUnallocatedOnly = document.getElementById('filter-alloc').checked;
-      let joinedList = [];
-      
-      issuersCache.forEach(issuer => {
-        const issuerAllocations = allocationsCache.filter(a => a.issuer_id === issuer.id);
-        
-        if (issuerAllocations.length === 0) {
-          joinedList.push({
-            issuerId: issuer.id,
-            issuerName: issuer.name,
-            productName: issuer.product_name,
-            productPrice: issuer.product_price,
-            faceValue: null,
-            issuedCount: null,
-            totalCount: null,
-            remaining: null,
-            isUnallocated: true
-          });
-        } else {
-          issuerAllocations.forEach(a => {
-            joinedList.push({
-              issuerId: issuer.id,
-              issuerName: issuer.name,
-              productName: issuer.product_name,
-              productPrice: issuer.product_price,
-              faceValue: a.face_value,
-              issuedCount: a.issued_count,
-              totalCount: a.total_count,
-              remaining: a.total_count - a.issued_count,
-              isUnallocated: false
-            });
-          });
-        }
-      });
-      
-      if (isUnallocatedOnly) {
-        joinedList = joinedList.filter(item => item.isUnallocated || (item.remaining !== null && item.remaining <= item.totalCount * 0.5));
-      }
-      
-      renderIssuersTable(joinedList);
-    }
-
-    function renderIssuersTable(list) {
-      const tbody = document.getElementById('issuer-list');
+    function renderIssuersCards(list) {
+      const grid = document.getElementById('issuer-grid');
       if (!list || list.length === 0) {
-        const isUnallocatedOnly = document.getElementById('filter-alloc')?.checked;
-        if (isUnallocatedOnly) {
-          tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding: 30px; color:#64748b;">조건에 맞는 발행처가 없습니다.</td></tr>';
-        } else {
-          tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding: 30px; color:#64748b;">등록된 발행처가 없습니다.</td></tr>`;
-        }
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 48px; text-align: center; background: #fff; border: 1px dashed #cbd5e1; border-radius: 10px; color: #64748b; font-size: 0.95rem;">
+            등록된 발행처가 없습니다.
+          </div>
+        `;
         return;
       }
       
-      tbody.innerHTML = list.map(item => {
-        const manageButtons = `
-          <div style="display: flex; gap: 6px; justify-content: center;">
-            <a href="edit-issuer.html?id=${item.issuerId}" class="btn-table-edit">수정</a>
-            <button class="btn-table-delete" onclick="window.deleteIssuer(${item.issuerId}, '${escapeHtml(item.issuerName)}')">삭제</button>
-          </div>
-        `;
-        const detailButton = `
-          <a href="detail-issuer.html?id=${item.issuerId}" class="btn-table-edit">보기</a>
-        `;
-
-        const prodNameHtml = item.productName 
-          ? `<span style="font-weight: 500; color: #1e293b;">${escapeHtml(item.productName)}</span>`
-          : `<span style="color:#94a3b8;">-</span>`;
-        const prodPriceHtml = (item.productPrice !== null && item.productPrice !== undefined && item.productPrice > 0)
-          ? `<span style="font-weight: 500; color: #334155;">${fmtMoney(item.productPrice)}</span>`
-          : `<span style="color:#94a3b8;">-</span>`;
-
-        if (item.isUnallocated) {
-          return `
-            <tr>
-              <td>${escapeHtml(item.issuerName)}</td>
-              <td>${prodNameHtml}</td>
-              <td>${prodPriceHtml}</td>
-              <td style="color:#94a3b8;">-</td>
-              <td style="color:#94a3b8;">-</td>
-              <td style="color:#94a3b8;">-</td>
-              <td>${detailButton}</td>
-              <td>${manageButtons}</td>
-            </tr>
+      grid.innerHTML = list.map(item => {
+        let productContent = '';
+        if (item.products && item.products.length > 0) {
+          productContent = `
+            <div class="issuer-product-list">
+              ${item.products.map(p => {
+                const val = (p.price !== undefined && p.price !== null) ? fmtMoney(p.price) : '-';
+                return `
+                  <div class="issuer-product-row">
+                    <span class="issuer-product-name">${escapeHtml(p.product_name)}</span>
+                    <span class="issuer-product-val">${val}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        } else if (item.couponValues && item.couponValues.length > 0) {
+          productContent = `
+            <div class="issuer-product-list">
+              <div class="issuer-product-row">
+                <span class="issuer-product-name">배정 쿠폰</span>
+                <span class="issuer-product-val">${item.couponValues.map(v => fmtMoney(v)).join(', ')}</span>
+              </div>
+            </div>
           `;
         } else {
-          return `
-            <tr>
-              <td>${escapeHtml(item.issuerName)}</td>
-              <td>${prodNameHtml}</td>
-              <td>${prodPriceHtml}</td>
-              <td style="color:#0f172a; font-weight: 600;">${fmtMoney(item.faceValue)}</td>
-              <td>${item.issuedCount.toLocaleString()}장</td>
-              <td style="color: ${item.remaining === 0 ? '#ef4444' : '#10b981'}; font-weight: 600;">
-                ${item.remaining.toLocaleString()}장
-              </td>
-              <td>${detailButton}</td>
-              <td>${manageButtons}</td>
-            </tr>
-          `;
+          productContent = `<div style="font-size: 0.95rem; color: #94a3b8; padding: 4px 0;">등록된 상품이 없습니다.</div>`;
         }
+
+        return `
+          <div class="issuer-card">
+            <div class="issuer-card-top">
+              <h3 class="issuer-card-title">${escapeHtml(item.issuerName)}</h3>
+              <div class="issuer-card-actions">
+                <button class="btn-card-del" onclick="window.deleteIssuer(${item.issuerId}, '${escapeHtml(item.issuerName)}')">삭제</button>
+                <a href="edit-issuer.html?id=${item.issuerId}" class="btn-card-edit">수정</a>
+              </div>
+            </div>
+
+            <div class="issuer-meta-grid">
+              <div class="issuer-meta-item">
+                <span class="meta-label">아이디</span>
+                <span class="meta-val">${escapeHtml(item.username || '-')}</span>
+              </div>
+              <div class="issuer-meta-item">
+                <span class="meta-label">전화번호</span>
+                <span class="meta-val">${escapeHtml(item.phone || '연락처 미등록')}</span>
+              </div>
+              <div class="issuer-meta-item">
+                <span class="meta-label">위치</span>
+                <span class="meta-val">${escapeHtml(item.address || '위치 미등록')}</span>
+              </div>
+            </div>
+
+            <div class="issuer-card-divider"></div>
+
+            ${productContent}
+          </div>
+        `;
       }).join('');
     }
 

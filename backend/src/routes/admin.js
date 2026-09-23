@@ -733,33 +733,105 @@ router.put('/issuance-rules', authenticate, authorize('admin'), async (req, res,
 router.get('/issuers', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const [issuers] = await pool.execute(
-      `SELECT id, username, name, product_name, product_price, created_at FROM issuers ORDER BY created_at ASC`
+      `SELECT id, username, name, phone, address, product_name, product_price, created_at FROM issuers ORDER BY created_at ASC`
     );
     const [allocations] = await pool.execute(
       `SELECT id, issuer_id, face_value, total_count, issued_count, created_at 
        FROM issuer_allocations ORDER BY created_at ASC`
     );
-    res.json({ success: true, data: { issuers, allocations } });
-  } catch (err) { next(err); }
+    const [products] = await pool.execute(
+      `SELECT id, issuer_id, product_name, price, display_order FROM issuer_products ORDER BY display_order ASC, id ASC`
+    );
+    const [rules] = await pool.execute(
+      `SELECT min_amount, max_amount, face_value FROM coupon_issuance_rules ORDER BY display_order ASC`
+    );
+
+    const getCouponFaceValue = (price) => {
+      if (!rules || rules.length === 0) return null;
+      const p = Number(price);
+      for (const r of rules) {
+        const min = Number(r.min_amount);
+        const max = r.max_amount !== null && r.max_amount !== undefined ? Number(r.max_amount) : Infinity;
+        if (p >= min && p <= max) {
+          return Number(r.face_value);
+        }
+      }
+      return null;
+    };
+
+    const issuersWithProducts = issuers.map(iss => {
+      let issProds = products.filter(p => p.issuer_id === iss.id);
+      // issuer_products에 없는 경우 레거시 컬럼 폴백
+      if (issProds.length === 0 && iss.product_name) {
+        issProds = [{
+          id: 0,
+          issuer_id: iss.id,
+          product_name: iss.product_name,
+          price: iss.product_price || 0,
+          display_order: 1
+        }];
+      }
+      const mappedProds = issProds.map(p => ({
+        ...p,
+        coupon_face_value: getCouponFaceValue(p.price)
+      }));
+
+      return {
+        ...iss,
+        products: mappedProds
+      };
+    });
+
+    res.json({ success: true, data: { issuers: issuersWithProducts, allocations } });
+  } catch (err) {
+    next(err);
+  }
 });
 
-// ── 2. 신규 발행처 등록 ──
+// ── 2. 새 발행처 등록 (다중 상품 지원) ──
 router.post('/issuers', authenticate, authorize('admin'), async (req, res, next) => {
-  const { username, password, name, productName, productPrice } = req.body;
+  const { username, password, name, phone, address, products, productName, productPrice } = req.body;
   if (!username || !password || !name) {
-    return res.status(400).json({ success: false, message: '아이디, 비밀번호, 발행처명을 모두 입력해주세요.' });
+    return res.status(400).json({ success: false, message: '아이디, 비밀번호, 기관명은 필수입니다.' });
   }
-  if (!productName || productPrice === undefined || productPrice === null || isNaN(productPrice) || Number(productPrice) < 0) {
-    return res.status(400).json({ success: false, message: '입장권(제품)명과 제품 금액을 정확히 입력해주세요.' });
+
+  // 복수 상품 목록 정규화
+  let productList = [];
+  if (Array.isArray(products) && products.length > 0) {
+    productList = products.map(p => ({
+      productName: (p.productName || p.product_name || '').trim(),
+      price: Number(String(p.price || 0).replace(/[^0-9]/g, ''))
+    })).filter(p => p.productName && !isNaN(p.price));
+  } else if (productName && productPrice !== undefined) {
+    const pPrice = Number(String(productPrice).replace(/[^0-9]/g, ''));
+    if (productName.trim() && !isNaN(pPrice)) {
+      productList = [{ productName: productName.trim(), price: pPrice }];
+    }
   }
+
+  if (productList.length === 0) {
+    return res.status(400).json({ success: false, message: '최소 1개 이상의 상품명과 금액을 입력해주세요.' });
+  }
+
   try {
     const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash(password, 10);
-    await pool.execute(
-      `INSERT INTO issuers (username, password_hash, name, product_name, product_price) VALUES (?, ?, ?, ?, ?)`,
-      [username, hashedPassword, name, productName, Number(productPrice)]
+    const firstProd = productList[0];
+
+    const [result] = await pool.execute(
+      `INSERT INTO issuers (username, password_hash, name, phone, address, product_name, product_price) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [username, hashedPassword, name, phone || null, address || null, firstProd.productName, firstProd.price]
     );
-    res.json({ success: true, message: '발행처가 등록되었습니다.' });
+    const issuerId = result.insertId;
+
+    for (let i = 0; i < productList.length; i++) {
+      await pool.execute(
+        `INSERT INTO issuer_products (issuer_id, product_name, price, display_order) VALUES (?, ?, ?, ?)`,
+        [issuerId, productList[i].productName, productList[i].price, i + 1]
+      );
+    }
+
+    res.json({ success: true, message: '발행처가 등록되었습니다.', data: { id: issuerId } });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ success: false, message: '이미 존재하는 발행처 아이디입니다.' });
@@ -768,25 +840,60 @@ router.post('/issuers', authenticate, authorize('admin'), async (req, res, next)
   }
 });
 
-// ── 2.5 단일 발행처 상세 조회 ──
+// ── 2.5 단일 발행처 상세 조회 (복수 상품 포함) ──
 router.get('/issuers/:id', authenticate, authorize('admin'), async (req, res, next) => {
   const { id } = req.params;
   try {
     const [rows] = await pool.execute(
-      `SELECT id, username, name, product_name, product_price, created_at FROM issuers WHERE id = ?`,
+      `SELECT id, username, name, phone, address, product_name, product_price, created_at FROM issuers WHERE id = ?`,
       [id]
     );
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: '존재하지 않는 발행처입니다.' });
     }
-    res.json({ success: true, data: rows[0] });
+
+    const [products] = await pool.execute(
+      `SELECT id, product_name, price, display_order FROM issuer_products WHERE issuer_id = ? ORDER BY display_order ASC, id ASC`,
+      [id]
+    );
+    const [rules] = await pool.execute(
+      `SELECT min_amount, max_amount, face_value FROM coupon_issuance_rules ORDER BY display_order ASC`
+    );
+
+    const getCouponFaceValue = (price) => {
+      if (!rules || rules.length === 0) return null;
+      const p = Number(price);
+      for (const r of rules) {
+        const min = Number(r.min_amount);
+        const max = r.max_amount !== null && r.max_amount !== undefined ? Number(r.max_amount) : Infinity;
+        if (p >= min && p <= max) return Number(r.face_value);
+      }
+      return null;
+    };
+
+    let mappedProds = products.map(p => ({
+      ...p,
+      coupon_face_value: getCouponFaceValue(p.price)
+    }));
+
+    if (mappedProds.length === 0 && rows[0].product_name) {
+      mappedProds = [{
+        id: 0,
+        product_name: rows[0].product_name,
+        price: rows[0].product_price || 0,
+        display_order: 1,
+        coupon_face_value: getCouponFaceValue(rows[0].product_price)
+      }];
+    }
+
+    res.json({ success: true, data: { ...rows[0], products: mappedProds } });
   } catch (err) { next(err); }
 });
 
-// ── 2.6 발행처 정보 수정 ──
+// ── 2.6 발행처 정보 수정 (복수 상품 지원) ──
 router.put('/issuers/:id', authenticate, authorize('admin'), async (req, res, next) => {
   const { id } = req.params;
-  const { name, password, productName, productPrice } = req.body;
+  const { name, phone, address, password, products, productName, productPrice } = req.body;
   if (!name) {
     return res.status(400).json({ success: false, message: '기관명을 입력해주세요.' });
   }
@@ -794,14 +901,43 @@ router.put('/issuers/:id', authenticate, authorize('admin'), async (req, res, ne
     const updateFields = ['name = ?'];
     const updateParams = [name];
 
-    if (productName !== undefined) {
-      updateFields.push('product_name = ?');
-      updateParams.push(productName);
+    if (phone !== undefined) {
+      updateFields.push('phone = ?');
+      updateParams.push(phone || null);
     }
-    if (productPrice !== undefined && !isNaN(productPrice)) {
-      updateFields.push('product_price = ?');
-      updateParams.push(Number(productPrice));
+    if (address !== undefined) {
+      updateFields.push('address = ?');
+      updateParams.push(address || null);
     }
+
+    // 복수 상품 목록 정규화
+    let productList = [];
+    if (Array.isArray(products)) {
+      productList = products.map(p => ({
+        productName: (p.productName || p.product_name || '').trim(),
+        price: Number(String(p.price || 0).replace(/[^0-9]/g, ''))
+      })).filter(p => p.productName && !isNaN(p.price));
+    } else if (productName && productPrice !== undefined) {
+      const pPrice = Number(String(productPrice).replace(/[^0-9]/g, ''));
+      if (productName.trim() && !isNaN(pPrice)) {
+        productList = [{ productName: productName.trim(), price: pPrice }];
+      }
+    }
+
+    if (productList.length > 0) {
+      updateFields.push('product_name = ?', 'product_price = ?');
+      updateParams.push(productList[0].productName, productList[0].price);
+
+      // issuer_products 갱신
+      await pool.execute(`DELETE FROM issuer_products WHERE issuer_id = ?`, [id]);
+      for (let i = 0; i < productList.length; i++) {
+        await pool.execute(
+          `INSERT INTO issuer_products (issuer_id, product_name, price, display_order) VALUES (?, ?, ?, ?)`,
+          [id, productList[i].productName, productList[i].price, i + 1]
+        );
+      }
+    }
+
     if (password) {
       const bcrypt = require('bcryptjs');
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -845,18 +981,6 @@ router.post('/issuers/allocations', authenticate, authorize('admin'), async (req
     return res.status(400).json({ success: false, message: '발행처, 배정 금액, 배정 수량을 올바르게 입력해주세요.' });
   }
   try {
-    // 이미 다른 금액권이 배정되어 있는지 검사
-    const [existing] = await pool.execute(
-      `SELECT DISTINCT face_value FROM issuer_allocations WHERE issuer_id = ?`,
-      [issuerId]
-    );
-    if (existing.length > 0 && existing.some(e => Number(e.face_value) !== Number(faceValue))) {
-      return res.status(400).json({
-        success: false,
-        message: `이미 이 발행처에는 다른 금액권(${Number(existing[0].face_value).toLocaleString()}원)이 배정되어 있습니다. 한 발행처에는 동일한 금액권만 배정할 수 있습니다.`
-      });
-    }
-
     // 예산 초과 검사
     const [settings] = await pool.execute(
       `SELECT setting_value FROM system_settings WHERE setting_key = 'total_budget'`
@@ -877,11 +1001,151 @@ router.post('/issuers/allocations', authenticate, authorize('admin'), async (req
       });
     }
 
-    await pool.execute(
-      `INSERT INTO issuer_allocations (issuer_id, face_value, total_count) VALUES (?, ?, ?)`,
-      [issuerId, faceValue, totalCount]
+    // 동일 발행처 및 동일 권종에 대한 배정이 이미 있으면 total_count 누적, 없으면 신규 삽입
+    const [existing] = await pool.execute(
+      `SELECT id, total_count FROM issuer_allocations WHERE issuer_id = ? AND face_value = ? LIMIT 1`,
+      [issuerId, faceValue]
     );
+    if (existing.length > 0) {
+      await pool.execute(
+        `UPDATE issuer_allocations SET total_count = total_count + ? WHERE id = ?`,
+        [totalCount, existing[0].id]
+      );
+    } else {
+      await pool.execute(
+        `INSERT INTO issuer_allocations (issuer_id, face_value, total_count) VALUES (?, ?, ?)`,
+        [issuerId, faceValue, totalCount]
+      );
+    }
+
     res.json({ success: true, message: '발행처 쿠폰 배정이 완료되었습니다.' });
+  } catch (err) { next(err); }
+});
+
+// ── 3.5. 발행처별 등록 상품 및 쿠폰 배정 설정 목록 조회 (상단 셋팅 테이블용) ──
+router.get('/coupons/issuer-settings', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const [issuers] = await pool.execute(
+      `SELECT id, name, username, phone, address, product_name, product_price FROM issuers ORDER BY id ASC`
+    );
+    const [products] = await pool.execute(
+      `SELECT id, issuer_id, product_name, price, display_order FROM issuer_products ORDER BY display_order ASC, id ASC`
+    );
+    const [rules] = await pool.execute(
+      `SELECT min_amount, max_amount, face_value, rule_name FROM coupon_issuance_rules ORDER BY display_order ASC`
+    );
+    const [allocations] = await pool.execute(
+      `SELECT id, issuer_id, face_value, total_count, issued_count FROM issuer_allocations`
+    );
+
+    const getCouponFaceValue = (price) => {
+      if (!rules || rules.length === 0) return null;
+      const p = Number(price);
+      for (const r of rules) {
+        const min = Number(r.min_amount);
+        const max = r.max_amount !== null && r.max_amount !== undefined ? Number(r.max_amount) : Infinity;
+        if (p >= min && p <= max) return Number(r.face_value);
+      }
+      return null;
+    };
+
+    let totalAllocatedSum = 0;
+    let totalIssuedSum = 0;
+    let totalRemainingSum = 0;
+
+    const list = issuers.map(iss => {
+      let issProds = products.filter(p => p.issuer_id === iss.id);
+      if (issProds.length === 0 && iss.product_name) {
+        issProds = [{
+          id: 0,
+          issuer_id: iss.id,
+          product_name: iss.product_name,
+          price: iss.product_price || 0,
+          display_order: 1
+        }];
+      }
+
+      // 발행처별 상품 목록 매핑
+      const prodsMapped = issProds.map(prod => {
+        const faceVal = getCouponFaceValue(prod.price);
+        const alloc = allocations.find(a => a.issuer_id === iss.id && Number(a.face_value) === Number(faceVal));
+        const totalCount = alloc ? Number(alloc.total_count) : 0;
+        const issuedCount = alloc ? Number(alloc.issued_count) : 0;
+        const remainingCount = Math.max(0, totalCount - issuedCount);
+
+        totalAllocatedSum += totalCount;
+        totalIssuedSum += issuedCount;
+        totalRemainingSum += remainingCount;
+
+        return {
+          productId: prod.id,
+          productName: prod.product_name,
+          productPrice: prod.price,
+          couponFaceValue: faceVal,
+          allocationId: alloc ? alloc.id : null,
+          totalCount,
+          issuedCount,
+          remainingCount
+        };
+      });
+
+      // 만약 등록된 상품이 없는 경우의 예외 처리
+      if (prodsMapped.length === 0) {
+        const issAllocs = allocations.filter(a => a.issuer_id === iss.id);
+        if (issAllocs.length > 0) {
+          issAllocs.forEach(a => {
+            const tc = Number(a.total_count);
+            const ic = Number(a.issued_count);
+            const rc = Math.max(0, tc - ic);
+            totalAllocatedSum += tc;
+            totalIssuedSum += ic;
+            totalRemainingSum += rc;
+            prodsMapped.push({
+              productId: 0,
+              productName: '미등록 (기본 배정)',
+              productPrice: null,
+              couponFaceValue: Number(a.face_value),
+              allocationId: a.id,
+              totalCount: tc,
+              issuedCount: ic,
+              remainingCount: rc
+            });
+          });
+        } else {
+          prodsMapped.push({
+            productId: 0,
+            productName: '등록 상품 없음',
+            productPrice: null,
+            couponFaceValue: null,
+            allocationId: null,
+            totalCount: 0,
+            issuedCount: 0,
+            remainingCount: 0
+          });
+        }
+      }
+
+      return {
+        issuerId: iss.id,
+        issuerName: iss.name,
+        username: iss.username,
+        phone: iss.phone,
+        address: iss.address,
+        products: prodsMapped
+      };
+    });
+
+    res.json({
+      success: true,
+      data: {
+        summary: {
+          totalAllocated: totalAllocatedSum,
+          totalIssued: totalIssuedSum,
+          totalRemaining: totalRemainingSum
+        },
+        issuers: list
+      }
+    });
   } catch (err) { next(err); }
 });
 

@@ -89,6 +89,33 @@ async function initializeDatabase(retries = 10, delay = 2000) {
         } catch (err) {}
       }
 
+      // issuer_products 테이블 생성 및 데이터 이관
+      try {
+        await conn.execute(`
+          CREATE TABLE IF NOT EXISTS issuer_products (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            issuer_id INT UNSIGNED NOT NULL,
+            product_name VARCHAR(100) NOT NULL,
+            price INT UNSIGNED NOT NULL,
+            display_order INT DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (issuer_id) REFERENCES issuers(id) ON DELETE CASCADE
+          ) ENGINE=InnoDB;
+        `);
+        await conn.execute(`
+          INSERT INTO issuer_products (issuer_id, product_name, price, display_order)
+          SELECT id, product_name, product_price, 1
+          FROM issuers
+          WHERE product_name IS NOT NULL AND product_name != ''
+            AND NOT EXISTS (
+              SELECT 1 FROM issuer_products WHERE issuer_products.issuer_id = issuers.id
+            );
+        `);
+        logger.info('✅ DB 스키마 업데이트 성공 (issuer_products 테이블)');
+      } catch (err) {
+        logger.info(`ℹ️ DB 스키마 업데이트 스킵: ${err.message}`);
+      }
+
       conn.release();
       return;
     } catch (err) {
