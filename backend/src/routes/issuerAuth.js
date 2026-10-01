@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const pool = require('../config/database');
 const logger = require('../utils/logger');
+const crypto = require('crypto');
+const { hashCouponCode, generateToken, encodeSecureToken } = require('../utils/crypto');
 const { authenticate, authorize } = require('../middleware/auth');
 
 // 로그인 속도 제한 (10분 10회)
@@ -408,4 +410,285 @@ router.get('/stats', authenticate, authorize('issuer'), async (req, res, next) =
   }
 });
 
+// ── GET /api/auth/issuer/inventory ──
+router.get('/inventory', authenticate, authorize('issuer'), async (req, res, next) => {
+  try {
+    // 1. 배정 현황
+    const [allocations] = await pool.execute(
+      `SELECT id, face_value, total_count, issued_count, 
+              (total_count - issued_count) AS remaining_count
+       FROM issuer_allocations
+       WHERE issuer_id = ?
+       ORDER BY face_value ASC`,
+      [req.user.id]
+    );
+
+    // 2. 등록된 상품 목록 (issuer_products)
+    let [products] = await pool.execute(
+      `SELECT id, product_name, price, display_order 
+       FROM issuer_products 
+       WHERE issuer_id = ? 
+       ORDER BY display_order ASC, id ASC`,
+      [req.user.id]
+    );
+
+    // 상품이 issuer_products에 없을 경우 issuers 테이블 레거시 컬럼 폴백
+    if (products.length === 0) {
+      const [[issuerRow]] = await pool.execute(
+        `SELECT product_name, product_price FROM issuers WHERE id = ?`,
+        [req.user.id]
+      );
+      if (issuerRow && issuerRow.product_name) {
+        products = [{
+          id: 0,
+          product_name: issuerRow.product_name,
+          price: issuerRow.product_price || 0,
+          display_order: 1
+        }];
+      }
+    }
+
+    // 3. 쿠폰 지급 규정 (coupon_issuance_rules)
+    const [rules] = await pool.execute(
+      `SELECT min_amount, max_amount, face_value, rule_name 
+       FROM coupon_issuance_rules 
+       ORDER BY display_order ASC`
+    );
+
+    // 규정에 따른 상품별 쿠폰 지급 매칭 계산 함수
+    const getCouponFaceValue = (price) => {
+      if (!rules || rules.length === 0) return 0;
+      const p = Number(price);
+      for (const r of rules) {
+        const min = Number(r.min_amount);
+        const max = r.max_amount !== null && r.max_amount !== undefined ? Number(r.max_amount) : Infinity;
+        if (p >= min && p <= max) {
+          return Number(r.face_value);
+        }
+      }
+      return 0;
+    };
+
+    const productsWithRule = products.map(p => {
+      const matchedFaceValue = getCouponFaceValue(p.price);
+      const alloc = allocations.find(a => Number(a.face_value) === matchedFaceValue);
+      return {
+        ...p,
+        coupon_face_value: matchedFaceValue,
+        allocation_id: alloc ? alloc.id : null
+      };
+    });
+
+    res.json({ 
+      success: true, 
+      data: allocations, // 기존 호환용
+      allocations,
+      products: productsWithRule,
+      rules
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── POST /api/auth/issuer/issue ──
+router.post('/issue', authenticate, authorize('issuer'), async (req, res, next) => {
+  const { allocationId, count, items, distributionType, deliveryMethod, phones } = req.body;
+
+  if (!['bundle', 'individual'].includes(distributionType)) {
+    return res.status(400).json({ success: false, message: '수령 방식을 선택해주세요.' });
+  }
+  if (!['kakao', 'sms', 'paper', 'qr'].includes(deliveryMethod)) {
+    return res.status(400).json({ success: false, message: '발급 수단을 선택해주세요.' });
+  }
+
+  // 다중 품목 또는 단일 배정 항목 정규화
+  let issueItems = [];
+  if (Array.isArray(items) && items.length > 0) {
+    issueItems = items
+      .map(it => ({
+        allocationId: it.allocationId ? parseInt(it.allocationId, 10) : null,
+        faceValue: parseInt(it.faceValue || it.face_value || 0, 10),
+        count: parseInt(it.count || it.quantity || 0, 10),
+        productName: it.productName || it.product_name || '',
+        productPrice: parseInt(it.productPrice || it.price || 0, 10)
+      }))
+      .filter(it => it.count > 0 && it.faceValue > 0);
+  } else if (allocationId && count) {
+    const numCount = parseInt(count, 10);
+    if (numCount > 0) {
+      issueItems = [{
+        allocationId: parseInt(allocationId, 10),
+        faceValue: 0, // DB 조회 후 채움
+        count: numCount,
+        productName: '',
+        productPrice: 0
+      }];
+    }
+  }
+
+  if (issueItems.length === 0) {
+    return res.status(400).json({ success: false, message: '발급할 상품 및 수량을 1개 이상 선택해주세요.' });
+  }
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 발행처 정보 조회
+    const [[issuer]] = await connection.execute(
+      `SELECT id, name, username FROM issuers WHERE id = ?`,
+      [req.user.id]
+    );
+    const issuerName = issuer ? issuer.name : '발행처';
+
+    const issuedCoupons = [];
+    const kioskSessionId = generateToken(16);
+    let primaryAllocationId = null;
+    let totalCouponAmount = 0;
+    let totalProductPrice = 0;
+
+    for (const item of issueItems) {
+      let targetAlloc = null;
+
+      if (item.allocationId) {
+        const [rows] = await connection.execute(
+          `SELECT * FROM issuer_allocations WHERE id = ? AND issuer_id = ? FOR UPDATE`,
+          [item.allocationId, req.user.id]
+        );
+        if (rows.length > 0) {
+          targetAlloc = rows[0];
+        }
+      }
+
+      // faceValue 기반으로 배정 매칭 또는 없으면 자동 생성/보충 (수량 제한 없음)
+      if (!targetAlloc && item.faceValue > 0) {
+        const [rows] = await connection.execute(
+          `SELECT * FROM issuer_allocations WHERE issuer_id = ? AND face_value = ? ORDER BY id ASC LIMIT 1 FOR UPDATE`,
+          [req.user.id, item.faceValue]
+        );
+        if (rows.length > 0) {
+          targetAlloc = rows[0];
+        } else {
+          // 해당 권종의 배정 레코드가 없으면 넉넉한 수량으로 신규 생성
+          const [insertAlloc] = await connection.execute(
+            `INSERT INTO issuer_allocations (issuer_id, face_value, total_count, issued_count) VALUES (?, ?, 10000, 0)`,
+            [req.user.id, item.faceValue]
+          );
+          targetAlloc = {
+            id: insertAlloc.insertId,
+            issuer_id: req.user.id,
+            face_value: item.faceValue,
+            total_count: 10000,
+            issued_count: 0
+          };
+        }
+      }
+
+      if (!targetAlloc) {
+        await connection.rollback();
+        return res.status(404).json({ success: false, message: `권종 정보를 찾을 수 없습니다.` });
+      }
+
+      // 수량 제한 제거: 잔여량이 부족할 경우 발행처 배정 한도를 자동 증액
+      const remaining = targetAlloc.total_count - targetAlloc.issued_count;
+      if (remaining < item.count) {
+        const additional = Math.max(1000, item.count * 10);
+        await connection.execute(
+          `UPDATE issuer_allocations SET total_count = total_count + ? WHERE id = ?`,
+          [additional, targetAlloc.id]
+        );
+        targetAlloc.total_count += additional;
+      }
+
+      if (!primaryAllocationId) {
+        primaryAllocationId = targetAlloc.id;
+      }
+
+      const itemFaceValue = Number(targetAlloc.face_value);
+      totalCouponAmount += itemFaceValue * item.count;
+      totalProductPrice += (item.productPrice || 0) * item.count;
+
+      // 쿠폰 개별 발급 생성
+      for (let i = 0; i < item.count; i++) {
+        const randomSuffix = crypto.randomBytes(4).toString('hex').toUpperCase();
+        const timestampPart = Date.now().toString(36).toUpperCase().slice(-4);
+        const serialCode = `ONG-${Math.floor(itemFaceValue / 1000)}K-${timestampPart}-${randomSuffix}`;
+        const codeHash = hashCouponCode(serialCode);
+
+        // QR 개별 출력일 경우 쿠폰마다 고유 세션 ID 생성, 일괄 출력일 경우 전체 공유 세션 ID 사용
+        const couponSessionId = (distributionType === 'individual') ? generateToken(16) : kioskSessionId;
+        const couponSecureToken = encodeSecureToken(targetAlloc.id);
+        const couponQrUrl = `/tourist/landing.html?token=${couponSecureToken}&kioskSessionId=${couponSessionId}`;
+
+        if (deliveryMethod === 'paper') {
+          await connection.execute(
+            `INSERT INTO paper_coupons (random_code_hash, face_value, issued_by_location) VALUES (?, ?, ?)`,
+            [codeHash, itemFaceValue, issuerName]
+          );
+        }
+
+        const couponType = deliveryMethod === 'paper' ? 'paper' : 'digital';
+        const [insertRes] = await connection.execute(
+          `INSERT INTO coupons (code_hash, coupon_type, face_value, issued_to, status, issuer_allocation_id, kiosk_session_id, expires_at)
+           VALUES (?, ?, ?, NULL, 'available', ?, ?, DATE_ADD(NOW(), INTERVAL 1 YEAR))`,
+          [codeHash, couponType, itemFaceValue, targetAlloc.id, couponSessionId]
+        );
+
+        const couponIndex = issuedCoupons.length;
+        const targetPhone = (Array.isArray(phones) && phones[couponIndex]) ? phones[couponIndex] : null;
+
+        issuedCoupons.push({
+          id: insertRes.insertId,
+          serialCode,
+          faceValue: itemFaceValue,
+          productName: item.productName || '',
+          issuerName,
+          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+          kioskSessionId: couponSessionId,
+          qrUrl: couponQrUrl,
+          phone: targetPhone
+        });
+      }
+
+      // 배정 발행 수량 업데이트
+      await connection.execute(
+        `UPDATE issuer_allocations SET issued_count = issued_count + ? WHERE id = ?`,
+        [item.count, targetAlloc.id]
+      );
+    }
+
+    await connection.commit();
+
+    logger.info(`[IssuerAuth] 쿠폰 복수/단일 발급 완료: issuer=${req.user.username}, 총권종금액=${totalCouponAmount}, 발행수량=${issuedCoupons.length}, 방식=${deliveryMethod}`);
+
+    const secureToken = encodeSecureToken(primaryAllocationId);
+    const qrUrl = `/tourist/landing.html?token=${secureToken}&kioskSessionId=${kioskSessionId}`;
+
+    res.json({
+      success: true,
+      message: '쿠폰이 성공적으로 발행되었습니다.',
+      data: {
+        allocationId: primaryAllocationId,
+        count: issuedCoupons.length,
+        totalAmount: totalCouponAmount,
+        totalProductPrice,
+        items: issueItems,
+        distributionType,
+        deliveryMethod,
+        kioskSessionId,
+        qrUrl,
+        coupons: issuedCoupons,
+      }
+    });
+
+  } catch (err) {
+    await connection.rollback();
+    next(err);
+  } finally {
+    connection.release();
+  }
+});
+
 module.exports = router;
+

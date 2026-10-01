@@ -7,6 +7,7 @@ const { hashCouponCode, decodeSecureToken, encodeSecureToken, generateToken } = 
 // 쿠폰 배정 정보 조회 (암호화된 보안 토큰 또는 숫자 ID 해석)
 router.get('/allocation-public/:token', async (req, res, next) => {
   const token = req.params.token;
+  const { kioskSessionId } = req.query;
   const allocationId = decodeSecureToken(token);
   if (!allocationId) {
     return res.status(404).json({ success: false, message: '유효하지 않은 쿠폰 발급 정보입니다.' });
@@ -23,6 +24,19 @@ router.get('/allocation-public/:token', async (req, res, next) => {
       return res.status(404).json({ success: false, message: '유효하지 않은 쿠폰 발급 정보입니다.' });
     }
     const data = { ...rows[0], secure_token: encodeSecureToken(rows[0].id) };
+
+    // 키오스크 세션이 지정되어 있으면 세션 전체 쿠폰 금액 및 수량 합산 반영
+    if (kioskSessionId) {
+      const [sessionRows] = await pool.execute(
+        `SELECT SUM(face_value) as total_face, COUNT(*) as coupon_count FROM coupons WHERE kiosk_session_id = ?`,
+        [kioskSessionId]
+      );
+      if (sessionRows.length > 0 && sessionRows[0].total_face > 0) {
+        data.face_value = Number(sessionRows[0].total_face);
+        data.coupon_count = Number(sessionRows[0].coupon_count);
+      }
+    }
+
     res.json({ success: true, data });
   } catch (err) {
     next(err);
@@ -103,17 +117,47 @@ router.post('/issue-by-qr', authenticate, authorize('tourist'), async (req, res,
 
     // 1. 키오스크 1회성 세션 검증: 이미 누군가가 이 QR(kioskSessionId)을 찍어 발급받았다면 카카오톡 공유 어뷰징 차단
     if (kioskSessionId) {
-      const [usedSessions] = await connection.execute(
-        `SELECT id FROM coupons WHERE kiosk_session_id = ? LIMIT 1`,
+      const [claimedCoupons] = await connection.execute(
+        `SELECT id FROM coupons WHERE kiosk_session_id = ? AND issued_to IS NOT NULL LIMIT 1`,
         [kioskSessionId]
       );
-      if (usedSessions.length > 0) {
+      if (claimedCoupons.length > 0) {
         await connection.rollback();
         return res.status(400).json({ success: false, message: '이미 발급에 사용 완료된 QR 코드입니다. 현장 키오스크의 새로 갱신된 QR 코드를 스캔해 주세요.' });
       }
+
+      // 현장 키오스크에서 1단계로 생성된 미등록 대기 쿠폰 목록 조회
+      const [pendingCoupons] = await connection.execute(
+        `SELECT id, face_value FROM coupons WHERE kiosk_session_id = ? AND issued_to IS NULL`,
+        [kioskSessionId]
+      );
+
+      if (pendingCoupons.length > 0) {
+        const totalAmount = pendingCoupons.reduce((sum, c) => sum + Number(c.face_value), 0);
+
+        // 2단계 쿠폰 등록: 소유자를 현재 로그인한 관광객으로 변경
+        await connection.execute(
+          `UPDATE coupons SET issued_to = ? WHERE kiosk_session_id = ? AND issued_to IS NULL`,
+          [req.user.id, kioskSessionId]
+        );
+
+        // 관광객 잔액 업데이트
+        await connection.execute(
+          `UPDATE users SET coupon_balance = coupon_balance + ? WHERE id = ?`,
+          [totalAmount, req.user.id]
+        );
+
+        await connection.commit();
+        return res.json({ 
+          success: true, 
+          message: `${totalAmount.toLocaleString()}원 쿠폰(${pendingCoupons.length}장)이 지갑으로 성공적으로 발급되었습니다.`,
+          count: pendingCoupons.length,
+          totalAmount
+        });
+      }
     }
 
-    // 2. 배정 정보 조회 (Pessimistic Lock)
+    // 2. 단일 배정 직접 발급 (폴백)
     const [allocations] = await connection.execute(
       `SELECT * FROM issuer_allocations WHERE id = ? FOR UPDATE`,
       [targetId]
@@ -126,30 +170,26 @@ router.post('/issue-by-qr', authenticate, authorize('tourist'), async (req, res,
 
     const allocation = allocations[0];
 
-    // 3. 발행처 전체 수량 초과 여부만 체크 (예: 200장 한도 수량)
+    // 발행처 전체 수량 초과 여부만 체크
     if (allocation.issued_count >= allocation.total_count) {
       await connection.rollback();
       return res.status(400).json({ success: false, message: '이 발행처의 쿠폰 수량이 모두 소진되었습니다.' });
     }
 
-    // 4. 각 발급 건별 독자적인 개별 고유 쿠폰 번호 난수 생성 (사용자가 보유 중이어도 무조건 추가 발급)
     const rawCode = `QR_${allocation.id}_${req.user.id}_${Date.now()}_${generateToken(6)}`;
     const codeHash = hashCouponCode(rawCode);
 
-    // 5. 신규 쿠폰 레코드 무조건 삽입
     await connection.execute(
       `INSERT INTO coupons (code_hash, coupon_type, face_value, issued_to, status, issuer_allocation_id, kiosk_session_id)
        VALUES (?, 'digital', ?, ?, 'available', ?, ?)`,
       [codeHash, allocation.face_value, req.user.id, allocation.id, kioskSessionId || null]
     );
 
-    // 6. 발행처 전체 발행 수량(issued_count) 1 증가 (200장 중 1장 차감)
     await connection.execute(
       `UPDATE issuer_allocations SET issued_count = issued_count + 1 WHERE id = ?`,
       [allocation.id]
     );
 
-    // 7. 관광객 잔액 업데이트
     await connection.execute(
       `UPDATE users SET coupon_balance = coupon_balance + ? WHERE id = ?`,
       [allocation.face_value, req.user.id]
@@ -168,22 +208,29 @@ router.post('/issue-by-qr', authenticate, authorize('tourist'), async (req, res,
 // 키오스크 실시간 폴링용 상태 체크 API
 router.get('/kiosk-poll', async (req, res, next) => {
   const { allocationId, token, kioskSessionId } = req.query;
-  const targetId = decodeSecureToken(token || allocationId);
 
-  if (!targetId || !kioskSessionId) {
-    return res.json({ success: true, isIssued: false });
+  if (!kioskSessionId || kioskSessionId === 'undefined') {
+    return res.json({ success: true, isIssued: false, isRegistered: false, phone: null });
   }
 
   try {
     const [rows] = await pool.execute(
-      `SELECT id FROM coupons WHERE issuer_allocation_id = ? AND kiosk_session_id = ? LIMIT 1`,
-      [targetId, kioskSessionId]
+      `SELECT c.id, c.status, c.issued_to, u.nickname, u.provider_id 
+       FROM coupons c 
+       LEFT JOIN users u ON c.issued_to = u.id 
+       WHERE c.kiosk_session_id = ? AND c.issued_to IS NOT NULL LIMIT 1`,
+      [kioskSessionId]
     );
 
-    if (rows.length > 0) {
-      return res.json({ success: true, isIssued: true });
-    }
-    res.json({ success: true, isIssued: false });
+    const isRegistered = rows.length > 0;
+    const phone = isRegistered ? (rows[0].nickname || rows[0].provider_id || String(rows[0].issued_to)) : null;
+
+    res.json({
+      success: true,
+      isIssued: isRegistered,
+      isRegistered,
+      phone
+    });
   } catch (err) {
     next(err);
   }

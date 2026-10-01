@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { hashCouponCode } = require('../utils/crypto');
 
 /**
  * 가맹점 쿠폰 스캔 및 결제 처리
@@ -26,12 +27,12 @@ exports.scanCoupon = async (req, res) => {
       return res.status(403).json({ message: '승인 완료된 가맹점만 결제를 처리할 수 있습니다.' });
     }
 
-    // 1. 쿠폰 정보 조회 (SHA-256 해시 비교)
-    // 실제 운영 시에는 crypto.createHash('sha256').update(couponCode + salt).digest('hex') 필요
-    // 여기서는 단순화를 위해 평문 또는 매칭되는 해시를 찾는다고 가정
+    // 1. 쿠폰 정보 조회 (바코드 일련번호 해시 또는 동적 QR 토큰)
+    const cleanCode = couponCode.trim().toUpperCase();
+    const hashed = hashCouponCode(cleanCode);
     const [coupons] = await connection.execute(
-      'SELECT * FROM coupons WHERE code_hash = ?',
-      [couponCode]
+      'SELECT * FROM coupons WHERE code_hash = ? OR code_hash = ? OR active_qr_token = ? LIMIT 1',
+      [cleanCode, hashed, cleanCode]
     );
 
     if (coupons.length === 0) {

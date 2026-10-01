@@ -5,7 +5,14 @@
 const BASE = '/api'
 
 function getToken() {
-  return localStorage.getItem('ongjin_token')
+  const path = typeof window !== 'undefined' ? window.location.pathname : ''
+  if (path.includes('/issuer/')) {
+    return localStorage.getItem('ongjin_issuer_token') || localStorage.getItem('ongjin_token')
+  }
+  if (path.includes('/admin/')) {
+    return localStorage.getItem('ongjin_admin_token') || localStorage.getItem('ongjin_token')
+  }
+  return localStorage.getItem('ongjin_token') || localStorage.getItem('ongjin_issuer_token') || localStorage.getItem('ongjin_admin_token')
 }
 
 function setTokens(token, refresh) {

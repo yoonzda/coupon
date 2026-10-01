@@ -24,6 +24,7 @@ const issuerAuthRouter = require('./routes/issuerAuth');
 require('./jobs/settlementJob');
 
 const app = express();
+app.set('trust proxy', 1);
 
 // ── 보안 미들웨어 ──────────────────────────────────
 app.use(helmet());
@@ -32,12 +33,13 @@ app.use(cors({
   credentials: true,
 }));
 
-// 전역 Rate Limit (1분 100회)
+// 전역 Rate Limit (1분 1000회, 폴링/헬스체크 제외)
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 100,
+  max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.path.includes('/kiosk-poll') || req.path.includes('/health'),
   message: { success: false, message: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.' },
 });
 app.use(globalLimiter);

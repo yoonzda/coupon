@@ -106,9 +106,9 @@
     .admin-table td { padding: 16px 24px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; vertical-align: middle; }
     .admin-table tr:hover { background: #f8fafc; }
   </style>
-  <script type="module" crossorigin src="/assets/admin-detail-issuer-CCTNhLQ6.js"></script>
+  <script type="module" crossorigin src="/assets/admin-detail-issuer-C4dy7ktT.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-BrJ7NzZM.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-Ba6NtGBQ.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
   <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
 </head>
@@ -177,6 +177,23 @@
             <span class="profile-detail-value" id="profile-regdate">-</span>
           </div>
         </div>
+      </div>
+
+      <!-- 취급 상품 목록 테이블 -->
+      <h2 class="table-title">취급 상품 목록</h2>
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width: 40%; text-align: center;">상품명</th>
+              <th style="width: 30%; text-align: center;">금액</th>
+              <th style="width: 30%; text-align: center;">할인권 금액</th>
+            </tr>
+          </thead>
+          <tbody id="product-detail-list">
+            <tr><td colspan="3" class="text-center" style="padding: 30px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- 배정 이력 테이블 -->
