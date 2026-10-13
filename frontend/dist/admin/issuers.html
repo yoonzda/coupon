@@ -123,6 +123,47 @@
       color: #1e293b;
       font-weight: 500;
       font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 아이디 복사 버튼 */
+    .btn-copy-id {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: #475569;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      cursor: pointer;
+      line-height: 1.2;
+      transition: all 0.15s ease;
+      vertical-align: middle;
+      user-select: none;
+    }
+    .btn-copy-id:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+      border-color: #94a3b8;
+    }
+    .btn-copy-id:active {
+      transform: scale(0.97);
+    }
+    .btn-copy-id svg {
+      width: 12px;
+      height: 12px;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+    .btn-copy-id.copied {
+      background: #ecfdf5;
+      color: #15803d;
+      border-color: #86efac;
     }
 
     .issuer-card-divider {
@@ -156,7 +197,7 @@
 
     .table-title { font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; }
   </style>
-  <script type="module" crossorigin src="/assets/admin-issuers-DqBO4MMT.js"></script>
+  <script type="module" crossorigin src="/assets/admin-issuers-B3FvW3Pi.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-Ba6NtGBQ.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">

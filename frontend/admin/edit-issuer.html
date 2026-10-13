@@ -84,6 +84,12 @@
       font-weight: 600;
       pointer-events: none;
     }
+    @media (max-width: 540px) {
+      .product-grid-row {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -132,7 +138,7 @@
             <input type="text" id="issuer-phone" placeholder="예: 032-899-3810" />
           </div>
           <div class="form-group">
-            <label for="issuer-address">위치 (주소)</label>
+            <label for="issuer-address">위치</label>
             <input type="text" id="issuer-address" placeholder="예: 인천광역시 옹진군 자월면 소야리" />
           </div>
           <div class="form-group">
@@ -140,7 +146,7 @@
             <input type="password" id="issuer-password" placeholder="변경 시에만 입력" />
           </div>
 
-          <!-- 상품 입력 영역 (박스 없이 기본 폼 스타일과 100% 동일하게 배치) -->
+          <!-- 상품 입력 영역 (상품명, 금액 2열 배치) -->
           <div id="product-list-container">
             <!-- dynamic products -->
           </div>
@@ -187,49 +193,38 @@
       const itemEl = document.createElement('div');
       itemEl.className = 'product-item';
       itemEl.id = rowId;
+      itemEl.style.marginBottom = '20px';
 
       const formattedPrice = (price !== '' && price !== null && price !== undefined)
         ? Number(price).toLocaleString('ko-KR')
         : '';
 
-      if (currentCount === 0) {
-        // 첫 번째 상품은 다른 기본 필드와 완벽히 동일한 연속 레이아웃
-        itemEl.innerHTML = `
-          <div class="form-group">
-            <label>상품명</label>
-            <input type="text" class="prod-name-input" required value="${escapeHtml(name)}" />
-          </div>
-          <div class="form-group">
-            <label>금액</label>
-            <div class="input-group">
-              <input type="text" class="prod-price-input" required autocomplete="off" value="${formattedPrice}" />
-              <span class="input-unit">원</span>
-            </div>
-          </div>
-        `;
-      } else {
-        // 추가 상품: 구분선 + 상품명 라벨 우측에 삭제 버튼 인라인 배치 (소제목 제거)
-        itemEl.style.marginTop = '24px';
+      if (currentCount > 0) {
+        itemEl.style.marginTop = '20px';
         itemEl.style.paddingTop = '18px';
         itemEl.style.borderTop = '1px dashed #cbd5e1';
+      }
 
-        itemEl.innerHTML = `
-          <div class="form-group">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      itemEl.innerHTML = `
+        <div class="product-grid-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; align-items: center; margin-bottom: 3px; min-height: 20px;">
               <label style="margin-bottom: 0;">상품명</label>
-              <button type="button" onclick="window.removeProductRow('${rowId}')" style="background: none; border: none; color: #be123c; font-size: 0.82rem; font-weight: 600; cursor: pointer; padding: 2px 4px;">삭제</button>
             </div>
-            <input type="text" class="prod-name-input" required value="${escapeHtml(name)}" />
+            <input type="text" class="prod-name-input" placeholder="예: 입장권" required value="${escapeHtml(name)}" />
           </div>
-          <div class="form-group">
-            <label>금액</label>
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; min-height: 20px;">
+              <label style="margin-bottom: 0;">금액</label>
+              ${currentCount > 0 ? `<button type="button" onclick="window.removeProductRow('${rowId}')" style="background: none; border: none; color: #be123c; font-size: 0.82rem; font-weight: 600; cursor: pointer; padding: 0 2px;">삭제</button>` : ''}
+            </div>
             <div class="input-group">
-              <input type="text" class="prod-price-input" required autocomplete="off" value="${formattedPrice}" />
+              <input type="text" class="prod-price-input" placeholder="0" required autocomplete="off" value="${formattedPrice}" />
               <span class="input-unit">원</span>
             </div>
           </div>
-        `;
-      }
+        </div>
+      `;
 
       productContainer.appendChild(itemEl);
 

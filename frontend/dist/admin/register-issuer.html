@@ -155,8 +155,14 @@
       font-weight: 600;
       pointer-events: none;
     }
+    @media (max-width: 540px) {
+      .product-grid-row {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+    }
   </style>
-  <script type="module" crossorigin src="/assets/admin-register-issuer-D-DiPSjQ.js"></script>
+  <script type="module" crossorigin src="/assets/admin-register-issuer-bsTftnvG.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-Ba6NtGBQ.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
@@ -204,7 +210,7 @@
             <input type="text" id="issuer-phone" placeholder="예: 032-899-3810" />
           </div>
           <div class="form-group">
-            <label for="issuer-address">위치 (주소)</label>
+            <label for="issuer-address">위치</label>
             <input type="text" id="issuer-address" placeholder="예: 인천광역시 옹진군 자월면 소야리" />
           </div>
           <div class="form-group">
