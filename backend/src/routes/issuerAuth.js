@@ -5,9 +5,10 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const pool = require('../config/database');
 const logger = require('../utils/logger');
-const crypto = require('crypto');
-const { hashCouponCode, generateToken, encodeSecureToken } = require('../utils/crypto');
 const { authenticate, authorize } = require('../middleware/auth');
+const crypto = require('crypto');
+const { hashCouponCode } = require('../utils/crypto');
+const { enqueue } = require('../services/notificationQueue');
 
 // 로그인 속도 제한 (10분 10회)
 const loginLimiter = rateLimit({
@@ -47,7 +48,7 @@ router.post('/login', loginLimiter, async (req, res, next) => {
     const token = jwt.sign(
       { id: issuer.id, role: 'issuer', name: issuer.name, username: issuer.username },
       process.env.JWT_SECRET,
-      { expiresIn: '8h' }
+      { expiresIn: '2h' }
     );
 
     logger.info(`[IssuerAuth] 로그인 성공: ${username} [${req.ip}]`);
@@ -94,10 +95,18 @@ router.get('/me', authenticate, authorize('issuer'), async (req, res) => {
 router.get('/allocations', authenticate, authorize('issuer'), async (req, res, next) => {
   try {
     const [rows] = await pool.execute(
-      `SELECT id, face_value, total_count, issued_count, created_at 
-       FROM issuer_allocations 
-       WHERE issuer_id = ? 
-       ORDER BY created_at DESC`,
+      `SELECT 
+         ia.id, 
+         ia.face_value, 
+         ia.total_count, 
+         GREATEST(
+           ia.issued_count,
+           COALESCE((SELECT COUNT(*) FROM coupons c WHERE c.issuer_allocation_id = ia.id), 0)
+         ) AS issued_count, 
+         ia.created_at 
+       FROM issuer_allocations ia
+       WHERE ia.issuer_id = ? 
+       ORDER BY ia.face_value ASC, ia.created_at DESC`,
       [req.user.id]
     );
     res.json({ success: true, data: rows });
@@ -410,283 +419,175 @@ router.get('/stats', authenticate, authorize('issuer'), async (req, res, next) =
   }
 });
 
-// ── GET /api/auth/issuer/inventory ──
-router.get('/inventory', authenticate, authorize('issuer'), async (req, res, next) => {
+// ── POST /api/auth/issuer/forest-login (덕적도자연휴양림 전용 로그인 — 당일 자정 만료) ──
+router.post('/forest-login', async (req, res, next) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ success: false, message: '아이디와 비밀번호를 입력해주세요.' });
+  }
+
   try {
-    // 1. 배정 현황
-    const [allocations] = await pool.execute(
-      `SELECT id, face_value, total_count, issued_count, 
-              (total_count - issued_count) AS remaining_count
-       FROM issuer_allocations
-       WHERE issuer_id = ?
-       ORDER BY face_value ASC`,
-      [req.user.id]
+    const [[issuer]] = await pool.execute(
+      `SELECT id, username, password_hash, name FROM issuers WHERE username = ? LIMIT 1`,
+      [username.trim()]
     );
 
-    // 2. 등록된 상품 목록 (issuer_products)
-    let [products] = await pool.execute(
-      `SELECT id, product_name, price, display_order 
-       FROM issuer_products 
-       WHERE issuer_id = ? 
-       ORDER BY display_order ASC, id ASC`,
-      [req.user.id]
-    );
-
-    // 상품이 issuer_products에 없을 경우 issuers 테이블 레거시 컬럼 폴백
-    if (products.length === 0) {
-      const [[issuerRow]] = await pool.execute(
-        `SELECT product_name, product_price FROM issuers WHERE id = ?`,
-        [req.user.id]
-      );
-      if (issuerRow && issuerRow.product_name) {
-        products = [{
-          id: 0,
-          product_name: issuerRow.product_name,
-          price: issuerRow.product_price || 0,
-          display_order: 1
-        }];
-      }
+    if (!issuer || issuer.id !== 4) {
+      return res.status(401).json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
     }
 
-    // 3. 쿠폰 지급 규정 (coupon_issuance_rules)
-    const [rules] = await pool.execute(
-      `SELECT min_amount, max_amount, face_value, rule_name 
-       FROM coupon_issuance_rules 
-       ORDER BY display_order ASC`
+    const isMatch = await bcrypt.compare(password, issuer.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+    }
+
+    // 당일 밤 23:59:59 (KST) 만료 초 계산
+    const now = new Date();
+    const kstMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    let diffSeconds = Math.floor((kstMidnight.getTime() - now.getTime()) / 1000);
+    if (diffSeconds < 60) diffSeconds = 60;
+
+    const token = jwt.sign(
+      { id: issuer.id, role: 'issuer', name: issuer.name, username: issuer.username, isForest: true },
+      process.env.JWT_SECRET,
+      { expiresIn: diffSeconds }
     );
 
-    // 규정에 따른 상품별 쿠폰 지급 매칭 계산 함수
-    const getCouponFaceValue = (price) => {
-      if (!rules || rules.length === 0) return 0;
-      const p = Number(price);
-      for (const r of rules) {
-        const min = Number(r.min_amount);
-        const max = r.max_amount !== null && r.max_amount !== undefined ? Number(r.max_amount) : Infinity;
-        if (p >= min && p <= max) {
-          return Number(r.face_value);
-        }
-      }
-      return 0;
-    };
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-    const productsWithRule = products.map(p => {
-      const matchedFaceValue = getCouponFaceValue(p.price);
-      const alloc = allocations.find(a => Number(a.face_value) === matchedFaceValue);
-      return {
-        ...p,
-        coupon_face_value: matchedFaceValue,
-        allocation_id: alloc ? alloc.id : null
-      };
-    });
-
-    res.json({ 
-      success: true, 
-      data: allocations, // 기존 호환용
-      allocations,
-      products: productsWithRule,
-      rules
+    logger.info(`[ForestAuth] 덕적도자연휴양림 로그인 성공: ${username} (만료까지 ${diffSeconds}초) [${req.ip}]`);
+    res.json({
+      success: true,
+      token,
+      loginDate: todayStr,
+      issuer: { id: issuer.id, username: issuer.username, name: issuer.name },
     });
   } catch (err) {
     next(err);
   }
 });
 
-// ── POST /api/auth/issuer/issue ──
-router.post('/issue', authenticate, authorize('issuer'), async (req, res, next) => {
-  const { allocationId, count, items, distributionType, deliveryMethod, phones } = req.body;
-
-  if (!['bundle', 'individual'].includes(distributionType)) {
-    return res.status(400).json({ success: false, message: '수령 방식을 선택해주세요.' });
-  }
-  if (!['kakao', 'sms', 'paper', 'qr'].includes(deliveryMethod)) {
-    return res.status(400).json({ success: false, message: '발급 수단을 선택해주세요.' });
+// ── POST /api/auth/issuer/forest-issue (덕적도자연휴양림 10,000원 쿠폰 즉시 발급 및 문자 발송) ──
+router.post('/forest-issue', authenticate, authorize('issuer'), async (req, res, next) => {
+  if (req.user.id !== 4) {
+    return res.status(403).json({ success: false, message: '덕적도자연휴양림 전용 발급 권한이 필요합니다.' });
   }
 
-  // 다중 품목 또는 단일 배정 항목 정규화
-  let issueItems = [];
-  if (Array.isArray(items) && items.length > 0) {
-    issueItems = items
-      .map(it => ({
-        allocationId: it.allocationId ? parseInt(it.allocationId, 10) : null,
-        faceValue: parseInt(it.faceValue || it.face_value || 0, 10),
-        count: parseInt(it.count || it.quantity || 0, 10),
-        productName: it.productName || it.product_name || '',
-        productPrice: parseInt(it.productPrice || it.price || 0, 10)
-      }))
-      .filter(it => it.count > 0 && it.faceValue > 0);
-  } else if (allocationId && count) {
-    const numCount = parseInt(count, 10);
-    if (numCount > 0) {
-      issueItems = [{
-        allocationId: parseInt(allocationId, 10),
-        faceValue: 0, // DB 조회 후 채움
-        count: numCount,
-        productName: '',
-        productPrice: 0
-      }];
-    }
-  }
+  const { recipientName, recipientPhone } = req.body;
+  const cleanPhone = (recipientPhone || '').replace(/\D/g, '');
 
-  if (issueItems.length === 0) {
-    return res.status(400).json({ success: false, message: '발급할 상품 및 수량을 1개 이상 선택해주세요.' });
+  if (!cleanPhone || !/^010\d{8}$/.test(cleanPhone)) {
+    return res.status(400).json({ success: false, message: '올바른 휴대폰 번호 11자리를 입력해주세요. (010으로 시작)' });
   }
 
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
-    // 발행처 정보 조회
-    const [[issuer]] = await connection.execute(
-      `SELECT id, name, username FROM issuers WHERE id = ?`,
-      [req.user.id]
+    // 1. 10,000원권 배정 조회 및 잠금
+    const [allocations] = await connection.execute(
+      `SELECT id, total_count, issued_count FROM issuer_allocations 
+       WHERE issuer_id = 4 AND face_value = 10000 
+       ORDER BY id DESC LIMIT 1 FOR UPDATE`
     );
-    const issuerName = issuer ? issuer.name : '발행처';
 
-    const issuedCoupons = [];
-    const kioskSessionId = generateToken(16);
-    let primaryAllocationId = null;
-    let totalCouponAmount = 0;
-    let totalProductPrice = 0;
-
-    for (const item of issueItems) {
-      let targetAlloc = null;
-
-      if (item.allocationId) {
-        const [rows] = await connection.execute(
-          `SELECT * FROM issuer_allocations WHERE id = ? AND issuer_id = ? FOR UPDATE`,
-          [item.allocationId, req.user.id]
-        );
-        if (rows.length > 0) {
-          targetAlloc = rows[0];
-        }
-      }
-
-      // faceValue 기반으로 배정 매칭 또는 없으면 자동 생성/보충 (수량 제한 없음)
-      if (!targetAlloc && item.faceValue > 0) {
-        const [rows] = await connection.execute(
-          `SELECT * FROM issuer_allocations WHERE issuer_id = ? AND face_value = ? ORDER BY id ASC LIMIT 1 FOR UPDATE`,
-          [req.user.id, item.faceValue]
-        );
-        if (rows.length > 0) {
-          targetAlloc = rows[0];
-        } else {
-          // 해당 권종의 배정 레코드가 없으면 넉넉한 수량으로 신규 생성
-          const [insertAlloc] = await connection.execute(
-            `INSERT INTO issuer_allocations (issuer_id, face_value, total_count, issued_count) VALUES (?, ?, 10000, 0)`,
-            [req.user.id, item.faceValue]
-          );
-          targetAlloc = {
-            id: insertAlloc.insertId,
-            issuer_id: req.user.id,
-            face_value: item.faceValue,
-            total_count: 10000,
-            issued_count: 0
-          };
-        }
-      }
-
-      if (!targetAlloc) {
-        await connection.rollback();
-        return res.status(404).json({ success: false, message: `권종 정보를 찾을 수 없습니다.` });
-      }
-
-      // 수량 제한 제거: 잔여량이 부족할 경우 발행처 배정 한도를 자동 증액
-      const remaining = targetAlloc.total_count - targetAlloc.issued_count;
-      if (remaining < item.count) {
-        const additional = Math.max(1000, item.count * 10);
-        await connection.execute(
-          `UPDATE issuer_allocations SET total_count = total_count + ? WHERE id = ?`,
-          [additional, targetAlloc.id]
-        );
-        targetAlloc.total_count += additional;
-      }
-
-      if (!primaryAllocationId) {
-        primaryAllocationId = targetAlloc.id;
-      }
-
-      const itemFaceValue = Number(targetAlloc.face_value);
-      totalCouponAmount += itemFaceValue * item.count;
-      totalProductPrice += (item.productPrice || 0) * item.count;
-
-      // 쿠폰 개별 발급 생성
-      for (let i = 0; i < item.count; i++) {
-        const randomSuffix = crypto.randomBytes(4).toString('hex').toUpperCase();
-        const timestampPart = Date.now().toString(36).toUpperCase().slice(-4);
-        const serialCode = `ONG-${Math.floor(itemFaceValue / 1000)}K-${timestampPart}-${randomSuffix}`;
-        const codeHash = hashCouponCode(serialCode);
-
-        // QR 개별 출력일 경우 쿠폰마다 고유 세션 ID 생성, 일괄 출력일 경우 전체 공유 세션 ID 사용
-        const couponSessionId = (distributionType === 'individual') ? generateToken(16) : kioskSessionId;
-        const couponSecureToken = encodeSecureToken(targetAlloc.id);
-        const couponQrUrl = `/tourist/landing.html?token=${couponSecureToken}&kioskSessionId=${couponSessionId}`;
-
-        if (deliveryMethod === 'paper') {
-          await connection.execute(
-            `INSERT INTO paper_coupons (random_code_hash, face_value, issued_by_location) VALUES (?, ?, ?)`,
-            [codeHash, itemFaceValue, issuerName]
-          );
-        }
-
-        const couponType = deliveryMethod === 'paper' ? 'paper' : 'digital';
-        const [insertRes] = await connection.execute(
-          `INSERT INTO coupons (code_hash, coupon_type, face_value, issued_to, status, issuer_allocation_id, kiosk_session_id, expires_at)
-           VALUES (?, ?, ?, NULL, 'available', ?, ?, DATE_ADD(NOW(), INTERVAL 1 YEAR))`,
-          [codeHash, couponType, itemFaceValue, targetAlloc.id, couponSessionId]
-        );
-
-        const couponIndex = issuedCoupons.length;
-        const targetPhone = (Array.isArray(phones) && phones[couponIndex]) ? phones[couponIndex] : null;
-
-        issuedCoupons.push({
-          id: insertRes.insertId,
-          serialCode,
-          faceValue: itemFaceValue,
-          productName: item.productName || '',
-          issuerName,
-          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-          kioskSessionId: couponSessionId,
-          qrUrl: couponQrUrl,
-          phone: targetPhone
-        });
-      }
-
-      // 배정 발행 수량 업데이트
-      await connection.execute(
-        `UPDATE issuer_allocations SET issued_count = issued_count + ? WHERE id = ?`,
-        [item.count, targetAlloc.id]
-      );
+    if (allocations.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: '10,000원권 쿠폰 배정 정보를 찾을 수 없습니다.' });
     }
+
+    const alloc = allocations[0];
+    if (alloc.issued_count >= alloc.total_count) {
+      await connection.rollback();
+      return res.status(400).json({ success: false, message: '10,000원권 쿠폰 배정 수량이 모두 소진되었습니다.' });
+    }
+
+    // 2. 고유 쿠폰 코드 생성 (OJ-XXXX-XXXX)
+    const part1 = crypto.randomBytes(2).toString('hex').toUpperCase();
+    const part2 = crypto.randomBytes(2).toString('hex').toUpperCase();
+    const couponCode = `OJ-${part1}-${part2}`;
+    const codeHash = hashCouponCode(couponCode);
+
+    // 3. paper_coupons 삽입 (수령자 정보 및 쿠폰코드 보관)
+    await connection.execute(
+      `INSERT INTO paper_coupons 
+       (random_code_hash, face_value, issued_by_location, terminal_id, issuer_id, issuer_allocation_id, converted, recipient_name, recipient_phone, coupon_code)
+       VALUES (?, 10000, '덕적도자연휴양림', 'DJRES-01', 4, ?, 0, ?, ?, ?)`,
+      [codeHash, alloc.id, recipientName ? recipientName.trim() : '고객', cleanPhone, couponCode]
+    );
+
+    // 4. 배정 카운트 증가
+    await connection.execute(
+      `UPDATE issuer_allocations SET issued_count = issued_count + 1 WHERE id = ?`,
+      [alloc.id]
+    );
 
     await connection.commit();
 
-    logger.info(`[IssuerAuth] 쿠폰 복수/단일 발급 완료: issuer=${req.user.username}, 총권종금액=${totalCouponAmount}, 발행수량=${issuedCoupons.length}, 방식=${deliveryMethod}`);
+    // 5. 기존과 100% 동일한 공식 문자 폼 발송 (비동기 큐)
+    const baseUrl = process.env.APP_BASE_URL || 'https://ongjincoupon.kr';
+    const claimUrl = `${baseUrl}/tourist/mypage.html?claimCode=${couponCode}`;
+    const notiMessage = `[옹진관광] 10,000원 쿠폰이 발급되었습니다.\n아래 링크를 눌러 내 쿠폰함에 등록하세요.\n${claimUrl}\n(유효기간: 발급일로부터 1년)`;
 
-    const secureToken = encodeSecureToken(primaryAllocationId);
-    const qrUrl = `/tourist/landing.html?token=${secureToken}&kioskSessionId=${kioskSessionId}`;
+    enqueue('sms', cleanPhone, notiMessage).catch(err => {
+      logger.error(`[ForestIssue] 문자 발송 큐 등록 실패: ${err.message}`);
+    });
+
+    const maskedPhone = cleanPhone.replace(/(\d{3})-?(\d{4})-?(\d{4})/, '$1-****-$3');
+    logger.info(`[ForestIssue] 쿠폰 발급 성공: ${couponCode} -> ${maskedPhone} (${recipientName || '고객'})`);
 
     res.json({
       success: true,
-      message: '쿠폰이 성공적으로 발행되었습니다.',
+      message: '쿠폰이 발급되었습니다.',
       data: {
-        allocationId: primaryAllocationId,
-        count: issuedCoupons.length,
-        totalAmount: totalCouponAmount,
-        totalProductPrice,
-        items: issueItems,
-        distributionType,
-        deliveryMethod,
-        kioskSessionId,
-        qrUrl,
-        coupons: issuedCoupons,
+        couponCode,
+        faceValue: 10000
       }
     });
-
   } catch (err) {
     await connection.rollback();
     next(err);
   } finally {
     connection.release();
+  }
+});
+
+// ── GET /api/auth/issuer/forest-history (덕적도자연휴양림 발급 이력 조회) ──
+router.get('/forest-history', authenticate, authorize('issuer'), async (req, res, next) => {
+  if (req.user.id !== 4) {
+    return res.status(403).json({ success: false, message: '덕적도자연휴양림 전용 권한이 필요합니다.' });
+  }
+
+  try {
+    const [rows] = await pool.execute(
+      `SELECT 
+         id,
+         COALESCE(recipient_name, '') AS recipient_name,
+         recipient_phone,
+         coupon_code,
+         face_value,
+         converted,
+         converted_at,
+         is_cancelled,
+         DATE_FORMAT(CONVERT_TZ(issued_at, '+00:00', '+09:00'), '%Y-%m-%d %H:%i') AS issued_at
+       FROM paper_coupons
+       WHERE issuer_id = 4 AND face_value = 10000
+       ORDER BY id DESC
+       LIMIT 100`
+    );
+
+    const [[{ totalCount }]] = await pool.execute(
+      `SELECT COUNT(*) AS totalCount FROM paper_coupons WHERE issuer_id = 4 AND face_value = 10000`
+    );
+
+    res.json({
+      success: true,
+      totalCount,
+      data: rows
+    });
+  } catch (err) {
+    next(err);
   }
 });
 

@@ -1,308 +1,1039 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="description" content="나의 쿠폰함 — 옹진관광 쿠폰" />
-  <title>나의 쿠폰함 | 옹진관광 쿠폰</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
-
-  <!-- 🌟 진짜 지도 타일 렌더링용 Leaflet 오픈스트리트맵 CSS & JS (Head에서 즉시 로드) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- PWA & Mobile Web App -->
+  <link rel="manifest" href="/assets/manifest-C2E8yHgd.webmanifest">
+  <meta name="theme-color" content="#FFFFFF">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon-Lwcp8xrE.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="옹진쿠폰">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <script src="/shared/js/pwa-install.js?v=20261022" data-pwa-banner defer></script>
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="옹진 관광쿠폰">
+  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
+  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="description" content="내 쿠폰 지갑 — 옹진관광 쿠폰 마이페이지" />
+  <title>내 쿠폰 지갑 | 옹진관광 쿠폰</title>
   <style>
-    .view-content {
-      display: none !important;
-      width: 100%;
-    }
-
-    .view-content.active-view {
-      display: block !important;
-    }
-
-    /* 🌟 진짜 지도 타일 렌더링을 위한 명확한 높이 지정 */
-    .real-map-wrapper {
-      width: 100%;
-      height: calc(100vh - 120px);
-      min-height: 550px;
-      position: relative;
-      background: #e2e8f0;
-    }
-
-    #real-map {
-      width: 100% !important;
-      height: 100% !important;
-      min-height: 550px !important;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 1;
-    }
-
-    /* 검색 바 상단 오버레이 */
-    .map-floating-search {
-      position: absolute;
-      top: 14px;
-      left: 14px;
-      right: 14px;
-      z-index: 100;
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 6px 14px;
-      display: flex;
-      align-items: center;
-      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
-      border: 1px solid var(--border-color);
-    }
-
-    .map-floating-input {
-      flex: 1;
-      height: 40px;
-      border: none;
-      background: transparent;
-      padding: 0 8px;
-      font-size: 0.92rem;
-      font-weight: 600;
-      outline: none;
-      color: var(--text-dark);
-    }
-
-    /* 커스텀 마커 팝업 스타일 */
-    .leaflet-popup-content-wrapper {
-      border-radius: 12px !important;
-      padding: 4px 6px !important;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.18) !important;
-    }
-    .leaflet-popup-content {
-      margin: 10px 12px !important;
-      font-family: 'Pretendard', sans-serif !important;
-    }
-
-    /* QR 사용 모달 바텀시트 */
-    .qr-modal-backdrop {
+    /* 종이쿠폰 등록 및 발행처 바텀시트 모달 스타일 보강 (하단 네비 탭바보다 상위 z-index 10050 보장) */
+    #register-sheet.sheet-overlay,
+    #issuer-sheet.sheet-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      width: 100%;
+      max-width: var(--max-mobile, 480px);
+      height: 100%;
+      margin: 0 auto;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 10050 !important;
       display: flex;
-      align-items: flex-end;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: stretch;
+      box-sizing: border-box;
+    }
+    #register-sheet .sheet,
+    #issuer-sheet .sheet {
+      background: #ffffff;
+      border-radius: 24px 24px 0 0;
+      padding: 0;
+      position: relative;
+      box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.25);
+      max-height: 86vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: registerSheetUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sheet-scroll-area {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      padding: 0 20px 16px;
+      flex: 1;
+    }
+    .sheet-sticky-footer {
+      position: sticky;
+      bottom: 0;
+      background: #ffffff;
+      padding: 12px 20px calc(14px + env(safe-area-inset-bottom, 12px));
+      border-top: 1px solid #E2E8F0;
+      display: flex;
+      gap: 8px;
+      z-index: 30;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+      flex-shrink: 0;
+    }
+    @keyframes registerSheetUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    #register-sheet .sheet-close-btn,
+    #issuer-sheet .sheet-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #F3F4F6;
+      border: none;
+      display: flex;
+      align-items: center;
       justify-content: center;
-      z-index: 2000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
+      cursor: pointer;
+      z-index: 20;
+      color: #4B5563;
+      transition: background 0.2s ease;
+    }
+    #register-sheet .sheet-close-btn:hover {
+      background: #E5E7EB;
+      color: #111827;
     }
 
-    .qr-modal-backdrop.active {
+    /* QR 사용 모달 */
+    .use-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.52);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 10050 !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--duration-slow) var(--ease-standard);
+    }
+    .use-modal-backdrop.active {
       opacity: 1;
       pointer-events: auto;
     }
-
-    .qr-modal-sheet {
-      width: 100vw;
-      max-width: 480px;
-      background: #ffffff;
-      border-radius: 20px 20px 0 0;
-      padding: 32px 24px 40px;
-      box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
-      border-top: 3px solid var(--primary-blue);
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    .use-modal-sheet {
+      background: #fff;
+      border-radius: 22px;
+      width: 90%;
+      max-width: 360px;
+      padding: 32px 24px 28px;
       text-align: center;
+      box-shadow: var(--shadow-modal);
+      transform: scale(0.92);
+      transition: transform var(--duration-slow) var(--ease-standard);
     }
-
-    .qr-modal-backdrop.active .qr-modal-sheet {
-      transform: translateY(0);
+    .use-modal-backdrop.active .use-modal-sheet {
+      transform: scale(1);
     }
-
-    .qr-image-wrap {
-      width: 220px;
-      height: 220px;
-      margin: 20px auto;
-      border: 2px solid var(--primary-blue);
-      padding: 12px;
-      background: #ffffff;
-      border-radius: 12px;
-    }
-
-    .qr-timer {
-      font-family: 'Gowun Dodum', sans-serif;
-      font-size: 2.2rem;
-      font-weight: 400;
-      color: var(--primary-blue);
-      margin-bottom: 20px;
-    }
-
-    /* ─────────────────────────────────────────────────────────────
-       🖼️ [시원시원하고 넓직한 비주얼 이미지 가맹점 카드 5종]
-    ───────────────────────────────────────────────────────────── */
-
-    /* 1번 넓은 시안: 큼직한 시그니처 썸네일 카드 (Wide Thumbnail Card) */
-    .m-wide-1 {
-      background: #ffffff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 18px;
-      padding: 16px;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
-      transition: all 0.2s ease;
-    }
-    .m-wide-1:hover {
-      border-color: #0284c7;
-      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.12);
-    }
-
-    /* 2번 넓은 시안: 풀-Width 탑 배너 카드 (Hero Top Banner Card) */
-    .m-wide-2 {
-      background: #ffffff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 20px;
-      overflow: hidden;
-      margin-bottom: 20px;
-      box-shadow: 0 6px 22px rgba(15, 23, 42, 0.06);
-    }
-
-    /* 3번 넓은 시안: 모던 아일랜드 매장 카드 (Modern Island Store Card) */
-    .m-wide-3 {
-      background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
-      border: 1.5px solid #bae6fd;
-      border-radius: 18px;
-      padding: 16px;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      box-shadow: 0 4px 18px rgba(2, 132, 199, 0.08);
-    }
-
-    /* 4번 넓은 시안: 풀-와이드 스플릿 비주얼 카드 (Full-Wide Split Visual Card) */
-    .m-wide-4 {
-      background: #ffffff;
-      border: 1.5px solid #cbd5e1;
-      border-left: 6px solid #0284c7;
+    .qr-container {
+      background: var(--app-bg);
+      border: 1px solid #EEF0F2;
       border-radius: 16px;
       padding: 16px;
-      margin-bottom: 20px;
+      margin: 0;
       display: flex;
-      gap: 16px;
+      justify-content: center;
       align-items: center;
-      box-shadow: 0 3px 14px rgba(0,0,0,0.04);
+      aspect-ratio: 1;
+    }
+    .qr-img {
+      width: 100%;
+      height: 100%;
+      max-width: 200px;
+      max-height: 200px;
     }
 
-    /* 5번 넓은 시안: 럭셔리 라운드 갤러리 카드 (Luxury Gallery Pill Card) */
-    .m-wide-5 {
-      background: #ffffff;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 24px;
-      padding: 18px;
-      margin-bottom: 20px;
+    /* 발급 QR 모달 */
+    .qr-modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0, 7, 16, 0.44);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10050 !important; opacity: 0; pointer-events: none;
+      transition: opacity var(--duration-slow) var(--ease-standard);
+    }
+    .qr-modal-backdrop.active { opacity: 1; pointer-events: auto; }
+    .qr-modal-sheet {
+      background: #fff;
+      border-radius: 22px;
+      width: 85%; max-width: 340px;
+      padding: 32px 20px; text-align: center;
+      box-shadow: var(--shadow-modal);
+      transform: scale(0.9);
+      transition: transform var(--duration-slow) var(--ease-standard);
+    }
+    .qr-modal-backdrop.active .qr-modal-sheet { transform: scale(1); }
+
+    /* 서브페이지 헤더 (다른 페이지와 통일) */
+    .subpage-header {
+      height: 64px;
+      padding: 0 18px;
       display: flex;
-      gap: 16px;
       align-items: center;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      justify-content: center;
+      background: #FFFFFF;
+      border-bottom: 1px solid #EEF0F2;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .subpage-header .btn-back {
+      position: absolute;
+      left: 14px;
+      background: none;
+      border: none;
+      padding: 8px;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--fg-strong, #111827);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .subpage-header .btn-back:hover {
+      background: rgba(0, 104, 249, 0.08);
+      color: var(--primary, #0068F9);
+      transform: translateX(-2px);
+    }
+    .subpage-header .btn-back:active {
+      transform: scale(0.92);
+    }
+    .subpage-header .title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--fg-strong, #111827);
+      letter-spacing: -0.04em;
+      text-align: center;
+    }
+    .subpage-header .btn-right {
+      position: absolute;
+      right: 18px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--fg-secondary);
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+    .subpage-header .btn-right:hover {
+      background: #F3F4F6;
+      border-color: #D1D5DB;
+      color: #111827;
+    }
+    .subpage-header .btn-right:active {
+      background: #E5E7EB;
+      border-color: #9CA3AF;
+    }
+
+    /* 사용자 계정 식별 프로필 바 */
+    .user-profile-bar {
+      margin: 14px 18px 2px;
+      padding: 14px 16px;
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+    .profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #EEF4FF;
+      color: #0068F9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+    .profile-avatar.kakao {
+      background: #FEE500;
+      color: #191919;
+    }
+    .profile-avatar.naver {
+      background: #03C75A;
+      color: #FFFFFF;
+    }
+    .profile-avatar.phone {
+      background: #EBF5FF;
+      color: #0068F9;
+    }
+    .profile-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .profile-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 2px;
+      flex-wrap: wrap;
+    }
+    .profile-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+    .profile-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: #F3F4F6;
+      color: #4B5563;
+    }
+    .profile-badge.kakao {
+      background: rgba(254, 229, 0, 0.25);
+      color: #3C1E1E;
+    }
+    .profile-badge.naver {
+      background: rgba(3, 199, 90, 0.15);
+      color: #027A37;
+    }
+    .profile-badge.phone {
+      background: rgba(0, 104, 249, 0.1);
+      color: #0068F9;
+    }
+    .profile-sub {
+      font-size: 12px;
+      color: #6B7280;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+
+    .balance-card {
+      margin: 30px 20px 0 !important;
+    }
+
+    /* 관광쿠폰 혜택 온보딩 카드 배너 */
+    .pass-benefit-card {
+      margin: 16px 20px 0;
+      padding: 16px 18px;
+      background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+      border: 1px solid #BFDBFE;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .pass-benefit-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0, 104, 249, 0.12);
+    }
+    .pass-benefit-card:active {
+      transform: scale(0.98);
+    }
+    .pbc-left {
+      flex: 1;
+      padding-right: 12px;
+    }
+    .pbc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #0068F9;
+      background: #FFFFFF;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    .pbc-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.02em;
+      margin-bottom: 3px;
+    }
+    .pbc-sub {
+      font-size: 12px;
+      color: #4B5563;
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+    }
+    .pbc-btn {
+      background: var(--primary, #0068F9);
+      color: #FFFFFF;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0, 104, 249, 0.25);
+    }
+    .empty-coupon-container {
+      text-align: center;
+      padding: 42px 24px;
+      background: #F9FAFB;
+      border-radius: 16px;
+      margin: 10px 0;
+      border: 1px dashed #E5E7EB;
+    }
+    .empty-coupon-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+    .empty-coupon-title {
+      font-size: 15.5px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 6px;
+    }
+    .empty-coupon-desc {
+      font-size: 13px;
+      color: #6B7280;
+      line-height: 1.45;
+      margin: 0 0 20px;
+    }
+    .empty-coupon-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: var(--primary, #0068F9);
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 3px 10px rgba(0, 104, 249, 0.28);
+      transition: background 0.18s ease, transform 0.15s ease;
+    }
+    .empty-coupon-btn:hover {
+      background: #0052C9;
+      transform: translateY(-1px);
+    }
+    .empty-coupon-btn:active {
+      transform: scale(0.97);
+    }
+    .empty-simple-text {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--fg-tertiary);
+      font-size: 13px;
+    }
+
+    /* 모달 닫기 버튼 */
+    .modal-close-btn {
+      position: absolute;
+      top: 16px; right: 16px;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      color: #111827; cursor: pointer;
+      border: none; background: none; padding: 0;
+      transition: color 0.15s ease, transform 0.15s ease;
+    }
+    .modal-close-btn:hover {
+      color: var(--primary);
+    }
+
+    /* 완료 버튼 호버 효과 (컬러 변경만 적용) */
+    #btn-complete-payment {
+      background: var(--primary);
+      color: #FFFFFF;
+      cursor: pointer;
+      transition: background 0.18s ease;
+    }
+    #btn-complete-payment:hover {
+      background: #004ecc;
+    }
+
+    /* Toast */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes scanLaser {
+      0% { top: 10px; opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { top: 160px; opacity: 0; }
+    }
+
+    .scanner-tab-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      background: #F3F4F6;
+      padding: 4px;
+      border-radius: 12px;
+    }
+    .scanner-tab-btn {
+      flex: 1;
+      height: 38px;
+      border: none;
+      background: transparent;
+      border-radius: 9px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #6B7280;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+    }
+    .scanner-tab-btn.active {
+      background: #FFFFFF;
+      color: var(--primary, #0068F9);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
   </style>
-  <script type="module" crossorigin src="/assets/tourist-mypage-Z-x0AHOA.js"></script>
+  <!-- 실시간 QR 디코딩 라이브러리 -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script type="module" crossorigin src="/assets/tourist-mypage-DjiaNk76.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-Ba6NtGBQ.js">
-  <link rel="stylesheet" crossorigin href="/assets/tourist-theme-MhiOuvHY.css">
+  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
+  <link rel="modulepreload" crossorigin href="/assets/i18n-Y-He8y1g.js">
+  <link rel="stylesheet" crossorigin href="/assets/app-styles-CmrLvQNp.css">
 </head>
 <body>
-  <div class="tourist-app" id="app-container" style="padding-bottom: 100px;">
-    <!-- 상단 헤더 -->
-    <header class="header-clean">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <img src="/assets/favicon-JK0pTB8M.png" alt="옹진군 로고" style="width: 24px; height: 24px; object-fit: contain;" />
-        <h1 class="header-title" id="header-title-text">나의 <span>쿠폰함</span></h1>
-      </div>
-      <a href="#" id="nav-logout" style="font-size: 0.82rem; color: var(--text-slate); font-weight: 700; text-decoration: none;">로그아웃</a>
-    </header>
+  <div class="app-container">
+    <div class="my-scroll">
 
-    <!-- 1. 쿠폰함 뷰 (Wallet View) -->
-    <main class="wallet-container view-content active-view" id="view-wallet">
-      <div class="section-title-wrap">
-        <h2 class="section-title">사용 가능 쿠폰</h2>
-      </div>
-
-      <!-- 쿠폰 카드 목록 -->
-      <div id="coupon-list">
-        <div style="padding: 40px; text-align: center; color: var(--text-slate);">쿠폰 정보를 불러오고 있습니다...</div>
-      </div>
-
-      <div class="section-title-wrap" style="margin-top: 40px;">
-        <h2 class="section-title">쿠폰 사용처</h2>
-      </div>
-
-      <!-- 🌟 시원시원하고 넓직한 비주얼 이미지 가맹점 카드 5종 시안 -->
-      <div id="merchant-list">
-        <div style="padding: 20px; text-align: center; color: var(--text-slate);">가맹점 목록을 불러오는 중...</div>
-      </div>
-    </main>
-
-    <!-- 2. 지도 뷰 (Map View) -->
-    <main class="view-content" id="view-map" style="padding:0;">
-      <div class="real-map-wrapper">
-        <div class="map-floating-search">
-          <svg style="width:20px;height:20px;color:var(--primary-blue);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input type="text" id="map-search-input" class="map-floating-input" placeholder="가맹점 이름을 검색하세요" />
+      <!-- ── 서브페이지 헤더 ── -->
+      <div class="subpage-header" style="position: relative;">
+        <a href="/tourist/index.html" class="btn-back" title="메인 페이지로 이동">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </a>
+        <div class="title" data-i18n="mypage_page_title">내 쿠폰함</div>
+        <div style="position: absolute; right: 14px; display: flex; align-items: center; gap: 8px;">
+          <div class="header-popover-wrap">
+            <button class="icon-btn" id="btn-lang" title="언어 변경 / Change Language" style="display:flex;align-items:center;gap:4px;padding:6px 9px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M2 12h20"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              <span class="lang-indicator-text" style="font-size:11.5px;font-weight:700;letter-spacing:-0.02em;color:var(--primary);">KO</span>
+            </button>
+            <div class="header-dropdown" id="dropdown-lang">
+              <button class="dropdown-item" data-lang="ko" data-i18n="lang_ko">KOR</button>
+              <button class="dropdown-item" data-lang="en" data-i18n="lang_en">ENG</button>
+            </div>
+          </div>
+          <button class="btn-right" id="nav-logout" data-i18n="logout" style="position: static;">로그아웃</button>
         </div>
-        <div id="real-map"></div>
       </div>
-    </main>
 
-    <!-- 하단 알약 슬라이딩 네비게이션 -->
-    <div class="floating-pill-nav" id="pill-nav">
-      <div class="pill-slider" id="pill-slider"></div>
-      <button class="pill-tab active" data-tab="wallet" title="쿠폰함" onclick="window.switchTab('wallet')">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5zM5 15a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2H5z" />
+      <!-- ── 사용자 계정 식별 프로필 바 ── -->
+      <div class="user-profile-bar" id="user-profile-card">
+        <div class="profile-avatar" id="profile-avatar">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name-row">
+            <span class="profile-name" id="profile-name">로그인 정보 확인 중...</span>
+            <span class="profile-badge" id="profile-badge" data-i18n="mypage_profile_badge">간편인증</span>
+          </div>
+          <div class="profile-sub" id="profile-sub" data-i18n="mypage_profile_sub">발급받은 디지털 쿠폰이 안전하게 저장됩니다.</div>
+        </div>
+      </div>
+
+      <!-- ── 잔액 요약 카드 (첫 번째 이미지 기반 화이트 모던 카드) ── -->
+
+      <div class="balance-card">
+        <div class="balance-grid">
+          <!-- 왼쪽: 보유 쿠폰 -->
+          <div class="balance-col">
+            <div class="balance-label" data-i18n="mypage_hold_coupon">보유 쿠폰</div>
+            <div class="balance-value" id="coupon-count" style="color:var(--primary, #0068F9);">0장</div>
+          </div>
+
+          <!-- 중앙 구분선 -->
+          <div class="balance-divider"></div>
+
+          <!-- 오른쪽: 내 쿠폰 잔액 -->
+          <div class="balance-col">
+            <div class="balance-label" data-i18n="mypage_balance">내 쿠폰 잔액</div>
+            <div class="balance-value" id="total-balance">₩0</div>
+          </div>
+        </div>
+
+        <div class="balance-actions">
+          <button class="balance-action" id="btn-register-coupon" type="button" onclick="window.openRegisterSheet(event)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+            <span data-i18n="mypage_register_paper">종이쿠폰 등록</span>
+          </button>
+          <a href="/tourist/map.html" class="balance-action secondary" style="text-decoration:none;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span data-i18n="mypage_find_merchant">가맹점 지도</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- ── 쿠폰 현장 발행처 안내 배너 카드 (발급받는 부분 대체) ── -->
+      <div class="pass-benefit-card" id="pass-issuer-banner" onclick="window.openIssuerSheet(event)" style="cursor: pointer;">
+        <div class="pbc-left">
+          <span class="pbc-tag" data-i18n="mypage_banner_tag">쿠폰 수령 안내</span>
+          <div class="pbc-title" data-i18n="mypage_banner_title">현장 쿠폰 발행처 안내</div>
+          <div class="pbc-sub" data-i18n="mypage_banner_sub">옹진군 운영 관광시설 4곳 이용 시 현장 발급</div>
+        </div>
+        <div class="pbc-btn">
+          <span data-i18n="mypage_banner_btn">발행처 보기</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- ── 쿠폰 탭 ── -->
+      <div class="coupon-tabs">
+        <button class="coupon-tab" data-active="true" data-filter="available" data-i18n="mypage_tab_available">사용 가능</button>
+        <button class="coupon-tab" data-filter="used" data-i18n="mypage_tab_used">사용 완료</button>
+        <button class="coupon-tab" data-filter="expired">만료 / 취소</button>
+      </div>
+
+      <!-- ── 쿠폰 리스트 ── -->
+      <div class="coupon-list" id="coupon-list">
+        <!-- JS에서 렌더링 -->
+      </div>
+
+      <!-- ── 하단 가맹점 입점 배너 (메인 화면과 100% 동일한 연속성 디자인) ── -->
+      <div style="padding: 24px 20px 16px;">
+        <a href="/tourist/apply-guide.html" class="merchant-banner" style="margin: 0; text-decoration: none;">
+          <div class="merchant-banner-inner">
+            <div class="merchant-banner-deco1"></div>
+            <div class="merchant-banner-text">
+              <div class="merchant-banner-title" data-i18n="merchant_banner_title">매장을 운영 중이신가요?</div>
+              <div class="merchant-banner-desc" data-i18n="merchant_banner_desc">지금 입점하고 더 많은 섬 여행객을 만나보세요.</div>
+            </div>
+            <div class="merchant-banner-cta">
+              <span data-i18n="merchant_banner_cta">입점 신청</span>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- ── 하단 계정 설정 및 회원 탈퇴 ── -->
+      <div style="padding: 10px 20px 48px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+        <button type="button" id="btn-add-homescreen" style="background: #EEF4FF; border: 1px solid #C7D9FE; border-radius: 10px; font-size: 13px; color: #0068F9; font-weight: 700; cursor: pointer; padding: 9px 16px; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0, 104, 249, 0.08);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+          홈 화면에 바로가기 추가
+        </button>
+        <button type="button" id="btn-manage-pin" style="background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 10px; font-size: 13px; color: #4B5563; font-weight: 600; cursor: pointer; padding: 9px 16px; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          간편 비밀번호(4자리) 변경/등록
+        </button>
+        <button type="button" id="btn-withdraw-account" data-i18n="mypage_withdraw" style="background: none; border: none; font-size: 12px; color: #9CA3AF; text-decoration: underline; cursor: pointer; padding: 6px 12px; font-family: inherit;">
+          회원 탈퇴 (계정 삭제)
+        </button>
+      </div>
+
+    </div><!-- /.my-scroll -->
+
+    <!-- ── 4자리 간편비밀번호 변경/등록 모달 ── -->
+    <div class="pin-modal-overlay" id="modal-pin-setup" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;">
+      <div class="pin-modal-card" style="width: 100%; max-width: 360px; background: #FFFFFF; border-radius: 20px; padding: 26px 22px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); text-align: center;">
+        <div style="width: 52px; height: 52px; border-radius: 16px; background: #EEF4FF; color: var(--primary, #0068F9); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <div style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 6px;">간편 비밀번호(4자리) 설정</div>
+        <div style="font-size: 13.5px; color: #6B7280; line-height: 1.45; margin-bottom: 20px;">
+          로그인 시 사용할 <strong>4자리 숫자 비밀번호</strong>를 입력해 주세요.
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+          <div>
+            <label style="font-size: 12.5px; font-weight: 600; color: #4B5563; margin-bottom: 4px; display: block;">새 비밀번호 (4자리)</label>
+            <input type="password" id="modal-pin-input" style="width: 100%; height: 48px; border: 1.5px solid #E5E7EB; border-radius: 12px; letter-spacing: 12px; text-align: center; font-size: 24px; font-weight: 700; box-sizing: border-box;" placeholder="••••" maxlength="4" pattern="[0-9]*" inputmode="numeric" />
+          </div>
+          <div>
+            <label style="font-size: 12.5px; font-weight: 600; color: #4B5563; margin-bottom: 4px; display: block;">비밀번호 확인</label>
+            <input type="password" id="modal-pin-confirm" style="width: 100%; height: 48px; border: 1.5px solid #E5E7EB; border-radius: 12px; letter-spacing: 12px; text-align: center; font-size: 24px; font-weight: 700; box-sizing: border-box;" placeholder="••••" maxlength="4" pattern="[0-9]*" inputmode="numeric" />
+          </div>
+        </div>
+
+        <div id="modal-pin-error" style="display: none; color: #DC2626; font-size: 12px; margin-top: 10px; font-weight: 500; text-align: center;"></div>
+
+        <button type="button" id="btn-modal-pin-save" style="width: 100%; height: 48px; border-radius: 12px; background: var(--primary, #0068F9); color: #FFF; border: none; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 18px;">
+          비밀번호 저장하기
+        </button>
+
+        <button type="button" id="btn-modal-pin-cancel" style="width: 100%; background: none; border: none; font-size: 13px; color: #9CA3AF; margin-top: 12px; cursor: pointer; text-decoration: underline;">
+          취소
+        </button>
+      </div>
+    </div>
+
+
+
+    <!-- ── 하단 네비게이션 ── -->
+    <nav class="tabbar tab-bar" style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; max-width: 440px !important; margin: 0 auto !important; height: calc(68px + env(safe-area-inset-bottom, 0px)) !important; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important; background: rgba(255, 255, 255, 0.98) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-top: 1px solid #E2E8F0 !important; display: flex !important; flex-direction: row !important; justify-content: space-around !important; align-items: center !important; z-index: 9999 !important; box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05) !important; box-sizing: border-box !important;">
+      <a class="tab-item" href="/tourist/index.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-5a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9.5z"/></svg>
+        <span class="label" data-i18n="nav_home" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">Home</span>
+      </a>
+      <a class="tab-item" href="/tourist/about-pass.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span class="label" data-i18n="nav_island_pass" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">관광쿠폰</span>
+      </a>
+      <a class="tab-item" href="/tourist/map.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>
+        <span class="label" data-i18n="nav_map" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">가맹점지도</span>
+      </a>
+      <a class="tab-item" href="/tourist/apply-guide.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l2-6h12l2 6M4 10v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V10M4 10h16M10 21v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/></svg>
+        <span class="label" data-i18n="nav_apply" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">입점신청</span>
+      </a>
+      <a class="tab-item active" data-active="true" href="/tourist/mypage.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: var(--primary, #059669) !important; font-weight: 700 !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="label" data-i18n="nav_my" style="font-size: 11px !important; font-weight: 700 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">My</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- 종이쿠폰 등록 바텀시트 (실시간 카메라 스캐너 탑재) -->
+  <div class="sheet-overlay" id="register-sheet" style="display:none;" onclick="if(event.target===this) window.closeRegisterSheet()">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <button type="button" class="sheet-close-btn" id="btn-x-register-close" title="닫기" onclick="window.closeRegisterSheet()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
-        <span class="pill-label">쿠폰함</span>
       </button>
-      <button class="pill-tab" data-tab="map" title="가맹점 지도" onclick="window.switchTab('map')">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-        </svg>
-        <span class="pill-label">가맹점 지도</span>
-      </button>
+
+      <!-- 스크롤 가능 본문 영역 -->
+      <div class="sheet-scroll-area">
+        <div class="sheet-title" style="margin-top: 10px;">종이쿠폰 등록</div>
+        <div class="sheet-sub">키오스크·매표소 영수증의 <strong>QR코드 / 바코드를 스캔</strong>하거나 쿠폰 번호를 직접 입력하세요.</div>
+
+        <!-- 모드 전환 탭 -->
+        <div class="scanner-tab-bar">
+          <button type="button" class="scanner-tab-btn active" id="tab-btn-manual">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>
+            번호 직접 입력
+          </button>
+          <button type="button" class="scanner-tab-btn" id="tab-btn-scan">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            QR · 바코드 스캔
+          </button>
+        </div>
+
+        <!-- 1. 카메라 스캐너 영역 (선택 시 활성화) -->
+        <div id="panel-scan" style="display: none;">
+          <div id="scanner-viewfinder" style="position:relative; width:100%; height:230px; background:#0f172a; border-radius:16px; overflow:hidden; display:flex; align-items:center; justify-content:center; margin-bottom:12px;">
+            <video id="scanner-video" playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+            <canvas id="scanner-canvas" style="display:none;"></canvas>
+            
+            <!-- 조준 가이드 박스 -->
+            <div style="position:absolute; width:180px; height:120px; border:2.5px solid #38bdf8; border-radius:10px; box-shadow:0 0 0 4000px rgba(15, 23, 42, 0.55); pointer-events:none; display:flex; align-items:center; justify-content:center;">
+              <div style="position:absolute; left:4px; right:4px; height:2px; background:linear-gradient(to right, transparent, #38bdf8, transparent); animation:scanLaser 2s infinite ease-in-out;"></div>
+            </div>
+            <div id="scanner-status" style="position:absolute; bottom:12px; background:rgba(0,0,0,0.7); color:#fff; font-size:12px; font-weight:500; padding:5px 14px; border-radius:100px; letter-spacing:-0.01em;">
+              영수증의 QR코드 또는 바코드를 비춰주세요
+            </div>
+          </div>
+
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; font-size:12.5px; color:#1e40af; margin-bottom:12px; line-height:1.6;">
+            📌 <strong>스캔 안내</strong><br>
+            키오스크 영수증의 <strong>QR코드 또는 바코드(Code 128)</strong>를 가이드 박스 안에 맞춰주세요.<br>
+            인식이 되지 않으면 <strong>"번호 직접 입력"</strong> 탭을 이용하세요.
+          </div>
+
+          <div style="display:flex; gap:8px; margin-bottom:16px;">
+            <button type="button" id="btn-toggle-camera" style="flex:1; height:42px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; font-weight:600; color:#475569; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+              카메라 재연결
+            </button>
+            <button type="button" id="btn-file-scan" style="flex:1; height:42px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; font-weight:600; color:#475569; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+              사진으로 스캔
+            </button>
+            <input type="file" id="scan-file-fallback" accept="image/*" capture="environment" style="display:none;" />
+          </div>
+        </div>
+
+        <!-- 2. 직접 입력 영역 -->
+        <div id="panel-manual" style="display: block;">
+          <div class="sheet-field-lbl">쿠폰 번호 입력</div>
+          <input type="text" class="form-input" id="paper-coupon-code"
+            placeholder="예: OJ-XXXX-XXXX" maxlength="12"
+            style="font-family: monospace; font-size: 17px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;"
+            autocomplete="off" inputmode="text" />
+          <div id="paper-coupon-error" style="display: none; font-size: 13px; color: #ef4444; margin-top: 6px; font-weight: 600;"></div>
+          
+          <!-- 등록 유의사항 안내 박스 -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-top: 12px; text-align: left;">
+            <div style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+              <span>ℹ️</span> 종이쿠폰 모바일 등록 유의사항
+            </div>
+            <ul style="margin: 0; padding-left: 16px; font-size: 11.5px; color: #64748b; line-height: 1.6;">
+              <li>모바일 등록 즉시 지류 종이쿠폰은 <strong>재사용 불가(무효화)</strong> 처리됩니다.</li>
+              <li>등록된 쿠폰은 <strong>발급일로부터 1년간</strong> 옹진군 가맹점에서 자유롭게 사용하실 수 있습니다.</li>
+              <li>이미 다른 계정에 등록되었거나 사용 완료된 쿠폰은 등록할 수 없습니다.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 고정 액션 버튼 바 -->
+      <div class="sheet-sticky-footer">
+        <button type="button" class="sheet-register" id="btn-register-submit" style="flex: 1; height: 50px; margin: 0; border-radius: 12px; background: #0068F9; color: #FFFFFF; font-size: 15px; font-weight: 700; box-shadow: 0 4px 14px rgba(0, 104, 249, 0.28);">쿠폰 등록하기</button>
+        <button type="button" class="sheet-cancel" id="btn-register-cancel" style="width: 84px; height: 50px; margin: 0; border-radius: 12px; background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; font-size: 14.5px; font-weight: 700;">닫기</button>
+      </div>
     </div>
   </div>
 
-  <!-- QR 제시 모달 바텀시트 -->
-  <div class="qr-modal-backdrop" id="use-qr-modal">
-    <div class="qr-modal-sheet">
-      <div style="width: 40px; height: 4px; background: #cbd5e1; border-radius: 99px; margin: 0 auto 20px;"></div>
-      <h3 style="font-family: 'Gowun Dodum', sans-serif; font-size: 1.5rem; font-weight: 400; color: var(--text-dark); margin-bottom: 6px;">가맹점 결제용 QR 코드</h3>
-      <p style="font-size: 0.85rem; color: var(--text-slate); margin-bottom: 16px;">가맹점 대표님께 QR 코드를 보여주세요.</p>
-
-      <div id="use-modal-qr-container">
-        <div class="qr-image-wrap">
-          <img id="use-modal-qr-img" src="" alt="결제 QR" style="width:100%;height:100%;object-fit:contain;" />
+  <!-- 쿠폰 현장 발행처 안내 바텀시트 모달 -->
+  <div class="sheet-overlay" id="issuer-sheet" style="display:none;" onclick="if(event.target===this) window.closeIssuerSheet()">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <button type="button" class="sheet-close-btn" id="btn-x-issuer-close" title="닫기" onclick="window.closeIssuerSheet()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <!-- 스크롤 가능 본문 영역 -->
+      <div class="sheet-scroll-area">
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 4px;">
+          <span style="font-size: 11px; font-weight: 700; color: #0284C7; background: #E0F2FE; padding: 3px 8px; border-radius: 6px;">옹진군 지정 공식 발행처 (4개소)</span>
         </div>
-        <div class="qr-timer" id="use-modal-timer">03:00</div>
-        <button class="btn-outline" style="width:100%; height:48px; border:1px solid #cbd5e1; border-radius:8px; font-weight:700; cursor:pointer;" onclick="window.closeUseModal()">닫기</button>
+        <div class="sheet-title" style="font-size: 19px; font-weight: 800; color: #0F172A; margin-bottom: 6px;">옹진군 관광시설 쿠폰 발행처</div>
+        <div class="sheet-sub" style="font-size: 13px; color: #64748B; margin-bottom: 20px; line-height: 1.45;">
+          옹진군에서 직접 운영하는 아래 <strong>4개 관광시설</strong> 이용 시, 입장료·체험료 결제 금액에 따라 관광쿠폰을 현장에서 환급 발급해 드립니다.
+        </div>
+
+        <!-- 발행처 목록 카드 (옹진군 운영 4대 관광시설) -->
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+          
+          <!-- 1. 자월달빛천문대 -->
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 14px 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <div style="font-size: 15px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 16px;">🔭</span> 자월달빛천문대
+              </div>
+              <span style="font-size: 11px; font-weight: 700; color: #1D4ED8; background: #DBEAFE; padding: 2px 8px; border-radius: 4px;">자월면</span>
+            </div>
+            <div style="font-size: 12.5px; color: #475569; line-height: 1.5;">
+              • 위치: 인천광역시 옹진군 자월면 자월서로 396-35<br>
+              • 발급 혜택: 투영관(2,000원), 관측실(3,000원) 이용 시 발급
+            </div>
+          </div>
+
+          <!-- 2. 장골해수욕장 야영장 -->
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 14px 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <div style="font-size: 15px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 16px;">⛺</span> 장골해수욕장 야영장
+              </div>
+              <span style="font-size: 11px; font-weight: 700; color: #1D4ED8; background: #DBEAFE; padding: 2px 8px; border-radius: 4px;">자월면</span>
+            </div>
+            <div style="font-size: 12.5px; color: #475569; line-height: 1.5;">
+              • 위치: 인천광역시 옹진군 자월면 자월서로 101번길 13<br>
+              • 발급 혜택: 야영장 이용료 결제 시 10,000원 쿠폰 발급
+            </div>
+          </div>
+
+          <!-- 3. 소야랑 -->
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 14px 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <div style="font-size: 15px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 16px;">🏡</span> 소야랑
+              </div>
+              <span style="font-size: 11px; font-weight: 700; color: #047857; background: #D1FAE5; padding: 2px 8px; border-radius: 4px;">덕적면 (소야도)</span>
+            </div>
+            <div style="font-size: 12.5px; color: #475569; line-height: 1.5;">
+              • 위치: 인천광역시 옹진군 덕적면 소야로 188-14<br>
+              • 발급 혜택: 시설 이용 시 5,000원 쿠폰 발급
+            </div>
+          </div>
+
+          <!-- 4. 덕적도 자연휴양림 -->
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 14px 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <div style="font-size: 15px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 16px;">🌲</span> 덕적도 자연휴양림
+              </div>
+              <span style="font-size: 11px; font-weight: 700; color: #047857; background: #D1FAE5; padding: 2px 8px; border-radius: 4px;">덕적면</span>
+            </div>
+            <div style="font-size: 12.5px; color: #475569; line-height: 1.5;">
+              • 위치: 인천광역시 옹진군 덕적면 덕적남로 220<br>
+              • 발급 혜택: 휴양림 및 야영데크 이용 시 10,000원(비수기 5,000원) 쿠폰 발급
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 안내 팁 박스 -->
+        <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 13px 15px; margin-bottom: 10px;">
+          <div style="font-size: 13px; font-weight: 700; color: #1D4ED8; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            현장에서 종이(지류) 쿠폰을 받으셨나요?
+          </div>
+          <div style="font-size: 12px; color: #2563EB; line-height: 1.45;">
+            지류 쿠폰의 바코드 또는 번호를 모바일 지갑에 등록하시면 스마트폰 QR 스캔으로 가맹점에서 손쉽게 사용하실 수 있습니다.
+          </div>
+        </div>
       </div>
 
-      <div id="use-modal-expired-container" style="display: none;">
-        <p style="font-size: 0.9rem; color: #DC2626; font-weight: 700; margin: 20px 0;">유효 시간이 만료되었습니다.</p>
-        <button class="btn-blue-fill" style="width:100%; height:48px;" id="btn-re-qr">QR 코드 재생성</button>
+      <!-- 하단 고정 액션 버튼 바 -->
+      <div class="sheet-sticky-footer">
+        <button type="button" onclick="window.closeIssuerSheet(); window.openRegisterSheet();" style="flex: 1; height: 50px; border-radius: 12px; background: #0068F9; color: #FFFFFF; border: none; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 14px rgba(0, 104, 249, 0.28);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+          종이쿠폰 등록하기
+        </button>
+        <button type="button" onclick="window.closeIssuerSheet();" style="width: 84px; height: 50px; border-radius: 12px; background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; font-size: 14.5px; font-weight: 700; cursor: pointer;">
+          닫기
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 종이쿠폰 전환 등록 성공 축하 모달 -->
+  <div class="use-modal-backdrop" id="claim-success-modal">
+    <div class="use-modal-sheet" style="position: relative; text-align: center; padding: 32px 24px;">
+      <div style="width: 64px; height: 64px; background: #ecfdf5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+        <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">쿠폰 등록 완료!</h3>
+      <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">종이쿠폰이 내 모바일 지갑으로 성공적으로 전환되었습니다.</p>
+      
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; margin-bottom: 24px; text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 13px; color: #64748b;">충전된 쿠폰 금액</span>
+          <span id="success-coupon-amount" style="font-size: 20px; font-weight: 800; color: #0068F9;">₩0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 12.5px;">
+          <span style="color: #64748b;">발권 장소</span>
+          <span id="success-coupon-loc" style="font-weight: 600; color: #1e293b;">-</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12.5px;">
+          <span style="color: #64748b;">유효기간</span>
+          <span style="font-weight: 600; color: #1e293b;">발급일로부터 1년</span>
+        </div>
+      </div>
+
+      <button type="button" class="btn-submit-coupon" id="btn-success-confirm" style="margin-bottom: 0;">내 쿠폰함에서 확인하기</button>
+    </div>
+  </div>
+
+  <!-- 쿠폰 사용 QR 모달 -->
+  <div class="use-modal-backdrop" id="use-qr-modal">
+    <div class="use-modal-sheet" style="position: relative;">
+      <button class="modal-close-btn" onclick="window.closeUseModal()" title="닫기">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <!-- QR 및 타이머 영역 -->
+      <div id="use-modal-qr-container" style="margin-top: 24px;">
+        <div class="qr-container">
+          <img id="use-modal-qr-img" class="qr-img" src="" alt="쿠폰 결제용 QR 코드" />
+        </div>
+        
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 24px 0 22px;">
+          <div style="font-size: 14px; color: #6B7280; font-weight: 400; font-family: var(--font-sans);">남은 시간</div>
+          <div id="use-modal-timer" style="font-size: 27px; font-weight: 700; color: var(--primary); font-family: var(--font-sans); letter-spacing: normal; line-height: 1.1;">03:00</div>
+        </div>
+      </div>
+      
+      <!-- 만료된 화면 -->
+      <div id="use-modal-expired-container" style="display: none; margin: 30px 0; text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 100px; background: #FEE2E2; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <p style="font-size: 14px; color: #DC2626; font-weight: 700; margin-bottom: 6px;">유효 시간이 만료되었습니다</p>
+        <p style="font-size: 13px; color: var(--fg-secondary); margin-bottom: 20px;">보안을 위해 QR 코드가 소멸되었습니다.</p>
+        <button onclick="window.regenerateQr()" style="padding: 8px 16px; font-size: 13px; border-radius: 10px; border: 1.5px solid var(--accent); color: var(--accent); background: #fff; font-family: inherit; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 auto;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+          다시 받기
+        </button>
+      </div>
+      
+      <!-- 완료 버튼 -->
+      <button class="reg-cta" id="btn-complete-payment" onclick="window.completePayment()" style="width: 100%; margin: 0;">완료</button>
+    </div>
+  </div>
+
+  <!-- Kiosk 발급 모달 -->
+  <div class="qr-modal-backdrop" id="qr-modal">
+    <div class="qr-modal-sheet">
+      <div id="qr-state-loading" style="display: block;">
+        <div style="width: 48px; height: 48px; border: 4px solid var(--accent-soft); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--fg-strong); margin: 0 0 8px 0;">QR 코드 분석 중</h3>
+        <p style="font-size: 13px; color: var(--fg-secondary); margin: 0; line-height: 1.5;">카메라로 촬영된 이미지를 디코딩하여<br>쿠폰을 발급받고 있습니다.</p>
+      </div>
+      
+      <div id="qr-state-success" style="display: none;">
+        <div style="width: 64px; height: 64px; border-radius: 100px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; animation: bounce 0.6s ease-out;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--fg-strong); margin: 0 0 8px 0;">쿠폰 발급 성공!</h3>
+        <p id="qr-success-msg" style="font-size: 14px; color: var(--accent); font-weight: 700; margin-bottom: 24px;">쿠폰이 지갑에 등록되었습니다.</p>
+        <button class="reg-cta" id="btn-qr-success-ok" style="width: 100%; margin: 0;">확인</button>
+      </div>
+
+      <div id="qr-state-error" style="display: none;">
+        <div style="width: 64px; height: 64px; border-radius: 100px; background: #FEE2E2; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--fg-strong); margin: 0 0 8px 0;">인식 실패</h3>
+        <p id="qr-error-msg" style="font-size: 13px; color: #DC2626; margin-bottom: 24px; line-height: 1.5;">QR 코드를 찾을 수 없습니다.<br>밝은 곳에서 다시 시도해주세요.</p>
+        <button class="reg-cta" id="btn-qr-error-close" style="width: 100%; margin: 0; background: var(--fg-strong);">닫기</button>
       </div>
     </div>
   </div>
 
   <div id="toast-container"></div>
-
+
+  <!-- ── 기존 비즈니스 로직 (100% 유지) ── -->
 </body>
 </html>

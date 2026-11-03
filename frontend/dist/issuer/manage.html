@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="옹진 관광쿠폰">
+  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
+  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
+  <meta property="og:locale" content="ko_KR">
   <meta name="google" content="notranslate" />
   <title>발행처 관리 페이지 | 옹진 관광 쿠폰</title>
   <style>
@@ -733,10 +740,11 @@
       stroke: #1e293b;
     }
   </style>
-  <script type="module" crossorigin src="/assets/issuer-manage-D9qWLckV.js"></script>
+  <script type="module" crossorigin src="/assets/issuer-manage-B4oEq13G.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-Ba6NtGBQ.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-DIUxAG8e.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-03q0TmgI.css">
 </head>
 <body>
 
@@ -839,10 +847,19 @@
                 </div>
               </div>
             </div>
+
+            <!-- 권종별 세부 배정 현황 카드 -->
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin: 0;">권종별 상세 배정 현황</h3>
+                <span style="font-size: 0.8rem; color: #64748b; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;">실시간 자동 집계</span>
+              </div>
+              <div id="allocations-detail-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- 권종별 항목 동적 렌더링 -->
+              </div>
+            </div>
           </div>
         </div>
-
-
 
       </div>
     </section>

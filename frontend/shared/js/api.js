@@ -126,7 +126,11 @@ async function request(method, path, body = null) {
             .then(async (retryRes) => {
               const data = await retryRes.json().catch(() => ({}))
               if (!retryRes.ok) {
-                const error = new Error(data.message || '요청에 실패했습니다.')
+                const errorMsg = data.message ||
+                                 (Array.isArray(data.errors) && data.errors[0]?.msg) ||
+                                 (typeof data.error === 'string' ? data.error : null) ||
+                                 '요청에 실패했습니다.'
+                const error = new Error(errorMsg)
                 error.status = retryRes.status
                 reject(error)
               } else {
@@ -147,8 +151,13 @@ async function request(method, path, body = null) {
 
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    const error = new Error(data.message || '요청에 실패했습니다.')
+    const errorMsg = data.message ||
+                     (Array.isArray(data.errors) && data.errors[0]?.msg) ||
+                     (typeof data.error === 'string' ? data.error : null) ||
+                     '요청에 실패했습니다.'
+    const error = new Error(errorMsg)
     error.status = res.status
+    error.data = data
     throw error
   }
   return data

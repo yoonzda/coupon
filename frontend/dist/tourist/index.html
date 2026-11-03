@@ -1,53 +1,1481 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>옹진 관광 쿠폰 | 본인인증</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
-  <script type="module" crossorigin src="/assets/tourist-index-Dx7V11e0.js"></script>
+  <script>
+    if (window.location.hostname.includes('withi.kr')) {
+      var meta = document.createElement('meta');
+      meta.name = 'robots';
+      meta.content = 'noindex, nofollow, noarchive';
+      document.head.appendChild(meta);
+      window.location.replace('https://ongjincoupon.kr' + window.location.pathname + window.location.search);
+    }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- PWA & Mobile Web App -->
+  <link rel="manifest" href="/assets/manifest-C2E8yHgd.webmanifest">
+  <meta name="theme-color" content="#FFFFFF">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon-Lwcp8xrE.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="옹진쿠폰">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <script src="/shared/js/pwa-install.js?v=20261022" data-pwa-banner defer></script>
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ongjincoupon.kr/tourist/index.html">
+  <meta property="og:site_name" content="옹진관광쿠폰">
+  <meta property="og:title" content="옹진관광쿠폰">
+  <meta property="og:description" content="옹진관광 쿠폰 플랫폼 — 백령도·대청도·연평도·덕적도·자월도 옹진군 섬 여행 필수 모바일 할인 쿠폰">
+  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
+  <meta property="og:image:width" content="1024">
+  <meta property="og:image:height" content="1024">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="옹진관광쿠폰">
+  <meta name="twitter:description" content="옹진관광 쿠폰 플랫폼 — 백령도·대청도·연평도·덕적도·자월도 옹진군 섬 여행 필수 모바일 할인 쿠폰">
+  <meta name="description" content="옹진관광 쿠폰 플랫폼 — 백령도·대청도·소청도·연평도·덕적도·자월도·영흥도 옹진군 7개 섬 여행 필수 공식 모바일 할인 쿠폰" />
+  <meta name="keywords" content="옹진관광쿠폰, 옹진쿠폰, 옹진군 관광쿠폰, 옹진 섬패스, 백령도 여행, 대청도 여행, 소청도 여행, 연평도 여행, 덕적도 여행, 자월도 여행, 영흥도 여행, 인천 섬여행 할인쿠폰, 옹진군청, 옹진군 소상공인 쿠폰" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="옹진군청 관광문화과" />
+  <meta name="naver-site-verification" content="1f8d040db553e40a1c3253a2f859ff821b905372" />
+  <meta name="google-site-verification" content="t5Vtc4skebg_5dXprHi1JkYF5LdnO35O3EzIx92NKDU" />
+  <link rel="canonical" href="https://ongjincoupon.kr/tourist/index.html" />
+  <title>옹진관광쿠폰 — 옹진군 공식 디지털 관광쿠폰 포털</title>
+  <!-- Schema.org JSON-LD 구조화 데이터 (검색엔진 최적화) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "옹진관광쿠폰",
+    "alternateName": ["옹진쿠폰", "옹진군 관광쿠폰", "Ongjin Tourist Coupon"],
+    "url": "https://ongjincoupon.kr/",
+    "description": "옹진군 공식 디지털 관광쿠폰 플랫폼 — 백령도·대청도·소청도·연평도·덕적도·자월도·영흥도 7개 섬 여행 필수 모바일 할인 쿠폰",
+    "publisher": {
+      "@type": "GovernmentOrganization",
+      "name": "옹진군청",
+      "url": "https://www.ongjin.go.kr"
+    }
+  }
+  </script>
+  <style>
+    /* ── 가맹점 상세 바텀시트 모달 ── */
+    .bottom-sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.48);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 10050 !important;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      touch-action: none;
+      overscroll-behavior: contain;
+    }
+    .bottom-sheet-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    /* 뒷배경 스크롤 방지 락 클래스 */
+    body.modal-locked {
+      overflow: hidden !important;
+      touch-action: none !important;
+    }
+    .scroll.modal-locked {
+      overflow: hidden !important;
+      touch-action: none !important;
+    }
+    .merchant-detail-sheet {
+      background: #FFFFFF;
+      border-radius: 28px 28px 0 0;
+      width: 100%;
+      max-width: 440px;
+      height: 85vh;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    .bottom-sheet-overlay.active .merchant-detail-sheet {
+      transform: translateY(0);
+    }
+    .sheet-drag-handle {
+      width: 36px;
+      height: 4px;
+      border-radius: 100px;
+      background: #D1D5DB;
+      margin: 10px auto 4px;
+      flex-shrink: 0;
+    }
+    .sheet-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #F3F4F6;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      color: #4B5563;
+      transition: background 0.2s ease;
+    }
+    .sheet-close-btn:hover {
+      background: #E5E7EB;
+      color: #111827;
+    }
+    .sheet-scroll-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      -webkit-overflow-scrolling: touch !important;
+      overscroll-behavior: contain !important;
+      touch-action: pan-y !important;
+      padding-bottom: 60px;
+    }
+
+    /* 상단 1:1 정사각형 이미지 슬라이더 (상단 여백 & 둥근 카드 모서리) */
+    .detail-img-slider-wrap {
+      position: relative;
+      width: calc(100% - 32px);
+      margin: 12px 16px 0;
+      aspect-ratio: 1;
+      background: #F3F4F6;
+      border-radius: 20px;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .detail-img-slider {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      touch-action: pan-x pan-y !important; /* 이미지 위에서 위아래로 쓸어도 모달이 스크롤되도록 pan-y 허용 */
+      scroll-behavior: smooth;
+    }
+    .detail-img-slider::-webkit-scrollbar { display: none; }
+    .detail-img-slider img {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      scroll-snap-align: start;
+      user-select: none;
+      -webkit-user-drag: none;
+      -khtml-user-drag: none;
+      -moz-user-drag: none;
+      -o-user-drag: none;
+      pointer-events: auto;
+    }
+    /* 이미지 없거나 로드 실패 시 폴백 */
+    .img-fallback {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f2f5;
+      font-size: 56px;
+      color: #9ca3af;
+      scroll-snap-align: start;
+    }
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 12;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+      opacity: 0.9;
+    }
+    .slider-btn:hover {
+      background: #FFFFFF;
+      transform: translateY(-50%) scale(1.08);
+      opacity: 1;
+    }
+    .slider-btn:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+    .slider-btn.prev-btn { left: 12px; }
+    .slider-btn.next-btn { right: 12px; }
+    .slider-btn.is-hidden { display: none !important; }
+
+    .detail-glass-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      left: auto;
+      padding: 5px 13px;
+      border-radius: 100px;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .detail-glass-badge .sep { opacity: 0.6; font-size: 12px; margin: 0 1px; color: rgba(255,255,255,0.7); }
+
+    /* 하단 상세 정보 세션 */
+    .detail-info-section {
+      padding: 24px 20px 20px;
+    }
+    .detail-island-name {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+    .detail-shop-name {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--fg-strong);
+      letter-spacing: -0.035em;
+      margin: 0 0 20px;
+      line-height: 1.25;
+    }
+    .detail-meta-list {
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      border-top: 2px solid #111827;
+    }
+    .detail-meta-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 14px 4px;
+      border-bottom: 1px solid #E5E7EB;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .detail-meta-item .meta-label {
+      width: 76px;
+      color: #6B7280;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .detail-meta-item .meta-val {
+      color: #111827;
+      font-weight: 600;
+      flex: 1;
+      word-break: keep-all;
+    }
+
+    /* ── 상세 바텀시트 하단 액션 (위치 보기 버튼) ── */
+    .detail-action-row {
+      margin-top: 24px;
+    }
+    .btn-view-map {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px 20px;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 104, 249, 0.22);
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .btn-view-map:hover {
+      background: #0052c9;
+    }
+    .btn-view-map:active {
+      transform: scale(0.98);
+    }
+
+    /* ── 사용 가능 쿠폰 카드 섹션 ── */
+    .detail-coupon-section {
+      margin-top: 32px;
+    }
+    .detail-coupon-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--fg-strong);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      letter-spacing: -0.03em;
+    }
+    .detail-coupon-title .count-badge {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--powder-blue);
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+    .detail-coupon-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      background: #FFFFFF;
+      border: 1px solid #EEF0F2;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+    .detail-coupon-card .c-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .detail-coupon-card .c-name {
+      font-size: 15.5px;
+      font-weight: 500;
+      color: var(--fg-strong);
+      letter-spacing: -0.02em;
+    }
+    .detail-coupon-card .c-val {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+    .detail-coupon-card .btn-use-c {
+      padding: 10px 18px;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 3px 8px rgba(0, 104, 249, 0.25);
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .detail-coupon-card .btn-use-c:hover {
+      background: #004ecc;
+    }
+    /* 주요 서비스 섹션 상단 여백 (20px 감소하여 30px 설정) */
+    .services-section {
+      padding-top: 30px !important;
+      padding-bottom: 4px !important;
+    }
+    /* 로그인 상태 인디케이터 배지 */
+    .user-logged-badge {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      background: #10B981;
+      border-radius: 50%;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.4);
+    }
+
+    /* ── 메인 하단 카피라이트 & 푸터 (모바일 전용 최적화) ── */
+    .app-footer {
+      background: #F8FAFC;
+      border-top: 1px solid #E2E8F0;
+      padding: 24px 20px calc(96px + env(safe-area-inset-bottom, 20px));
+      font-size: 12px;
+      color: #64748B;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .footer-terms-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .footer-terms-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 10px;
+    }
+    .footer-terms-row a {
+      color: #64748B;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 0;
+      transition: color 0.15s ease;
+      cursor: pointer;
+    }
+    .footer-terms-row a.privacy-link {
+      color: #0F172A;
+      font-weight: 700;
+    }
+    .footer-terms-row a:hover {
+      color: var(--primary, #059669);
+      text-decoration: underline;
+    }
+    .footer-terms-row .terms-sep {
+      color: #CBD5E1;
+      font-size: 10px;
+      user-select: none;
+    }
+    .footer-divider {
+      height: 1px;
+      background: #E2E8F0;
+      margin: 16px 0;
+    }
+    .footer-inquiry-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .inquiry-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .inquiry-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      letter-spacing: -0.01em;
+    }
+    .inquiry-tel-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .inquiry-tel-card:active {
+      background: #F0F9FF;
+      border-color: #38BDF8;
+      transform: scale(0.99);
+    }
+    .tel-card-main {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .tel-icon-wrap {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #EFF6FF;
+      color: #2563EB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .tel-number {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: 0.01em;
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", sans-serif;
+    }
+    .tel-subtext {
+      font-size: 12px;
+      font-weight: 500;
+      color: #64748B;
+      margin-left: 3px;
+    }
+    .tel-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      background: #EFF6FF;
+      color: #2563EB;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .inquiry-hours {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: #64748B;
+      background: #F1F5F9;
+      padding: 9px 12px;
+      border-radius: 8px;
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+    .inquiry-hours svg {
+      color: #64748B;
+      flex-shrink: 0;
+    }
+    .footer-bottom-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      border-top: 1px solid #E2E8F0;
+      padding-top: 14px;
+    }
+    .gov-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #475569;
+      letter-spacing: -0.01em;
+    }
+    .copyright-text {
+      font-size: 11px;
+      color: #94A3B8;
+    }
+
+    /* ── 약관 바텀시트 모달 ── */
+    .terms-sheet {
+      background: #FFFFFF;
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-width: 440px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bottom-sheet-overlay.active .terms-sheet {
+      transform: translateY(0);
+    }
+    .terms-header {
+      padding: 18px 20px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #F1F5F9;
+      position: relative;
+    }
+    .terms-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 0;
+    }
+    .terms-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #334155;
+    }
+    .terms-body h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 16px 0 6px;
+    }
+    .terms-body h4:first-child {
+      margin-top: 0;
+    }
+    .terms-body p {
+      margin: 0 0 12px;
+      color: #475569;
+    }
+    .terms-footer {
+      padding: 12px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+      border-top: 1px solid #F1F5F9;
+      background: #FAFAFA;
+    }
+    .terms-footer button {
+      width: 100%;
+      height: 44px;
+      background: var(--primary, #059669);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ── 메인 히어로 슬라이더 전용 (main-hero-*) — 공통 .hero-* 규칙은 건드리지 않음 ── */
+    .main-hero {
+      aspect-ratio: 5 / 4; /* 이미지 로딩 중에도 높이 고정 */
+      touch-action: pan-y;
+    }
+    .main-hero .hero-track {
+      width: 300% !important;
+    }
+    .main-hero .hero-slide {
+      flex: 0 0 33.3333% !important;
+      width: 33.3333% !important;
+    }
+    /* 배경 이미지 톤 다운 */
+    .main-hero .hero-slide img {
+      filter: saturate(0.85) brightness(0.95);
+    }
+    /* 하단 rgba(0,0,0,0.8) → 40% 0.45 → 약 65% 높이에서 투명 (상단 풍경은 원본 유지) */
+    .main-hero-grad {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.45) 40%,
+        rgba(0, 0, 0, 0) 65%),
+        linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)); /* 전체 오버레이 (그라데이션 아래 층) */
+      pointer-events: none;
+      z-index: 1;
+    }
+    /* 타이틀 + 설명: 좌측 하단 */
+    .main-hero-copy {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: 36px;
+      z-index: 2;
+      color: #FFFFFF;
+      pointer-events: none;
+    }
+    .main-hero-copy.is-entering {
+      animation: mainHeroTextIn 0.5s ease-out both;
+    }
+    @keyframes mainHeroTextIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .main-hero-title {
+      margin: 0;
+      font-size: clamp(20px, 6.5vw, 28px);
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.03em;
+      color: #FFFFFF;
+      word-break: keep-all;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    }
+    .main-hero-desc {
+      margin: 10px 0 0;
+      font-size: clamp(14px, 4vw, 16px);
+      font-weight: 400;
+      line-height: 1.5;
+      letter-spacing: -0.02em;
+      color: rgba(255, 255, 255, 0.75);
+      word-break: keep-all;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
+    }
+    /* 숫자 카운터: 우측 상단 */
+    .main-hero-counter {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 2;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      font-size: 12px;
+      line-height: 1.4;
+      font-variant-numeric: tabular-nums;
+      color: rgba(255, 255, 255, 0.6);
+      pointer-events: none;
+    }
+    .main-hero-counter-current {
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+    @supports not ((backdrop-filter: blur(6px)) or (-webkit-backdrop-filter: blur(6px))) {
+      .main-hero-counter { background: rgba(0, 0, 0, 0.5); }
+    }
+    /* 좌우 버튼: 마우스 환경에서만 렌더링, 히어로 hover 시 페이드인 */
+    .main-hero-nav {
+      display: none;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .main-hero-nav {
+        position: absolute;
+        top: 50%;
+        width: 40px;
+        height: 40px;
+        margin-top: -20px;
+        padding: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 3;
+        opacity: 0;
+        transition: opacity 0.3s ease, background 0.2s ease;
+      }
+      .main-hero-nav.prev { left: 12px; }
+      .main-hero-nav.next { right: 12px; }
+      .main-hero:hover .main-hero-nav,
+      .main-hero-nav:focus-visible {
+        opacity: 1;
+      }
+      .main-hero-nav:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      .main-hero-nav:focus-visible {
+        outline: 2px solid #FFFFFF;
+        outline-offset: 2px;
+      }
+      /* 카운터와 텍스트 사이에 버튼이 들어갈 공간이 없을 때 (좁은 창) */
+      .main-hero-nav.is-cramped {
+        display: none;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .main-hero-copy.is-entering { animation: none; }
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/tourist-index-CvZ_UA1s.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-Ba6NtGBQ.js">
-  <link rel="stylesheet" crossorigin href="/assets/tourist-theme-MhiOuvHY.css">
+  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
+  <link rel="modulepreload" crossorigin href="/assets/i18n-Y-He8y1g.js">
+  <link rel="stylesheet" crossorigin href="/assets/app-styles-CmrLvQNp.css">
 </head>
 <body>
-  <div class="tourist-app">
-    <div class="auth-app-wrapper">
-      <!-- 깨끗한 흰색 중앙 모바일 본인인증 카드 -->
-      <div style="width: 100%; max-width: 360px; margin: 0 auto; text-align: center;">
-        <div class="logo-area">
-          <img src="/assets/favicon-JK0pTB8M.png" alt="옹진군 로고" style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 12px;" />
-          <div class="logo-subtitle">옹진군 관광 쿠폰</div>
-          <h1 class="logo-title">나의 옹진 쿠폰</h1>
-          <p class="logo-desc">
-            휴대폰 본인 인증 후 수령 및 등록된 옹진관광 할인 쿠폰을 바로 확인하고 사용하실 수 있습니다.
-          </p>
+  <div class="app-container">
+    <div class="scroll">
+
+      <!-- ── 헤더 ── -->
+      <header class="header">
+        <div class="header-row" style="align-items: center;">
+          <a class="logo" href="/tourist/index.html" aria-label="옹진관광쿠폰 홈" style="display: flex; align-items: center; text-decoration: none;">
+            <!-- 옹진관광쿠폰 공식 BI 로고 -->
+            <img src="/assets/images/ongjin-coupon-logo.png" alt="옹진관광쿠폰" style="height: 40px; width: auto; max-width: 150px; object-fit: contain; display: block;" />
+          </a>
+          <div class="head-icons">
+            <!-- 🌐 지구본 언어 선택 토글 버튼 & 드롭다운 -->
+            <div class="header-popover-wrap">
+              <button class="icon-btn" id="btn-lang" onclick="window.toggleLanguage && window.toggleLanguage(event)" title="언어 변경 (KO/EN)" aria-label="언어 변경" style="display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:5px !important; height:34px !important; padding:0 10px !important; min-width:56px !important; width:auto !important; border-radius:100px !important; background:#F1F5F9 !important; border:1px solid #E2E8F0 !important; cursor:pointer !important; -webkit-tap-highlight-color:transparent !important;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0 !important; width:16px !important; height:16px !important;">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M2 12h20"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                <span class="lang-indicator-text" style="font-size:12px !important; font-weight:800 !important; color:#0F172A !important; letter-spacing:0.02em !important; line-height:1 !important;">KO</span>
+              </button>
+              <div class="header-dropdown" id="dropdown-lang" style="z-index:99999 !important;">
+                <button class="dropdown-item" data-lang="ko" data-i18n="lang_ko">한국어 (KOR)</button>
+                <button class="dropdown-item" data-lang="en" data-i18n="lang_en">English (ENG)</button>
+              </div>
+            </div>
+
+            <!-- 👤 로그인/마이페이지 버튼 (드롭다운 없이 바로 이동) -->
+            <a href="/tourist/mypage.html" class="icon-btn" id="btn-user-menu" title="마이페이지 / 로그인" aria-label="마이페이지 또는 로그인" style="text-decoration:none; color:inherit;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </a>
+          </div>
         </div>
 
-        <form id="otp-send-form" style="width: 100%;">
-          <div class="form-group">
-            <label style="text-align: center;">휴대폰 번호</label>
-            <input type="tel" id="phone" placeholder="휴대폰 번호를 입력해 주세요" maxlength="13" required autocomplete="off" />
-          </div>
-          <button type="submit" class="btn-submit" id="btn-send">인증번호 발송</button>
-        </form>
+        <!-- 검색바 -->
+        <div class="search" id="main-search-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="main-search-input" data-i18n-placeholder="header_search_placeholder" placeholder="가맹점을 검색해보세요" />
+          <a href="/tourist/map.html" title="가맹점 지도 전체보기" style="display:flex;align-items:center;color:currentColor;text-decoration:none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            </svg>
+          </a>
+        </div>
+      </header>
 
-        <form id="otp-verify-form" style="display: none; width: 100%; margin-top: 24px;">
-          <div class="form-group">
-            <label style="text-align: center;">인증번호 6자리</label>
-            <input type="text" id="otp-code" placeholder="인증번호 6자리" maxlength="6" style="letter-spacing: 6px; font-size: 1.15rem;" required />
+      <!-- ── 히어로 슬라이더 (3장 · 좌측 하단 텍스트 + 우측 상단 카운터) ── -->
+      <div class="hero">
+        <div class="hero-card main-hero" id="hero-slider">
+          <div class="hero-track" id="hero-track">
+            <div class="hero-slide" data-href="/tourist/about-pass.html" style="cursor: pointer;">
+              <img src="/assets/hero-issuer-deokjeok-800-CRUyREXL.jpg"
+                   srcset="/assets/hero-issuer-deokjeok-480-MOJduRxr.jpg 480w, /assets/hero-issuer-deokjeok-800-CRUyREXL.jpg 800w, /assets/hero-issuer-deokjeok-D6ru2TMF.jpg 1200w"
+                   sizes="(min-width: 480px) 471px, calc((100vw - 40px) * 1.07)"
+                   width="1200" height="896" fetchpriority="high" decoding="async" alt="덕적도 해안 풍경" />
+            </div>
+            <div class="hero-slide" data-href="/tourist/map.html" style="cursor: pointer;">
+              <img src="/assets/hero-2-deokjeok-720-CmxzbbI_.jpg"
+                   srcset="/assets/hero-2-deokjeok-720-CmxzbbI_.jpg 720w, /assets/hero-2-deokjeok-1200-DET5BXKI.jpg 1200w, /assets/hero-2-deokjeok-Cdo5HDcV.jpg 1920w"
+                   sizes="(min-width: 480px) 835px, calc((100vw - 40px) * 1.9)"
+                   width="1920" height="810" loading="lazy" decoding="async" alt="덕적도 풍경" />
+            </div>
+            <div class="hero-slide" data-href="/tourist/about-pass.html" style="cursor: pointer;">
+              <img src="/assets/hero-5-jawol-720-DDyfhnXr.jpg"
+                   srcset="/assets/hero-5-jawol-720-DDyfhnXr.jpg 720w, /assets/hero-5-jawol-1200-UdycyCQl.jpg 1200w, /assets/hero-5-jawol-Dw5bs-f1.jpg 1920w"
+                   sizes="(min-width: 480px) 835px, calc((100vw - 40px) * 1.9)"
+                   width="1920" height="810" loading="lazy" decoding="async" alt="자월도 풍경" />
+            </div>
           </div>
-          <button type="submit" class="btn-outline" id="btn-verify">인증하기</button>
-        </form>
+          <div class="main-hero-grad"></div>
+
+          <!-- 숫자 카운터 -->
+          <div class="main-hero-counter" aria-hidden="true">
+            <span class="main-hero-counter-current" id="hero-counter-current">1</span> / <span id="hero-counter-total">3</span>
+          </div>
+
+          <!-- 좌우 버튼 (마우스 환경에서만 렌더링) -->
+          <button type="button" class="main-hero-nav prev" id="hero-btn-prev" aria-label="이전 슬라이드">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button type="button" class="main-hero-nav next" id="hero-btn-next" aria-label="다음 슬라이드">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+
+          <!-- 타이틀 + 설명 -->
+          <div class="main-hero-copy" id="hero-copy" aria-live="polite">
+            <h2 class="main-hero-title" id="hero-title"></h2>
+            <p class="main-hero-desc" id="hero-desc"></p>
+          </div>
+        </div>
+      </div>
+
+      <script>
+      (function initHeroSlider() {
+        const track = document.getElementById('hero-track');
+        const slider = document.getElementById('hero-slider');
+        if (!track || !slider) return;
+
+        const slides = track.querySelectorAll('.hero-slide');
+        const total = slides.length;
+        if (total === 0) return;
+
+        track.style.width = `${total * 100}%`;
+        const step = 100 / total;
+        slides.forEach(slide => {
+          slide.style.flex = `0 0 ${step}%`;
+          slide.style.width = `${step}%`;
+        });
+
+        const copyEl = document.getElementById('hero-copy');
+        const titleEl = document.getElementById('hero-title');
+        const descEl = document.getElementById('hero-desc');
+        const counterEl = document.getElementById('hero-counter-current');
+        document.getElementById('hero-counter-total').textContent = String(total);
+
+        // 타이틀 줄바꿈은 <br> 위치에서만
+        const slideData = [
+          {
+            ko: { title: '덕적도·자월도 여행 경비,<br>관광쿠폰으로 돌려받으세요', desc: '결제 금액에 따라 현장에서 바로 발급해 드려요' },
+            en: { title: 'Deokjeok · Jawol trip costs,<br>back as tourism coupons', desc: 'Issued on the spot based on what you pay' }
+          },
+          {
+            ko: { title: '식당·카페·숙소까지<br>섬 어디서나 현금처럼', desc: '가맹점 어디서나 자유롭게 결제하세요' },
+            en: { title: 'Food, cafés and stays —<br>pay like cash anywhere', desc: 'Pay freely at any partner merchant' }
+          },
+          {
+            ko: { title: '앱 설치 없이도<br>누구나 쉽게 결제하세요', desc: '스마트폰·문자·종이쿠폰 모두 사용할 수 있어요' },
+            en: { title: 'No app needed —<br>easy payment for all', desc: 'Use a smartphone, text or paper coupon' }
+          }
+        ];
+
+        const AUTO_MS = 5000;
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let current = 0;
+        let autoTimer = null;
+        let isAnimating = false;
+        let isHolding = false;
+
+        function renderText(idx, animate) {
+          const lang = localStorage.getItem('ongjin_lang') || 'ko';
+          const item = slideData[idx][lang] || slideData[idx].ko;
+          titleEl.innerHTML = item.title;
+          descEl.textContent = item.desc;
+          counterEl.textContent = String(idx + 1);
+          if (animate) {
+            copyEl.classList.remove('is-entering');
+            void copyEl.offsetWidth; // 애니메이션 재시작
+            copyEl.classList.add('is-entering');
+          }
+        }
+
+        function setTrack(offset) {
+          track.style.transform = `translateX(${offset}%)`;
+          track.style.webkitTransform = `translateX(${offset}%)`;
+        }
+
+        // 좌우 버튼은 세로 중앙이 기본, 텍스트와 겹치면 카운터~텍스트 사이로 올리고 그래도 안 되면 숨김
+        const navBtns = slider.querySelectorAll('.main-hero-nav');
+        const counterBox = slider.querySelector('.main-hero-counter');
+        function positionNav() {
+          const NAV = 40, GAP = 8;
+          const copyTop = copyEl.offsetTop;
+          const counterBottom = counterBox.offsetTop + counterBox.offsetHeight;
+          let center = slider.clientHeight / 2;
+          if (center + NAV / 2 + GAP > copyTop) center = (counterBottom + copyTop) / 2;
+          const cramped = copyTop - counterBottom < NAV + GAP;
+          navBtns.forEach(btn => {
+            btn.style.top = `${center}px`;
+            btn.classList.toggle('is-cramped', cramped);
+          });
+        }
+
+        function goTo(idx) {
+          current = ((idx % total) + total) % total;
+          setTrack(-(current * step));
+          renderText(current, true);
+          positionNav();
+        }
+        window.addEventListener('resize', positionNav);
+
+        // 자동 전환: 수동 조작·누르고 있는 동안·백그라운드 탭·동작 줄이기 설정 시 정지
+        function stopAuto() {
+          clearTimeout(autoTimer);
+          autoTimer = null;
+        }
+        function startAuto() {
+          stopAuto();
+          if (reducedMotion.matches || isHolding || document.hidden) return;
+          autoTimer = setTimeout(() => {
+            goTo(current + 1);
+            startAuto();
+          }, AUTO_MS);
+        }
+        reducedMotion.addEventListener?.('change', startAuto);
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) stopAuto(); else startAuto();
+        });
+
+        function manualGo(delta, e) {
+          if (e) {
+            e.stopPropagation();
+            e.preventDefault();
+          }
+          if (isAnimating) return;
+          isAnimating = true;
+          goTo(current + delta);
+          startAuto();
+          setTimeout(() => { isAnimating = false; }, 320);
+        }
+
+        document.getElementById('hero-btn-prev').addEventListener('click', (e) => manualGo(-1, e));
+        document.getElementById('hero-btn-next').addEventListener('click', (e) => manualGo(1, e));
+
+        window.addEventListener('ongjin-lang-changed', () => {
+          renderText(current, false);
+          positionNav();
+        });
+
+        // 첫 장만 우선 로드하고, 페이지 로드가 끝나면 나머지 장을 미리 받아 전환 시 빈 화면 방지
+        window.addEventListener('load', () => {
+          slides.forEach((slide, i) => {
+            const img = slide.querySelector('img');
+            if (i > 0 && img) img.loading = 'eager';
+          });
+        });
+
+        goTo(0);
+        startAuto();
+
+        const isControl = (target) => target.closest('.main-hero-nav');
+
+        function snapBack() {
+          track.classList.remove('dragging');
+          setTrack(-(current * step));
+        }
+        function openCurrent() {
+          const href = slides[current].dataset.href;
+          if (href) window.location.href = href;
+        }
+
+        // 터치 스와이프: 처음 움직인 방향으로 축을 고정해 세로 스크롤 중에는 넘어가지 않음
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchDeltaX = 0;
+        let axis = null; // 'x' | 'y' | null
+
+        slider.addEventListener('touchstart', (e) => {
+          if (isControl(e.target)) return;
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          touchDeltaX = 0;
+          axis = null;
+          isHolding = true;
+          stopAuto();
+          track.classList.remove('dragging');
+        }, { passive: true });
+
+        slider.addEventListener('touchmove', (e) => {
+          if (isControl(e.target) || axis === 'y') return;
+          const dx = e.touches[0].clientX - touchStartX;
+          const dy = e.touches[0].clientY - touchStartY;
+          if (!axis) {
+            if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+            axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+            if (axis === 'y') return;
+          }
+          if (e.cancelable) e.preventDefault();
+          touchDeltaX = dx;
+          track.classList.add('dragging');
+          setTrack(-(current * step) + (dx / slider.offsetWidth) * step);
+        }, { passive: false });
+
+        function endTouch(canceled) {
+          isHolding = false;
+          if (!canceled && axis === 'x' && Math.abs(touchDeltaX) > 30) {
+            track.classList.remove('dragging');
+            goTo(touchDeltaX < 0 ? current + 1 : current - 1);
+          } else {
+            snapBack();
+            if (!canceled && axis === null) openCurrent();
+          }
+          axis = null;
+          touchDeltaX = 0;
+          startAuto();
+        }
+        slider.addEventListener('touchend', (e) => {
+          if (isControl(e.target)) return;
+          endTouch(false);
+        }, { passive: true });
+        slider.addEventListener('touchcancel', () => endTouch(true));
+
+        // PC 마우스 드래그
+        let mouseStartX = 0;
+        let mouseActive = false;
+        let mouseMoved = false;
+
+        slider.addEventListener('mousedown', (e) => {
+          if (isControl(e.target)) return;
+          mouseStartX = e.clientX;
+          mouseActive = true;
+          mouseMoved = false;
+          isHolding = true;
+          stopAuto();
+          track.classList.add('dragging');
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if (!mouseActive) return;
+          const dx = e.clientX - mouseStartX;
+          if (Math.abs(dx) > 6) {
+            mouseMoved = true;
+            setTrack(-(current * step) + (dx / slider.offsetWidth) * step);
+          }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+          if (!mouseActive) return;
+          mouseActive = false;
+          isHolding = false;
+          const dx = e.clientX - mouseStartX;
+          if (mouseMoved && Math.abs(dx) > 35) {
+            track.classList.remove('dragging');
+            goTo(dx < 0 ? current + 1 : current - 1);
+          } else {
+            snapBack();
+            if (!mouseMoved) openCurrent();
+          }
+          startAuto();
+        });
+      })();
+      </script>
+
+      <!-- ── 옹진의 섬 여행 ── -->
+      <div class="section">
+        <div class="section-head">
+          <h2 data-i18n="section_island_title">섬 따라 만나는 혜택</h2>
+          <p data-i18n="section_island_desc">쿠폰 사용이 가능한 가까운 가맹점을 지도에서 찾아보세요.</p>
+        </div>
+      </div>
+
+      <!-- 섬 탭 -->
+      <div class="tabs" id="island-tabs">
+        <button class="tab" data-active="true" data-island="all" data-i18n="tab_all">전체</button>
+        <button class="tab" data-island="baengnyeong" data-i18n="tab_baengnyeong">백령도</button>
+        <button class="tab" data-island="daecheong" data-i18n="tab_daecheong">대청도</button>
+        <button class="tab" data-island="socheong" data-i18n="tab_socheong">소청도</button>
+        <button class="tab" data-island="yeonpyeong" data-i18n="tab_yeonpyeong">연평도</button>
+        <button class="tab" data-island="deokjeok" data-i18n="tab_deokjeok">덕적도</button>
+        <button class="tab" data-island="jawol" data-i18n="tab_jawol">자월도</button>
+        <button class="tab" data-island="yeongheung" data-i18n="tab_yeongheung">영흥도</button>
+      </div>
+
+      <!-- 섬 카드 가로 스크롤 (동적 렌더링) -->
+      <div class="cards-scroll" id="island-cards">
+        <div style="padding: 36px 20px; color: var(--fg-tertiary, #94a3b8); font-size: 13.5px; text-align: center; width: 100%; background: #ffffff; border-radius: 16px; border: 1px dashed #e2e8f0; margin: 4px 16px;">
+          <div style="font-weight: 700; color: #334155; margin-bottom: 4px;">등록된 가맹점이 준비 중입니다</div>
+          <div style="font-size: 12.5px; color: #64748b;">현재 옹진군 관내 가맹점 모집을 진행하고 있습니다.</div>
+        </div>
+      </div>
+
+      <!-- ── 주요 서비스 (상단 여백 50px 정밀 설정) ── -->
+      <div class="section services-section">
+        <div class="section-head">
+          <h2 data-i18n="services_title">주요 서비스</h2>
+          <p data-i18n="services_desc">쿠폰 등록부터 사용까지, 모든 혜택을 한 번에.</p>
+        </div>
+      </div>
+
+      <div class="services">
+        <a href="/tourist/mypage.html" class="service-card" id="btn-my-coupon-card">
+          <div class="ico">
+            <img src="/assets/3d/ticket-3d.png" alt="내 쿠폰함 3D" class="ico-3d" />
+          </div>
+          <div class="stack">
+            <div class="t" data-i18n="services_my_coupon">내 쿠폰함</div>
+            <div class="d" data-i18n="services_my_coupon_desc">발급받은 쿠폰을 확인하세요</div>
+          </div>
+          <div class="chev">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+          </div>
+        </a>
+
+        <a href="/tourist/map.html" class="service-card">
+          <div class="ico">
+            <img src="/assets/3d/map-3d.png" alt="주변 가맹점 3D" class="ico-3d" />
+          </div>
+          <div class="stack">
+            <div class="t" data-i18n="services_nearby_merchants">주변 가맹점</div>
+            <div class="d" data-i18n="services_nearby_merchants_desc">내 위치 근처 사용처를 찾아보세요</div>
+          </div>
+          <div class="chev">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+          </div>
+        </a>
+
+        <div class="service-card" id="btn-coupon-register" style="cursor:pointer;" onclick="window.openCouponRegisterModal(event)">
+          <div class="ico">
+            <img src="/assets/3d/add-coupon-3d.png" alt="쿠폰 등록 3D" class="ico-3d" />
+          </div>
+          <div class="stack">
+            <div class="t" data-i18n="services_coupon_reg">쿠폰 등록</div>
+            <div class="d" data-i18n="services_coupon_reg_desc">쿠폰 번호 입력으로 등록</div>
+          </div>
+          <div class="chev">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 가맹점 입점 배너 ── -->
+      <div style="padding: 49px 20px 8px;">
+        <a href="/tourist/apply-guide.html" class="merchant-banner" style="margin: 0; text-decoration: none;">
+          <div class="merchant-banner-inner">
+            <div class="merchant-banner-deco1"></div>
+            <div class="merchant-banner-text">
+              <div class="merchant-banner-title" data-i18n="merchant_banner_title">매장을 운영 중이신가요?</div>
+              <div class="merchant-banner-desc" data-i18n="merchant_banner_desc">지금 입점하고 더 많은 섬 여행객을 만나보세요.</div>
+            </div>
+            <div class="merchant-banner-cta">
+              <span data-i18n="merchant_banner_cta">입점 신청</span>
+            </div>
+          </div>
+        </a>
+      </div>
+
+
+      <!-- 가맹점 링크 -->
+      <div style="text-align: center; padding: 16px 20px 24px;">
+        <p style="font-size: 13px; color: var(--fg-tertiary);">
+          <span data-i18n="merchant_login_ask">사장님이신가요?</span>
+          <a href="/merchant/index.html" data-i18n="merchant_login_link" style="color: var(--accent); font-weight: 600; margin-left: 4px;">가맹점 로그인</a>
+        </p>
+      </div>
+
+      <!-- ── 메인 하단 카피라이트 & 푸터 (모바일 전용 최적화) ── -->
+      <footer class="app-footer">
+        <!-- 1. 약관 링크 (모바일 2열 정렬) -->
+        <div class="footer-terms-wrap">
+          <div class="footer-terms-row">
+            <a href="javascript:void(0)" onclick="openTermsModal('terms')" data-i18n="footer_terms">서비스이용약관</a>
+            <span class="terms-sep">·</span>
+            <a href="javascript:void(0)" onclick="openTermsModal('privacy')" class="privacy-link" data-i18n="footer_privacy">개인정보처리방침</a>
+          </div>
+          <div class="footer-terms-row">
+            <a href="javascript:void(0)" onclick="openTermsModal('location')" data-i18n="footer_location_terms">위치기반서비스 이용약관</a>
+            <span class="terms-sep">·</span>
+            <a href="javascript:void(0)" onclick="openTermsModal('location-privacy')" data-i18n="footer_location_privacy">개인위치정보처리방침</a>
+          </div>
+        </div>
+
+        <div class="footer-divider"></div>
+
+        <!-- 2. 문의처 정보 (모바일 맞춤 터치 카드) -->
+        <div class="footer-inquiry-box">
+          <!-- 시스템 사용법 및 문의 -->
+          <div class="inquiry-item">
+            <div class="inquiry-label" data-i18n="footer_inquiry_app">시스템 사용법 및 문의</div>
+            <a href="tel:032-212-3168" class="inquiry-tel-card" title="시스템 사용법 및 문의 전화 걸기">
+              <div class="tel-card-main">
+                <div class="tel-icon-wrap">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                </div>
+                <span class="tel-number">032-212-3168</span>
+              </div>
+              <span class="tel-badge">전화연결</span>
+            </a>
+          </div>
+
+          <!-- 입점문의 -->
+          <div class="inquiry-item">
+            <div class="inquiry-label" data-i18n="footer_inquiry_merchant">입점문의</div>
+            <a href="tel:032-899-2213" class="inquiry-tel-card" title="옹진군청 입점 문의 전화 걸기">
+              <div class="tel-card-main">
+                <div class="tel-icon-wrap">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                </div>
+                <span class="tel-number">032-899-2213<span class="tel-subtext">(옹진군청)</span></span>
+              </div>
+              <span class="tel-badge">전화연결</span>
+            </a>
+            <a href="tel:032-212-3168" class="inquiry-tel-card" title="입점 문의 전화 걸기">
+              <div class="tel-card-main">
+                <div class="tel-icon-wrap">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                </div>
+                <span class="tel-number">032-212-3168<span class="tel-subtext">(또는)</span></span>
+              </div>
+              <span class="tel-badge">전화연결</span>
+            </a>
+          </div>
+
+          <!-- 운영시간 -->
+          <div class="inquiry-hours">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span data-i18n="footer_hours">평일: 09:00~18:00 (점심시간 12:00~13:00)</span>
+          </div>
+        </div>
+
+        <!-- 3. 지자체 및 카피라이트 -->
+        <div class="footer-bottom-meta">
+          <div class="gov-title" data-i18n="footer_gov">인천광역시 옹진군</div>
+          <div class="copyright-text">Copyright &copy; Ongjin-gun. All rights reserved.</div>
+        </div>
+      </footer>
+
+    </div><!-- /.scroll -->
+
+    <!-- ── 하단 네비게이션 ── -->
+    <nav class="tabbar tab-bar" style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; max-width: 440px !important; margin: 0 auto !important; height: calc(68px + env(safe-area-inset-bottom, 0px)) !important; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important; background: rgba(255, 255, 255, 0.98) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-top: 1px solid #E2E8F0 !important; display: flex !important; flex-direction: row !important; justify-content: space-around !important; align-items: center !important; z-index: 9999 !important; box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05) !important; box-sizing: border-box !important;">
+      <a class="tab-item active" data-active="true" href="/tourist/index.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: var(--primary, #059669) !important; font-weight: 700 !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-5a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9.5z"/></svg>
+        <span class="label" data-i18n="nav_home" style="font-size: 11px !important; font-weight: 700 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">Home</span>
+      </a>
+      <a class="tab-item" href="/tourist/about-pass.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span class="label" data-i18n="nav_island_pass" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">관광쿠폰</span>
+      </a>
+      <a class="tab-item" href="/tourist/map.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>
+        <span class="label" data-i18n="nav_map" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">가맹점지도</span>
+      </a>
+      <a class="tab-item" href="/tourist/apply-guide.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l2-6h12l2 6M4 10v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V10M4 10h16M10 21v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/></svg>
+        <span class="label" data-i18n="nav_apply" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">입점신청</span>
+      </a>
+      <a class="tab-item" href="/tourist/mypage.html" id="tab-my-page" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="label" data-i18n="nav_my" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">My</span>
+      </a>
+    </nav>
+
+  </div><!-- /.app-container -->
+
+  <!-- 약관 및 정책 상세 바텀시트 모달 -->
+  <div class="bottom-sheet-overlay" id="modal-terms-policy" style="display: none; opacity: 0; pointer-events: none;">
+    <div class="terms-sheet">
+      <div class="sheet-drag-handle"></div>
+      <div class="terms-header">
+        <h3 id="terms-modal-title">서비스이용약관</h3>
+        <button class="sheet-close-btn" onclick="closeTermsModal()" title="닫기" style="position: static;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="terms-body" id="terms-modal-body">
+        <!-- 동적 약관 본문 -->
+      </div>
+      <div class="terms-footer">
+        <button type="button" onclick="closeTermsModal()">확인</button>
       </div>
     </div>
   </div>
 
-  <!-- 화면을 밀지 않는 상단 고정 토스트 컨테이너 -->
-  <div id="toast-container"></div>
-
+  <!-- 가맹점 상세 정보 바텀시트 모달 -->
+  <div class="bottom-sheet-overlay" id="modal-merchant-detail">
+    <div class="merchant-detail-sheet">
+      <div class="sheet-drag-handle"></div>
+      <button class="sheet-close-btn" id="btn-close-merchant-detail" title="닫기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <div class="sheet-scroll-body">
+        <!-- 상단 1:1 정사각형 이미지 슬라이더 & 글래스모피즘 뱃지 -->
+        <div class="detail-img-slider-wrap">
+          <div class="detail-img-slider" id="detail-img-slider">
+            <!-- 동적 <img> -->
+          </div>
+          <button class="slider-btn prev-btn" id="detail-slider-prev" title="이전 이미지">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button class="slider-btn next-btn" id="detail-slider-next" title="다음 이미지">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <div class="detail-glass-badge">
+            <span id="detail-current-slide">1</span>
+            <span class="sep">/</span>
+            <span id="detail-total-slides">1</span>
+          </div>
+        </div>
+
+        <!-- 하단 정보 영역 -->
+        <div class="detail-info-section">
+          <div class="detail-island-name" id="detail-island">백령도</div>
+          <h2 class="detail-shop-name" id="detail-name">가게 상호명</h2>
+
+          <div class="detail-meta-list">
+            <div class="detail-meta-item">
+              <span class="meta-label" data-i18n="detail_category">분류</span>
+              <span class="meta-val" id="detail-category">음식점</span>
+            </div>
+            <div class="detail-meta-item">
+              <span class="meta-label" data-i18n="detail_phone">연락처</span>
+              <span class="meta-val" id="detail-phone">032-836-1234</span>
+            </div>
+            <div class="detail-meta-item">
+              <span class="meta-label" data-i18n="detail_address">주소</span>
+              <span class="meta-val" id="detail-address">인천광역시 옹진군...</span>
+            </div>
+            <div class="detail-meta-item">
+              <span class="meta-label" data-i18n="detail_hours">운영정보</span>
+              <span class="meta-val" id="detail-hours">09:00 ~ 17:00 (토, 일 휴무)</span>
+            </div>
+          </div>
+
+          <!-- 위치 보기 액션 버튼 (텍스트만 큼직하게) -->
+          <div class="detail-action-row">
+            <button class="btn-view-map" id="btn-detail-view-map" data-i18n="detail_btn_map">
+              위치 보기
+            </button>
+          </div>
+
+          <!-- 사용 가능 쿠폰 리스트 -->
+          <div class="detail-coupon-section">
+            <div class="detail-coupon-title">
+              <span data-i18n="detail_coupons_title">사용 가능 쿠폰</span>
+              <span class="count-badge" id="detail-coupon-badge">2장 보유</span>
+            </div>
+            <div id="detail-coupon-list">
+              <!-- 동적 렌더링 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 종이쿠폰 등록 바텀시트 모달 (디자인 피드백 반영) -->
+  <div class="bottom-sheet-overlay" id="modal-coupon-register">
+    <div class="bottom-sheet-content" style="position: relative;">
+      <div class="sheet-drag-handle"></div>
+      <button type="button" class="sheet-close-btn" id="btn-x-coupon-modal" title="닫기" onclick="window.closeCouponRegisterModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="sheet-header">
+        <h3 class="sheet-title" data-i18n="modal_coupon_title">종이쿠폰 등록</h3>
+        <p class="sheet-sub" data-i18n="modal_coupon_sub">쿠폰 뒷면의 번호를 입력하거나 바코드를 스캔하세요.</p>
+      </div>
+      <div class="sheet-body">
+        <div class="form-field" style="margin-bottom:14px;">
+          <label class="form-label" data-i18n="modal_coupon_label">쿠폰 번호</label>
+          <input type="text" id="input-coupon-code" class="form-input" data-i18n-placeholder="modal_coupon_placeholder" placeholder="예: OJ-XXXX-XXXX" maxlength="12" autocomplete="off" />
+        </div>
+        <div class="sheet-divider-or"><span>또는</span></div>
+        <button type="button" class="btn-scan-barcode" id="btn-scan-barcode">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span data-i18n="modal_btn_scan">카메라로 바코드 스캔</span>
+        </button>
+        <button type="button" class="btn-submit-coupon" id="btn-submit-coupon" data-i18n="modal_btn_submit">쿠폰 등록하기</button>
+        <button type="button" class="btn-cancel-sheet" id="btn-close-coupon-modal" data-i18n="btn_cancel" onclick="window.closeCouponRegisterModal()">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 언어 선택 드롭다운 (숨겨진 select) -->
+  <select id="lang-switcher-tourist" style="display:none;">
+    <option value="ko">한국어</option>
+    <option value="en">English</option>
+    <option value="zh">中文</option>
+  </select>
+
+  <!-- ── 통합 스크립트 (Vite ESM 모듈) ── -->
 </body>
 </html>

@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="옹진 관광쿠폰">
+  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
+  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
+  <meta property="og:locale" content="ko_KR">
   <title>쿠폰 배정하기 | 옹진 관광 쿠폰</title>
   <script>
     (function() {
@@ -70,12 +77,59 @@
       font-weight: 600;
       pointer-events: none;
     }
+
+    /* 칩 버튼 및 정책 미니 박스 */
+    .chip-btn {
+      padding: 6px 12px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .chip-btn.active {
+      background: #0068F9;
+      border-color: #0068F9;
+      color: #fff;
+    }
+    .policy-mini-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #0068F9;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+    .policy-mini-box strong {
+      color: #0f172a;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+    .policy-mini-list {
+      margin: 6px 0 0 0;
+      padding-left: 18px;
+      color: #475569;
+      font-size: 0.82rem;
+    }
+    .policy-mini-list li {
+      margin-bottom: 3px;
+    }
   </style>
-  <script type="module" crossorigin src="/assets/admin-allocate-coupon-BrHVlzRn.js"></script>
+  <script type="module" crossorigin src="/assets/admin-allocate-coupon-jdW213Fm.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-Ba6NtGBQ.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-DIUxAG8e.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-DxYVQPuN.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-03q0TmgI.css">
 </head>
 <body>
   <div class="app-shell">
@@ -105,7 +159,21 @@
       </div>
 
       <div class="form-container">
-        
+        <!-- 옹진 관광쿠폰 권종 배정 정책 안내 -->
+        <div class="policy-mini-box">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <strong>📌 옹진 관광쿠폰 5대 표준 권종 정책</strong>
+            <span style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 99px; font-weight: 700;">공식 기준</span>
+          </div>
+          <ol class="policy-mini-list">
+            <li><strong>1,000원권</strong> : 1천원 결제 시 지급</li>
+            <li><strong>2,000원권</strong> : 2천원 이상 ~ 3천원 이하 결제 시 지급</li>
+            <li><strong>3,000원권</strong> : 3천원 초과 ~ 8천원 이하 결제 시 지급</li>
+            <li><strong>5,000원권</strong> : 8천원 초과 ~ 4만원 이하 결제 시 지급 (주력 권종)</li>
+            <li><strong>10,000원권</strong> : 4만원 초과 결제 시 지급 (고액 결제 우대)</li>
+          </ol>
+        </div>
+
         <form id="form-create-allocation" onsubmit="createAllocation(event)">
           <div class="form-group">
             <label for="allocation-issuer-select">발행처</label>
@@ -116,8 +184,15 @@
           <div class="form-group">
             <label for="allocation-face-value">배정 쿠폰 금액</label>
             <div class="input-group">
-              <input type="number" id="allocation-face-value" class="no-spin" min="0" required />
+              <input type="number" id="allocation-face-value" class="no-spin" min="0" value="5000" required />
               <span class="input-unit">원</span>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+              <button type="button" class="chip-btn" onclick="setAllocFaceValue(1000, this)">1,000원권</button>
+              <button type="button" class="chip-btn" onclick="setAllocFaceValue(2000, this)">2,000원권</button>
+              <button type="button" class="chip-btn" onclick="setAllocFaceValue(3000, this)">3,000원권</button>
+              <button type="button" class="chip-btn active" onclick="setAllocFaceValue(5000, this)">5,000원권</button>
+              <button type="button" class="chip-btn" onclick="setAllocFaceValue(10000, this)">10,000원권</button>
             </div>
           </div>
           <div class="form-group">

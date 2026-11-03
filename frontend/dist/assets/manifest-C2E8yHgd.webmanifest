@@ -1,0 +1,22 @@
+{
+  "id": "/tourist/",
+  "name": "옹진관광쿠폰",
+  "short_name": "옹진쿠폰",
+  "description": "옹진군 섬 여행 공식 모바일 할인 쿠폰 — 쿠폰함, 가맹점 지도, 쿠폰 사용",
+  "lang": "ko",
+  "start_url": "/tourist/index.html?source=homescreen",
+  "scope": "/tourist/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "icons": [
+    { "src": "/tourist/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/tourist/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/tourist/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "내 쿠폰함", "short_name": "쿠폰함", "url": "/tourist/mypage.html?source=homescreen", "icons": [{ "src": "/tourist/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "가맹점 지도", "short_name": "지도", "url": "/tourist/map.html?source=homescreen", "icons": [{ "src": "/tourist/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

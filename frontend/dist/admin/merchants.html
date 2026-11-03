@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="옹진 관광쿠폰">
+  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
+  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
+  <meta property="og:locale" content="ko_KR">
   <title>가맹점 관리 | 옹진 관광 쿠폰</title>
   <script>
     (function() {
@@ -19,93 +26,390 @@
       background: #f1f5f9;
       color: #1e293b; 
     }
-    /* 탭 디자인 (캡슐형 세그먼트 컨트롤) */
+
+    .admin-sidebar svg {
+      max-width: 24px !important;
+      max-height: 24px !important;
+      box-sizing: border-box;
+    }
+    /* 표준 세그먼트 탭 스타일 */
     .coupon-tabs-outer {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       display: flex;
-      justify-content: flex-start;
     }
     .coupon-tabs-container {
       display: inline-flex;
-      background: #e2e8f0;
-      padding: 4px;
-      border-radius: 20px;
-      gap: 2px;
-      position: relative;
-      z-index: 1;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 3px;
+      gap: 3px;
     }
     .coupon-tab-indicator {
-      position: absolute;
-      top: 4px;
-      bottom: 4px;
-      left: 0;
-      width: 0;
-      background: #334155;
-      border-radius: 14px;
-      z-index: 0;
-      transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      display: none !important;
     }
     .coupon-tab-pill {
-      padding: 8px 18px;
-      font-size: 0.88rem;
-      font-weight: 700;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
       color: #475569;
-      border-radius: 16px;
-      display: flex;
+      border-radius: 3px;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
       cursor: pointer;
-      transition: color 0.2s ease;
-      background: none;
+      background: transparent;
       border: none;
-      position: relative;
-      z-index: 2;
+      transition: all 0.15s ease;
+      line-height: 1.3;
     }
     .coupon-tab-pill:hover {
+      background: #f1f5f9;
       color: #0f172a;
     }
     .coupon-tab-pill.active {
-      background: none !important;
-      color: #fff !important;
-      box-shadow: none !important;
+      background: var(--adm-primary, #0284c7) !important;
+      color: #ffffff !important;
+      font-weight: 600 !important;
     }
     .tab-count-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 99px;
-      background: rgba(71, 85, 105, 0.15);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: #e2e8f0;
       color: #475569;
-      transition: all 0.2s ease;
-      margin-left: 4px;
     }
     .coupon-tab-pill.active .tab-count-badge {
-      background: rgba(255, 255, 255, 0.25);
-      color: #ffffff;
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: #ffffff !important;
     }
-    .table-container {
-      background: #fff; border-radius: 0 !important; border: 1px solid #e2e8f0; 
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 32px;
+    .filter-bars-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 20px;
     }
-    .table-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; margin-top: 8px; }
-    mark.search-highlight {
-      background-color: #fef08a;
-      color: #854d0e;
-      font-weight: 700;
-      padding: 1px 4px;
+    .filter-bars-wrap .coupon-tabs-outer {
+      margin-bottom: 0;
+    }
+    .island-tabs-container {
+      display: inline-flex;
+      flex-wrap: wrap;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
       border-radius: 4px;
-      box-shadow: 0 1px 2px rgba(234, 179, 8, 0.2);
+      padding: 3px;
+      gap: 3px;
+    }
+    .island-tab-pill {
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #475569;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      transition: all 0.15s ease;
+      line-height: 1.3;
+    }
+    .island-tab-pill:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .island-tab-pill.active {
+      background: #0f172a !important;
+      color: #ffffff !important;
+      font-weight: 600 !important;
+    }
+    .island-tab-pill.active .tab-count-badge {
+      background: rgba(255, 255, 255, 0.22) !important;
+      color: #ffffff !important;
+    }
+    .island-region-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      font-weight: 700;
+      margin-right: 6px;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+    .island-region-자월 { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .island-region-덕적 { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .island-region-영흥 { background: #fefce8; color: #a16207; border-color: #fde047; }
+    .island-region-북도 { background: #faf5ff; color: #7e22ce; border-color: #e9d5ff; }
+    .island-region-대청 { background: #ecfeff; color: #0e7490; border-color: #a5f3fc; }
+    .island-region-연평 { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+    .island-region-백령 { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+    .island-region-기타 { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+    .merchant-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+    .merchant-table { width: 100%; border-collapse: collapse; }
+    .merchant-table th { background: #f8fafc; padding: 16px 24px; text-align: left; font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+    .merchant-table td { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .badge, .status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      font-weight: 600;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    .badge-success, .status-approved { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-warning, .status-pending  { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-danger,  .status-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .action-btns { display: flex; gap: 8px; }
+
+    /* Modal Overlay & Styling for Direct Registration */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-container-lg {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      position: relative;
+      width: 100%;
+      max-width: 680px;
+      max-height: calc(100vh - 32px);
+      max-height: calc(100dvh - 32px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin: 0;
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-container-lg form {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      background: #f8fafc;
+      flex-shrink: 0;
+    }
+    .modal-close-btn {
+      background: none; border: none; color: #64748b;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      padding: 6px; border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .modal-close-btn:hover { color: #0f172a; background: #e2e8f0; }
+    .modal-body {
+      padding: 22px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      flex: 1;
+      min-height: 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 640px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-label {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .form-label .req {
+      color: #ef4444;
+      font-weight: 800;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      color: #1e293b;
+      background: #fff;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2,132,199,0.15);
+    }
+    .form-section-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .form-help-text {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .approve-notice-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .reg-upload-card {
+      border: 1.5px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .reg-upload-card:hover {
+      border-color: #0284c7;
+      background: #f0f9ff;
+    }
+    .store-img-thumb-wrap {
+      position: relative;
+      width: 76px;
+      height: 76px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+    }
+    .store-img-thumb-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .store-img-thumb-wrap .btn-thumb-remove {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      background: rgba(239, 68, 68, 0.9);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .admin-day-pill {
+      flex: 1;
+      min-width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #475569;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .admin-day-pill:hover {
+      border-color: #7dd3fc;
+      background: #f0f9ff;
+      color: #0369a1;
+    }
+    .admin-day-pill.active {
+      background: #0284c7;
+      border-color: #0284c7;
+      color: #ffffff;
+      box-shadow: 0 2px 5px rgba(2,132,199,0.28);
+    }
+    .admin-preset-btn {
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .admin-preset-btn:hover {
+      background: #e2e8f0;
+      color: #1e293b;
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-merchants-kuaufA6j.js"></script>
+  <script type="module" crossorigin src="/assets/admin-merchants-C-iW7ogo.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-Ba6NtGBQ.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-DIUxAG8e.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-DxYVQPuN.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-03q0TmgI.css">
 </head>
 <body>
   <div class="app-shell">
@@ -116,81 +420,535 @@
     <main class="admin-content">
       <header class="dashboard-header">
         <div class="header-title-area">
-          <span class="header-category">Merchant Management</span>
           <h1>가맹점 관리</h1>
-          <p class="header-desc">신규 입점 신청 확인 및 승인/반려 처리를 관리합니다.</p>
+          <p class="header-desc">신규 입점 신청 확인 및 승인/반려 처리를 관리합니다. (도서 지역 방문/유선 접수 건 직접 등록 가능)</p>
+        </div>
+        <div class="header-actions" style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" class="btn btn-secondary" id="btn-refresh-merchants" title="가맹점 목록 새로고침">
+            <span>새로고침</span>
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-open-register">
+            가맹점 직접 등록
+          </button>
         </div>
       </header>
 
-      <!-- 1. 승인 완료 가맹점 목록 (상단) -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 8px; flex-wrap: wrap; gap: 12px;">
-        <h2 class="table-title" style="margin: 0; display: flex; align-items: center; gap: 8px;">
-          가맹점 목록
-          <span class="badge badge-success" id="count-approved" style="display: none;">0</span>
-        </h2>
-        <div style="position: relative; width: 100%; max-width: 320px;">
-          <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94a3b8;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="text" id="approved-search" placeholder="상점명, 대표자명, 주소 검색..." class="form-input" style="width: 100%; padding: 8px 12px 8px 36px; font-size: 0.85rem; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;" />
-        </div>
-      </div>
-      <div class="table-container">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th style="width: 18%; text-align: center;">상점명</th>
-              <th style="width: 14%; text-align: center;">카테고리</th>
-              <th style="width: 15%; text-align: center;">대표자 성명</th>
-              <th style="width: 18%; text-align: center;">연락처</th>
-              <th style="width: 23%; text-align: center;">주소</th>
-              <th style="width: 12%; text-align: center;">관리</th>
-            </tr>
-          </thead>
-          <tbody id="approved-merchant-list">
-            <tr><td colspan="6" class="text-center" style="padding: 40px; color: #64748b;">데이터 로드 중...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- 2. 심사 및 가맹점 관리 (하단) -->
-      <div style="margin-bottom: 12px; margin-top: 24px; display: flex; justify-content: flex-start;">
-        <!-- 탭 버튼 영역 (캡슐형 세그먼트 컨트롤) -->
-        <div class="coupon-tabs-outer" style="margin-bottom: 0;">
+      <!-- 탭 버튼 영역 (상태별 + 7개 권역별 필터) -->
+      <div class="filter-bars-wrap">
+        <div class="coupon-tabs-outer">
           <div class="coupon-tabs-container">
             <div class="coupon-tab-indicator"></div>
-            <button class="coupon-tab-pill active" data-status="pending">
+            <button class="coupon-tab-pill active" data-status="all">
+              전체
+              <span class="tab-count-badge" id="count-all">0</span>
+            </button>
+            <button class="coupon-tab-pill" data-status="approved">
+              승인 완료
+              <span class="tab-count-badge" id="count-approved">0</span>
+            </button>
+            <button class="coupon-tab-pill" data-status="pending">
               승인 대기
               <span class="tab-count-badge" id="count-pending">0</span>
             </button>
             <button class="coupon-tab-pill" data-status="rejected">
-              반려
+              반려/중지
               <span class="tab-count-badge" id="count-rejected">0</span>
-            </button>
-            <button class="coupon-tab-pill" data-status="suspended">
-              운영 중지
-              <span class="tab-count-badge" id="count-suspended">0</span>
             </button>
           </div>
         </div>
+
+        <!-- 7개 도서 권역 카테고리 필터 -->
+        <div class="island-tabs-container" id="island-tabs-container">
+          <button type="button" class="island-tab-pill active" data-island="all">
+            전체 권역
+            <span class="tab-count-badge" id="count-island-all">0</span>
+          </button>
+          <button type="button" class="island-tab-pill" data-island="자월">
+            자월
+            <span class="tab-count-badge" id="count-island-자월">0</span>
+          </button>
+          <button type="button" class="island-tab-pill" data-island="덕적">
+            덕적
+            <span class="tab-count-badge" id="count-island-덕적">0</span>
+          </button>
+          <button type="button" class="island-tab-pill" data-island="영흥">
+            영흥
+            <span class="tab-count-badge" id="count-island-영흥">0</span>
+          </button>
+          <button type="button" class="island-tab-pill" data-island="북도">
+            북도
+            <span class="tab-count-badge" id="count-island-북도">0</span>
+          </button>
+          <button type="button" class="island-tab-pill" data-island="대청">
+            대청
+            <span class="tab-count-badge" id="count-island-대청">0</span>
+          </button>
+          <button type="button" class="island-tab-pill" data-island="연평">
+            연평
+            <span class="tab-count-badge" id="count-island-연평">0</span>
+          </button>
+          <button type="button" class="island-tab-pill" data-island="백령">
+            백령
+            <span class="tab-count-badge" id="count-island-백령">0</span>
+          </button>
+        </div>
       </div>
-      <div class="table-container">
-        <table class="admin-table">
+
+      <div class="merchant-card">
+        <table class="merchant-table">
           <thead>
-            <tr id="merchant-table-header">
-              <th style="width: 15%; text-align: center;">상점명</th>
-              <th style="width: 12%; text-align: center;">카테고리</th>
-              <th style="width: 13%; text-align: center;">대표자 성명</th>
-              <th style="width: 15%; text-align: center;">연락처</th>
-              <th style="width: 20%; text-align: center;">주소</th>
-              <th style="width: 12%; text-align: center;">신청일</th>
-              <th style="width: 13%; text-align: center;">관리</th>
+            <tr>
+              <th>상점명</th>
+              <th style="white-space: nowrap;">아이디</th>
+              <th>카테고리</th>
+              <th>대표자 성명</th>
+              <th>연락처</th>
+              <th>주소</th>
+              <th style="white-space: nowrap;">등록일</th>
+              <th style="width: 105px; text-align: center; white-space: nowrap;">등록자</th>
+              <th style="width: 100px; text-align: center; white-space: nowrap;">상태</th>
+              <th style="width: 150px; text-align: center; white-space: nowrap;">관리</th>
             </tr>
           </thead>
           <tbody id="merchant-list">
-            <tr><td colspan="7" class="text-center" style="padding: 40px; color: #64748b;">데이터 로드 중...</td></tr>
+            <tr><td colspan="10" class="text-center" style="padding: 40px;">데이터 로드 중...</td></tr>
           </tbody>
         </table>
       </div>
     </main>
+  </div>
+
+  <!-- 담당 공무원 가맹점 직접 등록 모달 -->
+  <div id="modal-register-merchant" class="modal-overlay">
+    <form id="form-register-merchant" class="modal-container-lg">
+      <div class="modal-header">
+        <div>
+          <h2 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #f0f9ff; color: #0284c7; border-radius: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <line x1="19" y1="8" x2="19" y2="14"></line>
+                <line x1="22" y1="11" x2="16" y2="11"></line>
+              </svg>
+            </span>
+            신규 가맹점 직접 등록
+          </h2>
+          <p style="margin: 4px 0 0 0; font-size: 0.83rem; color: #64748b;">
+            도서 지역 방문/유선 접수 건을 공무원이 직접 등록하고 즉시 승인(또는 심사 대기) 처리합니다.
+          </p>
+        </div>
+        <button type="button" class="modal-close-btn" id="btn-close-register-modal" aria-label="닫기">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+          <!-- 1. 가맹점 기본 정보 -->
+          <div>
+            <div class="form-section-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              가맹점 기본 정보
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="reg-name">상호명 <span class="req">*</span></label>
+                <input type="text" id="reg-name" name="name" class="form-input" required placeholder="예: 바다향기횟집, 서포리마트" autocomplete="off" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-owner-name">대표자 성명 <span class="req">*</span></label>
+                <input type="text" id="reg-owner-name" name="ownerName" class="form-input" required placeholder="예: 홍길동" autocomplete="off" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-phone">대표자 휴대전화 <span class="req">*</span></label>
+                <input type="tel" id="reg-phone" name="phone" class="form-input" required placeholder="010-1234-5678" maxlength="13" autocomplete="off" />
+                <span class="form-help-text">※ 상점주 모바일 OTP 로그인 및 정산 안내 수신용</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-store-phone">매장 유선전화 (선택)</label>
+                <input type="tel" id="reg-store-phone" name="storePhone" class="form-input" placeholder="예: 032-831-0000" maxlength="14" autocomplete="off" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-business-no">사업자등록번호 (선택)</label>
+                <input type="text" id="reg-business-no" name="businessNo" class="form-input" placeholder="예: 123-45-67890" maxlength="12" autocomplete="off" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-category">업종/카테고리</label>
+                <select id="reg-category" name="category" class="form-select">
+                  <option value="음식점" selected>음식점 (식당/횟집/분식)</option>
+                  <option value="카페">카페·디저트 (카페/베이커리)</option>
+                  <option value="숙박">숙박 (펜션/모텔/민박)</option>
+                  <option value="수산물/특산물">수산물·특산물 판매점</option>
+                  <option value="마트/편의점">마트·편의점 (슈퍼/마트)</option>
+                  <option value="체험/레저">체험·레저 (낚시/체험시설)</option>
+                  <option value="기타">기타 업종</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 사업장 소재지 및 영업 정보 -->
+          <div>
+            <div class="form-section-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              사업장 소재지 및 영업 정보
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="reg-island">도서 권역</label>
+                <select id="reg-island" name="island" class="form-select">
+                  <option value="덕적면" selected>덕적면 (덕적도, 소야도, 굴업도 등)</option>
+                  <option value="자월면">자월면 (자월도, 대이작도, 소이작도, 승봉도)</option>
+                  <option value="백령면">백령면 (백령도)</option>
+                  <option value="대청면">대청면 (대청도, 소청도)</option>
+                  <option value="연평면">연평면 (대연평도, 소연평도)</option>
+                  <option value="영흥면">영흥면 (영흥도, 선재도)</option>
+                  <option value="북도면">북도면 (신도, 시도, 모도, 장봉도)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-address">사업장 상세 주소 <span class="req">*</span></label>
+                <input type="text" id="reg-address" name="address" class="form-input" required placeholder="예: 인천광역시 옹진군 덕적면 덕적남로 123" value="인천광역시 옹진군 덕적면 " autocomplete="off" />
+              </div>
+            </div>
+
+            <!-- 영업시간 및 휴무일 간편 선택 피커 -->
+            <div class="form-group" style="margin-top: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <label class="form-label" style="margin: 0; font-size: 0.88rem; color: #1e293b;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #0284c7; margin-right: 2px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  영업시간 및 휴무일 선택
+                </label>
+                <div style="display: flex; gap: 4px;">
+                  <button type="button" class="admin-preset-btn" id="reg-preset-all">매일</button>
+                  <button type="button" class="admin-preset-btn" id="reg-preset-weekdays">평일만</button>
+                  <button type="button" class="admin-preset-btn" id="reg-preset-weekend">주말만</button>
+                </div>
+              </div>
+
+              <!-- 요일 버튼 그리드 -->
+              <div style="margin-bottom: 10px;">
+                <div style="font-size: 0.78rem; color: #64748b; font-weight: 600; margin-bottom: 6px;">영업 요일 선택</div>
+                <div id="reg-weekday-selector" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <button type="button" class="admin-day-pill active" data-day="월">월</button>
+                  <button type="button" class="admin-day-pill active" data-day="화">화</button>
+                  <button type="button" class="admin-day-pill active" data-day="수">수</button>
+                  <button type="button" class="admin-day-pill active" data-day="목">목</button>
+                  <button type="button" class="admin-day-pill active" data-day="금">금</button>
+                  <button type="button" class="admin-day-pill active" data-day="토">토</button>
+                  <button type="button" class="admin-day-pill active" data-day="일">일</button>
+                </div>
+              </div>
+
+              <!-- 시간 선택 및 24시간 버튼 -->
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
+                <div style="flex: 1; min-width: 110px;">
+                  <select id="reg-open-time" class="form-select" style="padding: 7px 10px; font-size: 0.85rem; height: 38px;">
+                    <option value="">오픈 시간</option>
+                  </select>
+                </div>
+                <span style="font-weight: 700; color: #64748b; font-size: 0.9rem;">~</span>
+                <div style="flex: 1; min-width: 110px;">
+                  <select id="reg-close-time" class="form-select" style="padding: 7px 10px; font-size: 0.85rem; height: 38px;">
+                    <option value="">마감 시간</option>
+                  </select>
+                </div>
+                <button type="button" id="reg-btn-24h" style="padding: 8px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; cursor: pointer; height: 38px; white-space: nowrap;">
+                  24시간 운영
+                </button>
+              </div>
+
+              <!-- 최종 반영 텍스트 필드 -->
+              <div>
+                <div style="font-size: 0.78rem; color: #64748b; font-weight: 600; margin-bottom: 4px;">저장될 영업시간 문구 (직접 수정 가능)</div>
+                <input type="text" id="reg-business-hours" name="businessHours" class="form-input" style="padding: 8px 12px; font-size: 0.88rem; font-weight: 600; color: #1e40af; background: #fff;" placeholder="예: 매일 09:00 ~ 20:00 (연중무휴)" autocomplete="off" />
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. 정산 계좌 정보 -->
+          <div>
+            <div class="form-section-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+              정산 계좌 정보 (월별 쿠폰 환급 계좌)
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="reg-bank-name">거래 은행 (선택)</label>
+                <select id="reg-bank-name" name="bankName" class="form-select">
+                  <option value="">은행 선택</option>
+                  <option value="농협">NH농협 (중앙회/지역농협)</option>
+                  <option value="수협">수협은행 / 지역수협</option>
+                  <option value="신한">신한은행</option>
+                  <option value="국민">KB국민은행</option>
+                  <option value="우리">우리은행</option>
+                  <option value="하나">하나은행</option>
+                  <option value="기업">IBK기업은행</option>
+                  <option value="우체국">우체국</option>
+                  <option value="카카오뱅크">카카오뱅크</option>
+                  <option value="토스뱅크">토스뱅크</option>
+                  <option value="새마을">새마을금고</option>
+                  <option value="신협">신협</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-account-no">정산 계좌번호 (선택)</label>
+                <input type="text" id="reg-account-no" name="accountNo" class="form-input" placeholder="'-' 없이 숫자만 입력" maxlength="25" autocomplete="off" />
+              </div>
+            </div>
+          <!-- 4. 입점 증빙서류 및 가게 이미지 첨부 (선택) -->
+          <div>
+            <div class="form-section-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              입점 증빙서류 및 가게 이미지 첨부 (선택)
+            </div>
+
+            <!-- 사업자등록증 & 통장사본 2열 그리드 -->
+            <div class="form-grid-2" style="margin-bottom: 12px;">
+              <!-- 사업자등록증 사본 -->
+              <div class="form-group">
+                <label class="form-label">
+                  사업자등록증 사본
+                  <span style="font-size: 0.72rem; color: #64748b; font-weight: normal;">(JPG/PNG, 최대 10MB)</span>
+                </label>
+                <div class="reg-upload-card" id="drop-zone-cert">
+                  <input type="file" id="reg-file-cert" accept="image/*" style="display: none;" />
+                  <div id="cert-preview-empty">
+                    <span style="font-size: 1.5rem; display: block; margin-bottom: 4px;">📄</span>
+                    <span style="font-size: 0.8rem; font-weight: 600; color: #0284c7;">클릭하여 파일 선택</span>
+                  </div>
+                  <div id="cert-preview-loaded" style="display: none; position: relative; align-items: center; justify-content: center;">
+                    <img id="cert-preview-img" src="" alt="사업자등록증 미리보기" style="max-height: 90px; max-width: 100%; border-radius: 6px; border: 1px solid #e2e8f0; object-fit: contain;" />
+                    <button type="button" id="btn-remove-cert" style="position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">×</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 정산 통장 사본 -->
+              <div class="form-group">
+                <label class="form-label">
+                  정산 통장 사본
+                  <span style="font-size: 0.72rem; color: #64748b; font-weight: normal;">(JPG/PNG, 최대 10MB)</span>
+                </label>
+                <div class="reg-upload-card" id="drop-zone-bankbook">
+                  <input type="file" id="reg-file-bankbook" accept="image/*" style="display: none;" />
+                  <div id="bankbook-preview-empty">
+                    <span style="font-size: 1.5rem; display: block; margin-bottom: 4px;">🏦</span>
+                    <span style="font-size: 0.8rem; font-weight: 600; color: #0284c7;">클릭하여 파일 선택</span>
+                  </div>
+                  <div id="bankbook-preview-loaded" style="display: none; position: relative; align-items: center; justify-content: center;">
+                    <img id="bankbook-preview-img" src="" alt="통장사본 미리보기" style="max-height: 90px; max-width: 100%; border-radius: 6px; border: 1px solid #e2e8f0; object-fit: contain;" />
+                    <button type="button" id="btn-remove-bankbook" style="position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">×</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 가게 대표 이미지 (다중) -->
+            <div class="form-group" style="margin-bottom: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin: 0;">
+                  가게 이미지 등록
+                  <span style="font-size: 0.72rem; color: #64748b; font-weight: normal;">(매장 전경, 내부, 대표 메뉴 등 최대 5장)</span>
+                </label>
+                <span id="reg-store-img-count" style="font-size: 0.76rem; font-weight: 700; color: #0284c7;">0 / 5장</span>
+              </div>
+              <div style="border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 12px; background: #f8fafc;">
+                <input type="file" id="reg-file-store-images" accept="image/*" multiple style="display: none;" />
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;" id="reg-store-images-previews">
+                  <!-- 미리보기 썸네일들이 여기에 삽입됨 -->
+                  <div id="btn-add-store-img" style="width: 76px; height: 76px; border: 1.5px dashed #94a3b8; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; background: #fff; color: #64748b; transition: all 0.2s;">
+                    <span style="font-size: 1.3rem;">📸</span>
+                    <span style="font-size: 0.72rem; font-weight: 700; margin-top: 2px;">사진 추가</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. 즉시 승인 옵션 카드 -->
+          <div class="approve-notice-box">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+              <input type="checkbox" id="reg-immediate-approve" name="immediateApprove" checked style="width: 18px; height: 18px; accent-color: #0284c7; cursor: pointer;" />
+              <span style="font-size: 0.95rem; font-weight: 800; color: #0369a1;">
+                등록 즉시 '승인 완료' 처리 (즉시 활성화)
+              </span>
+            </label>
+            <p id="approve-help-text" style="margin: 4px 0 0 28px; font-size: 0.82rem; color: #0284c7; line-height: 1.45;">
+              ✓ 등록 즉시 승인되어, 상점주가 모바일 웹에서 휴대폰 번호로 바로 로그인하여 관광객의 쿠폰 QR을 스캔 결제할 수 있습니다.
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-neutral" id="btn-cancel-register" style="padding: 10px 18px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e1; background: #fff; color: #475569; border-radius: 8px;">취소</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-register" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; font-weight: 700; border: none; cursor: pointer; background: #0284c7; color: #fff; border-radius: 8px; font-size: 0.95rem; box-shadow: 0 2px 6px rgba(2,132,199,0.3);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span id="btn-submit-text">가맹점 등록 및 즉시 승인</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 가맹점 개별 문자(SMS/LMS) 발송 모달 -->
+  <div class="modal-overlay" id="modal-merchant-sms">
+    <div class="modal-container-lg" style="max-width: 540px;">
+      <form id="form-merchant-sms" onsubmit="return false;">
+        <div class="modal-header" style="background: #f0f9ff; border-bottom: 1px solid #bae6fd;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #0284c7; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <div>
+              <h2 style="font-size: 1.12rem; font-weight: 800; color: #0369a1; margin: 0;">가맹점 문자(SMS) 직접 발송</h2>
+              <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #0284c7;">해당 가맹점 대표자에게 개별 안내 문자를 즉시 전송합니다.</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" id="btn-close-sms-modal" aria-label="닫기">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div class="modal-body" style="padding: 20px 24px; overflow-y: auto;">
+          <!-- 수신 가맹점 카드 -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">수신 가맹점 정보</span>
+              <span id="sms-modal-merchant-id" style="font-size: 0.75rem; color: #94a3b8; font-family: monospace;">ID: -</span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <strong id="sms-modal-merchant-name" style="font-size: 1.05rem; color: #0f172a;">-</strong>
+              <span id="sms-modal-owner-name" style="font-size: 0.85rem; color: #475569;">대표자: -</span>
+            </div>
+            <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: #0284c7; font-weight: 700;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <span id="sms-modal-phone">-</span>
+            </div>
+          </div>
+
+          <!-- 상용 템플릿 선택 -->
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
+              ⚡ 빠른 문구 템플릿 (클릭 시 자동 입력)
+            </label>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;" id="sms-template-container">
+              <button type="button" class="admin-preset-btn" data-template="document">📄 서류 보완 요청</button>
+              <button type="button" class="admin-preset-btn" data-template="approved">🎉 승인 완료 안내</button>
+              <button type="button" class="admin-preset-btn" data-template="settlement">💰 정산 계좌 확인</button>
+              <button type="button" class="admin-preset-btn" data-template="inspection">🔍 사업장 점검 안내</button>
+            </div>
+          </div>
+
+          <!-- 문자 제목 -->
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 4px; display: block;">문자 제목 (LMS 장문 전송 시 사용)</label>
+            <input type="text" id="sms-input-title" class="form-input" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; font-size: 0.9rem;" placeholder="예: [옹진관광] 가맹점 안내" maxlength="30" />
+          </div>
+
+          <!-- 문자 본문 -->
+          <div class="form-group" style="margin-bottom: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #334155; margin: 0;">발송 메시지 내용 <span class="req" style="color: #ef4444;">*</span></label>
+              <span id="sms-byte-counter" style="font-size: 0.78rem; font-weight: 600; color: #64748b;">
+                0 / 90 Byte (<span id="sms-type-badge" style="color: #059669; font-weight: 700;">SMS 단문</span>)
+              </span>
+            </div>
+            <textarea id="sms-input-message" class="form-control" rows="5" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; font-size: 0.9rem; line-height: 1.5; resize: vertical; box-sizing: border-box;" placeholder="가맹점에 전달할 문자 내용을 입력해주세요." required></textarea>
+          </div>
+          <div style="font-size: 0.76rem; color: #94a3b8; line-height: 1.4;">
+            ※ 90 Byte 초과 시 자동으로 <strong>LMS(장문 문자, 최대 2,000 Byte)</strong>로 전환되어 발송됩니다.
+          </div>
+        </div>
+
+        <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px; background: #f8fafc;">
+          <button type="button" class="btn btn-neutral" id="btn-cancel-sms" style="padding: 9px 16px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e1; background: #fff; color: #475569; border-radius: 8px;">닫기</button>
+          <button type="button" class="btn btn-primary" id="btn-send-merchant-sms" style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 20px; font-weight: 700; border: none; cursor: pointer; background: #0284c7; color: #fff; border-radius: 8px; font-size: 0.92rem; box-shadow: 0 2px 6px rgba(2,132,199,0.25);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            <span id="btn-send-sms-text">문자 전송하기</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 가맹점 삭제(제재/숨김) 처리 모달 -->
+  <div class="modal-overlay" id="modal-merchant-delete">
+    <div class="modal-container-lg" style="max-width: 520px;">
+      <form id="form-merchant-delete" onsubmit="return false;">
+        <div class="modal-header" style="background: #fff1f2; border-bottom: 1px solid #fecdd3;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #e11d48; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+              </svg>
+            </div>
+            <div>
+              <h2 style="font-size: 1.12rem; font-weight: 800; color: #9f1239; margin: 0;">가맹점 삭제 (제재 / 숨김 처리)</h2>
+              <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #be123c;">DB에서 완전 삭제하지 않고 사유를 기록하여 목록 및 사용자 화면에서 제외합니다.</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" id="btn-close-delete-modal" aria-label="닫기">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div class="modal-body" style="padding: 20px 24px; overflow-y: auto;">
+          <!-- 대상 가맹점 카드 -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;">제재/삭제 대상 가맹점</span>
+              <span id="del-modal-merchant-id" style="font-size: 0.75rem; color: #94a3b8; font-family: monospace;">ID: -</span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <strong id="del-modal-merchant-name" style="font-size: 1.05rem; color: #0f172a;">-</strong>
+              <span id="del-modal-owner-name" style="font-size: 0.85rem; color: #475569;">대표자: -</span>
+            </div>
+            <div id="del-modal-address" style="margin-top: 4px; font-size: 0.82rem; color: #64748b;">-</div>
+          </div>
+
+          <!-- 빠른 제재 사유 선택 -->
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
+              ⚡ 빠른 삭제(제재) 사유 선택 (클릭 시 자동 입력)
+            </label>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;" id="del-reason-presets">
+              <button type="button" class="admin-preset-btn" data-reason="가맹점 준수규칙 위반 (부정결제/현금교환 등 적발)">🚫 가맹규칙 위반</button>
+              <button type="button" class="admin-preset-btn" data-reason="관광객 쿠폰 결제 거부 및 불친절 민원 누적">⚠️ 쿠폰 결제 거부 민원</button>
+              <button type="button" class="admin-preset-btn" data-reason="폐업 또는 장기 휴업으로 인한 가맹점 제외">🏪 폐업 / 장기 휴업</button>
+              <button type="button" class="admin-preset-btn" data-reason="중복 신청 또는 운영자 직권 목록 제외">📝 직권 목록 제외</button>
+            </div>
+          </div>
+
+          <!-- 삭제(제재) 사유 본문 -->
+          <div class="form-group" style="margin-bottom: 8px;">
+            <label class="form-label" style="font-size: 0.84rem; font-weight: 700; color: #334155;">삭제(제재) 사유 상세 입력 <span class="req" style="color: #ef4444;">*</span></label>
+            <textarea id="del-input-reason" class="form-control" rows="4" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; font-size: 0.9rem; line-height: 1.5; resize: vertical; box-sizing: border-box;" placeholder="가맹점 규칙 위반 내용이나 목록에서 제외하는 사유를 입력해주세요." required></textarea>
+          </div>
+
+          <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 10px 12px; font-size: 0.78rem; color: #9f1239; line-height: 1.45;">
+            ※ 처리 즉시 <strong>전체 가맹점 목록과 관광객 지도/앱에서 숨겨지며</strong>, 해당 가맹점의 로그인 및 쿠폰 스캔 결제가 차단됩니다. (차후 <strong>[반려/중지]</strong> 탭에서 사유 확인 및 복구 가능)
+          </div>
+        </div>
+
+        <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px; background: #f8fafc;">
+          <button type="button" class="btn btn-neutral" id="btn-cancel-delete" style="padding: 9px 16px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e1; background: #fff; color: #475569; border-radius: 8px;">취소</button>
+          <button type="button" class="btn btn-primary" id="btn-confirm-delete-merchant" style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 20px; font-weight: 700; border: none; cursor: pointer; background: #e11d48; color: #fff; border-radius: 8px; font-size: 0.92rem; box-shadow: 0 2px 6px rgba(225,29,72,0.25);">
+            <span id="btn-confirm-delete-text">삭제(제재) 처리하기</span>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <div id="toast-container"></div>

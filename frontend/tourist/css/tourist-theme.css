@@ -154,31 +154,65 @@ html, body {
 }
 
 .form-group label {
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 600;
   color: #334155;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
   width: 100%;
+  text-align: left;
+  padding-left: 2px;
+  display: block;
 }
 
 .form-group input {
   width: 100%;
   height: 48px;
   border: 1.5px solid #cbd5e1;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 0 16px;
+  font-family: 'Pretendard', sans-serif;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   color: #0f172a;
   outline: none;
   background: #ffffff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.15s ease;
   text-align: center;
+  letter-spacing: 0.5px;
 }
 
 .form-group input:focus {
   border-color: var(--primary-blue);
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+  box-shadow: none !important;
+  outline: none;
+}
+
+.dev-otp-notice {
+  margin: 8px 0 16px;
+  font-size: 0.85rem;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.5;
+  font-weight: 400;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.dev-otp-notice strong {
+  color: #0284c7;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  padding: 1px 4px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dev-otp-notice strong:hover {
+  background-color: #e0f2fe;
+  color: #0369a1;
 }
 
 .btn-submit {
@@ -187,12 +221,13 @@ html, body {
   background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   color: #ffffff;
   border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 800;
+  border-radius: 8px;
+  font-size: 0.96rem;
+  font-weight: 500 !important;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2);
   transition: opacity 0.15s ease, transform 0.15s ease;
+  letter-spacing: -0.2px;
 }
 
 .btn-submit:hover {
@@ -466,8 +501,132 @@ html, body {
   padding: 12px 20px;
   border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 500;
   color: #ffffff;
   background: rgba(15, 23, 42, 0.9);
   box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  animation: toastFadeIn 0.25s ease-out;
 }
+
+.toast.error {
+  background: rgba(225, 29, 72, 0.95);
+}
+
+.toast.info {
+  background: rgba(2, 132, 199, 0.95);
+}
+
+.toast.success {
+  background: rgba(16, 185, 129, 0.95);
+}
+
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 단계별 스텝 화면 전환 스타일 */
+.auth-step-view {
+  width: 100%;
+  animation: stepFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes stepFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn-action-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.btn-resend-sub {
+  flex: 1;
+  height: 48px;
+  padding: 0 16px;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.btn-resend-sub:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.btn-resend-sub:active {
+  transform: translateY(1px);
+}
+
+.btn-vertical-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-resend-full {
+  width: 100%;
+  height: 48px;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  letter-spacing: -0.2px;
+}
+
+.btn-resend-full:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.btn-resend-full:active {
+  transform: translateY(1px);
+}
+
+.otp-timer {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ef4444;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  letter-spacing: -0.2px;
+}
+
+
+
+

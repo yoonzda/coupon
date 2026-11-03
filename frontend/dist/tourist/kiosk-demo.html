@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>관광지 키오스크 종이쿠폰 발권 시뮬레이터 | 옹진 관광 쿠폰</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=Inter:wght@500;600;700;800&family=Courier+Prime:wght@700&display=swap" rel="stylesheet">
+  
+  <!-- QRCode.js CDN (영수증 QR 코드 실시간 생성) -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --kiosk-bg: #0f172a;
+      --kiosk-card: #1e293b;
+      --kiosk-accent: #0284c7;
+      --kiosk-accent-hover: #0369a1;
+      --paper-bg: #ffffff;
+      --paper-text: #1e293b;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--kiosk-bg);
+      color: #f8fafc;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── 키오스크 상단 바 ── */
+    .kiosk-nav {
+      background: #020617;
+      border-bottom: 1px solid #1e293b;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .kiosk-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .kiosk-logo-badge {
+      background: #0284c7;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+    }
+    .kiosk-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .kiosk-time {
+      font-size: 13px;
+      color: #94a3b8;
+      font-family: monospace;
+    }
+
+    /* ── 메인 레이아웃 ── */
+    .kiosk-main {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .kiosk-main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── 왼쪽: 키오스크 터치 화면 ── */
+    .kiosk-screen {
+      background: var(--kiosk-card);
+      border: 2px solid #334155;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+    .screen-header {
+      margin-bottom: 24px;
+    }
+    .screen-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      padding: 4px 10px;
+      border-radius: 100px;
+      margin-bottom: 8px;
+    }
+    .screen-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: -0.02em;
+      margin: 0 0 6px;
+    }
+    .screen-desc {
+      font-size: 14px;
+      color: #94a3b8;
+      margin: 0;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .kiosk-select {
+      width: 100%;
+      height: 48px;
+      background: #0f172a;
+      border: 1.5px solid #334155;
+      border-radius: 12px;
+      padding: 0 16px;
+      color: #f8fafc;
+      font-size: 14px;
+      font-weight: 600;
+      outline: none;
+    }
+
+    /* 티켓 패키지 선택 옵션 (6대 권종 2열 그리드) */
+    .package-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 600px) {
+      .package-grid { grid-template-columns: 1fr; }
+    }
+    .package-card {
+      background: #0f172a;
+      border: 2px solid #334155;
+      border-radius: 16px;
+      padding: 16px 18px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+    .package-card:hover {
+      border-color: #38bdf8;
+      background: #132238;
+    }
+    .package-card.selected {
+      border-color: #0284c7;
+      background: rgba(2, 132, 199, 0.15);
+    }
+    .package-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 3px;
+    }
+    .package-sub {
+      font-size: 12.5px;
+      color: #94a3b8;
+    }
+    .package-price {
+      text-align: right;
+    }
+    .package-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+    .package-coupon {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.12);
+      padding: 2px 6px;
+      border-radius: 6px;
+      margin-top: 2px;
+      display: inline-block;
+    }
+
+    /* ── 천문과학관 관람시설 및 수량 조절 인터페이스 ── */
+    .facility-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .facility-card {
+      background: #0f172a;
+      border: 1.5px solid #334155;
+      border-radius: 16px;
+      padding: 14px 16px;
+      transition: all 0.2s ease;
+    }
+    .facility-card:hover {
+      border-color: #475569;
+    }
+    .facility-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .facility-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .facility-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .facility-desc {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .ticket-rates-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ticket-rate-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1e293b;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1.5px solid transparent;
+      transition: all 0.2s;
+    }
+    .ticket-rate-row.has-qty {
+      border-color: #0284c7;
+      background: rgba(2, 132, 199, 0.14);
+    }
+    .rate-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .rate-label {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .rate-price {
+      font-size: 13px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+    .stepper-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stepper-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #f8fafc;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .stepper-btn:hover:not(:disabled) {
+      background: #0284c7;
+      border-color: #38bdf8;
+    }
+    .stepper-btn:active:not(:disabled) {
+      transform: scale(0.92);
+    }
+    .stepper-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+    .stepper-count {
+      min-width: 28px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 800;
+      color: #f8fafc;
+      font-family: monospace;
+    }
+    .presets-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .preset-chip {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .preset-chip:hover {
+      background: #0284c7;
+      color: #fff;
+      border-color: #38bdf8;
+    }
+    .preset-chip.danger:hover {
+      background: #dc2626;
+      border-color: #f87171;
+    }
+    .summary-checkout-bar {
+      background: #0f172a;
+      border: 1.5px solid #334155;
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sum-col-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .sum-items-text {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .sum-total-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: #38bdf8;
+      font-family: monospace;
+    }
+    .sum-col-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .coupon-benefit-tag {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+    .coupon-benefit-tag.active {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .coupon-benefit-tag.excluded {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .coupon-benefit-tag.empty {
+      background: #1e293b;
+      color: #64748b;
+    }
+
+    .btn-issue {
+      width: 100%;
+      height: 56px;
+      background: #0284c7;
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 10px 20px -5px rgba(2, 132, 199, 0.5);
+      transition: all 0.2s;
+    }
+    .btn-issue:hover { background: #0369a1; }
+    .btn-issue:active { transform: scale(0.98); }
+    .btn-issue:disabled {
+      background: #475569;
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    /* ── 오른쪽: 영수증 프린터 슬롯 및 출력 티켓 ── */
+    .printer-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .printer-slot {
+      width: 320px;
+      height: 12px;
+      background: #020617;
+      border: 2px solid #334155;
+      border-radius: 10px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+      margin-bottom: -6px;
+      z-index: 10;
+    }
+
+    /* 실물 영수증 스타일 티켓 */
+    .receipt-ticket {
+      width: 310px;
+      background: var(--paper-bg);
+      color: var(--paper-text);
+      padding: 24px 20px 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      position: relative;
+      animation: printOut 1s cubic-bezier(0.16, 1, 0.3, 1);
+      display: none;
+    }
+    @keyframes printOut {
+      from { transform: translateY(-40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    /* 영수증 하단 톱니바퀴 절취선 효과 */
+    .receipt-ticket::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -10px;
+      width: 100%;
+      height: 10px;
+      background: radial-gradient(circle, transparent, transparent 50%, #fff 50%, #fff 100%);
+      background-size: 16px 20px;
+    }
+
+    .rc-header {
+      text-align: center;
+      border-bottom: 1.5px dashed #cbd5e1;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+    }
+    .rc-logo {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #0284c7;
+      margin-bottom: 4px;
+    }
+    .rc-title {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .rc-loc {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .rc-body {
+      margin-bottom: 18px;
+    }
+    .rc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      font-size: 13px;
+      margin-bottom: 6px;
+      gap: 12px;
+    }
+    .rc-row > span:first-child {
+      color: #64748b;
+      flex-shrink: 0;
+      white-space: nowrap;
+      min-width: 56px;
+    }
+    .rc-row > span:last-child {
+      text-align: right;
+      word-break: keep-all;
+      line-height: 1.4;
+    }
+    .rc-row.highlight {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+    .rc-row.highlight > span:first-child {
+      color: #0f172a;
+    }
+
+    /* 영수증 쿠폰 강조 영역 */
+    .rc-coupon-box {
+      background: #f0f9ff;
+      border: 1.5px solid #bae6fd;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .rc-coupon-badge {
+      display: inline-block;
+      background: #0284c7;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 100px;
+      margin-bottom: 6px;
+    }
+    .rc-coupon-val {
+      font-size: 24px;
+      font-weight: 900;
+      color: #0369a1;
+      letter-spacing: -0.03em;
+      margin-bottom: 2px;
+    }
+    .rc-coupon-sub {
+      font-size: 11px;
+      color: #0284c7;
+      font-weight: 600;
+    }
+
+    /* QR 코드 렌더링 영역 */
+    .rc-qr-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .rc-qr-code {
+      width: 140px;
+      height: 140px;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .rc-code-num {
+      font-family: 'Courier Prime', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #0f172a;
+      background: #f1f5f9;
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+
+    .rc-notice {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.45;
+      text-align: center;
+      border-top: 1.5px dashed #cbd5e1;
+      padding-top: 12px;
+    }
+
+    /* ── 테스트 도우미 액션 ── */
+    .helper-card {
+      margin-top: 24px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 16px 20px;
+      width: 310px;
+      text-align: center;
+    }
+    .helper-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 8px;
+    }
+    .helper-desc {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .helper-btn {
+      width: 100%;
+      height: 40px;
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+    .helper-btn:hover { background: #7dd3fc; }
+    .helper-btn.is-disabled {
+      background: #475569 !important;
+      color: #94a3b8 !important;
+      pointer-events: none;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+
+    /* 결제 취소 버튼 */
+    .btn-cancel-ticket {
+      width: 100%;
+      height: 44px;
+      margin-top: 14px;
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    .btn-cancel-ticket:hover { background: #dc2626; }
+    .btn-cancel-ticket:active { transform: scale(0.98); }
+    .btn-cancel-ticket:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #64748b;
+      box-shadow: none;
+    }
+
+    /* 영수증 취소 워터마크 오버레이 */
+    .receipt-cancelled-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(2px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 25;
+      border-radius: 4px;
+      animation: stampFade 0.3s ease-out;
+    }
+    @keyframes stampFade {
+      from { opacity: 0; transform: scale(1.1); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .stamp-box {
+      border: 4px solid #ef4444;
+      color: #ef4444;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      transform: rotate(-10deg);
+      text-transform: uppercase;
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+      text-align: center;
+      background: rgba(254, 242, 242, 0.85);
+    }
+    .stamp-sub {
+      font-size: 12px;
+      margin-top: 4px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #b91c1c;
+    }
+  </style>
+</head>
+<body>
+  <!-- 키오스크 상단 바 -->
+  <header class="kiosk-nav">
+    <div class="kiosk-brand">
+      <span class="kiosk-logo-badge">ONGJIN KIOSK</span>
+      <span class="kiosk-title">옹진군 관광지 무인 발권 시스템</span>
+    </div>
+    <div class="kiosk-time" id="clock-display">2026.09.08 00:00:00</div>
+  </header>
+
+  <!-- 메인 작업 영역 -->
+  <main class="kiosk-main">
+    <!-- 왼쪽: 키오스크 발권기 터치 화면 -->
+    <section class="kiosk-screen">
+      <div class="screen-header">
+        <span class="screen-tag">키오스크 시뮬레이터</span>
+        <h1 class="screen-title">입장권 및 관광쿠폰 발권</h1>
+        <p class="screen-desc">관광지 입장권 결제 시 영수증에 옹진 관광쿠폰이 즉시 인쇄되어 발권됩니다.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">발권 매표소 (발행처 선택)</label>
+        <select id="select-location" class="kiosk-select">
+          <option value="soya" selected>소야랑 매표 키오스크 (소야도)</option>
+          <option value="obsv">천문과학관 무인발권기 (자월도)</option>
+          <option value="djres">덕적도자연휴양림 매표소 (덕적도)</option>
+          <option value="jang">장골해수욕장야영장 관리소 (자월도)</option>
+          <option value="demo">키오스크 데모 체험관 (테스트 전용)</option>
+        </select>
+      </div>
+
+      <!-- [기존 6대 표준 권종 패키지 선택] - 소야랑 등 일반 매표소 전용 -->
+      <div id="section-default-packages">
+        <div class="form-group">
+          <label class="form-label">입장권 패키지 선택 (6대 표준 권종)</label>
+          <div class="package-grid">
+            <div class="package-card" onclick="selectPackage(1000, 1000, '어린이 1인 입장권')">
+              <div>
+                <div class="package-name">어린이 입장권 (1천원)</div>
+                <div class="package-sub">기본 입장권 (지역쿠폰 1,000원 환급)</div>
+              </div>
+              <div class="package-price">
+                <div class="package-val">₩1,000</div>
+                <div class="package-coupon">+쿠폰 1,000원</div>
+              </div>
+            </div>
+
+            <div class="package-card" onclick="selectPackage(2000, 2000, '청소년 1인 입장권')">
+              <div>
+                <div class="package-name">청소년 입장권 (2천원)</div>
+                <div class="package-sub">청소년 할인 (지역쿠폰 2,000원 환급)</div>
+              </div>
+              <div class="package-price">
+                <div class="package-val">₩2,000</div>
+                <div class="package-coupon">+쿠폰 2,000원</div>
+              </div>
+            </div>
+
+            <div class="package-card" onclick="selectPackage(3000, 3000, '성인 1인 일반권')">
+              <div>
+                <div class="package-name">성인 일반권 (3천원)</div>
+                <div class="package-sub">기본 관람권 (지역쿠폰 3,000원 환급)</div>
+              </div>
+              <div class="package-price">
+                <div class="package-val">₩3,000</div>
+                <div class="package-coupon">+쿠폰 3,000원</div>
+              </div>
+            </div>
+
+            <div class="package-card selected" onclick="selectPackage(5000, 5000, '관광지 통합 자유이용권')">
+              <div>
+                <div class="package-name">통합 자유이용권 (5천원)</div>
+                <div class="package-sub">체험+입장 패키지 (지역쿠폰 5,000원 환급)</div>
+              </div>
+              <div class="package-price">
+                <div class="package-val">₩5,000</div>
+                <div class="package-coupon">+쿠폰 5,000원</div>
+              </div>
+            </div>
+
+            <div class="package-card" onclick="selectPackage(8000, 8000, '가족 2~3인 패키지')">
+              <div>
+                <div class="package-name">가족 2~3인권 (8천원)</div>
+                <div class="package-sub">가족 관람권 (지역쿠폰 8,000원 환급)</div>
+              </div>
+              <div class="package-price">
+                <div class="package-val">₩8,000</div>
+                <div class="package-coupon">+쿠폰 8,000원</div>
+              </div>
+            </div>
+
+            <div class="package-card" onclick="selectPackage(10000, 10000, '단체/VIP 프리미엄')">
+              <div>
+                <div class="package-name">단체 VIP권 (1만원)</div>
+                <div class="package-sub">전체 시설 이용권 (지역쿠폰 10,000원 환급)</div>
+              </div>
+              <div class="package-price">
+                <div class="package-val">₩10,000</div>
+                <div class="package-coupon">+쿠폰 10,000원</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-issue" id="btn-issue-default" onclick="issueDefaultTicket()">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5m-16.5 3h16.5M3.75 15h16.5M5.25 18.75h9M3.75 12h16.5" /></svg>
+          <span id="btn-issue-default-text">₩5,000 결제 및 종이쿠폰 발권하기</span>
+        </button>
+      </div>
+
+      <!-- [천문과학관 전용 관람시설 및 수량 조절 인터페이스] -->
+      <div id="section-obsv-facilities" style="display:none;">
+        <!-- 빠른 원클릭 세트 선택 바 -->
+        <div class="form-group">
+          <label class="form-label">천문과학관 추천 관람 구성</label>
+          <div class="presets-bar">
+            <button type="button" class="preset-chip" onclick="applyPreset('child3')">🔭 어린이 3종 (4,600원)</button>
+            <button type="button" class="preset-chip" onclick="applyPreset('youth3')">청소년 3종 (6,800원)</button>
+            <button type="button" class="preset-chip" onclick="applyPreset('adult3')">성인 3종 (9,000원)</button>
+            <button type="button" class="preset-chip" onclick="applyPreset('planet1')">투영관 1인 (600원 · 소액)</button>
+            <button type="button" class="preset-chip" onclick="applyPreset('planet2')">투영관 2인 (1,200원 · 1천원 환급)</button>
+            <button type="button" class="preset-chip danger" onclick="applyPreset('clear')">🔄 초기화</button>
+          </div>
+        </div>
+
+        <!-- 3대 관람시설 카드 및 수량 선택 -->
+        <div class="facility-container">
+          <!-- 1. 상설전시실 -->
+          <div class="facility-card">
+            <div class="facility-header">
+              <div>
+                <div class="facility-title">🪐 상설전시실 <span class="facility-badge">기본 관람</span></div>
+                <div class="facility-desc">우주·과학 체험 상설전시실 (현장 발권)</div>
+              </div>
+            </div>
+            <div class="ticket-rates-list">
+              <div class="ticket-rate-row" id="row-exhibit_adult">
+                <div class="rate-info">
+                  <span class="rate-label">어른 (성인)</span>
+                  <span class="rate-price">₩4,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCount('exhibit_adult', -1)">−</button>
+                  <span class="stepper-count" id="count-exhibit_adult">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCount('exhibit_adult', 1)">+</button>
+                </div>
+              </div>
+              <div class="ticket-rate-row" id="row-exhibit_youth">
+                <div class="rate-info">
+                  <span class="rate-label">청소년 / 군인</span>
+                  <span class="rate-price">₩3,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCount('exhibit_youth', -1)">−</button>
+                  <span class="stepper-count" id="count-exhibit_youth">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCount('exhibit_youth', 1)">+</button>
+                </div>
+              </div>
+              <div class="ticket-rate-row" id="row-exhibit_child">
+                <div class="rate-info">
+                  <span class="rate-label">어린이</span>
+                  <span class="rate-price">₩2,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCount('exhibit_child', -1)">−</button>
+                  <span class="stepper-count" id="count-exhibit_child">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCount('exhibit_child', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 천체투영관 -->
+          <div class="facility-card">
+            <div class="facility-header">
+              <div>
+                <div class="facility-title">🌌 천체투영관 <span class="facility-badge" style="color:#a855f7; background:rgba(168,85,247,0.12);">돔 상영관</span></div>
+                <div class="facility-desc">천체 돔 스크린 우주 영상 관람실</div>
+              </div>
+            </div>
+            <div class="ticket-rates-list">
+              <div class="ticket-rate-row" id="row-planet_adult">
+                <div class="rate-info">
+                  <span class="rate-label">어른 (성인)</span>
+                  <span class="rate-price">₩1,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCount('planet_adult', -1)">−</button>
+                  <span class="stepper-count" id="count-planet_adult">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCount('planet_adult', 1)">+</button>
+                </div>
+              </div>
+              <div class="ticket-rate-row" id="row-planet_youth">
+                <div class="rate-info">
+                  <span class="rate-label">청소년 / 군인</span>
+                  <span class="rate-price">₩800</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCount('planet_youth', -1)">−</button>
+                  <span class="stepper-count" id="count-planet_youth">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCount('planet_youth', 1)">+</button>
+                </div>
+              </div>
+              <div class="ticket-rate-row" id="row-planet_child">
+                <div class="rate-info">
+                  <span class="rate-label">어린이</span>
+                  <span class="rate-price">₩600</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCount('planet_child', -1)">−</button>
+                  <span class="stepper-count" id="count-planet_child">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCount('planet_child', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. 관측실 -->
+          <div class="facility-card">
+            <div class="facility-header">
+              <div>
+                <div class="facility-title">🔭 관측실 <span class="facility-badge" style="color:#10b981; background:rgba(16,185,129,0.12);">망원경 관측</span></div>
+                <div class="facility-desc">천체 망원경 태양 및 야간 별자리 관측</div>
+              </div>
+            </div>
+            <div class="ticket-rates-list">
+              <div class="ticket-rate-row" id="row-obsv_adult">
+                <div class="rate-info">
+                  <span class="rate-label">어른 (성인)</span>
+                  <span class="rate-price">₩4,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCount('obsv_adult', -1)">−</button>
+                  <span class="stepper-count" id="count-obsv_adult">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCount('obsv_adult', 1)">+</button>
+                </div>
+              </div>
+              <div class="ticket-rate-row" id="row-obsv_youth">
+                <div class="rate-info">
+                  <span class="rate-label">청소년 / 군인</span>
+                  <span class="rate-price">₩3,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCount('obsv_youth', -1)">−</button>
+                  <span class="stepper-count" id="count-obsv_youth">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCount('obsv_youth', 1)">+</button>
+                </div>
+              </div>
+              <div class="ticket-rate-row" id="row-obsv_child">
+                <div class="rate-info">
+                  <span class="rate-label">어린이</span>
+                  <span class="rate-price">₩2,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCount('obsv_child', -1)">−</button>
+                  <span class="stepper-count" id="count-obsv_child">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCount('obsv_child', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 실시간 결제 합계 및 환급 혜택 바 -->
+        <div class="summary-checkout-bar">
+          <div class="sum-col-left">
+            <div class="sum-items-text" id="sum-items-desc">선택된 티켓 없음</div>
+            <div class="sum-total-val" id="sum-total-display">₩0</div>
+          </div>
+          <div class="sum-col-right">
+            <div class="coupon-benefit-tag empty" id="sum-coupon-badge">수량을 선택해 주세요</div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-issue" id="btn-issue-ticket" onclick="issueObsvTicket()" disabled>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5m-16.5 3h16.5M3.75 15h16.5M5.25 18.75h9M3.75 12h16.5" /></svg>
+          <span id="btn-issue-text">티켓을 선택해 주세요</span>
+        </button>
+      </div>
+          <!-- [덕적도자연휴양림 전용 객실/야영장 시설 및 이용요금 인터페이스] -->
+      <div id="section-djres-facilities" style="display:none;">
+        <!-- 시즌 및 이용안내 배너 -->
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 10px 14px; margin-bottom: 14px; font-size: 12.5px; color: #6ee7b7; line-height: 1.45;">
+          🌲 <strong>덕적도 자연휴양림 공식 이용요금</strong> (숲나들e 공시 기준)<br>
+          • <strong>성수기</strong>: 7.15 ~ 8.24 / <strong>주말</strong>: 금·토요일 및 공휴일 전일<br>
+          • <strong>비수기</strong>: 성수기 및 주말을 제외한 주중 (평일)
+        </div>
+
+        <!-- 빠른 원클릭 추천 세트 선택 바 -->
+        <div class="form-group">
+          <label class="form-label">덕적도자연휴양림 추천 상품</label>
+          <div class="presets-bar">
+            <button type="button" class="preset-chip" onclick="applyPresetDjres('camp_off')">🏕️ 야영데크 평일 (20,000원)</button>
+            <button type="button" class="preset-chip" onclick="applyPresetDjres('camp_peak')">🏕️ 야영데크 주말 (30,000원)</button>
+            <button type="button" class="preset-chip" onclick="applyPresetDjres('resort_off')">🏠 휴양관 4인실 (60,000원)</button>
+            <button type="button" class="preset-chip" onclick="applyPresetDjres('house5_off')">🏡 숲속의집 5인실 (120,000원)</button>
+            <button type="button" class="preset-chip" onclick="applyPresetDjres('house8_off')">🌲 숲속의집 8인실 (200,000원)</button>
+            <button type="button" class="preset-chip danger" onclick="applyPresetDjres('clear')">🔄 초기화</button>
+          </div>
+        </div>
+
+        <!-- 4대 휴양시설 카드 및 수량 선택 -->
+        <div class="facility-container">
+          <!-- 1. 야영데크 -->
+          <div class="facility-card">
+            <div class="facility-header">
+              <div>
+                <div class="facility-title">🏕️ 야영시설 (야영데크) <span class="facility-badge" style="color:#10b981; background:rgba(16,185,129,0.12);">기준 1명 / 최대 4명</span></div>
+                <div class="facility-desc">야영장 1~6구역 (야영데크 101~106호) 텐트 설치 1박</div>
+              </div>
+            </div>
+            <div class="ticket-rates-list">
+              <div class="ticket-rate-row" id="row-dj_camp_off">
+                <div class="rate-info">
+                  <span class="rate-label">비수기 주중 (평일 1박)</span>
+                  <span class="rate-price">₩20,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_camp_off', -1)">−</button>
+                  <span class="stepper-count" id="count-dj_camp_off">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_camp_off', 1)">+</button>
+                </div>
+              </div>
+              <div class="ticket-rate-row" id="row-dj_camp_peak">
+                <div class="rate-info">
+                  <span class="rate-label">성수기 및 주말 (1박)</span>
+                  <span class="rate-price">₩30,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_camp_peak', -1)">−</button>
+                  <span class="stepper-count" id="count-dj_camp_peak">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_camp_peak', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 산림문화휴양관 -->
+          <div class="facility-card">
+            <div class="facility-header">
+              <div>
+                <div class="facility-title">🏠 산림문화휴양관 <span class="facility-badge">기준 4명 (최대 4명)</span></div>
+                <div class="facility-desc">연립형 숙박동 (101호, 102호, 103호)</div>
+              </div>
+            </div>
+            <div class="ticket-rates-list">
+              <div class="ticket-rate-row" id="row-dj_resort_off">
+                <div class="rate-info">
+                  <span class="rate-label">비수기 주중 (평일 1박)</span>
+                  <span class="rate-price">₩60,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_resort_off', -1)">−</button>
+                  <span class="stepper-count" id="count-dj_resort_off">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_resort_off', 1)">+</button>
+                </div>
+              </div>
+              <div class="ticket-rate-row" id="row-dj_resort_peak">
+                <div class="rate-info">
+                  <span class="rate-label">성수기 및 주말 (1박)</span>
+                  <span class="rate-price">₩90,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_resort_peak', -1)">−</button>
+                  <span class="stepper-count" id="count-dj_resort_peak">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_resort_peak', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. 숲속의집 (5인실) -->
+          <div class="facility-card">
+            <div class="facility-header">
+              <div>
+                <div class="facility-title">🏡 숲속의집 (5인실) <span class="facility-badge" style="color:#38bdf8; background:rgba(56,189,248,0.12);">기준 5명 (최대 5명)</span></div>
+                <div class="facility-desc">단독형 통나무 숙박동 (1호, 2호, 3호)</div>
+              </div>
+            </div>
+            <div class="ticket-rates-list">
+              <div class="ticket-rate-row" id="row-dj_house5_off">
+                <div class="rate-info">
+                  <span class="rate-label">비수기 주중 (평일 1박)</span>
+                  <span class="rate-price">₩120,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_house5_off', -1)">−</button>
+                  <span class="stepper-count" id="count-dj_house5_off">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_house5_off', 1)">+</button>
+                </div>
+              </div>
+              <div class="ticket-rate-row" id="row-dj_house5_peak">
+                <div class="rate-info">
+                  <span class="rate-label">성수기 및 주말 (1박)</span>
+                  <span class="rate-price">₩150,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_house5_peak', -1)">−</button>
+                  <span class="stepper-count" id="count-dj_house5_peak">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_house5_peak', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. 숲속의집 대형 (8인실) -->
+          <div class="facility-card">
+            <div class="facility-header">
+              <div>
+                <div class="facility-title">🌲 숲속의집 대형 (8인실) <span class="facility-badge" style="color:#a855f7; background:rgba(168,85,247,0.12);">기준 8명 (최대 8명)</span></div>
+                <div class="facility-desc">대가족·단체 단독 숙박동 (4호, 5호)</div>
+              </div>
+            </div>
+            <div class="ticket-rates-list">
+              <div class="ticket-rate-row" id="row-dj_house8_off">
+                <div class="rate-info">
+                  <span class="rate-label">비수기 주중 (평일 1박)</span>
+                  <span class="rate-price">₩200,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_house8_off', -1)">−</button>
+                  <span class="stepper-count" id="count-dj_house8_off">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_house8_off', 1)">+</button>
+                </div>
+              </div>
+              <div class="ticket-rate-row" id="row-dj_house8_peak">
+                <div class="rate-info">
+                  <span class="rate-label">성수기 및 주말 (1박)</span>
+                  <span class="rate-price">₩250,000</span>
+                </div>
+                <div class="stepper-wrap">
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_house8_peak', -1)">−</button>
+                  <span class="stepper-count" id="count-dj_house8_peak">0</span>
+                  <button type="button" class="stepper-btn" onclick="changeCountDjres('dj_house8_peak', 1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 실시간 결제 합계 및 환급 혜택 바 -->
+        <div class="summary-checkout-bar">
+          <div class="sum-col-left">
+            <div class="sum-items-text" id="sum-djres-items-desc">선택된 시설/객실 없음</div>
+            <div class="sum-total-val" id="sum-djres-total-display">₩0</div>
+          </div>
+          <div class="sum-col-right">
+            <div class="coupon-benefit-tag empty" id="sum-djres-coupon-badge">객실 또는 데크를 선택해 주세요</div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-issue" id="btn-issue-djres" onclick="issueDjresTicket()" disabled>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5m-16.5 3h16.5M3.75 15h16.5M5.25 18.75h9M3.75 12h16.5" /></svg>
+          <span id="btn-issue-djres-text">객실 또는 데크를 선택해 주세요</span>
+        </button>
+      </div>
+</section>
+
+    <!-- 오른쪽: 영수증 프린터 슬롯 및 출력된 종이 쿠폰 -->
+    <section class="printer-container">
+      <div class="printer-slot"></div>
+      
+      <!-- 실물 영수증 쿠폰 -->
+      <article class="receipt-ticket" id="receipt-ticket">
+        <div class="rc-header">
+          <div class="rc-logo">ONGJIN ISLAND PASS</div>
+          <div class="rc-title">관광지 입장권 & 쿠폰</div>
+          <div class="rc-loc" id="rc-location-text">덕적도 서포리 매표소 키오스크 #1</div>
+        </div>
+
+        <div class="rc-body">
+          <div class="rc-row">
+            <span style="color:#64748b;">발권일시</span>
+            <span id="rc-date-text" style="font-family:monospace;">2026.09.08 19:30</span>
+          </div>
+          <div class="rc-row">
+            <span style="color:#64748b;">선택품목</span>
+            <span id="rc-pkg-name">성인 1인 입장권</span>
+          </div>
+          <div class="rc-row highlight">
+            <span>결제금액</span>
+            <span id="rc-pay-amount">₩3,000</span>
+          </div>
+        </div>
+
+        <!-- 환급 쿠폰 박스 -->
+        <div class="rc-coupon-box">
+          <span class="rc-coupon-badge">옹진군 지역화폐 관광쿠폰</span>
+          <div class="rc-coupon-val" id="rc-coupon-amount">₩5,000</div>
+          <div class="rc-coupon-sub">옹진 관내 모든 식당·카페·체험장 사용가능</div>
+        </div>
+
+        <!-- QR 코드 영역 -->
+        <div class="rc-qr-wrap">
+          <div class="rc-qr-code" id="rc-qrcode"></div>
+          <div class="rc-code-num" id="rc-code-text">OJ-0000-0000</div>
+        </div>
+
+        <div class="rc-notice">
+          스마트폰 카메라로 위 QR코드를 비추면<br>
+          <strong>옹진 관광쿠폰 모바일 쿠폰함</strong>에 즉시 적재됩니다.
+        </div>
+      </article>
+
+      <!-- 결제 취소 버튼 (발권 성공 시 노출) -->
+      <button type="button" class="btn-cancel-ticket" id="btn-cancel-ticket" style="display:none;">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        결제 취소 (쿠폰 무효화 모의)
+      </button>
+
+      <!-- 테스트 도우미 카드 -->
+      <div class="helper-card" id="helper-card" style="display:none;">
+        <div class="helper-title">📱 모바일 앱 전환 테스트</div>
+        <div class="helper-desc" id="helper-desc-text">
+          위 화면의 종이 영수증 QR을 스마트폰 카메라로 비춰보거나,<br>
+          아래 버튼을 눌러 내 모바일 쿠폰함에 즉시 등록해 보세요!
+        </div>
+        <a href="#" id="btn-quick-claim" class="helper-btn" target="_blank">
+          모바일 쿠폰함에서 등록 테스트 (새 창)
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // 시계 표시
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock-display').textContent = 
+        now.getFullYear() + '.' + 
+        String(now.getMonth() + 1).padStart(2, '0') + '.' + 
+        String(now.getDate()).padStart(2, '0') + ' ' + 
+        String(now.getHours()).padStart(2, '0') + ':' + 
+        String(now.getMinutes()).padStart(2, '0') + ':' + 
+        String(now.getSeconds()).padStart(2, '0');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    const ISSUER_MAP = {
+      'soya':  { key: 'kiosk_soyaland_secure_key_2026',    name: '소야랑 매표 키오스크 #1' },
+      'obsv':  { key: 'kiosk_observatory_secure_key_2026', name: '천문과학관 무인발권기' },
+      'djres': { key: 'kiosk_deokjeok_resort_key_2026',    name: '덕적도자연휴양림 매표소' },
+      'jang':  { key: 'kiosk_janggol_camp_key_2026',       name: '장골해수욕장야영장 관리소' },
+      'demo':  { key: 'ongjin-kiosk-secure-key',           name: '키오스크 데모 체험관' }
+    };
+
+    // ── [기존 모드] 일반 매표소(소야랑 등) 패키지 상태 ──
+    let selectedPrice = 5000;
+    let selectedCoupon = 5000;
+    let selectedPkgName = '관광지 통합 자유이용권';
+
+    window.selectPackage = function(price, coupon, name) {
+      selectedPrice = price;
+      selectedCoupon = coupon;
+      selectedPkgName = name;
+      document.querySelectorAll('.package-card').forEach(card => card.classList.remove('selected'));
+      if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('selected');
+      }
+      updateDefaultPackageUI();
+    };
+
+    function updateDefaultPackageUI() {
+      const btnText = document.getElementById('btn-issue-default-text');
+      if (btnText) {
+        btnText.textContent = `₩${selectedPrice.toLocaleString()} 결제 및 종이쿠폰 발권하기`;
+      }
+    }
+
+    // ── [천문과학관 전용] 실제 관람시설 및 관람료 정의 ──
+    const RATE_DEFS = {
+      'exhibit_adult': { facility: '상설전시실', label: '어른', price: 4000 },
+      'exhibit_youth': { facility: '상설전시실', label: '청소년/군인', price: 3000 },
+      'exhibit_child': { facility: '상설전시실', label: '어린이', price: 2000 },
+      'planet_adult':  { facility: '천체투영관', label: '어른', price: 1000 },
+      'planet_youth':  { facility: '천체투영관', label: '청소년/군인', price: 800 },
+      'planet_child':  { facility: '천체투영관', label: '어린이', price: 600 },
+      'obsv_adult':    { facility: '관측실', label: '어른', price: 4000 },
+      'obsv_youth':    { facility: '관측실', label: '청소년/군인', price: 3000 },
+      'obsv_child':    { facility: '관측실', label: '어린이', price: 2000 },
+    };
+
+    let counts = {
+      exhibit_adult: 0, exhibit_youth: 0, exhibit_child: 0,
+      planet_adult: 0,  planet_youth: 0,  planet_child: 0,
+      obsv_adult: 0,    obsv_youth: 0,    obsv_child: 0
+    };
+
+    let currentTotalPaid = 0;
+    let currentSelectedSummary = '';
+    let currentItemsPayload = [];
+
+    // 현재 발권된 거래 상태 보관
+    let currentTransactionId = null;
+    let currentCouponCodes = [];
+    let currentIssuerConfig = null;
+
+    function calcCouponByPaidAmount(paidAmount) {
+      const amt = Number(paidAmount) || 0;
+      if (amt < 1000) return 0;
+      if (amt < 2000) return 1000;
+      if (amt <= 3000) return 2000;
+      if (amt <= 7000) return 3000;
+      if (amt <= 20000) return 5000;
+      if (amt <= 30000) return 8000;
+      return 10000;
+    }
+
+    window.changeCount = function(rateId, delta) {
+      counts[rateId] = Math.max(0, Math.min(20, (counts[rateId] || 0) + delta));
+      updateCheckoutUI();
+    };
+
+    window.applyPreset = function(type) {
+      Object.keys(counts).forEach(k => counts[k] = 0);
+
+      if (type === 'child3') {
+        counts.exhibit_child = 1;
+        counts.planet_child = 1;
+        counts.obsv_child = 1;
+      } else if (type === 'youth3') {
+        counts.exhibit_youth = 1;
+        counts.planet_youth = 1;
+        counts.obsv_youth = 1;
+      } else if (type === 'adult3') {
+        counts.exhibit_adult = 1;
+        counts.planet_adult = 1;
+        counts.obsv_adult = 1;
+      } else if (type === 'planet1') {
+        counts.planet_child = 1;
+      } else if (type === 'planet2') {
+        counts.planet_child = 2;
+      }
+      updateCheckoutUI();
+    };
+
+    function updateCheckoutUI() {
+      let totalAmount = 0;
+      let totalQty = 0;
+      const selectedNames = [];
+      const itemsPayload = [];
+
+      for (const [key, cnt] of Object.entries(counts)) {
+        const el = document.getElementById(`count-${key}`);
+        if (el) el.textContent = cnt;
+        const row = document.getElementById(`row-${key}`);
+        if (row) {
+          if (cnt > 0) row.classList.add('has-qty');
+          else row.classList.remove('has-qty');
+        }
+
+        if (cnt > 0) {
+          const def = RATE_DEFS[key];
+          const lineAmount = def.price * cnt;
+          totalAmount += lineAmount;
+          totalQty += cnt;
+          selectedNames.push(`${def.facility}(${def.label}) × ${cnt}`);
+          itemsPayload.push({
+            name: `${def.facility} - ${def.label}`,
+            unitPrice: def.price,
+            quantity: cnt,
+            paidAmount: lineAmount,
+            productCode: key
+          });
+        }
+      }
+
+      currentTotalPaid = totalAmount;
+      currentItemsPayload = itemsPayload;
+
+      document.getElementById('sum-total-display').textContent = `₩${totalAmount.toLocaleString()}`;
+      const descEl = document.getElementById('sum-items-desc');
+      const badgeEl = document.getElementById('sum-coupon-badge');
+      const issueBtn = document.getElementById('btn-issue-ticket');
+      const btnText = document.getElementById('btn-issue-text');
+
+      if (totalQty === 0) {
+        currentSelectedSummary = '선택된 티켓 없음';
+        descEl.textContent = '선택된 티켓 없음';
+        badgeEl.className = 'coupon-benefit-tag empty';
+        badgeEl.textContent = '수량을 선택해 주세요';
+        issueBtn.disabled = true;
+        if (btnText) btnText.textContent = '티켓을 선택해 주세요';
+      } else {
+        const summaryStr = selectedNames.length <= 2 
+          ? selectedNames.join(', ')
+          : `${selectedNames.slice(0, 2).join(', ')} 외 ${selectedNames.length - 2}건 (총 ${totalQty}매)`;
+        currentSelectedSummary = summaryStr;
+        descEl.textContent = summaryStr;
+
+        const couponVal = calcCouponByPaidAmount(totalAmount);
+        if (totalAmount < 1000) {
+          badgeEl.className = 'coupon-benefit-tag excluded';
+          badgeEl.textContent = '❌ 쿠폰 미발급 (1천원 미만)';
+          if (btnText) btnText.textContent = `₩${totalAmount.toLocaleString()} 결제 (입장권만 발권)`;
+        } else {
+          badgeEl.className = 'coupon-benefit-tag active';
+          badgeEl.textContent = `🎁 +${couponVal.toLocaleString()}원 쿠폰 환급!`;
+          if (btnText) btnText.textContent = `₩${totalAmount.toLocaleString()} 결제 및 티켓 발권하기`;
+        }
+        issueBtn.disabled = false;
+      }
+    }
+
+    // ── 매표소(발행처) 전환 이벤트 ──
+    // ── [덕적도 자연휴양림 전용] 실제 객실 및 야영시설 이용요금 정의 ──
+    const RATE_DEFS_DJRES = {
+      'dj_camp_off':    { facility: '야영데크', label: '비수기 주중(평일)', price: 20000 },
+      'dj_camp_peak':   { facility: '야영데크', label: '성수기 및 주말',   price: 30000 },
+      'dj_resort_off':  { facility: '산림문화휴양관(4인실)', label: '비수기 주중(평일)', price: 60000 },
+      'dj_resort_peak': { facility: '산림문화휴양관(4인실)', label: '성수기 및 주말',   price: 90000 },
+      'dj_house5_off':  { facility: '숲속의집(5인실)', label: '비수기 주중(평일)', price: 120000 },
+      'dj_house5_peak': { facility: '숲속의집(5인실)', label: '성수기 및 주말',   price: 150000 },
+      'dj_house8_off':  { facility: '숲속의집(8인실)', label: '비수기 주중(평일)', price: 200000 },
+      'dj_house8_peak': { facility: '숲속의집(8인실)', label: '성수기 및 주말',   price: 250000 },
+    };
+
+    let countsDjres = {
+      dj_camp_off: 0, dj_camp_peak: 0,
+      dj_resort_off: 0, dj_resort_peak: 0,
+      dj_house5_off: 0, dj_house5_peak: 0,
+      dj_house8_off: 0, dj_house8_peak: 0,
+    };
+
+    let currentDjresTotalPaid = 0;
+    let currentDjresSummary = '';
+    let currentDjresItemsPayload = [];
+
+    window.changeCountDjres = function(rateId, delta) {
+      countsDjres[rateId] = Math.max(0, Math.min(10, (countsDjres[rateId] || 0) + delta));
+      updateDjresCheckoutUI();
+    };
+
+    window.applyPresetDjres = function(type) {
+      Object.keys(countsDjres).forEach(k => countsDjres[k] = 0);
+      if (type === 'camp_off') countsDjres.dj_camp_off = 1;
+      else if (type === 'camp_peak') countsDjres.dj_camp_peak = 1;
+      else if (type === 'resort_off') countsDjres.dj_resort_off = 1;
+      else if (type === 'house5_off') countsDjres.dj_house5_off = 1;
+      else if (type === 'house8_off') countsDjres.dj_house8_off = 1;
+      updateDjresCheckoutUI();
+    };
+
+    function updateDjresCheckoutUI() {
+      let totalAmount = 0;
+      let totalQty = 0;
+      const selectedNames = [];
+      const itemsPayload = [];
+
+      for (const [key, cnt] of Object.entries(countsDjres)) {
+        const el = document.getElementById(`count-${key}`);
+        if (el) el.textContent = cnt;
+        const row = document.getElementById(`row-${key}`);
+        if (row) {
+          if (cnt > 0) row.classList.add('has-qty');
+          else row.classList.remove('has-qty');
+        }
+
+        if (cnt > 0) {
+          const def = RATE_DEFS_DJRES[key];
+          const lineAmount = def.price * cnt;
+          totalAmount += lineAmount;
+          totalQty += cnt;
+          selectedNames.push(`${def.facility}(${def.label}) × ${cnt}`);
+          itemsPayload.push({
+            name: `${def.facility} - ${def.label}`,
+            unitPrice: def.price,
+            quantity: cnt,
+            paidAmount: lineAmount,
+            productCode: key
+          });
+        }
+      }
+
+      currentDjresTotalPaid = totalAmount;
+      currentDjresItemsPayload = itemsPayload;
+
+      document.getElementById('sum-djres-total-display').textContent = `₩${totalAmount.toLocaleString()}`;
+      const descEl = document.getElementById('sum-djres-items-desc');
+      const badgeEl = document.getElementById('sum-djres-coupon-badge');
+      const issueBtn = document.getElementById('btn-issue-djres');
+      const btnText = document.getElementById('btn-issue-djres-text');
+
+      if (totalQty === 0) {
+        currentDjresSummary = '선택된 시설/객실 없음';
+        descEl.textContent = '선택된 시설/객실 없음';
+        badgeEl.className = 'coupon-benefit-tag empty';
+        badgeEl.textContent = '객실 또는 데크를 선택해 주세요';
+        issueBtn.disabled = true;
+        if (btnText) btnText.textContent = '객실 또는 데크를 선택해 주세요';
+      } else {
+        const summaryStr = selectedNames.length <= 2 
+          ? selectedNames.join(', ')
+          : `${selectedNames.slice(0, 2).join(', ')} 외 ${selectedNames.length - 2}건 (총 ${totalQty}개)`;
+        currentDjresSummary = summaryStr;
+        descEl.textContent = summaryStr;
+
+        const couponVal = calcCouponByPaidAmount(totalAmount);
+        badgeEl.className = 'coupon-benefit-tag active';
+        badgeEl.textContent = `🎁 +${couponVal.toLocaleString()}원 쿠폰 환급!`;
+        if (btnText) btnText.textContent = `₩${totalAmount.toLocaleString()} 결제 및 종이쿠폰 발권하기`;
+        issueBtn.disabled = false;
+      }
+    }
+
+    // ── 매표소(발행처) 전환 이벤트 ──
+    function onLocationChange() {
+      const loc = document.getElementById('select-location').value;
+      const defSection = document.getElementById('section-default-packages');
+      const obsvSection = document.getElementById('section-obsv-facilities');
+      const djresSection = document.getElementById('section-djres-facilities');
+
+      defSection.style.display = 'none';
+      obsvSection.style.display = 'none';
+      if (djresSection) djresSection.style.display = 'none';
+
+      if (loc === 'obsv') {
+        obsvSection.style.display = 'block';
+        updateCheckoutUI();
+      } else if (loc === 'djres') {
+        if (djresSection) djresSection.style.display = 'block';
+        updateDjresCheckoutUI();
+      } else {
+        defSection.style.display = 'block';
+        updateDefaultPackageUI();
+      }
+    }
+    document.getElementById('select-location').addEventListener('change', onLocationChange);
+
+    // ── 영수증 공통 렌더링 함수 ──
+    function renderReceiptTicket(coupon, issuerConfig, pkgName, payAmount) {
+      document.getElementById('rc-location-text').textContent = coupon.location || issuerConfig.name;
+      document.getElementById('rc-date-text').textContent = new Date().toLocaleString('ko-KR');
+      document.getElementById('rc-pkg-name').textContent = pkgName;
+      document.getElementById('rc-pay-amount').textContent = `₩${payAmount.toLocaleString()}`;
+
+      const qrContainer = document.getElementById('rc-qrcode');
+      const helperCard = document.getElementById('helper-card');
+      const quickClaimBtn = document.getElementById('btn-quick-claim');
+
+      if (!coupon.code || coupon.faceValue === 0) {
+        document.getElementById('rc-coupon-amount').textContent = '쿠폰 미발급 (1천원 미만)';
+        document.getElementById('rc-code-text').textContent = '입장권 전용 (쿠폰 없음)';
+        qrContainer.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:124px; color:#64748b; font-size:11px; text-align:center; line-height:1.4;">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="margin-bottom:6px; opacity:0.6;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" /></svg>
+            정상 입장권<br>(1,000원 미만 쿠폰 제외)
+          </div>
+        `;
+        qrContainer.style.opacity = '1';
+
+        helperCard.style.display = 'block';
+        quickClaimBtn.classList.add('is-disabled');
+        quickClaimBtn.removeAttribute('href');
+        quickClaimBtn.textContent = '쿠폰 미발급 티켓';
+        document.getElementById('helper-desc-text').innerHTML = `
+          1,000원 미만 소액 결제 건으로 지역관광쿠폰 환급 대상에서 제외되었습니다.<br>
+          본 영수증은 입장 전용 티켓으로 사용됩니다.
+        `;
+      } else {
+        document.getElementById('rc-coupon-amount').textContent = `₩${coupon.faceValue.toLocaleString()}`;
+        document.getElementById('rc-code-text').textContent = coupon.code;
+
+        // QR 코드 생성
+        qrContainer.innerHTML = '';
+        qrContainer.style.opacity = '1';
+        new QRCode(qrContainer, {
+          text: coupon.claimUrl,
+          width: 124,
+          height: 124,
+          colorDark: "#0f172a",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+
+        helperCard.style.display = 'block';
+        quickClaimBtn.classList.remove('is-disabled');
+        quickClaimBtn.href = coupon.claimUrl;
+        quickClaimBtn.textContent = '모바일 쿠폰함에서 등록 테스트 (새 창)';
+        document.getElementById('helper-desc-text').innerHTML = `
+          위 화면의 종이 영수증 QR을 스마트폰 카메라로 비춰보거나,<br>
+          아래 버튼을 눌러 내 모바일 쿠폰함에 즉시 등록해 보세요!
+        `;
+      }
+
+      // 영수증 내 기존 취소 오버레이 제거
+      const oldOverlay = document.getElementById('rc-cancelled-overlay');
+      if (oldOverlay) oldOverlay.remove();
+
+      // 영수증 표시
+      const receiptEl = document.getElementById('receipt-ticket');
+      receiptEl.style.display = 'block';
+
+      // 취소 버튼 노출 및 초기화
+      const btnCancel = document.getElementById('btn-cancel-ticket');
+      btnCancel.style.display = 'flex';
+      btnCancel.disabled = false;
+      btnCancel.innerHTML = `
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        결제 취소 (쿠폰 무효화 모의)
+      `;
+    }
+
+    // ── [기존 모드] 일반 매표소(소야랑 등) 발권 ──
+    window.issueDefaultTicket = async function() {
+      const btn = document.getElementById('btn-issue-default');
+      const locationKey = document.getElementById('select-location').value;
+      const issuerConfig = ISSUER_MAP[locationKey] || ISSUER_MAP['soya'];
+      currentIssuerConfig = issuerConfig;
+
+      const txnId = 'TXN_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      currentTransactionId = txnId;
+      currentCouponCodes = [];
+
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M4 12a8 8 0 018-8" /></svg>
+        영수증 및 종이쿠폰 발권 중...
+      `;
+
+      try {
+        const res = await fetch('/api/coupon/issue-paper', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Kiosk-Key': issuerConfig.key,
+            'X-Idempotency-Key': txnId
+          },
+          body: JSON.stringify({
+            transactionId: txnId,
+            faceValue: selectedPrice,
+            paidAmount: selectedPrice,
+            productCode: selectedPkgName,
+            location: issuerConfig.name
+          })
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          const coupon = result.data;
+          currentCouponCodes = coupon.code ? [coupon.code] : [];
+          renderReceiptTicket(coupon, issuerConfig, selectedPkgName, selectedPrice);
+        } else {
+          alert('발권 실패: ' + result.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('발권 통신 중 오류가 발생했습니다.');
+      } finally {
+        btn.disabled = false;
+        updateDefaultPackageUI();
+      }
+    };
+
+    // ── [천문과학관 전용] 관람시설 및 수량 기반 발권 ──
+    window.issueObsvTicket = async function() {
+      if (currentTotalPaid <= 0) {
+        alert('발권할 티켓 수량을 선택해 주세요.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-issue-ticket');
+      const locationKey = document.getElementById('select-location').value;
+      const issuerConfig = ISSUER_MAP[locationKey] || ISSUER_MAP['obsv'];
+      currentIssuerConfig = issuerConfig;
+
+      const txnId = 'TXN_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      currentTransactionId = txnId;
+      currentCouponCodes = [];
+
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M4 12a8 8 0 018-8" /></svg>
+        영수증 및 종이쿠폰 발권 중...
+      `;
+
+      try {
+        const res = await fetch('/api/coupon/issue-paper', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Kiosk-Key': issuerConfig.key,
+            'X-Idempotency-Key': txnId
+          },
+          body: JSON.stringify({
+            transactionId: txnId,
+            paidAmount: currentTotalPaid,
+            items: currentItemsPayload,
+            location: issuerConfig.name
+          })
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          const coupon = result.data;
+          currentCouponCodes = coupon.code ? [coupon.code] : [];
+          renderReceiptTicket(coupon, issuerConfig, currentSelectedSummary, currentTotalPaid);
+        } else {
+          alert('발권 실패: ' + result.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('발권 통신 중 오류가 발생했습니다.');
+      } finally {
+        btn.disabled = false;
+        updateCheckoutUI();
+      }
+    };
+
+    // 초기 설정: 소야랑(기존 패키지) 기본 활성화 및 천문과학관 프리셋 준비
+    // ── [덕적도자연휴양림 전용] 발권 함수 ──
+    window.issueDjresTicket = async function() {
+      if (currentDjresTotalPaid <= 0) {
+        alert('이용하실 객실 또는 데크 수량을 선택해 주세요.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-issue-djres');
+      const issuerConfig = ISSUER_MAP['djres'];
+      currentIssuerConfig = issuerConfig;
+
+      const txnId = 'TXN_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      currentTransactionId = txnId;
+      currentCouponCodes = [];
+
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M4 12a8 8 0 018-8" /></svg>
+        영수증 및 종이쿠폰 발권 중...
+      `;
+
+      try {
+        const res = await fetch('/api/coupon/issue-paper', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Kiosk-Key': issuerConfig.key,
+            'X-Idempotency-Key': txnId
+          },
+          body: JSON.stringify({
+            transactionId: txnId,
+            paidAmount: currentDjresTotalPaid,
+            items: currentDjresItemsPayload,
+            location: issuerConfig.name
+          })
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          const coupon = result.data;
+          currentCouponCodes = coupon.code ? [coupon.code] : [];
+          renderReceiptTicket(coupon, issuerConfig, currentDjresSummary, currentDjresTotalPaid);
+        } else {
+          alert('발권 실패: ' + result.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('발권 통신 중 오류가 발생했습니다.');
+      } finally {
+        btn.disabled = false;
+        updateDjresCheckoutUI();
+      }
+    };
+
+    applyPreset('child3');
+    applyPresetDjres('camp_off');
+    onLocationChange();
+
+    // ── 결제 취소(무효화) 버튼 클릭 이벤트 ──
+    document.getElementById('btn-cancel-ticket').addEventListener('click', async () => {
+      if (!currentTransactionId && currentCouponCodes.length === 0) {
+        alert('취소할 결제 건이 없습니다.');
+        return;
+      }
+
+      const confirmCancel = confirm(
+        '⚠️ 정말로 결제를 취소하시겠습니까?\n\n' +
+        '• 발권된 종이쿠폰은 즉시 전산에서 무효화(VOID) 처리됩니다.\n' +
+        '• 관광객이 QR코드를 스캔해도 모바일 등록이 차단됩니다.\n' +
+        '• 이미 가맹점에서 결제에 사용된 쿠폰은 취소할 수 없습니다.'
+      );
+      if (!confirmCancel) return;
+
+      const btnCancel = document.getElementById('btn-cancel-ticket');
+      btnCancel.disabled = true;
+      btnCancel.innerHTML = `
+        <svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M4 12a8 8 0 018-8" /></svg>
+        결제 취소 및 쿠폰 무효화 처리 중...
+      `;
+
+      try {
+        const issuerConfig = currentIssuerConfig || ISSUER_MAP['demo'];
+        const res = await fetch('/api/coupon/cancel', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Kiosk-Key': issuerConfig.key
+          },
+          body: JSON.stringify({
+            transactionId: currentTransactionId,
+            codes: currentCouponCodes,
+            cancelReason: '키오스크 시뮬레이터 결제 취소 (환불)'
+          })
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+          // 1. 영수증에 취소 스탬프 오버레이 부착
+          const receiptEl = document.getElementById('receipt-ticket');
+          const overlay = document.createElement('div');
+          overlay.className = 'receipt-cancelled-overlay';
+          overlay.id = 'rc-cancelled-overlay';
+          overlay.innerHTML = `
+            <div class="stamp-box">
+              결제 취소
+              <div class="stamp-sub">VOID / REFUNDED</div>
+            </div>
+          `;
+          receiptEl.appendChild(overlay);
+
+          // 2. QR 코드 흐리게 처리
+          const qrContainer = document.getElementById('rc-qrcode');
+          if (qrContainer) qrContainer.style.opacity = '0.12';
+
+          // 3. 테스트 도우미 링크 비활성화
+          const quickClaimBtn = document.getElementById('btn-quick-claim');
+          quickClaimBtn.classList.add('is-disabled');
+          quickClaimBtn.removeAttribute('href');
+          quickClaimBtn.textContent = '❌ 결제 취소됨 (등록 불가)';
+          document.getElementById('helper-desc-text').innerHTML = `
+            <strong style="color:#ef4444;">[취소 완료]</strong> 발권된 쿠폰이 서버에서 즉시 무효화되었습니다.<br>
+            스마트폰으로 QR을 스캔해도 등록이 거부됩니다.
+          `;
+
+          // 4. 취소 버튼 상태 변경
+          btnCancel.innerHTML = `
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+            결제 취소 완료 (무효화됨)
+          `;
+          btnCancel.disabled = true;
+
+          alert('✅ 결제 및 쿠폰 발권이 정상적으로 취소되었습니다.\n서버에서 쿠폰이 무효화되어 더 이상 사용할 수 없습니다.');
+        } else {
+          alert('결제 취소 실패: ' + result.message);
+          btnCancel.disabled = false;
+          btnCancel.innerHTML = `
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            결제 취소 (쿠폰 무효화 모의)
+          `;
+        }
+      } catch (err) {
+        console.error(err);
+        alert('취소 통신 중 오류가 발생했습니다.');
+        btnCancel.disabled = false;
+        btnCancel.innerHTML = `
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          결제 취소 (쿠폰 무효화 모의)
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

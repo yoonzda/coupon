@@ -3,270 +3,1164 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="옹진 관광쿠폰">
+  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
+  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
+  <meta property="og:locale" content="ko_KR">
   <title>쿠폰 관리 | 옹진 관광 관리자</title>
-  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script>
     (function() {
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
         document.documentElement.classList.add('sidebar-collapsed');
       }
     })();
-  </script>
+  </script>
   <style>
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      background: #f1f5f9;
-      color: #1e293b; 
-      font-family: 'Noto Sans KR', 'Inter', -apple-system, sans-serif;
+      background: #f5f6f8;
+      color: #202938; 
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     }
 
-    /* Section Headers */
-    .section-header-wrap {
+    .dashboard-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 8px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-      gap: 12px;
+      margin-bottom: 20px;
     }
-    .section-title {
-      font-size: 1.15rem;
+    .header-title-area h1 {
+      font-size: 22px;
       font-weight: 700;
-      color: #0f172a;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      color: #202938;
+      margin: 0 0 4px 0;
+      letter-spacing: -0.3px;
     }
-    .section-desc {
-      font-size: 0.88rem;
-      color: #64748b;
+    .header-desc {
+      font-size: 13.5px;
+      color: #667085;
       margin: 0;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .admin-sidebar svg {
+      max-width: 24px !important;
+      max-height: 24px !important;
+      box-sizing: border-box;
     }
 
     /* Card Layouts */
     .admin-card {
-      background: #ffffff;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      overflow: hidden;
-      margin-bottom: 36px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
+      background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 32px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
     }
+    .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .card-title { font-size: 1.1rem; font-weight: 700; }
+    .card-body { padding: 24px; }
 
-    /* Data Table */
-    .admin-table {
+    /* Forms */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; }
+    .form-group select, .form-group input { 
+      width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem;
+      box-sizing: border-box;
+    }
+    .form-row { display: flex; gap: 16px; align-items: flex-end; }
+    .form-row > div { flex: 1; }
+    
+    .btn-generate {
+      padding: 10px 24px; background: #0068F9; color: white; border: none; border-radius: 6px;
+      font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; height: 40px;
+      transition: background 0.2s;
+    }
+    .btn-generate:hover { background: #0052c2; }
+
+    /* ── 쿠폰 발급/사용 현황 테이블 & 페이지네이션 스타일 ── */
+    .table-scroll-container {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .coupon-status-table {
       width: 100%;
       border-collapse: collapse;
+      font-size: 13px;
+      min-width: 820px;
     }
-    .admin-table th {
+    .coupon-status-table th {
       background: #f8fafc;
-      padding: 13px 20px;
-      font-size: 0.85rem;
+      padding: 12px 14px;
+      font-size: 12.5px;
       font-weight: 600;
       color: #475569;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #e2e8f0;
       white-space: nowrap;
+      user-select: none;
     }
-    .admin-table td {
-      padding: 15px 20px;
-      font-size: 0.9rem;
-      border-bottom: 1px solid #f1f5f9;
-      color: #1e293b;
+    .coupon-status-table th.sortable {
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .coupon-status-table th.sortable:hover {
+      background: #f1f5f9;
+      color: #0284c7;
+    }
+    .coupon-status-table th .sort-icon {
+      display: inline-block;
+      margin-left: 4px;
+      font-size: 11px;
+      color: #94a3b8;
       vertical-align: middle;
     }
-    .admin-table tbody tr:hover {
-      background: #f8fafc;
+    .coupon-status-table th.sorted .sort-icon {
+      color: #0284c7;
+      font-weight: 800;
     }
-    .admin-table td.cell-issuer {
-      background: #ffffff;
-      border-right: 1px solid #f1f5f9;
-      font-weight: 600;
+    .coupon-status-table td {
+      padding: 12px 14px;
+      font-size: 13px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+      color: #1e293b;
     }
-    .admin-table tr:hover td.cell-issuer {
+    .coupon-status-table tr:hover {
       background: #f8fafc;
     }
 
-    /* Badges */
-    .badge {
+    /* 컬럼별 정렬 */
+    .col-center { text-align: center !important; }
+    .col-left { text-align: left !important; }
+    .col-right { text-align: right !important; }
+
+    /* 통계 칩 바 */
+    .coupon-stat-chips {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .stat-chip {
       display: inline-flex;
       align-items: center;
-      padding: 4px 10px;
-      border-radius: 99px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-    .badge-coupon-val {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
-      font-family: 'Inter', sans-serif;
-      font-weight: 700;
-      font-size: 0.82rem;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
       padding: 3px 9px;
       border-radius: 4px;
-      display: inline-block;
+      background: #ffffff;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1.4;
     }
-    .badge-stage1 {
-      background: #dbeafe;
-      color: #1e40af;
-      border: 1px solid #bfdbfe;
+    .stat-chip:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
     }
-    .badge-stage2 {
-      background: #dcfce7;
-      color: #166534;
-      border: 1px solid #bbf7d0;
+    .stat-chip.active {
+      background: #0284c7 !important;
+      color: #ffffff !important;
+      border-color: #0284c7 !important;
     }
-    .badge-stage3 {
-      background: #f3e8ff;
-      color: #6b21a8;
-      border: 1px solid #e9d5ff;
+    .stat-chip .chip-num {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
     }
 
-    /* Buttons */
-    .btn-table-action {
-      padding: 6px 12px;
-      background: #ffffff;
-      color: #334155;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
+    /* 툴바 검색창 */
+    .coupon-search-box {
+      position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      transition: all 0.15s ease;
-      white-space: nowrap;
     }
-    .btn-table-action:hover {
-      background: #0f172a;
-      color: #ffffff;
-      border-color: #0f172a;
+    .coupon-search-box input {
+      height: 34px !important;
+      padding: 0 10px 0 30px !important;
+      font-size: 12.5px !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 4px !important;
+      width: 180px;
+      outline: none;
+      transition: border-color 0.15s ease, width 0.2s ease;
+      background: #ffffff;
+    }
+    .coupon-search-box input:focus {
+      border-color: #0284c7 !important;
+      width: 220px;
+    }
+    .coupon-search-box .search-icon {
+      position: absolute;
+      left: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      pointer-events: none;
+      width: 14px;
+      height: 14px;
     }
 
-    /* Filter dropdowns */
+    /* 페이지네이션 바 */
+    .coupon-pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .coupon-page-info {
+      font-size: 12.5px;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .coupon-page-btns {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .coupon-page-btn {
+      height: 30px;
+      min-width: 30px;
+      padding: 0 8px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #334155;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .coupon-page-btn:hover:not(:disabled) {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+    .coupon-page-btn.active {
+      background: #0284c7 !important;
+      border-color: #0284c7 !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+    }
+    .coupon-page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-download {
+      padding: 6px 12px; background: transparent; color: #475569; border: 1.5px solid #64748b; border-radius: 4px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-download:hover { background: #f8fafc; color: #1e293b; border-color: #475569; }
+    
+    .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 600; line-height: 1.3; }
+    
+    /* 필터 셀렉트박스 커스텀 화살표 스타일 적용 */
     .filter-bar select {
       appearance: none !important;
       -webkit-appearance: none !important;
       -moz-appearance: none !important;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'%3E%3C/path%3E%3C/svg%3E") !important;
       background-repeat: no-repeat !important;
-      background-position: right 12px center !important;
-      background-size: 14px !important;
-      padding-right: 32px !important;
+      background-position: right 10px center !important;
+      background-size: 13px !important;
+      padding-right: 28px !important;
       cursor: pointer;
     }
 
-    /* Card Divider */
-    .section-divider {
-      height: 1px;
+    /* ── 옹진군 쿠폰 발행 정책 카드 스타일 ── */
+    .policy-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .policy-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 1200px) {
+      .policy-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .policy-grid { grid-template-columns: 1fr; }
+    }
+    .policy-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .policy-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .policy-item.tier-1 { border-top: 3.5px solid #0284c7; background: #f0f9ff; }
+    .policy-item.tier-2 { border-top: 3.5px solid #2563eb; background: #eff6ff; }
+    .policy-item.tier-3 { border-top: 3.5px solid #7c3aed; background: #faf5ff; }
+    .policy-item.tier-4 { border-top: 3.5px solid #059669; background: #ecfdf5; }
+    .policy-item.tier-5 { border-top: 3.5px solid #d97706; background: #fffbeb; }
+
+    .policy-tier-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      display: inline-block;
+      width: fit-content;
+      margin-bottom: 6px;
+    }
+    .tier-1 .policy-tier-badge { background: #e0f2fe; color: #0369a1; }
+    .tier-2 .policy-tier-badge { background: #dbeafe; color: #1d4ed8; }
+    .tier-3 .policy-tier-badge { background: #f3e8ff; color: #6d28d9; }
+    .tier-4 .policy-tier-badge { background: #d1fae5; color: #047857; }
+    .tier-5 .policy-tier-badge { background: #fef3c7; color: #b45309; }
+
+    .policy-item-val {
+      font-size: 1.22rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .tier-1 .policy-item-val { color: #0284c7; }
+    .tier-2 .policy-item-val { color: #2563eb; }
+    .tier-3 .policy-item-val { color: #7c3aed; }
+    .tier-4 .policy-item-val { color: #059669; }
+    .tier-5 .policy-item-val { color: #d97706; }
+
+    .policy-item-rule {
+      background: #ffffff;
+      border-radius: 6px;
+      padding: 8px 10px;
+      border: 1px solid rgba(0,0,0,0.06);
+      font-size: 0.82rem;
+      color: #1e293b;
+      line-height: 1.35;
+    }
+    .policy-item-rule strong {
+      display: block;
+      color: #0f172a;
+      font-size: 0.86rem;
+      margin-bottom: 2px;
+    }
+    .policy-item-desc {
+      font-size: 0.74rem;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    /* 발행처 비교 테이블 가로 스크롤 및 첫 열 고정 */
+    .comparison-container {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .comparison-table th, .comparison-table td {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .comparison-table th {
+      background: var(--surface-2);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+    /* 첫 번째 열 고정 */
+    .comparison-table th:first-child,
+    .comparison-table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background: #f8fafc !important;
+      font-weight: 600;
+      text-align: left;
+      border-right: 2px solid var(--border);
+      box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    }
+    .comparison-table th:first-child {
+      z-index: 11;
+      background: #f1f5f9 !important;
+      color: var(--text-primary);
+    }
+    .comparison-table tr:hover td {
+      background: var(--surface-2);
+    }
+    .comparison-table tr:hover td:first-child {
+      background: #f1f5f9 !important;
+    }
+
+    /* ── 모달 공통 스타일 ── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-backdrop.active {
+      opacity: 1; pointer-events: auto;
+    }
+    .modal-card {
+      background: #fff; border-radius: 14px;
+      width: 92%; max-width: 540px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transform: scale(0.95) translateY(10px);
+      transition: transform 0.2s ease;
+      max-height: 90vh;
+      display: flex; flex-direction: column;
+    }
+    .modal-backdrop.active .modal-card {
+      transform: scale(1) translateY(0);
+    }
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex; justify-content: space-between; align-items: center;
+      background: #f8fafc;
+    }
+    .modal-header h3 {
+      font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .modal-close-btn {
+      background: none; border: none; font-size: 1.4rem; color: #64748b;
+      cursor: pointer; padding: 4px; border-radius: 6px; line-height: 1;
+    }
+    .modal-close-btn:hover { color: #0f172a; background: #e2e8f0; }
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #e2e8f0;
+      display: flex; justify-content: flex-end; gap: 10px;
+      background: #f8fafc;
+    }
+
+    .chip-btn {
+      padding: 6px 12px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip-btn:hover {
       background: #e2e8f0;
-      margin: 40px 0;
+      color: #0f172a;
+    }
+    .chip-btn.active {
+      background: #0068F9;
+      border-color: #0068F9;
+      color: #fff;
+    }
+
+    .preview-box {
+      max-height: 160px;
+      overflow-y: auto;
+      background: #0f172a;
+      color: #38bdf8;
+      font-family: monospace;
+      font-size: 0.85rem;
+      padding: 12px 16px;
+      border-radius: 8px;
+      line-height: 1.6;
+      word-break: break-all;
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-coupons-BE_sJeP0.js"></script>
+  <script type="module" crossorigin src="/assets/admin-coupons-Dc4798Ot.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-Ba6NtGBQ.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-DIUxAG8e.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-DxYVQPuN.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-03q0TmgI.css">
 </head>
 <body>
   <div class="app-shell">
     <aside class="admin-sidebar"></aside>
 
     <main class="admin-content">
-      <header class="dashboard-header">
-        <div class="header-title-area">
-          <span class="header-category">Coupon Management</span>
-          <h1>쿠폰 관리</h1>
-          <p class="header-desc">발행처별 등록 상품과 연계된 쿠폰 배정 설정을 관리하고, 현장 결제 이후의 실시간 3단계 유통(발급·등록·사용) 흐름을 통합 모니터링합니다.</p>
+      <header class="dashboard-header" style="justify-content: space-between; align-items: center; text-align: left;">
+        <div class="header-title-area" style="text-align: left; align-items: flex-start;">
+          <h1 style="text-align: left; margin: 0;">쿠폰 관리</h1>
+          <p class="header-desc" style="text-align: left; margin: 4px 0 0 0;">종이 쿠폰용 난수 일괄 발행과 함께 전체 디지털/종이 쿠폰의 실시간 발급 및 사용(결제) 현황을 모니터링합니다.</p>
+        </div>
+        <div class="header-actions" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary" id="btn-refresh-coupons">
+            <span>새로고침</span>
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="location.href='allocate-coupon.html'">
+            <span>발행처 쿠폰 배정</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-open-instant">
+            <span>디지털 쿠폰 직접 발급</span>
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-open-generate">
+            <span>종이쿠폰 난수 일괄 발행</span>
+          </button>
         </div>
       </header>
 
-      <!-- ── 1. 상단 테이블: 발행처별 등록 상품 및 쿠폰 배정 설정 (사전 셋팅) ── -->
-      <div class="section-header-wrap">
-        <h2 class="section-title">발행처별 등록 상품 및 쿠폰 배정 설정</h2>
-        <button class="btn btn-neutral-outline btn-sm" style="height: 36px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;" onclick="location.href='allocate-coupon.html'">
-          쿠폰 배정하기
-        </button>
-      </div>
-
-      <div class="admin-card">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th style="width: 18%; text-align: left;">발행처</th>
-              <th style="width: 22%; text-align: left;">등록 상품</th>
-              <th style="width: 14%; text-align: right;">상품 금액</th>
-              <th style="width: 14%; text-align: center;">발급 쿠폰</th>
-              <th style="width: 11%; text-align: right;">지정 쿠폰 수</th>
-              <th style="width: 11%; text-align: right;">미발급 잔여</th>
-              <th style="width: 10%; text-align: center;">관리</th>
-            </tr>
-          </thead>
-          <tbody id="issuer-settings-list">
-            <tr><td colspan="7" class="text-center" style="padding: 36px; color:#64748b;">설정 데이터를 불러오는 중입니다...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="section-divider"></div>
-
-      <!-- ── 2. 하단 테이블: 쿠폰 실시간 발급 및 사용 내역 (구매 발생 이후 유통 흐름) ── -->
-      <div class="section-header-wrap">
-        <h2 class="section-title">쿠폰 실시간 발급 및 사용 내역</h2>
-      </div>
-
-      <!-- 필터 영역 -->
-      <div class="filter-bar" style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px; justify-content: space-between; flex-wrap: wrap;">
-        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">진행 단계 :</span>
-            <select id="filter-status" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 130px; outline: none;">
-              <option value="all">전체 단계</option>
-              <option value="stage1">1단계: 쿠폰 발급 (미등록 대기)</option>
-              <option value="stage2">2단계: 쿠폰 등록 (지갑 수령)</option>
-              <option value="stage3">3단계: 쿠폰 사용 (결제 완료)</option>
-            </select>
+      <!-- ── 옹진군 관광쿠폰 발행 및 차등 지급 정책 기준표 ── -->
+      <div class="policy-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #f0f9ff; color: #0284c7; border-radius: 8px;">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              </span>
+              <h2 style="margin: 0; font-size: 1.12rem; font-weight: 800; color: #0f172a;">옹진 관광쿠폰 발행 및 차등 지급 정책</h2>
+            </div>
+            <p style="margin: 4px 0 0 36px; font-size: 0.85rem; color: #64748b; line-height: 1.4;">
+              관광객 결제/소비 금액(승선권, 숙박, 음식 등) 구간에 따른 5대 표준 권종 발행 및 지급 기준표입니다.
+            </p>
           </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">발행처 :</span>
-            <select id="filter-issuer" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 140px; outline: none;">
-              <option value="all">전체 발행처</option>
-            </select>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span style="display: inline-flex; align-items: center; gap: 5px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 0.78rem; font-weight: 700; padding: 4px 12px; border-radius: 99px;">
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              공식 표준 정책 가이드
+            </span>
+          </div>
+        </div>
+
+        <!-- 5대 권종 정책 그리드 -->
+        <div class="policy-grid">
+          <!-- 1구간: 1,000원권 -->
+          <div class="policy-item tier-1">
+            <div>
+              <span class="policy-tier-badge">1구간</span>
+              <div class="policy-item-val">1,000원권</div>
+              <div class="policy-item-rule">
+                <strong>1천원 결제 시</strong>
+                지급 권종: 1,000원
+              </div>
+            </div>
+            <div class="policy-item-desc">소액 결제 및 최소 체험 기준</div>
+          </div>
+
+          <!-- 2구간: 2,000원권 -->
+          <div class="policy-item tier-2">
+            <div>
+              <span class="policy-tier-badge">2구간</span>
+              <div class="policy-item-val">2,000원권</div>
+              <div class="policy-item-rule">
+                <strong>2천원 ~ 3천원 이하</strong>
+                2,000원 ≤ 금액 ≤ 3,000원
+              </div>
+            </div>
+            <div class="policy-item-desc">단거리 교통 및 간식류 소비</div>
+          </div>
+
+          <!-- 3구간: 3,000원권 -->
+          <div class="policy-item tier-3">
+            <div>
+              <span class="policy-tier-badge">3구간</span>
+              <div class="policy-item-val">3,000원권</div>
+              <div class="policy-item-rule">
+                <strong>3천원 초과 ~ 8천원 이하</strong>
+                3,000원 &lt; 금액 ≤ 8,000원
+              </div>
+            </div>
+            <div class="policy-item-desc">일반 음료·카페 및 편의시설</div>
+          </div>
+
+          <!-- 4구간: 5,000원권 -->
+          <div class="policy-item tier-4">
+            <div>
+              <span class="policy-tier-badge">4구간 (주력 권종)</span>
+              <div class="policy-item-val">5,000원권</div>
+              <div class="policy-item-rule">
+                <strong>8천원 초과 ~ 4만원 이하</strong>
+                8,000원 &lt; 금액 ≤ 40,000원
+              </div>
+            </div>
+            <div class="policy-item-desc">식사, 체험 레저, 특산품 구매</div>
+          </div>
+
+          <!-- 5구간: 10,000원권 -->
+          <div class="policy-item tier-5">
+            <div>
+              <span class="policy-tier-badge">5구간 (고액 우대)</span>
+              <div class="policy-item-val">10,000원권</div>
+              <div class="policy-item-rule">
+                <strong>4만원 초과 결제 시</strong>
+                금액 &gt; 40,000원
+              </div>
+            </div>
+            <div class="policy-item-desc">숙박업소, 단체 식사 및 패키지</div>
+          </div>
+        </div>
+
+        <!-- 실시간 권종 판별기 (인터랙티브 계산기) -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span style="font-size: 0.85rem; font-weight: 700; color: #334155; display: flex; align-items: center; gap: 6px;">
+              <span>⚡</span> <strong>결제 금액별 권종 자동 판별:</strong>
+            </span>
+            <div style="position: relative; width: 160px;">
+              <input type="number" id="policy-calc-input" placeholder="소비 금액 (예: 25000)" style="width: 100%; padding: 6px 28px 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; font-weight: 700; box-sizing: border-box;" />
+              <span style="position: absolute; right: 8px; top: 7px; font-size: 0.8rem; color: #64748b;">원</span>
+            </div>
+            <span style="font-size: 0.88rem; color: #475569;">➜</span>
+            <div id="policy-calc-result" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 800; color: #2563eb; background: #eff6ff; padding: 4px 12px; border-radius: 6px; border: 1px solid #bfdbfe;">
+              금액을 입력하면 해당 권종이 판별됩니다.
+            </div>
+          </div>
+          <button type="button" id="btn-policy-apply-issue" style="padding: 7px 16px; background: #059669; color: #fff; border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 6px;">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            판별된 권종으로 즉시 발급하기
+          </button>
+        </div>
+      </div>
+
+      <!-- 전체 쿠폰 발급 및 사용 현황 헤더 & 필터 툴바 -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; margin-top: 14px; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+            <h2 style="margin: 0; font-size: 15px; font-weight: 700; color: #202938;">전체 쿠폰 발급 및 사용 현황</h2>
+            <span id="coupon-total-badge" style="font-size: 11.5px; font-weight: 700; color: #0284c7; background: #f0f9ff; border: 1px solid #bae6fd; padding: 2px 8px; border-radius: 4px;">총 0건</span>
+          </div>
+          <!-- 빠른 상태 필터 칩 -->
+          <div class="coupon-stat-chips" id="coupon-stat-chips">
+            <button type="button" class="stat-chip active" data-status="all">전체 <span class="chip-num" id="chip-cnt-all">0</span></button>
+            <button type="button" class="stat-chip" data-status="available" style="color: #166534;">사용 가능 <span class="chip-num" id="chip-cnt-available">0</span></button>
+            <button type="button" class="stat-chip" data-status="used" style="color: #0369a1;">사용 완료 <span class="chip-num" id="chip-cnt-used">0</span></button>
+            <button type="button" class="stat-chip" data-status="expired" style="color: #64748b;">기간 만료 <span class="chip-num" id="chip-cnt-expired">0</span></button>
+            <button type="button" class="stat-chip" data-status="cancelled" style="color: #991b1b;">취소/회수 <span class="chip-num" id="chip-cnt-cancelled">0</span></button>
+          </div>
+        </div>
+
+        <!-- 우측 액션 & 검색 & 필터 -->
+        <div class="filter-bar" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+          <!-- 검색창 -->
+          <div class="coupon-search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="coupon-search-input" placeholder="쿠폰번호, 수령인, 발행처 검색..." />
+          </div>
+
+          <!-- 구분 필터 (디지털/종이) -->
+          <select id="filter-type" onchange="window.onCouponFilterChange()" style="height: 34px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12.5px; background: #fff; color: #334155; outline: none; min-width: 105px;">
+            <option value="all">전체 구분</option>
+            <option value="digital">디지털 쿠폰</option>
+            <option value="paper">종이 쿠폰</option>
+          </select>
+
+          <!-- 상태 필터 셀렉트 -->
+          <select id="filter-status" onchange="window.onCouponFilterChange()" style="height: 34px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12.5px; background: #fff; color: #334155; outline: none; min-width: 110px;">
+            <option value="all">전체 상태</option>
+            <option value="available">사용 가능</option>
+            <option value="used">사용 완료</option>
+            <option value="expired">기간 만료</option>
+            <option value="cancelled">탈퇴 회수/취소</option>
+          </select>
+
+          <!-- 페이지당 보기 -->
+          <select id="coupon-page-size" onchange="window.onCouponPageSizeChange()" style="height: 34px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12.5px; background: #fff; color: #334155; outline: none; min-width: 100px;" title="페이지당 행 개수">
+            <option value="10">10개씩 보기</option>
+            <option value="15" selected>15개씩 보기</option>
+            <option value="30">30개씩 보기</option>
+            <option value="50">50개씩 보기</option>
+            <option value="100">100개씩 보기</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 전체 쿠폰 발급 및 사용 현황 카드 -->
+      <div class="admin-card" style="box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; margin-bottom: 24px;">
+        <div class="table-scroll-container">
+          <table class="coupon-status-table admin-table">
+            <thead>
+              <tr>
+                <th class="col-center sortable" data-sort="id" style="width: 110px;" title="클릭하여 ID 정렬">
+                  쿠폰 ID <span class="sort-icon" id="sort-icon-id">⇅</span>
+                </th>
+                <th class="col-center sortable" data-sort="coupon_type" style="width: 95px;" title="클릭하여 구분 정렬">
+                  구분 <span class="sort-icon" id="sort-icon-coupon_type">⇅</span>
+                </th>
+                <th class="col-right sortable" data-sort="face_value" style="width: 115px; padding-right: 18px;" title="클릭하여 액면가 정렬">
+                  액면가 <span class="sort-icon" id="sort-icon-face_value">⇅</span>
+                </th>
+                <th class="col-left sortable" data-sort="tourist_nickname" style="width: 180px;" title="클릭하여 수령인 정렬">
+                  수령인 (관광객) <span class="sort-icon" id="sort-icon-tourist_nickname">⇅</span>
+                </th>
+                <th class="col-left sortable" data-sort="issuer_name" style="width: 170px;" title="클릭하여 발행처 정렬">
+                  발행처 / 출처 <span class="sort-icon" id="sort-icon-issuer_name">⇅</span>
+                </th>
+                <th class="col-center sortable" data-sort="status" style="width: 105px;" title="클릭하여 상태 정렬">
+                  상태 <span class="sort-icon" id="sort-icon-status">⇅</span>
+                </th>
+                <th class="col-center sortable sorted" data-sort="issued_at" style="width: 150px;" title="클릭하여 발급일시 정렬">
+                  발급일시 <span class="sort-icon" id="sort-icon-issued_at">▼</span>
+                </th>
+                <th class="col-center sortable" data-sort="used_at" style="width: 150px;" title="클릭하여 사용일시 정렬">
+                  사용일시 <span class="sort-icon" id="sort-icon-used_at">⇅</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="coupon-status-list">
+              <tr><td colspan="8" class="col-center" style="padding: 36px; color:#64748b;">데이터를 불러오는 중입니다...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 하단 페이지네이션 바 -->
+        <div class="coupon-pagination-bar">
+          <div class="coupon-page-info" id="coupon-page-info">
+            총 0건 중 0 - 0건 표시
+          </div>
+          <div class="coupon-page-btns" id="coupon-page-btns">
+            <!-- 페이지네이션 버튼 동적 렌더링 -->
           </div>
         </div>
       </div>
 
-      <!-- 하단 트랜잭션 테이블 -->
-      <div class="admin-card">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th style="width: 15%; text-align: left;">쿠폰 금액</th>
-              <th style="width: 20%; text-align: left;">소유자 (전화번호)</th>
-              <th style="width: 25%; text-align: left;">발행처 / 구매일시</th>
-              <th style="width: 18%; text-align: center;">진행 단계</th>
-              <th style="width: 22%; text-align: left;">사용처 / 결제일시</th>
-            </tr>
-          </thead>
-          <tbody id="coupon-status-list">
-            <tr><td colspan="5" class="text-center" style="padding: 36px; color:#64748b;">유통 내역 데이터를 불러오는 중입니다...</td></tr>
-          </tbody>
-        </table>
+      <!-- 단체 공유 링크 현황 (키오스크 문자 수령 2장 이상) -->
+      <style>
+        .share-summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 12px; }
+        @media (max-width: 1100px) { .share-summary { grid-template-columns: repeat(3, 1fr); } }
+        .share-sum-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; }
+        .share-sum-item .lbl { font-size: 12px; color: #64748b; font-weight: 600; }
+        .share-sum-item .val { font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-top: 4px; font-variant-numeric: tabular-nums; }
+        .share-sum-item .sub { font-size: 11.5px; color: #94a3b8; margin-top: 2px; }
+        .share-sum-item.warn .val { color: #b45309; }
+        .share-sum-item.mute .val { color: #64748b; }
+        .share-badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 700; }
+        .share-badge.OPEN { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .share-badge.SOLD_OUT { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .share-badge.EXPIRED { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+        .share-badge.CANCELLED { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .share-progress { height: 6px; background: #e2e8f0; border-radius: 99px; overflow: hidden; margin-top: 4px; }
+        .share-progress > span { display: block; height: 100%; background: linear-gradient(90deg, #0284c7, #38bdf8); }
+        .share-row { cursor: pointer; }
+        .share-row:hover td { background: #f8fafc; }
+        .share-item-state { font-size: 11.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+        .share-item-state.claimed { background: #eff6ff; color: #1d4ed8; }
+        .share-item-state.waiting { background: #ecfdf5; color: #047857; }
+        .share-item-state.lapsed { background: #f1f5f9; color: #64748b; }
+        .share-item-state.cancelled { background: #fef2f2; color: #b91c1c; }
+        .share-proxy-tag { font-size: 11px; font-weight: 700; color: #b45309; background: #fffbeb; border: 1px solid #fde68a; padding: 1px 6px; border-radius: 4px; }
+        #modal-share-detail .modal-card { max-width: 860px; }
+        .share-detail-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 16px; margin-bottom: 16px; font-size: 13px; }
+        .share-detail-meta .k { color: #64748b; font-weight: 600; margin-right: 6px; }
+        .share-detail-meta .v { color: #0f172a; font-weight: 700; }
+      </style>
+      <div style="margin-top: 32px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0 0 4px 0;">단체 공유 링크 현황</h3>
+          <span style="font-size: 0.82rem; color: #64748b;">키오스크에서 문자로 2장 이상 발권된 건 · 행을 누르면 쿠폰별 수령자를 확인할 수 있습니다.</span>
+        </div>
+        <div class="filter-bar" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+          <div class="coupon-search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="share-search-input" placeholder="번호 뒷4자리, 발권장소, 거래번호" />
+          </div>
+          <select id="share-filter-status" style="height: 34px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12.5px; background: #fff; color: #334155; outline: none; min-width: 110px;">
+            <option value="">전체 상태</option>
+            <option value="OPEN">수령 중</option>
+            <option value="SOLD_OUT">전량 수령</option>
+            <option value="EXPIRED">기한 만료</option>
+            <option value="CANCELLED">결제 취소</option>
+          </select>
+        </div>
+      </div>
+      <div class="share-summary" id="share-summary">
+        <div class="share-sum-item"><div class="lbl">공유 링크</div><div class="val" id="share-sum-bundles">-</div><div class="sub">발권 건수</div></div>
+        <div class="share-sum-item"><div class="lbl">수령 완료</div><div class="val" id="share-sum-claimed">-</div><div class="sub">쿠폰 장수</div></div>
+        <div class="share-sum-item"><div class="lbl">수령 대기</div><div class="val" id="share-sum-waiting">-</div><div class="sub">기한 내 미수령</div></div>
+        <div class="share-sum-item mute"><div class="lbl">기한 만료 소멸</div><div class="val" id="share-sum-lapsed">-</div><div class="sub" id="share-sum-lapsed-amt">-</div></div>
+        <div class="share-sum-item warn"><div class="lbl">구매자 대리 수령</div><div class="val" id="share-sum-proxy">-</div><div class="sub">본인 몫 제외 추가 수령</div></div>
+      </div>
+      <div class="admin-card" style="box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; margin-bottom: 24px;">
+        <div class="table-scroll-container">
+          <table class="admin-table" style="width: 100%;">
+            <thead>
+              <tr>
+                <th class="col-center" style="width: 80px;">ID</th>
+                <th class="col-center" style="width: 150px;">발권일시</th>
+                <th class="col-left">발권장소</th>
+                <th class="col-center" style="width: 130px;">구매자 번호</th>
+                <th class="col-right" style="width: 150px;">발권 (장 / 금액)</th>
+                <th class="col-left" style="width: 170px;">수령 현황</th>
+                <th class="col-center" style="width: 90px;">수령자 / 대리</th>
+                <th class="col-center" style="width: 110px;">받기 기한</th>
+                <th class="col-center" style="width: 95px;">상태</th>
+              </tr>
+            </thead>
+            <tbody id="share-bundle-list">
+              <tr><td colspan="9" class="col-center" style="padding: 36px; color:#64748b;">데이터를 불러오는 중입니다...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="coupon-pagination-bar">
+          <div class="coupon-page-info" id="share-page-info">총 0건</div>
+          <div class="coupon-page-btns" id="share-page-btns"></div>
+        </div>
+      </div>
+
+      <!-- 쿠폰 배정 내역 -->
+      <div style="margin-top: 32px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0;">쿠폰 배정 내역</h3>
+        <span style="font-size: 0.85rem; color: #64748b;">* [재발행] 버튼을 누르면 해당 기관에 쿠폰을 즉시 추가 발행/배정할 수 있습니다.</span>
+      </div>
+      <div id="comparison-section" class="admin-card" style="border-radius: 6px;">
+        <div class="comparison-container">
+          <table class="comparison-table">
+            <thead>
+              <tr id="comparison-header">
+                <!-- 지표명 및 발행처 헤더 동적 로드 -->
+              </tr>
+            </thead>
+            <tbody id="comparison-body">
+              <!-- 비교 항목별 행 데이터 렌더링 -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
   </div>
 
-  <div id="toast-container"></div>
+  <!-- ── 모달: 단체 공유 링크 상세 ── -->
+  <div class="modal-backdrop" id="modal-share-detail">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="share-detail-title">단체 공유 링크 상세</h3>
+        <button type="button" class="modal-close-btn" id="share-detail-close" aria-label="닫기">&times;</button>
+      </div>
+      <div class="modal-body" id="share-detail-body">
+        <div style="padding: 24px; text-align: center; color: #64748b;">불러오는 중...</div>
+      </div>
+    </div>
+  </div>
 
+  <!-- ── 모달 1: 종이쿠폰 난수 일괄 발행 ── -->
+  <div class="modal-backdrop" id="modal-generate">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h3>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#0068F9" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            종이 쿠폰 난수 일괄 발행
+          </h3>
+          <span style="font-size: 0.74rem; background: #eff6ff; color: #1d4ed8; padding: 2px 8px; border-radius: 99px; font-weight: 700; border: 1px solid #bfdbfe;">Code 128 표준 규격</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="window.closeModal('modal-generate')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- 폼 뷰 -->
+        <div id="gen-form-view">
+          <p style="font-size: 0.88rem; color: #64748b; margin-top: 0; margin-bottom: 18px; line-height: 1.4;">
+            매표소, 키오스크 또는 행사장에서 인쇄·배포할 <strong>Code 128 표준 바코드 종이쿠폰</strong>을 일괄 생성합니다. 생성 후 키오스크 연동용 CSV 다운로드 및 바코드 라벨 즉시 인쇄가 가능합니다.
+          </p>
+
+          <div class="form-group">
+            <label for="gen-issuer-select">발행처 / 배포 장소</label>
+            <div style="display: flex; gap: 8px;">
+              <select id="gen-issuer-select" style="flex: 1;">
+                <option value="">발행처 목록 로딩 중...</option>
+              </select>
+            </div>
+            <input type="text" id="gen-issuer-custom" placeholder="직접 입력 시 기재 (예: 백령여객터미널, 특산물축제 등)" style="margin-top: 8px; font-size: 0.88rem; display: none;" />
+          </div>
+
+          <div class="form-group">
+            <label>쿠폰 액면가 (정책 기준 5대 권종)</label>
+            <div style="display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;">
+              <button type="button" class="chip-btn" onclick="setGenFaceValue(1000)">1,000원</button>
+              <button type="button" class="chip-btn" onclick="setGenFaceValue(2000)">2,000원</button>
+              <button type="button" class="chip-btn" onclick="setGenFaceValue(3000)">3,000원</button>
+              <button type="button" class="chip-btn active" onclick="setGenFaceValue(5000)">5,000원</button>
+              <button type="button" class="chip-btn" onclick="setGenFaceValue(10000)">10,000원</button>
+            </div>
+            <div style="position: relative;">
+              <input type="number" id="gen-face-value" value="5000" min="500" step="500" style="padding-right: 36px; font-weight: 700;" />
+              <span style="position: absolute; right: 14px; top: 11px; color: #64748b; font-weight: 600; font-size: 0.9rem;">원</span>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; margin-top: 8px; font-size: 0.78rem; color: #64748b; line-height: 1.45;">
+              💡 <strong>발행 정책:</strong> 1천원(1,000원) · 2~3천원(2,000원) · 3천원초과~8천원(3,000원) · 8천원초과~4만원(5,000원) · 4만원초과(10,000원)
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>발행 수량 (최대 5,000장)</label>
+            <div style="display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;">
+              <button type="button" class="chip-btn" onclick="setGenQuantity(50)">50장</button>
+              <button type="button" class="chip-btn active" onclick="setGenQuantity(100)">100장</button>
+              <button type="button" class="chip-btn" onclick="setGenQuantity(500)">500장</button>
+              <button type="button" class="chip-btn" onclick="setGenQuantity(1000)">1,000장</button>
+              <button type="button" class="chip-btn" onclick="setGenQuantity(3000)">3,000장</button>
+            </div>
+            <div style="position: relative;">
+              <input type="number" id="gen-quantity" value="100" min="1" max="5000" style="padding-right: 36px; font-weight: 700;" />
+              <span style="position: absolute; right: 14px; top: 11px; color: #64748b; font-weight: 600; font-size: 0.9rem;">장</span>
+            </div>
+          </div>
+
+          <!-- 예상 발행 총액 안내 -->
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+            <span style="font-size: 0.88rem; color: #166534; font-weight: 600;">총 발행 금액</span>
+            <span id="gen-total-amount" style="font-size: 1.15rem; font-weight: 800; color: #15803d;">500,000원</span>
+          </div>
+        </div>
+
+        <!-- 발행 완료 뷰 -->
+        <div id="gen-result-view" style="display: none;">
+          <div style="text-align: center; padding: 10px 0 16px;">
+            <div style="width: 48px; height: 48px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+              <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h4 style="margin: 0 0 4px; font-size: 1.15rem; font-weight: 800; color: #0f172a;">종이쿠폰 Code 128 난수 발행 완료!</h4>
+            <p id="gen-result-summary" style="margin: 0; font-size: 0.85rem; color: #64748b; line-height: 1.4;">
+              총 100장의 쿠폰 난수가 생성되었습니다.
+            </p>
+          </div>
+
+          <!-- Code 128 바코드 실시간 렌더링 검증 박스 -->
+          <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 12px 14px; text-align: center; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: #0f172a;">📊 Code 128 표준 바코드 검증 샘플</span>
+              <span style="font-size: 0.72rem; background: #eff6ff; color: #1d4ed8; padding: 2px 8px; border-radius: 99px; font-weight: 700; border: 1px solid #bfdbfe;">키오스크 스캐너 즉시 인식 가능</span>
+            </div>
+            <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: center; align-items: center;">
+              <svg id="gen-barcode-sample" style="max-width: 100%; height: 70px;"></svg>
+            </div>
+            <p style="margin: 6px 0 0; font-size: 0.74rem; color: #64748b;">키오스크 및 가맹점 바코드 스캐너로 위 Code 128 바코드를 직접 테스트해보세요.</p>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 0.84rem; font-weight: 700; color: #334155;">생성된 쿠폰 번호 미리보기 (일부)</span>
+              <span id="gen-preview-count" style="font-size: 0.78rem; color: #64748b;">100건</span>
+            </div>
+            <div class="preview-box" id="gen-code-preview" style="max-height: 110px;">
+              <!-- 코드 나열 -->
+            </div>
+          </div>
+
+          <!-- 다운로드 및 인쇄 버튼 그룹 -->
+          <div style="display: flex; gap: 8px;">
+            <button type="button" id="btn-download-csv" style="flex: 1.1; height: 42px; background: #059669; color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+              키오스크 연동용 CSV 다운로드
+            </button>
+            <button type="button" id="btn-print-labels" onclick="window.printBarcodeLabels && window.printBarcodeLabels()" style="flex: 0.9; height: 42px; background: #0068F9; color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.673-2.03-1.27-2.829m0 0A9.978 9.978 0 0112 7.5c2.67 0 5.105 1.05 6.904 2.762m-6.904-2.762c.706.706 1.258 1.545 1.625 2.477M18.904 10.262c-.597.799-1.03 1.753-1.27 2.829m0 0a8.005 8.005 0 01-11.268 0m11.268 0H5.366"/></svg>
+              Code 128 바코드 인쇄
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" id="gen-modal-footer">
+        <button type="button" class="btn btn-neutral btn-sm" onclick="window.closeModal('modal-generate')">취소</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-submit-generate" style="background: #0068F9; font-weight: 700; padding: 0 20px;">
+          쿠폰 난수 일괄 생성하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 모달 2: 쿠폰 추가 재발행 (재배정) ── -->
+  <div class="modal-backdrop" id="modal-reissue">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#0068F9" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+          쿠폰 추가 재발행 (배정)
+        </h3>
+        <button type="button" class="modal-close-btn" onclick="window.closeModal('modal-reissue')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 0.88rem; color: #64748b; margin-top: 0; margin-bottom: 18px; line-height: 1.4;">
+          선택한 발행처에 신규 쿠폰 수량을 즉시 추가 배정(재발행)합니다.
+        </p>
+
+        <div class="form-group">
+          <label>대상 발행처</label>
+          <input type="text" id="reissue-issuer-name" readonly style="background: #f8fafc; font-weight: 700; color: #0f172a;" />
+          <input type="hidden" id="reissue-issuer-id" />
+        </div>
+
+        <div class="form-group">
+          <label for="reissue-face-value">배정 쿠폰 액면가</label>
+          <div style="position: relative;">
+            <input type="number" id="reissue-face-value" value="5000" min="500" step="500" style="padding-right: 36px; font-weight: 700;" />
+            <span style="position: absolute; right: 14px; top: 11px; color: #64748b; font-weight: 600; font-size: 0.9rem;">원</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reissue-count">추가 발행(배정) 수량</label>
+          <div style="position: relative;">
+            <input type="number" id="reissue-count" value="1000" min="1" max="50000" style="padding-right: 36px; font-weight: 700;" />
+            <span style="position: absolute; right: 14px; top: 11px; color: #64748b; font-weight: 600; font-size: 0.9rem;">장</span>
+          </div>
+        </div>
+
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+          <span style="font-size: 0.88rem; color: #1e40af; font-weight: 600;">추가 배정 총액</span>
+          <span id="reissue-total-amount" style="font-size: 1.15rem; font-weight: 800; color: #1d4ed8;">5,000,000원</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-neutral btn-sm" onclick="window.closeModal('modal-reissue')">취소</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-submit-reissue" style="background: #0068F9; font-weight: 700; padding: 0 20px;">
+          재발행 승인하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 모달 3: 쿠폰 셋팅 수정 ── -->
+  <div class="modal-backdrop" id="modal-edit-setting">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#475569" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+          쿠폰 배정 설정 수정
+        </h3>
+        <button type="button" class="modal-close-btn" onclick="window.closeModal('modal-edit-setting')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 0.88rem; color: #64748b; margin-top: 0; margin-bottom: 18px; line-height: 1.4;">
+          발행처의 총 배정 수량을 변경합니다. (이미 관광객에게 발급된 수량보다 적게 설정할 수는 없습니다.)
+        </p>
+
+        <div class="form-group">
+          <label>발행처</label>
+          <input type="text" id="edit-setting-issuer-name" readonly style="background: #f8fafc; font-weight: 700; color: #0f172a;" />
+          <input type="hidden" id="edit-setting-alloc-id" />
+        </div>
+
+        <div class="form-group">
+          <label for="edit-setting-total-count">총 배정 수량</label>
+          <div style="position: relative;">
+            <input type="number" id="edit-setting-total-count" min="1" style="padding-right: 36px; font-weight: 700;" />
+            <span style="position: absolute; right: 14px; top: 11px; color: #64748b; font-weight: 600; font-size: 0.9rem;">장</span>
+          </div>
+          <span id="edit-setting-issued-hint" style="font-size: 0.78rem; color: #64748b; margin-top: 4px; display: block;">현재 발급 수량: 0장</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-neutral btn-sm" onclick="window.closeModal('modal-edit-setting')">취소</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-submit-edit-setting" style="background: #334155; font-weight: 700; padding: 0 20px;">
+          설정 저장하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 모달 4: 관광객 디지털 쿠폰 직접 발급 ── -->
+  <div class="modal-backdrop" id="modal-instant-digital">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#059669" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          관광객 디지털 쿠폰 직접 발급
+        </h3>
+        <button type="button" class="modal-close-btn" onclick="window.closeModal('modal-instant-digital')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 0.88rem; color: #64748b; margin-top: 0; margin-bottom: 18px; line-height: 1.4;">
+          민원 응대, 이벤트 또는 시연 목적으로 관광객에게 디지털 쿠폰을 즉시 직접 발급합니다.
+        </p>
+
+        <div class="form-group">
+          <label for="instant-tourist-name">수령 관광객 닉네임 / 성명</label>
+          <input type="text" id="instant-tourist-name" value="홍길동 (시연용 관광객)" placeholder="예: 홍길동, 김관광 등" style="font-weight: 600;" />
+        </div>
+
+        <div class="form-group">
+          <label for="instant-issuer-select">연계 배정처 (발행처)</label>
+          <select id="instant-issuer-select" style="font-weight: 600;"></select>
+        </div>
+
+        <div class="form-group">
+          <label>쿠폰 액면가 선택 (정책 기준 5대 권종)</label>
+          <div style="display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;">
+            <button type="button" class="chip-btn" onclick="setInstantFaceValue(1000)">1,000원</button>
+            <button type="button" class="chip-btn" onclick="setInstantFaceValue(2000)">2,000원</button>
+            <button type="button" class="chip-btn" onclick="setInstantFaceValue(3000)">3,000원</button>
+            <button type="button" class="chip-btn active" onclick="setInstantFaceValue(5000)">5,000원</button>
+            <button type="button" class="chip-btn" onclick="setInstantFaceValue(10000)">10,000원</button>
+          </div>
+          <div style="position: relative;">
+            <input type="number" id="instant-face-value" value="5000" min="500" step="500" style="padding-right: 36px; font-weight: 700;" />
+            <span style="position: absolute; right: 14px; top: 11px; color: #64748b; font-weight: 600; font-size: 0.9rem;">원</span>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; margin-top: 8px; font-size: 0.78rem; color: #64748b; line-height: 1.45;">
+            💡 <strong>발행 정책:</strong> 1천원(1,000원) · 2~3천원(2,000원) · 3천원초과~8천원(3,000원) · 8천원초과~4만원(5,000원) · 4만원초과(10,000원)
+          </div>
+        </div>
+
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 12px 16px; margin-top: 16px;">
+          <div style="font-size: 0.85rem; color: #065f46; font-weight: 700; margin-bottom: 4px;">⚡ 즉시 발급 안내</div>
+          <div style="font-size: 0.8rem; color: #047857; line-height: 1.4;">
+            발급 즉시 상단 목록에 [디지털 쿠폰]으로 등록되며, 1년간(365일) 유효한 사용 가능 상태가 됩니다.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-neutral btn-sm" onclick="window.closeModal('modal-instant-digital')">취소</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-submit-instant" style="background: #059669; font-weight: 700; padding: 0 20px;">
+          디지털 쿠폰 즉시 발급하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+
+  <!-- 단체 공유 링크 현황 -->
 </body>
 </html>

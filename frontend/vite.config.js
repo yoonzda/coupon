@@ -9,7 +9,7 @@ export default defineConfig({
         // 관광객 포털
         'tourist-index':    resolve(__dirname, 'tourist/index.html'),
         'tourist-mypage':   resolve(__dirname, 'tourist/mypage.html'),
-        'tourist-map':      resolve(__dirname, 'tourist/map.html'),
+
         'tourist-callback': resolve(__dirname, 'tourist/auth-callback.html'),
         'tourist-apply':    resolve(__dirname, 'tourist/apply-merchant.html'),
         'tourist-apply-pending': resolve(__dirname, 'tourist/apply-pending.html'),

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /tourist/
+Allow: /landing/
+Disallow: /admin/
+Disallow: /merchant/
+Disallow: /issuer/
+Disallow: /api/
+
+Sitemap: https://ongjincoupon.kr/sitemap.xml

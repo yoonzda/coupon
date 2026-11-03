@@ -4,19 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <!-- Favicon -->
-  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- PWA & Mobile Web App -->
+  <link rel="manifest" href="/assets/manifest-C2E8yHgd.webmanifest">
+  <meta name="theme-color" content="#FFFFFF">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon-Lwcp8xrE.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="옹진쿠폰">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <script src="/shared/js/pwa-install.js?v=20261022" defer></script>
   <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="옹진 섬패스 쿠폰">
-  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 섬패스로 더 알뜰한 옹진 여행">
-  <meta property="og:image" content="/og-image.png">
+  <meta property="og:title" content="옹진 관광쿠폰">
+  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
+  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
   <meta property="og:locale" content="ko_KR">
   <meta name="description" content="내 주변 가맹점 찾기 — 옹진관광 쿠폰 지도" />
-  <title>가맹점 지도 | 옹진 섬 패스 쿠폰</title>
-    <!-- 네이버 지도 API (NCP Client ID) -->
-  <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=x0h48m56fw"></script>
-  <link rel="stylesheet" href="../shared/css/brex-tokens.css?v=20260915_fix_all_tabs" />
-  <link rel="stylesheet" href="../shared/css/app-styles.css?v=20260915_fix_all_tabs" />
+  <title>가맹점 지도 | 옹진 관광쿠폰</title>
+  <!-- 네이버 지도 API (NCP Key ID) -->
+  <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=x0h48m56fw"></script>
   <style>
     .subpage-container {
       min-height: 100dvh;
@@ -247,9 +254,130 @@
       box-shadow: 0 2px 6px rgba(0, 104, 249, 0.2);
     }
 
+    /* 마커 클릭 시 지도 하단 플로팅 미니 프리뷰 카드 */
+    .map-marker-preview {
+      position: absolute;
+      bottom: 14px;
+      left: 12px;
+      right: 12px;
+      background: #FFFFFF;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      z-index: 100;
+      padding: 12px 14px;
+      animation: previewSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes previewSlideUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .preview-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+    .preview-thumb-box {
+      width: 58px;
+      height: 58px;
+      border-radius: 12px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #f1f5f9;
+    }
+    .preview-thumb-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .preview-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .preview-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+    .preview-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .preview-cat {
+      font-size: 11px;
+      font-weight: 600;
+      color: #0284c7;
+      background: #e0f2fe;
+      padding: 2px 6px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .preview-addr {
+      font-size: 12px;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 7px;
+    }
+    .preview-btn-row {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-preview-detail {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f172a;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 5px 11px;
+      cursor: pointer;
+    }
+    .btn-preview-route {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffffff;
+      background: #0F4C81;
+      border: none;
+      border-radius: 8px;
+      padding: 5px 12px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+    }
+    .btn-close-preview {
+      position: absolute;
+      top: -6px;
+      right: -4px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+
     /* 2차 분류 카테고리 탭 (1차 탭과 동일한 알약 형태, 노라인 그레이 배경 + 파란색 포인트 active) */
     .tabs.category-tabs {
       gap: 8px;
+    }
+    .tab {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: background 0.15s ease, transform 0.1s ease, color 0.15s ease;
+    }
+    .tab:active {
+      transform: scale(0.95);
     }
     .sub-tab {
       flex: 0 0 auto;
@@ -264,8 +392,14 @@
       font-family: inherit;
       cursor: pointer;
       white-space: nowrap;
-      transition: all 0.18s ease;
+      transition: background 0.15s ease, transform 0.1s ease, color 0.15s ease;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .sub-tab:active {
+      transform: scale(0.95);
+      background: #E5E7EB;
     }
     .sub-tab:hover {
       background: #E5E7EB;
@@ -284,13 +418,13 @@
       background: rgba(0, 0, 0, 0.48);
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
-      z-index: 1000;
+      z-index: 10050 !important;
       display: flex;
       align-items: flex-end;
       justify-content: center;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.25s ease;
+      transition: opacity 0.22s ease;
     }
     .bottom-sheet-overlay.active {
       opacity: 1;
@@ -308,7 +442,9 @@
       overflow: hidden;
       box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
       transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+      -webkit-overflow-scrolling: touch;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .bottom-sheet-overlay.active .merchant-detail-sheet {
       transform: translateY(0);
@@ -322,7 +458,25 @@
       flex-shrink: 0;
     }
     .sheet-close-btn {
-      display: none;
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.2s, color 0.2s;
+    }
+    .sheet-close-btn:active {
+      background: #e2e8f0;
+      color: #0f172a;
     }
     .sheet-scroll-body {
       flex: 1;
@@ -792,21 +946,38 @@
     }
   </style>
   <!-- 네이버 지도 API -->
-  <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=x0h48m56fw"></script>
-  <script type="module" crossorigin src="/assets/tourist-map-CXmo-nUK.js"></script>
+  <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=x0h48m56fw"></script>
+  <script type="module" crossorigin src="/assets/tourist-map-DaBZdFv7.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-Ba6NtGBQ.js">
+  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-DIUxAG8e.js">
+  <link rel="modulepreload" crossorigin href="/assets/i18n-Y-He8y1g.js">
+  <link rel="stylesheet" crossorigin href="/assets/app-styles-CmrLvQNp.css">
 </head>
 <body>
   <div class="app-container">
     <div class="subpage-container">
 
       <!-- 서브페이지 공통 헤더 -->
-      <div class="subpage-header">
+      <div class="subpage-header" style="position: relative;">
         <a href="/tourist/index.html" class="btn-back" title="메인 페이지로 이동">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </a>
-        <div class="title">가맹점 지도</div>
+        <div class="title" data-i18n="map_page_title">가맹점 지도</div>
+        <div class="header-popover-wrap" style="position: absolute; right: 14px;">
+          <button class="icon-btn" id="btn-lang" title="언어 변경 / Change Language" style="display:flex;align-items:center;gap:4px;padding:6px 9px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M2 12h20"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <span class="lang-indicator-text" style="font-size:11.5px;font-weight:700;letter-spacing:-0.02em;color:var(--primary);">KO</span>
+          </button>
+          <div class="header-dropdown" id="dropdown-lang">
+            <button class="dropdown-item" data-lang="ko" data-i18n="lang_ko">KOR</button>
+            <button class="dropdown-item" data-lang="en" data-i18n="lang_en">ENG</button>
+          </div>
+        </div>
       </div>
 
       <!-- 상단 상시 검색바 (검색창 유지 및 즉시 재검색 지원) -->
@@ -815,45 +986,68 @@
           <svg class="search-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
-          <input type="text" id="map-search-input" placeholder="가맹점명 또는 업종 검색 (예: 덕적, 해물탕)" autocomplete="off" />
+          <input type="text" id="map-search-input" data-i18n-placeholder="map_search_placeholder" placeholder="가맹점명 또는 업종 검색 (예: 덕적, 해물탕)" autocomplete="off" />
           <button type="button" class="btn-clear-search" id="btn-clear-map-search" title="검색어 지우기">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
       </div>
 
-      <!-- 섬 탭 (메인페이지와 동일한 디자인) -->
+      <!-- 섬 탭 (서비스 운영 핵심 지역인 덕적도, 자월도 최우선 배치) -->
       <div class="tabs" id="island-filter-chips" style="background: #FFFFFF; padding: 12px 20px 16px;">
-        <button class="tab" data-active="true" data-island="all">전체</button>
-        <button class="tab" data-island="백령도">백령도</button>
-        <button class="tab" data-island="대청도">대청도</button>
-        <button class="tab" data-island="소청도">소청도</button>
-        <button class="tab" data-island="연평도">연평도</button>
-        <button class="tab" data-island="덕적도">덕적도</button>
-        <button class="tab" data-island="자월도">자월도</button>
+        <button class="tab" data-active="true" data-island="all" data-i18n="tab_all">전체</button>
+        <button class="tab" data-island="덕적도" data-i18n="tab_deokjeok">덕적도</button>
+        <button class="tab" data-island="자월도" data-i18n="tab_jawol">자월도</button>
+        <button class="tab" data-island="백령도" data-i18n="tab_baengnyeong">백령도</button>
+        <button class="tab" data-island="대청도" data-i18n="tab_daecheong">대청도</button>
+        <button class="tab" data-island="소청도" data-i18n="tab_socheong">소청도</button>
+        <button class="tab" data-island="연평도" data-i18n="tab_yeonpyeong">연평도</button>
       </div>
 
       <!-- 지도 및 가맹점 본문 -->
       <div class="map-body">
-        <div class="map-viewport-wrap">
+        <div class="map-viewport-wrap" style="position: relative;">
           <div id="map"></div>
           <button class="map-fab" id="btn-my-location" title="내 위치">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
           </button>
+
+          <!-- 핀(마커) 선택 시 노출되는 미니 정보 카드 -->
+          <div id="map-marker-preview" class="map-marker-preview" style="display: none;">
+            <div class="preview-inner">
+              <div class="preview-thumb-box" id="preview-thumb-box">
+                <img id="preview-thumb" src="" alt="가맹점" onerror="this.src='https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200&auto=format&fit=crop&q=80'" />
+              </div>
+              <div class="preview-info">
+                <div class="preview-title-row">
+                  <span class="preview-name" id="preview-name">상호명</span>
+                  <span class="preview-cat" id="preview-cat">음식점</span>
+                </div>
+                <div class="preview-addr" id="preview-addr">주소 정보</div>
+                <div class="preview-btn-row">
+                  <button type="button" class="btn-preview-detail" id="btn-preview-detail" data-i18n="map_detail_btn">상세보기</button>
+                  <a class="btn-preview-route" id="btn-preview-route" href="#" target="_blank" rel="noopener noreferrer" data-i18n="map_route_btn">🧭 길찾기</a>
+                </div>
+              </div>
+              <button type="button" class="btn-close-preview" id="btn-close-preview" title="닫기">✕</button>
+            </div>
+          </div>
         </div>
 
         <div class="list-section-head">
-          <h3>가맹점 목록</h3>
+          <h3 data-i18n="map_list_title">가맹점 목록</h3>
           <span class="count" id="merchant-count">총 <span class="num">0</span>개의 가맹점</span>
         </div>
 
-        <!-- 2차 분류: 카테고리 탭 (입점신청 업종 항목 반영 - 심플 미니 탭 스타일) -->
+        <!-- 2차 분류: 카테고리 탭 (방안 A 표준 6대 분류) -->
         <div class="tabs category-tabs" id="category-filter-chips" style="background: #FFFFFF; padding: 20px 20px 20px;">
-          <button class="sub-tab" data-active="true" data-category="all">전체</button>
-          <button class="sub-tab" data-category="음식점">음식점</button>
-          <button class="sub-tab" data-category="카페">카페</button>
-          <button class="sub-tab" data-category="숙박">숙박</button>
-          <button class="sub-tab" data-category="기타">기타</button>
+          <button class="sub-tab" data-active="true" data-category="all" data-i18n="cat_all">전체</button>
+          <button class="sub-tab" data-category="음식점" data-i18n="cat_restaurant">음식점</button>
+          <button class="sub-tab" data-category="카페" data-i18n="cat_cafe">카페·디저트</button>
+          <button class="sub-tab" data-category="숙박" data-i18n="cat_stay">숙박</button>
+          <button class="sub-tab" data-category="수산물/특산물" data-i18n="cat_fish">수산물·특산물</button>
+          <button class="sub-tab" data-category="체험/레저" data-i18n="cat_activity">체험·레저</button>
+          <button class="sub-tab" data-category="기타" data-i18n="cat_etc">기타</button>
         </div>
 
         <div class="merchant-list-wrap" id="merchant-list">
@@ -867,23 +1061,23 @@
     <nav class="tabbar tab-bar" style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; max-width: 440px !important; margin: 0 auto !important; height: calc(68px + env(safe-area-inset-bottom, 0px)) !important; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important; background: rgba(255, 255, 255, 0.98) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-top: 1px solid #E2E8F0 !important; display: flex !important; flex-direction: row !important; justify-content: space-around !important; align-items: center !important; z-index: 9999 !important; box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05) !important; box-sizing: border-box !important;">
       <a class="tab-item" href="/tourist/index.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-5a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9.5z"/></svg>
-        <span class="label" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">Home</span>
+        <span class="label" data-i18n="nav_home" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">Home</span>
       </a>
       <a class="tab-item" href="/tourist/about-pass.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-        <span class="label" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">옹진섬패스</span>
+        <span class="label" data-i18n="nav_island_pass" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">관광쿠폰</span>
       </a>
       <a class="tab-item active" data-active="true" href="/tourist/map.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: var(--primary, #059669) !important; font-weight: 700 !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>
-        <span class="label" style="font-size: 11px !important; font-weight: 700 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">가맹점지도</span>
+        <span class="label" data-i18n="nav_map" style="font-size: 11px !important; font-weight: 700 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">가맹점지도</span>
       </a>
-      <a class="tab-item" href="/tourist/apply-merchant.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
+      <a class="tab-item" href="/tourist/apply-guide.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l2-6h12l2 6M4 10v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V10M4 10h16M10 21v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/></svg>
-        <span class="label" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">입점신청</span>
+        <span class="label" data-i18n="nav_apply" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">입점신청</span>
       </a>
       <a class="tab-item" href="/tourist/mypage.html" id="tab-my-page" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span class="label" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">My</span>
+        <span class="label" data-i18n="nav_my" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">My</span>
       </a>
     </nav>
   </div>
@@ -956,11 +1150,14 @@
             </div>
           </div>
 
-          <!-- 위치 보기 액션 버튼 (텍스트만 큼직하게) -->
-          <div class="detail-action-row">
-            <button class="btn-view-map" id="btn-detail-view-map">
-              위치 보기
+          <!-- 위치 보기 & 길찾기 액션 버튼 -->
+          <div class="detail-action-row" style="display: flex; gap: 8px;">
+            <button class="btn-view-map" id="btn-detail-view-map" style="flex: 1;">
+              지도에서 보기
             </button>
+            <a class="btn-directions" id="btn-detail-directions" href="#" target="_blank" rel="noopener noreferrer" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; background: #0F4C81; color: #FFFFFF; font-size: 15px; font-weight: 700; border-radius: 14px; text-decoration: none; padding: 15px 12px; gap: 6px; box-shadow: 0 4px 14px rgba(15, 76, 129, 0.25);">
+              🧭 길찾기 (네이버)
+            </a>
           </div>
 
           <!-- 사용 가능 쿠폰 리스트 -->
@@ -980,5 +1177,3 @@
 
 </body>
 </html>
-
-

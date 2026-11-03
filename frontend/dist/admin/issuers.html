@@ -3,205 +3,184 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="옹진 관광쿠폰">
+  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
+  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
+  <meta property="og:locale" content="ko_KR">
   <title>발행처 관리 | 옹진 관광 쿠폰</title>
-  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <script>
     (function() {
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
         document.documentElement.classList.add('sidebar-collapsed');
       }
     })();
-  </script>
+  </script>
   <style>
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      background: #f1f5f9;
-      color: #1e293b; 
+      background: #f5f6f8;
+      color: #202938; 
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     }
 
-    /* 카드 그리드 스타일 - 넓고 시원한 밸런스 */
-    .issuer-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(460px, 580px));
-      gap: 24px;
-      margin-bottom: 32px;
-    }
-    .issuer-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 0;
-      padding: 26px 28px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-    .issuer-card:hover {
-      border-color: #cbd5e1;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    }
-    .issuer-card-top {
+    .dashboard-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
-    .issuer-card-title {
-      font-size: 1.25rem;
+    .header-title-area h1 {
+      font-size: 22px;
       font-weight: 700;
-      color: #0f172a;
+      color: #202938;
+      margin: 0 0 4px 0;
+      letter-spacing: -0.3px;
+    }
+    .header-desc {
+      font-size: 13.5px;
+      color: #667085;
       margin: 0;
     }
-    .issuer-card-actions {
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .table-container {
+      background: #fff; border-radius: 4px !important; border: 1px solid #e5e7eb; 
+      box-shadow: none; overflow: hidden; margin-bottom: 32px;
+    }
+    .table-title { font-size: 15px; font-weight: 700; color: #202938; margin-bottom: 12px; margin-top: 8px; }
+    
+    .admin-table { width: 100%; border-collapse: collapse; text-align: center; }
+    .admin-table th { background: #f8fafc; padding: 14px 24px; text-align: center; font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+    .admin-table td { padding: 16px 24px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; vertical-align: middle; }
+    .admin-table tr:hover { background: #f8fafc; }
+
+    /* Modal Layout */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-container {
+      background: #fff; border-radius: 12px; width: 480px; max-width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: translateY(20px); transition: transform 0.25s ease; overflow: hidden;
+    }
+    .modal-overlay.active .modal-container { transform: translateY(0); }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+    .modal-body { padding: 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-start; gap: 8px; background: #f8fafc; }
+    
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.88rem; color: #334155; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px;
+      font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+
+    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
+    .badge-info { background: #e0f2fe; color: #0369a1; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef9c3; color: #854d0e; }
+
+    /* 삭제 버튼 스타일 (수정 버튼과 조화를 이루는 프리미엄 적색 테마 - 덜 쨍하고 고급스러운 딥 로즈 레드) */
+    .btn-table-delete {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 6px 12px !important;
+      font-size: 0.78rem !important;
+      font-weight: 600 !important;
+      color: #be123c !important;                 /* 톤다운된 차분한 딥 로즈 레드 */
+      background-color: #fff1f2 !important;       /* 은은하고 편안한 연분홍 배경 */
+      border: 1px solid #ffe4e6 !important;       /* 연하고 자연스러운 테두리 */
+      border-radius: 6px !important;
+      text-decoration: none !important;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      cursor: pointer !important;
+      line-height: 1 !important;
+      box-shadow: 0 1px 2px 0 rgba(190, 18, 60, 0.03) !important;
+    }
+    .btn-table-delete:hover {
+      background-color: #be123c !important;       /* 차분한 딥 로즈 레드로 반전 */
+      border-color: #be123c !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 6px -1px rgba(190, 18, 60, 0.15), 0 2px 4px -1px rgba(190, 18, 60, 0.08) !important;
+    }
+
+    /* 토글 온오프 스위치 스타일 */
+    .toggle-container {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
-    /* 단정하고 차분한 모노톤 헤더 버튼 */
-    .btn-card-del {
-      padding: 5px 12px;
+    .toggle-label {
       font-size: 0.82rem;
-      font-weight: 600;
-      color: #64748b;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      line-height: 1.4;
-    }
-    .btn-card-del:hover {
-      color: #e11d48;
-      border-color: #fecdd3;
-      background: #fff1f2;
-    }
-    .btn-card-edit {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 5px 14px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #ffffff;
-      background: #0f172a;
-      border: 1px solid #0f172a;
-      border-radius: 6px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background 0.15s ease;
-      line-height: 1.4;
-    }
-    .btn-card-edit:hover {
-      background: #334155;
-      border-color: #334155;
-    }
-
-    /* 위치 & 전화번호 & 아이디 정보 */
-    .issuer-meta-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 0;
-    }
-    .issuer-meta-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.95rem;
-    }
-    .meta-label {
-      width: 65px;
-      color: #64748b;
-      font-weight: 500;
-      font-size: 0.95rem;
-      flex-shrink: 0;
-    }
-    .meta-val {
-      color: #1e293b;
-      font-weight: 500;
-      font-size: 0.95rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* 아이디 복사 버튼 */
-    .btn-copy-id {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 7px;
-      font-size: 0.74rem;
-      font-weight: 600;
       color: #475569;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      cursor: pointer;
-      line-height: 1.2;
-      transition: all 0.15s ease;
-      vertical-align: middle;
+      font-weight: 500;
       user-select: none;
     }
-    .btn-copy-id:hover {
-      background: #e2e8f0;
-      color: #0f172a;
-      border-color: #94a3b8;
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 26px;
     }
-    .btn-copy-id:active {
-      transform: scale(0.97);
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
     }
-    .btn-copy-id svg {
-      width: 12px;
-      height: 12px;
-      stroke-width: 2;
-      flex-shrink: 0;
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: .3s;
     }
-    .btn-copy-id.copied {
-      background: #ecfdf5;
-      color: #15803d;
-      border-color: #86efac;
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 5px;
+      bottom: 5px;
+      background-color: white;
+      transition: .3s;
     }
-
-    .issuer-card-divider {
-      height: 1px;
-      background: #f1f5f9;
-      margin: 12px 0;
+    input:checked + .slider {
+      background-color: #2563eb;
     }
-
-    /* 상품 및 금액 목록 (동일한 폰트 크기, 괄호 없음) */
-    .issuer-product-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2563eb;
     }
-    .issuer-product-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.95rem;
+    input:checked + .slider:before {
+      transform: translateX(18px);
     }
-    .issuer-product-name {
-      color: #1e293b;
-      font-weight: 500;
-      font-size: 0.95rem;
+    .slider.round {
+      border-radius: 34px;
     }
-    .issuer-product-val {
-      font-weight: 600;
-      color: #0f172a;
-      font-size: 0.95rem;
+    .slider.round:before {
+      border-radius: 50%;
     }
-
-    .table-title { font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; }
   </style>
-  <script type="module" crossorigin src="/assets/admin-issuers-B3FvW3Pi.js"></script>
+  <script type="module" crossorigin src="/assets/admin-issuers-BiER0SNT.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-Ba6NtGBQ.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-DIUxAG8e.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-DxYVQPuN.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-03q0TmgI.css">
 </head>
 <body>
   <div class="app-shell">
@@ -210,28 +189,145 @@
 
     <!-- 메인 컨텐츠 -->
     <main class="admin-content">
-      <header class="dashboard-header">
-        <div class="header-title-area">
-          <span class="header-category">Issuer Management</span>
-          <h1>발행처 관리</h1>
-          <p class="header-desc">발행처 계정을 생성하고 발행처를 등록하고 관리합니다. 각 발행처의 쿠폰 현황을 확인할 수 있습니다.</p>
+      <header class="dashboard-header" style="justify-content: space-between; align-items: center; text-align: left;">
+        <div class="header-title-area" style="text-align: left; align-items: flex-start;">
+          <h1 style="text-align: left; margin: 0;">발행처 관리</h1>
+          <p class="header-desc" style="text-align: left; margin: 4px 0 0 0;">발행처 계정을 생성하고 발행처를 등록하고 관리합니다. 각 발행처의 쿠폰 현황을 확인할 수 있습니다.</p>
+        </div>
+        <div class="header-actions" style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" class="btn btn-secondary" id="btn-refresh-issuers" onclick="window.loadData(true)">
+            <span>새로고침</span>
+          </button>
+          <button type="button" class="btn btn-primary" onclick="location.href='register-issuer.html'">
+            <span>발행처 등록</span>
+          </button>
         </div>
       </header>
 
-      <!-- 1. 상단 헤더 바 (배정 필요 토글 삭제, 심플한 등록 버튼) -->
-      <div style="display: flex; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 8px;">
-        <h2 class="table-title">발행처 목록</h2>
-        <button class="btn btn-neutral-outline btn-sm" style="height: 34px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;" onclick="location.href='register-issuer.html'">발행처 등록</button>
+      <!-- 1. 발행처 목록 -->
+      <div style="margin-bottom: 12px;">
+        <h2 class="table-title" style="margin: 0; font-size: 15px; font-weight: 700;">발행처 목록</h2>
+      </div>
+      <div class="table-container">
+        <table class="admin-table" style="text-align: center;">
+          <thead>
+            <tr>
+              <th style="width: 25%; text-align: center;">기관명</th>
+              <th style="width: 25%; text-align: center;">ID</th>
+              <th style="width: 25%; text-align: center;">쿠폰 현황</th>
+              <th style="width: 25%; text-align: center;">관리</th>
+            </tr>
+          </thead>
+          <tbody id="issuer-list">
+            <tr><td colspan="4" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
+          </tbody>
+        </table>
       </div>
 
-      <!-- 2. 깔끔한 카드 그리드 -->
-      <div id="issuer-grid" class="issuer-grid">
-        <div style="grid-column: 1 / -1; padding: 48px; text-align: center; color: #64748b;">데이터를 불러오는 중입니다...</div>
+      <!-- 2. 발행처 쿠폰 배정 현황 -->
+      <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; margin-top: 24px;">
+        <h2 class="table-title" style="margin: 0;">쿠폰 배정현황</h2>
+        <div class="toggle-container">
+          <span class="toggle-label">배정 필요</span>
+          <label class="switch">
+            <input type="checkbox" id="filter-alloc" onchange="window.filterAllocations()" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width: 20%; text-align: center;">기관명</th>
+              <th style="width: 15%; text-align: center;">쿠폰 금액</th>
+              <th style="width: 15%; text-align: center;">발급 수량</th>
+              <th style="width: 15%; text-align: center;">잔여 수량</th>
+              <th style="width: 15%; text-align: center;">총 배정 수량</th>
+              <th style="width: 20%; text-align: center;">관리</th>
+            </tr>
+          </thead>
+          <tbody id="allocation-list">
+            <tr><td colspan="6" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
+          </tbody>
+        </table>
       </div>
     </main>
   </div>
 
   <div id="toast-container"></div>
 
+  <!-- ── 1. 쿠폰 배정 수정 및 재배정(이관) 모달 ── -->
+  <div class="modal-overlay" id="modal-edit-alloc">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a;">쿠폰 배정 수정 및 재배정</h3>
+        <button type="button" class="tut-btn-close" onclick="window.closeEditAllocModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-alloc-id" />
+        <div class="form-group">
+          <label for="edit-alloc-issuer">배정 발행처 (기관 이관/재배정)</label>
+          <select id="edit-alloc-issuer"></select>
+          <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 4px;">다른 기관을 선택하시면 해당 기관으로 쿠폰 배정이 즉시 이관됩니다.</small>
+        </div>
+        <div class="form-group">
+          <label for="edit-alloc-total">총 배정 수량 (장)</label>
+          <input type="number" id="edit-alloc-total" min="1" />
+          <small id="edit-alloc-issued-hint" style="color: #0284c7; font-size: 0.78rem; display: block; margin-top: 4px;"></small>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-neutral-outline btn-sm" onclick="window.closeEditAllocModal()">취소</button>
+        <button type="button" class="btn btn-primary btn-sm" style="background:#0284c7; color:#fff; border:none;" onclick="window.saveEditAlloc()">저장하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. 발행처 삭제 시 쿠폰 연계 처리 모달 ── -->
+  <div class="modal-overlay" id="modal-delete-issuer">
+    <div class="modal-container" style="width: 520px;">
+      <div class="modal-header">
+        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #be123c;">발행처 삭제 및 쿠폰 연계 처리</h3>
+        <button type="button" class="tut-btn-close" onclick="window.closeDeleteIssuerModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="del-issuer-id" />
+        <p style="font-size: 0.92rem; color: #1e293b; margin-bottom: 16px; line-height: 1.5;">
+          <strong id="del-issuer-name" style="color: #0284c7;"></strong> 발행처에 배정된 쿠폰 내역이 존재합니다.<br>
+          <span id="del-issuer-summary" style="font-size: 0.85rem; color: #64748b;"></span>
+        </p>
+        
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+          <div style="font-weight: 700; font-size: 0.88rem; color: #334155; margin-bottom: 12px;">삭제 처리 방식을 선택하세요:</div>
+          
+          <label style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; cursor: pointer;">
+            <input type="radio" name="del-action-type" id="del-radio-reassign" value="reassign" checked onchange="window.toggleDelOption()" style="margin-top: 3px;" />
+            <div>
+              <strong style="font-size: 0.88rem; color: #0f172a;">다른 발행처로 쿠폰 일괄 재배정 후 삭제</strong>
+              <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">배정된 쿠폰 전체를 다른 정상 운영 기관으로 안전하게 이관합니다.</div>
+            </div>
+          </label>
+
+          <div id="del-reassign-select-wrap" style="margin-left: 24px; margin-bottom: 14px;">
+            <select id="del-reassign-target" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem;"></select>
+          </div>
+
+          <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+            <input type="radio" name="del-action-type" id="del-radio-force" value="force" onchange="window.toggleDelOption()" style="margin-top: 3px;" />
+            <div>
+              <strong style="font-size: 0.88rem; color: #be123c;">미발행 쿠폰 회수 및 연계 내역 정리 후 삭제</strong>
+              <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">미발급 잔여 쿠폰은 회수되며, 기존에 발급/사용된 쿠폰의 거래 및 정산 이력은 안전하게 보존됩니다.</div>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-neutral-outline btn-sm" onclick="window.closeDeleteIssuerModal()">취소</button>
+        <button type="button" class="btn-table-delete" style="padding: 7px 16px !important;" onclick="window.executeDeleteIssuer()">삭제 실행</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

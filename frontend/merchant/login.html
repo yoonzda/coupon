@@ -679,7 +679,7 @@
             document.getElementById('verify-loading').classList.add('active');
             api.get('/merchant/transactions') // 가맹점 전용 API 권한 확인
               .then(() => {
-                window.location.replace('/merchant/scan.html');
+                window.location.replace('/merchant/index.html');
               })
               .catch(() => {
                 clearMerchantTokens();

@@ -31,6 +31,179 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 20px;
+    }
+
+    .merchant-top-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px !important;
+      padding: 14px 18px;
+    }
+
+    .merchant-shop-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+    }
+
+    .merchant-shop-sub {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .btn-merchant-logout {
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #475569;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px !important;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-merchant-logout:hover {
+      color: #0f172a;
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    /* 실시간 쿠폰 사용 요청 알림 영역 */
+    .usage-requests-wrap {
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .usage-requests-wrap.active {
+      display: flex;
+    }
+
+    .usage-req-card {
+      width: 100%;
+      background: #ffffff;
+      border: 2px solid #059669;
+      border-radius: 12px !important;
+      padding: 18px 20px;
+      box-shadow: 0 8px 24px rgba(5, 150, 105, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: reqSlideIn 0.25s ease-out;
+    }
+
+    @keyframes reqSlideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .usage-req-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .usage-req-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #059669;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 99px !important;
+      padding: 4px 10px;
+    }
+
+    .usage-req-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50% !important;
+      background: #059669;
+    }
+
+    .usage-req-time {
+      font-size: 0.8rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .usage-req-body {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .usage-req-phone {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .usage-req-sub {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .usage-req-amount {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #059669;
+      white-space: nowrap;
+    }
+
+    .usage-req-actions {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-req-approve {
+      padding: 13px 16px;
+      background: #059669;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px !important;
+      font-size: 0.98rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-req-approve:hover {
+      background: #047857;
+    }
+
+    .btn-req-reject {
+      padding: 13px 16px;
+      background: #f8fafc;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px !important;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-req-reject:hover {
+      background: #fee2e2;
+      color: #dc2626;
+      border-color: #fecaca;
     }
 
     /* 2열 4개 메인 카드 그리드 */
@@ -105,6 +278,18 @@
 </head>
 <body>
   <div class="intro-wrapper">
+    <!-- 상단 가맹점 정보 및 로그아웃 바 -->
+    <div class="merchant-top-bar">
+      <div>
+        <div class="merchant-shop-title" id="merchant-shop-name">가맹점 포털</div>
+        <div class="merchant-shop-sub">손님의 쿠폰 사용 요청 시 아래에 실시간 표시됩니다</div>
+      </div>
+      <button type="button" class="btn-merchant-logout" id="btn-merchant-logout">로그아웃</button>
+    </div>
+
+    <!-- 실시간 쿠폰 사용 승인 요청 영역 -->
+    <div class="usage-requests-wrap" id="usage-requests-wrap"></div>
+
     <div class="card-grid">
       <!-- 1. 쿠폰 스캔 -->
       <a class="main-card" href="/merchant/scan.html">
@@ -148,13 +333,115 @@
     </div>
   </div>
 
+  <div id="toast-container"></div>
+
   <script type="module">
-    import { getToken } from '../shared/js/api.js'
+    import { api, getToken, clearTokens, showToast, fmtMoney } from '../shared/js/api.js'
 
     const token = getToken();
     if (!token) {
       window.location.replace('/merchant/login.html');
     }
+
+    const shopNameEl = document.getElementById('merchant-shop-name');
+    const logoutBtn = document.getElementById('btn-merchant-logout');
+    const requestsWrap = document.getElementById('usage-requests-wrap');
+
+    try {
+      const savedUser = JSON.parse(localStorage.getItem('ongjin_user') || '{}');
+      if (savedUser.shopName && shopNameEl) {
+        shopNameEl.textContent = `${savedUser.shopName} 사장님`;
+      }
+    } catch (_) {}
+
+    api.get('/merchant/basic-info')
+      .then(res => {
+        if (res.success && res.data && shopNameEl) {
+          shopNameEl.textContent = `${res.data.name} 사장님`;
+        }
+      })
+      .catch(() => {});
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        clearTokens();
+        window.location.replace('/merchant/login.html');
+      });
+    }
+
+    function renderRequests(list) {
+      if (!requestsWrap) return;
+      if (!list || list.length === 0) {
+        requestsWrap.classList.remove('active');
+        requestsWrap.innerHTML = '';
+        return;
+      }
+
+      requestsWrap.classList.add('active');
+      requestsWrap.innerHTML = list.map(r => {
+        const timeStr = r.requested_at ? new Date(r.requested_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '방금 전';
+        return `
+          <div class="usage-req-card" data-req-id="${r.id}">
+            <div class="usage-req-top">
+              <span class="usage-req-badge">
+                <span class="usage-req-dot"></span>
+                쿠폰 사용 승인 요청
+              </span>
+              <span class="usage-req-time">${timeStr}</span>
+            </div>
+            <div class="usage-req-body">
+              <div>
+                <div class="usage-req-phone">${r.user_phone || '관광객 손님'}</div>
+                <div class="usage-req-sub">옹진 관광쿠폰 ${r.coupon_count}장 사용 요청</div>
+              </div>
+              <div class="usage-req-amount">${fmtMoney(r.total_amount)}</div>
+            </div>
+            <div class="usage-req-actions">
+              <button type="button" class="btn-req-approve" onclick="window.approveUsageReq(${r.id})">승인 (${fmtMoney(r.total_amount)})</button>
+              <button type="button" class="btn-req-reject" onclick="window.rejectUsageReq(${r.id})">거절</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function pollUsageRequests() {
+      try {
+        const res = await api.get('/merchant/use-requests');
+        if (res && res.success) {
+          renderRequests(res.data || []);
+        }
+      } catch (_) {}
+    }
+
+    window.approveUsageReq = async function(reqId) {
+      try {
+        const res = await api.post(`/merchant/use-requests/${reqId}/approve`);
+        if (res.success) {
+          showToast(res.message || '쿠폰 사용이 승인되었습니다.', 'success');
+          await pollUsageRequests();
+        }
+      } catch (err) {
+        showToast(err.message || '승인 처리에 실패했습니다.', 'error');
+        await pollUsageRequests();
+      }
+    };
+
+    window.rejectUsageReq = async function(reqId) {
+      try {
+        const res = await api.post(`/merchant/use-requests/${reqId}/reject`);
+        if (res.success) {
+          showToast('쿠폰 사용 요청을 거절했습니다.', 'info');
+          await pollUsageRequests();
+        }
+      } catch (err) {
+        showToast(err.message || '거절 처리에 실패했습니다.', 'error');
+        await pollUsageRequests();
+      }
+    };
+
+    pollUsageRequests();
+    setInterval(pollUsageRequests, 2000);
   </script>
 </body>
 </html>

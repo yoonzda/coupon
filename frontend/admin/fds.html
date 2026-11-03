@@ -1,109 +1,899 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link rel="icon" href="../shared/images/favicon.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="옹진 관광쿠폰">
+  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
+  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
+  <meta property="og:locale" content="ko_KR">
   <title>FDS 모니터링 | 옹진 관광 쿠폰</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="../shared/css/main.css" />
   <style>
-    * { box-sizing: border-box; }
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      
       background: #f1f5f9;
-      font-family: var(--font-main); color: #1e293b; 
+      color: #1e293b; 
     }
-    
-    .app-shell { 
-      display: block !important; 
-      min-height: 100vh; width: 100% !important; max-width: none !important;
+
+    /* KPI 요약 카드 그리드 */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
     }
-    
-    .admin-sidebar { 
-      width: 240px !important; 
-      min-width: 240px;
-      height: 100vh;
-      background: #0f172a;
-      color: #fff;
-      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    .kpi-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
       display: flex;
       flex-direction: column;
-      flex-shrink: 0;
+      justify-content: space-between;
     }
-    .admin-content { margin-left: 240px;  
-      flex: 1 !important; 
-      padding: 40px; 
-      background: #f1f5f9; 
-      min-width: 0;
+    .kpi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
     }
-    .bottom-nav { display: none; }
-    .admin-sidebar .logo {
-      padding: 24px; font-size: 1.1rem; font-weight: 900; 
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex; align-items: center; gap: 10px; color: #fff;
+    .kpi-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .kpi-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .kpi-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .kpi-desc {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+
+    /* 탭 필터 바 */
+    .filter-tab-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .tab-pills {
+      display: inline-flex;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 10px;
+      gap: 4px;
+    }
+    .tab-pill {
+      padding: 8px 16px;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #64748b;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-pill.active {
+      background: #fff;
+      color: #0f172a;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .tab-pill-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 99px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .tab-pill.active .tab-pill-count {
+      background: #e0f2fe;
+      color: #0284c7;
+    }
+    .tab-pill.active .tab-pill-count.danger {
+      background: #fee2e2;
+      color: #ef4444;
+    }
+
+    /* 테이블 및 카드 */
+    .admin-card {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .admin-table th {
+      background: var(--surface-2);
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
-    .admin-nav { padding: 16px 0; flex: 1; }
-    .admin-nav a {
-      display: flex; align-items: center; gap: 12px; padding: 12px 24px;
-      color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s;
-      white-space: nowrap; font-size: 0.95rem;
+    .admin-table td {
+      padding: 16px 20px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
     }
-    .admin-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
-    .admin-nav a.active { color: #fff; background: var(--primary); font-weight: 700; }
+    .admin-table tr:hover {
+      background: #f8fafc;
+    }
 
-    .admin-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
-    .admin-table { width: 100%; border-collapse: collapse; }
-    .admin-table th { background: var(--surface-2); padding: 12px 24px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
-    .admin-table td { padding: 16px 24px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
-    
-    .rule-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px; }
-    .rule-DUPLICATE { background: #fee2e2; color: #ef4444; }
-    .rule-HIGH_FREQ { background: #ffedd5; color: #f97316; }
+    /* 룰 뱃지 스타일 & 클릭 인터랙션 */
+    .rule-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+    .rule-tag:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    }
+    /* RULE-001 & RAPID_REUSE */
+    .rule-tag.rule-RULE-001,
+    .rule-tag.rule-RAPID_REUSE {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fca5a5;
+    }
+    /* RULE-002 & EXCESSIVE_AMOUNT */
+    .rule-tag.rule-RULE-002,
+    .rule-tag.rule-EXCESSIVE_AMOUNT {
+      background: #fef2f2;
+      color: #dc2626;
+      border-color: #fecaca;
+    }
+    /* RULE-003 & OFF_HOURS_USAGE */
+    .rule-tag.rule-RULE-003,
+    .rule-tag.rule-OFF_HOURS_USAGE {
+      background: #f5f3ff;
+      color: #6d28d9;
+      border-color: #ddd6fe;
+    }
+    /* RULE-004 & RAPID_MERCHANT_TX */
+    .rule-tag.rule-RULE-004,
+    .rule-tag.rule-RAPID_MERCHANT_TX {
+      background: #fff7ed;
+      color: #c2410c;
+      border-color: #ffedd5;
+    }
+    /* RULE-005 & IMPOSSIBLE_TRAVEL */
+    .rule-tag.rule-RULE-005,
+    .rule-tag.rule-IMPOSSIBLE_TRAVEL {
+      background: #e0f2fe;
+      color: #0369a1;
+      border-color: #bae6fd;
+    }
+    /* RULE-006 & PROXY_BULK_USE (단체 쿠폰 대리 수령분 다량 사용) */
+    .rule-tag.rule-RULE-006,
+    .rule-tag.rule-PROXY_BULK_USE {
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+    /* 기본 룰 태그 */
+    .rule-tag.rule-default {
+      background: #f1f5f9;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+
+    /* 모달 레이아웃 & 팝업 */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 10001;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .fds-guide-box {
+      background: #fff;
+      width: 100%;
+      max-width: 860px;
+      max-height: 88vh;
+      border-radius: 20px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: guidePopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes guidePopIn {
+      0% { opacity: 0; transform: scale(0.96) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .guide-header {
+      padding: 20px 28px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .guide-header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .guide-header-title h2 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0;
+    }
+    .guide-header-title p {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin: 2px 0 0;
+    }
+    .guide-btn-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+    }
+    .guide-btn-close:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .guide-content {
+      padding: 28px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    /* 가이드 상단 요약 배너 */
+    .guide-intro-banner {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .guide-intro-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+    .guide-intro-text h3 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #1e40af;
+      margin: 0 0 4px;
+    }
+    .guide-intro-text p {
+      font-size: 0.83rem;
+      color: #1e3a8a;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 룰 카드 그리드 */
+    .rule-cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .rule-card {
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px 20px;
+      transition: all 0.25s ease;
+    }
+    .rule-card.highlighted {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.25) !important;
+      background: #f0f9ff;
+    }
+    .rule-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .rule-card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .rule-code-badge {
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .rule-name {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0;
+    }
+    .severity-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 99px;
+    }
+    .severity-high {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .severity-medium {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .rule-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      background: #f8fafc;
+      padding: 14px 16px;
+      border-radius: 8px;
+      border: 1px solid #f1f5f9;
+    }
+    .rule-detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .rule-detail-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .rule-detail-value {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #1e293b;
+      line-height: 1.45;
+    }
+    .rule-action-box {
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: #eff6ff;
+      border-left: 3.5px solid #2563eb;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.83rem;
+      color: #1e40af;
+      line-height: 1.5;
+    }
+    .rule-action-box strong {
+      color: #1d4ed8;
+    }
+
+    /* 공무원 행정 대응 프로토콜 섹션 */
+    .protocol-section {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+    .protocol-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .protocol-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+    }
+    .protocol-step-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      position: relative;
+    }
+    .protocol-step-num {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #2563eb;
+      background: #eff6ff;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-bottom: 6px;
+    }
+    .protocol-step-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    .protocol-step-desc {
+      font-size: 0.8rem;
+      color: #475569;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .guide-footer {
+      padding: 16px 28px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .guide-footer-tip {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    /* FDS 상세 분석 및 타임라인 모달 스타일 */
+    .memo-chip {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      color: #334155;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .memo-chip:hover {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      color: #1d4ed8;
+    }
+    .timeline-container {
+      position: relative;
+      padding-left: 20px;
+      margin: 16px 0;
+    }
+    .timeline-container::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background: #cbd5e1;
+    }
+    .timeline-node {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .timeline-node:last-child {
+      margin-bottom: 0;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -20px;
+      top: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #0284c7;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1.5px #0284c7;
+    }
+    .timeline-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .timeline-gap-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      border-radius: 14px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin: -6px 0 12px 14px;
+    }
   </style>
 </head>
 <body>
   <div class="app-shell">
-    <aside class="admin-sidebar">
-      <div class="logo">옹진 관광 <span>ADMIN</span></div>
-      <nav class="admin-nav">
-        <a href="/admin/index.html">대시보드</a>
-        <a href="/admin/merchants.html">가맹점 관리</a>
-        <a href="/admin/settlement.html">정산 관리</a>
-        <a href="/admin/fds.html" class="active">FDS 모니터링</a>
-        <a href="/admin/coupons.html">쿠폰 및 발행처 관리</a>
-        <a href="/admin/statistics.html">통계 및 보고서</a>
-      </nav>
-    </aside>
+    <!-- 공통 사이드바 (admin-guard.js에서 동적 렌더링) -->
+    <aside class="admin-sidebar"></aside>
 
+    <!-- 메인 컨텐츠 -->
     <main class="admin-content">
       <header class="dashboard-header">
         <div class="header-title-area">
-          <span class="header-category">Security Monitoring</span>
           <h1>FDS 모니터링</h1>
-          <p class="header-desc">시스템이 탐지한 이상 거래 의심 내역을 검토합니다.</p>
+          <p class="header-desc">시스템이 실시간 탐지한 이상 거래 의심 내역을 검토하고 행정 조치를 수행합니다.</p>
+        </div>
+        <div class="header-actions" style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" id="btn-refresh-fds" class="btn btn-secondary" title="FDS 이상거래 탐지 내역 새로고침">
+            <span>새로고침</span>
+          </button>
+          <button type="button" id="btn-open-fds-guide" class="btn btn-secondary" title="클릭 시 FDS 이상거래 규정 기준 및 행정 매뉴얼을 확인합니다.">
+            <span>이상거래 탐지 기준 안내</span>
+          </button>
         </div>
       </header>
 
+      <!-- KPI 요약 카드 그리드 -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-label">총 탐지 건수</span>
+            <div class="kpi-icon-wrap" style="background:#e0f2fe; color:#0284c7;">📊</div>
+          </div>
+          <div class="kpi-value" id="kpi-total">0건</div>
+          <div class="kpi-desc">누적 감지된 이상거래 알림 전체</div>
+        </div>
+        <div class="kpi-card" style="border-color:#fecaca;">
+          <div class="kpi-header">
+            <span class="kpi-label" style="color:#dc2626;">미결 (조치 필요)</span>
+            <div class="kpi-icon-wrap" style="background:#fee2e2; color:#ef4444;">🚨</div>
+          </div>
+          <div class="kpi-value" id="kpi-unresolved" style="color:#ef4444;">0건</div>
+          <div class="kpi-desc">담당 공무원 사실 확인 및 소명 검토 대기</div>
+        </div>
+        <div class="kpi-card" style="border-color:#bbf7d0;">
+          <div class="kpi-header">
+            <span class="kpi-label" style="color:#16a34a;">조치 완료 (해결됨)</span>
+            <div class="kpi-icon-wrap" style="background:#dcfce7; color:#15803d;">✅</div>
+          </div>
+          <div class="kpi-value" id="kpi-resolved" style="color:#16a34a;">0건</div>
+          <div class="kpi-desc">소명 접수 또는 확인 완료 처리된 내역</div>
+        </div>
+      </div>
+
+      <!-- 탭 필터 바 -->
+      <div class="filter-tab-bar">
+        <div class="tab-pills">
+          <button type="button" class="tab-pill active" data-filter="all">
+            전체 보기 <span class="tab-pill-count" id="badge-all">0</span>
+          </button>
+          <button type="button" class="tab-pill" data-filter="unresolved">
+            미결 알림 <span class="tab-pill-count danger" id="badge-unresolved">0</span>
+          </button>
+          <button type="button" class="tab-pill" data-filter="resolved">
+            해결 완료 <span class="tab-pill-count" id="badge-resolved">0</span>
+          </button>
+        </div>
+        <div style="font-size:0.82rem; color:#64748b; display:flex; align-items:center; gap:6px;">
+          <span>💡 룰 뱃지(<span class="rule-tag rule-RULE-001" style="font-size:0.7rem; padding:1px 5px;">RULE</span>)를 클릭하면 상세 규정 설명이 즉시 표시됩니다.</span>
+        </div>
+      </div>
+
+      <!-- FDS 알림 테이블 카드 -->
       <div class="admin-card">
         <table class="admin-table">
           <thead>
             <tr>
-              <th>탐지 정보</th>
-              <th>가맹점/사용자</th>
-              <th>설명</th>
-              <th>상태</th>
-              <th>조치</th>
+              <th style="width: 14%;">탐지 정보</th>
+              <th style="width: 20%;">가맹점 / 이용자</th>
+              <th>의심 행태 설명 및 소명 메모</th>
+              <th style="width: 11%; text-align: center;">처리 상태</th>
+              <th style="width: 17%; text-align: center;">상세 및 조치</th>
             </tr>
           </thead>
           <tbody id="fds-list">
-            <tr><td colspan="5" class="text-center" style="padding: 40px;">데이터 로드 중...</td></tr>
+            <tr><td colspan="5" class="text-center" style="padding: 40px; color:#64748b;">데이터 로드 중...</td></tr>
           </tbody>
         </table>
       </div>
     </main>
+  </div>
+
+  <!-- FDS 이상거래 규정 안내 모달 -->
+  <div id="modal-fds-guide" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="fds-guide-modal-title">
+    <div class="fds-guide-box">
+      <div class="guide-header">
+        <div class="guide-header-title">
+          <span style="font-size: 28px;">🛡️</span>
+          <div>
+            <h2 id="fds-guide-modal-title">옹진군 FDS 이상거래 규정 및 탐지 기준 가이드</h2>
+            <p>도서 지역 관광 활성화 쿠폰의 부정수급 방지 및 공무원 행정 대응 프로토콜</p>
+          </div>
+        </div>
+        <button type="button" class="guide-btn-close" id="btn-close-guide" title="닫기 (ESC)">✕</button>
+      </div>
+
+      <div class="guide-content">
+        <!-- 인트로 배너 -->
+        <div class="guide-intro-banner">
+          <div class="guide-intro-icon">💡</div>
+          <div class="guide-intro-text">
+            <h3>FDS(Fraud Detection System) 이상거래 탐지 운영 원칙</h3>
+            <p>
+              옹진 관광쿠폰 시스템은 결제 발생 즉시 비동기 알고리즘을 통해 결제 시간, 결제 빈도, 결제 금액, 지리적 위치 등을 다각도로 실시간 검증합니다. 아래 <strong>5대 이상거래 의심 패턴</strong>이 감지되면 즉시 관제 목록에 등록되며, 담당 공무원의 사실 확인 전까지 정산 보류 등 행정적 통제가 가능합니다.
+            </p>
+          </div>
+        </div>
+
+        <!-- 5대 룰 카드 리스트 -->
+        <div class="rule-cards-list">
+          <!-- RULE-001 -->
+          <div class="rule-card" id="rule-card-RULE-001" data-rule="RULE-001">
+            <div class="rule-card-top">
+              <div class="rule-card-title-group">
+                <span class="rule-code-badge" style="background:#fee2e2; color:#b91c1c;">RULE-001 / RAPID_REUSE</span>
+                <h4 class="rule-name">동일 쿠폰 단시간 중복 결제 시도</h4>
+              </div>
+              <span class="severity-badge severity-high">🚨 심각도: 높음 (High)</span>
+            </div>
+            <div class="rule-detail-grid">
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">📌 규정 행태 (탐지 조건)</span>
+                <span class="rule-detail-value">동일한 쿠폰 번호로 <strong>30분 이내 2회 이상</strong> 연속 스캔 또는 결제가 시도된 행위</span>
+              </div>
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">⚠️ 부정수급 의심 사유</span>
+                <span class="rule-detail-value">모바일 화면 캡처 이미지 공유, 불법 바코드 복제 또는 결제 취소 지연을 악용한 다중 사용</span>
+              </div>
+            </div>
+            <div class="rule-action-box">
+              <strong>🛠️ 공무원 대응 매뉴얼:</strong> 가맹점에 유선 연락하여 실제 단체 이용인지, 단순 포스 오류인지 확인하고, 중복 승인된 결제 건은 즉시 승인 취소 조치합니다.
+            </div>
+          </div>
+
+          <!-- RULE-002 -->
+          <div class="rule-card" id="rule-card-RULE-002" data-rule="RULE-002">
+            <div class="rule-card-top">
+              <div class="rule-card-title-group">
+                <span class="rule-code-badge" style="background:#fef2f2; color:#dc2626;">RULE-002 / EXCESSIVE_AMOUNT</span>
+                <h4 class="rule-name">비정상 고액 결제 / 일평균 3배 초과 피크</h4>
+              </div>
+              <span class="severity-badge severity-high">🚨 심각도: 높음 (High)</span>
+            </div>
+            <div class="rule-detail-grid">
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">📌 규정 행태 (탐지 조건)</span>
+                <span class="rule-detail-value"><strong>단일 결제 50,000원 초과</strong> 또는 동일 사용자 <strong>10분 내 100,000원 이상</strong> 결제, 가맹점 평소 일매출의 3배 이상 급증</span>
+              </div>
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">⚠️ 부정수급 의심 사유</span>
+                <span class="rule-detail-value">실물 상품/음식 제공이 없는 허위 결제(소위 '쿠폰깡'), 현금 페이백을 통한 가맹점-이용자 결탁 부정 수급</span>
+              </div>
+            </div>
+            <div class="rule-action-box">
+              <strong>🛠️ 공무원 대응 매뉴얼:</strong> 가맹점 POS 실물 매출전표 및 판매 품목 영수증 사본을 징구하고, 소명이 불명확한 경우 월간 정산 관리에서 해당 금액을 정산 보류 처리합니다.
+            </div>
+          </div>
+
+          <!-- RULE-003 -->
+          <div class="rule-card" id="rule-card-RULE-003" data-rule="RULE-003">
+            <div class="rule-card-top">
+              <div class="rule-card-title-group">
+                <span class="rule-code-badge" style="background:#f5f3ff; color:#6d28d9;">RULE-003 / OFF_HOURS_USAGE</span>
+                <h4 class="rule-name">영업시간 외 심야 결제</h4>
+              </div>
+              <span class="severity-badge severity-medium">⚠️ 심각도: 주의 (Medium)</span>
+            </div>
+            <div class="rule-detail-grid">
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">📌 규정 행태 (탐지 조건)</span>
+                <span class="rule-detail-value">가맹점 통상 영업 종료 시간인 <strong>심야 새벽 시간대(01:00 ~ 05:00)</strong>에 쿠폰 결제가 승인된 행위</span>
+              </div>
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">⚠️ 부정수급 의심 사유</span>
+                <span class="rule-detail-value">영업 마감 후 가맹점주의 바코드 수기 대리 결제, 미방문 고객에 대한 사후 일괄 쿠폰 승인 처리</span>
+              </div>
+            </div>
+            <div class="rule-action-box">
+              <strong>🛠️ 공무원 대응 매뉴얼:</strong> 가맹점의 정규 영업시간을 확인하고, 심야 영업 증빙(숙박업 체크인, 야간 배달 등)을 청취하여 정당한 사유가 있을 시 확인 완료합니다.
+            </div>
+          </div>
+
+          <!-- RULE-004 -->
+          <div class="rule-card" id="rule-card-RULE-004" data-rule="RULE-004">
+            <div class="rule-card-top">
+              <div class="rule-card-title-group">
+                <span class="rule-code-badge" style="background:#fff7ed; color:#c2410c;">RULE-004 / RAPID_MERCHANT_TX</span>
+                <h4 class="rule-name">가맹점 1분 내 초고속 연쇄 결제</h4>
+              </div>
+              <span class="severity-badge severity-high">🚨 심각도: 높음 (High)</span>
+            </div>
+            <div class="rule-detail-grid">
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">📌 규정 행태 (탐지 조건)</span>
+                <span class="rule-detail-value">단일 가맹점에서 <strong>1분 이내 5회 이상</strong>의 쿠폰 결제가 연달아 발생하는 행위</span>
+              </div>
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">⚠️ 부정수급 의심 사유</span>
+                <span class="rule-detail-value">관광객들의 휴대폰을 수거하여 점주가 한꺼번에 '몰아찍기' 하거나 바코드 스캔 매크로 동작 의심</span>
+              </div>
+            </div>
+            <div class="rule-action-box">
+              <strong>🛠️ 공무원 대응 매뉴얼:</strong> 단체 관광객 방문 영수증 대조를 요청하고, 연속 결제된 쿠폰 소유주 명단과의 일치 여부를 파악합니다.
+            </div>
+          </div>
+
+          <!-- RULE-005 -->
+          <div class="rule-card" id="rule-card-RULE-005" data-rule="RULE-005">
+            <div class="rule-card-top">
+              <div class="rule-card-title-group">
+                <span class="rule-code-badge" style="background:#e0f2fe; color:#0369a1;">RULE-005 / IMPOSSIBLE_TRAVEL</span>
+                <h4 class="rule-name">물리적 이동 불가 원거리 / 섬 간 결제</h4>
+              </div>
+              <span class="severity-badge severity-medium">⚠️ 심각도: 주의 (Medium)</span>
+            </div>
+            <div class="rule-detail-grid">
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">📌 규정 행태 (탐지 조건)</span>
+                <span class="rule-detail-value">동일 사용자(ID)가 <strong>5분 내 지리적으로 이동 불가능한 다른 가맹점</strong>(예: 덕적도 ↔ 자월도 또는 5km 이상 원거리)에서 연속 결제</span>
+              </div>
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">⚠️ 부정수급 의심 사유</span>
+                <span class="rule-detail-value">타지에 있는 가족·지인에게 계정 대여 또는 쿠폰 캡처 사진 전송을 통한 대리 사용 (도서 방문 정책 취지 훼손)</span>
+              </div>
+            </div>
+            <div class="rule-action-box">
+              <strong>🛠️ 공무원 대응 매뉴얼:</strong> 관광객 본인의 실제 도서 지역 여객선 탑승 이력 및 방문 영수증을 확인하고, 대리 사용 적발 시 쿠폰 회수 및 이용 제한 조치합니다.
+            </div>
+          </div>
+
+          <!-- RULE-006 -->
+          <div class="rule-card" id="rule-card-RULE-006" data-rule="RULE-006">
+            <div class="rule-card-top">
+              <div class="rule-card-title-group">
+                <span class="rule-code-badge" style="background:#ecfdf5; color:#047857;">RULE-006 / PROXY_BULK_USE</span>
+                <h4 class="rule-name">단체 쿠폰 대리 수령분 다량 사용</h4>
+              </div>
+              <span class="severity-badge severity-medium">⚠️ 심각도: 주의 (Medium)</span>
+            </div>
+            <div class="rule-detail-grid">
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">📌 규정 행태 (탐지 조건)</span>
+                <span class="rule-detail-value">단체 공유 링크에서 구매자가 <strong>대리 수령한 쿠폰을 동일 가맹점에서 10분 내 3장 이상</strong> 사용</span>
+              </div>
+              <div class="rule-detail-item">
+                <span class="rule-detail-label">⚠️ 부정수급 의심 사유</span>
+                <span class="rule-detail-value">인솔자·구매자가 일행 몫을 모아 가맹점과 공모하여 현금화(깡)하는 행위 의심 (가족 단위 식사 등 정상 사용 가능성도 있음)</span>
+              </div>
+            </div>
+            <div class="rule-action-box">
+              <strong>🛠️ 공무원 대응 매뉴얼:</strong> 해당 가맹점의 결제 영수증(인원수·메뉴)을 대조하고, 동일 사용자의 반복 탐지 여부를 확인합니다. 부정 확인 시 정산 보류 및 쿠폰 회수를 진행합니다.
+            </div>
+          </div>
+        </div>
+
+        <!-- 담당 공무원 행정 대응 3단계 프로토콜 -->
+        <div class="protocol-section">
+          <div class="protocol-title">
+            <span>📋</span>
+            <span>담당 공무원 이상거래 행정 조치 3단계 프로토콜</span>
+          </div>
+          <div class="protocol-steps">
+            <div class="protocol-step-card">
+              <span class="protocol-step-num">Step 1</span>
+              <div class="protocol-step-name">알림 검토 & 데이터 대조</div>
+              <p class="protocol-step-desc">
+                FDS 모니터링 목록에서 탐지 일시, 가맹점 상호, 사용자 닉네임 및 이상 징후 설명을 확인합니다.
+              </p>
+            </div>
+            <div class="protocol-step-card">
+              <span class="protocol-step-num">Step 2</span>
+              <div class="protocol-step-name">유선 확인 및 소명자료 징구</div>
+              <p class="protocol-step-desc">
+                가맹점 대표자 유선 통화로 결제 경위를 확인하고, 필요 시 POS 영수증 사본이나 판매 사진을 제출받습니다.
+              </p>
+            </div>
+            <div class="protocol-step-card">
+              <span class="protocol-step-num">Step 3</span>
+              <div class="protocol-step-name">조치 확정 및 종결</div>
+              <p class="protocol-step-desc">
+                정상 거래 소명 시 <strong>[확인 완료]</strong> 처리하며, 부정 거래 확인 시 정산 보류 및 쿠폰 회수/환수를 진행합니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-footer">
+        <span class="guide-footer-tip">💡 옹진군 도서 관광 활성화 지원 조례 및 지방재정법에 의거 부정수급 적발 시 환수 및 가맹점 취소가 진행됩니다.</span>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-modal-confirm" style="padding:8px 20px; font-weight:700;">확인 및 닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FDS 이상거래 상세 내역 모달 -->
+  <div id="modal-fds-detail" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="fds-detail-modal-title">
+    <div class="fds-guide-box" style="max-width: 620px;">
+      <div class="guide-header">
+        <div class="guide-header-title">
+          <span style="font-size: 24px;">📋</span>
+          <div>
+            <h2 id="fds-detail-modal-title" style="font-size: 1.15rem;">이상거래 상세 내역</h2>
+            <p id="fds-detail-modal-subtitle" style="font-size: 0.8rem; color: #64748b;">대상 거래 목록 및 확인 처리</p>
+          </div>
+        </div>
+        <button type="button" class="guide-btn-close" id="btn-close-detail" title="닫기 (ESC)">✕</button>
+      </div>
+
+      <div class="guide-content" id="fds-detail-body">
+        <div style="text-align:center; padding: 40px; color:#64748b;">데이터를 불러오는 중입니다...</div>
+      </div>
+    </div>
   </div>
 
   <script type="module">
@@ -113,64 +903,412 @@
     // 관리자 인증 체크 (실패 시 login.html로 자동 리다이렉트)
     await requireAdminAuth();
 
+    let allFdsData = [];
+    let currentFilter = 'all';
+
+    // 룰 ID 정규화 및 클래스 매핑 헬퍼
+    function getRuleClass(ruleId) {
+      if (!ruleId) return 'rule-default';
+      const clean = ruleId.trim();
+      if (clean.includes('RULE-001') || clean.includes('RAPID_REUSE')) return 'rule-RULE-001';
+      if (clean.includes('RULE-002') || clean.includes('EXCESSIVE_AMOUNT')) return 'rule-RULE-002';
+      if (clean.includes('RULE-003') || clean.includes('OFF_HOURS')) return 'rule-RULE-003';
+      if (clean.includes('RULE-004') || clean.includes('RAPID_MERCHANT')) return 'rule-RULE-004';
+      if (clean.includes('RULE-005') || clean.includes('IMPOSSIBLE_TRAVEL')) return 'rule-RULE-005';
+      if (clean.includes('RULE-006') || clean.includes('PROXY_BULK_USE')) return 'rule-RULE-006';
+      return 'rule-default';
+    }
+
+    function getRuleTargetCardId(ruleId) {
+      if (!ruleId) return null;
+      const clean = ruleId.trim();
+      if (clean.includes('RULE-001') || clean.includes('RAPID_REUSE')) return 'rule-card-RULE-001';
+      if (clean.includes('RULE-002') || clean.includes('EXCESSIVE_AMOUNT')) return 'rule-card-RULE-002';
+      if (clean.includes('RULE-003') || clean.includes('OFF_HOURS')) return 'rule-card-RULE-003';
+      if (clean.includes('RULE-004') || clean.includes('RAPID_MERCHANT')) return 'rule-card-RULE-004';
+      if (clean.includes('RULE-005') || clean.includes('IMPOSSIBLE_TRAVEL')) return 'rule-card-RULE-005';
+      if (clean.includes('RULE-006') || clean.includes('PROXY_BULK_USE')) return 'rule-card-RULE-006';
+      return null;
+    }
+
     async function loadFDS() {
       const list = document.getElementById('fds-list');
       try {
         const { data } = await api.get('/admin/fds');
-        if (!data || data.length === 0) {
-          list.innerHTML = `
-            <tr><td colspan="5" style="padding: 60px; text-align: center; color: #64748b;">
-              <div style="font-size: 2rem; margin-bottom: 8px;"></div>
-              탐지된 이상 거래가 없습니다.
-            </td></tr>`;
-          return;
-        }
-        list.innerHTML = data.map(item => `
-          <tr>
-            <td>
-              <span class="rule-tag rule-${item.rule_id}">${item.rule_id}</span><br>
-              <small>${fmtDate(item.detected_at)}</small>
-            </td>
-            <td>
-              <strong>${item.merchant_name || '-'}</strong><br>
-              <small>${item.user_nickname || '익명 사용자'}</small>
-            </td>
-            <td>${item.description || '-'}</td>
-            <td>
-              <span class="badge ${item.resolved ? 'badge-success' : 'badge-danger'}">
-                ${item.resolved ? '해결됨' : '미결'}
-              </span>
-            </td>
-            <td>
-              ${!item.resolved ? `<button class="btn btn-neutral-outline btn-xs" onclick="resolveFDS(${item.id})">확인 완료</button>` : '-'}
-            </td>
-          </tr>
-        `).join('');
+        allFdsData = Array.isArray(data) ? data : [];
+        updateKPIs();
+        renderTable();
       } catch (e) {
         console.error('[FDS] 로드 실패:', e);
-        // 인증 오류(401)인 경우 로그인 안내, 그 외엔 오류 표시
         const isAuth = e.message?.includes('인증') || e.message?.includes('토큰');
         list.innerHTML = `
           <tr><td colspan="5" style="padding: 60px; text-align: center; color: #ef4444;">
-            <div style="font-size: 2rem; margin-bottom: 8px;">${isAuth ? '' : '️'}</div>
+            <div style="font-size: 2rem; margin-bottom: 8px;">${isAuth ? '🔒' : '⚠️'}</div>
             <strong>${isAuth ? '로그인이 필요합니다' : 'FDS 데이터 로드 실패'}</strong><br>
             <small style="color: #94a3b8; margin-top: 8px; display: block;">${e.message}</small>
-            ${isAuth ? `<a href="/tourist/index.html" style="margin-top:16px; display:inline-block; padding: 8px 20px; background:#3b82f6; color:#fff; border-radius:8px; text-decoration:none;">로그인 페이지로</a>` : ''}
+            ${isAuth ? `<a href="/admin/login.html" style="margin-top:16px; display:inline-block; padding: 8px 20px; background:#3b82f6; color:#fff; border-radius:8px; text-decoration:none;">로그인 페이지로</a>` : ''}
           </td></tr>`;
       }
     }
 
-    window.resolveFDS = async (id) => {
+    function updateKPIs() {
+      const total = allFdsData.length;
+      const unresolved = allFdsData.filter(item => !item.resolved).length;
+      const resolved = allFdsData.filter(item => !!item.resolved).length;
+
+      document.getElementById('kpi-total').textContent = `${total}건`;
+      document.getElementById('kpi-unresolved').textContent = `${unresolved}건`;
+      document.getElementById('kpi-resolved').textContent = `${resolved}건`;
+
+      document.getElementById('badge-all').textContent = total;
+      document.getElementById('badge-unresolved').textContent = unresolved;
+      document.getElementById('badge-resolved').textContent = resolved;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderTable() {
+      const list = document.getElementById('fds-list');
+      let filtered = allFdsData;
+      if (currentFilter === 'unresolved') {
+        filtered = allFdsData.filter(item => !item.resolved);
+      } else if (currentFilter === 'resolved') {
+        filtered = allFdsData.filter(item => !!item.resolved);
+      }
+
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <tr><td colspan="5" style="padding: 60px; text-align: center; color: #64748b;">
+            <div style="font-size: 2rem; margin-bottom: 8px;">✨</div>
+            ${currentFilter === 'unresolved' ? '미결 상태인 이상거래 알림이 없습니다. (모두 조치 완료)' : '조회된 이상 거래 내역이 없습니다.'}
+          </td></tr>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(item => {
+        const ruleClass = getRuleClass(item.rule_id);
+        return `
+          <tr>
+            <td>
+              <span class="rule-tag ${ruleClass}" onclick="window.openFdsGuideWithHighlight('${item.rule_id}')" title="클릭 시 이 규칙의 세부 정의와 대응 매뉴얼을 엽니다.">
+                <span>🛡️</span> ${item.rule_id || '기타 룰'}
+              </span><br>
+              <small style="color:#64748b; font-size:0.8rem; margin-top:4px; display:inline-block;">${fmtDate(item.detected_at)}</small>
+            </td>
+            <td>
+              <strong style="color:#0f172a; font-size:0.92rem;">${escapeHtml(item.merchant_name || '미등록 가맹점')}</strong><br>
+              <small style="color:#64748b;">이용자: ${escapeHtml(item.user_nickname || '익명 관광객')} (ID: ${item.user_id || '-'})</small>
+            </td>
+            <td>
+              <div style="font-weight:600; color:#1e293b; line-height:1.45;">${escapeHtml(item.description || '-')}</div>
+              ${item.coupon_id ? `<small style="color:#94a3b8; font-size:0.75rem;">쿠폰 식별번호: #${item.coupon_id}</small>` : ''}
+              ${item.resolved && item.resolution_note ? `
+                <div style="margin-top:6px; padding:6px 10px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; font-size:0.8rem; color:#166534; line-height:1.4;">
+                  <strong>📝 조치 메모:</strong> ${escapeHtml(item.resolution_note)}
+                  ${item.resolved_by_name ? `<span style="color:#65a30d; margin-left:6px;">(처리자: ${escapeHtml(item.resolved_by_name)})</span>` : ''}
+                </div>
+              ` : ''}
+            </td>
+            <td style="text-align:center;">
+              <span class="badge ${item.resolved ? 'badge-success' : 'badge-danger'}" style="font-size:0.8rem; padding:4px 10px;">
+                ${item.resolved ? '해결 완료' : '미결 (대기)'}
+              </span>
+            </td>
+            <td style="text-align:center; white-space:nowrap;">
+              <div style="display:inline-flex; align-items:center; gap:6px;">
+                <button type="button" class="btn btn-neutral-outline btn-xs" onclick="openFdsDetail(${item.id})" style="font-weight:700; border-radius:6px; display:inline-flex; align-items:center; gap:4px; padding:5px 10px;" title="대상 목록 보기">
+                  자세히 보기
+                </button>
+                ${!item.resolved 
+                  ? `<button type="button" class="btn btn-primary-outline btn-xs" onclick="openFdsDetail(${item.id}, true)" style="font-weight:700; border-radius:6px; padding:5px 10px; color:#0284c7; border-color:#0284c7;" title="확인 완료">확인 완료</button>` 
+                  : `<span style="color:#10b981; font-weight:700; font-size:0.8rem; padding:4px 8px; background:#f0fdf4; border-radius:6px;">완료</span>`}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ── 상세 모달 제어 함수 ──
+    const detailModal = document.getElementById('modal-fds-detail');
+    const btnCloseDetail = document.getElementById('btn-close-detail');
+
+    function closeDetailModal() {
+      if (detailModal) {
+        detailModal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    if (btnCloseDetail) {
+      btnCloseDetail.addEventListener('click', closeDetailModal);
+    }
+    if (detailModal) {
+      detailModal.addEventListener('click', (e) => {
+        if (e.target === detailModal) closeDetailModal();
+      });
+    }
+
+    window.closeDetailModal = closeDetailModal;
+
+    function formatDateTime(dStr) {
+      if (!dStr) return '-';
+      const d = new Date(dStr);
+      if (isNaN(d.getTime())) return dStr;
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    window.openFdsDetail = async (id, autoFocusMemo = false) => {
+      const body = document.getElementById('fds-detail-body');
+      if (!body) return;
+      body.innerHTML = `<div style="text-align:center; padding:40px; color:#64748b;">데이터를 불러오는 중입니다...</div>`;
+      detailModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
       try {
-        await api.patch(`/admin/fds/${id}/resolve`);
-        showToast('해결 상태로 변경되었습니다.', 'success');
-        loadFDS();
-      } catch (e) {
-        showToast(e.message, 'error');
+        const res = await api.get(`/admin/fds/${id}/details`);
+        const { alert, transactions } = res.data;
+
+        // 대상 거래 목록 행 구성 (결제 일시, 가맹점, 금액만 표시)
+        let tableRows = '';
+        if (transactions && transactions.length > 0) {
+          tableRows = transactions.map((tx) => {
+            return `
+              <tr>
+                <td style="font-size:0.88rem; color:#1e293b; padding:12px 16px; white-space:nowrap; font-weight:600;">
+                  ${formatDateTime(tx.scanned_at)}
+                </td>
+                <td style="padding:12px 16px;">
+                  <strong style="color:#0f172a; font-size:0.92rem;">${escapeHtml(tx.merchant_name)}</strong>
+                </td>
+                <td style="text-align:right; font-weight:700; color:#0f172a; font-size:0.92rem; padding:12px 16px; white-space:nowrap;">
+                  ${Number(tx.amount || 0).toLocaleString()}원
+                </td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          tableRows = `<tr><td colspan="3" style="text-align:center; padding:30px; color:#94a3b8;">대상 거래 내역이 없습니다.</td></tr>`;
+        }
+
+        body.innerHTML = `
+          <!-- 알림 기본 정보 요약 -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px 18px; margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="rule-tag ${getRuleClass(alert.rule_id)}" style="font-size:0.8rem; padding:3px 8px;">
+                  ${escapeHtml(alert.rule_id)}
+                </span>
+                <span class="badge ${alert.resolved ? 'badge-success' : 'badge-danger'}" style="font-size:0.78rem;">
+                  ${alert.resolved ? '해결 완료' : '미결'}
+                </span>
+              </div>
+              <span style="font-size:0.8rem; color:#64748b;">탐지일시: ${formatDateTime(alert.detected_at)}</span>
+            </div>
+            <div style="font-size:0.92rem; font-weight:700; color:#0f172a; margin-bottom:4px;">
+              ${escapeHtml(alert.description || '-')}
+            </div>
+            <div style="font-size:0.82rem; color:#64748b;">
+              대상 이용자: <strong>${escapeHtml(alert.user_nickname || '익명')} (ID: ${alert.user_id || '-'})</strong>
+            </div>
+          </div>
+
+          <!-- 대상 거래 목록 (결제 일시, 가맹점, 금액) -->
+          <div style="margin-bottom:20px;">
+            <div style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+              <table class="admin-table" style="margin:0; width:100%;">
+                <thead>
+                  <tr style="background:#f1f5f9;">
+                    <th style="padding:10px 16px;">결제 일시</th>
+                    <th style="padding:10px 16px;">가맹점</th>
+                    <th style="width:120px; text-align:right; padding:10px 16px;">금액</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${tableRows}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 확인 완료 / 메모 입력 영역 -->
+          <div style="border-top:1px solid #e2e8f0; padding-top:16px;">
+            ${alert.resolved ? `
+              <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:14px 16px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                  <strong style="color:#166534; font-size:0.88rem;">확인 완료된 내역</strong>
+                  <span style="font-size:0.8rem; color:#15803d;">
+                    ${formatDateTime(alert.resolved_at)} ${alert.resolved_by_name ? `(${escapeHtml(alert.resolved_by_name)})` : ''}
+                  </span>
+                </div>
+                <div style="color:#166534; font-size:0.88rem; line-height:1.5;">
+                  ${escapeHtml(alert.resolution_note || '(기록된 메모 없음)')}
+                </div>
+              </div>
+              <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+                <button type="button" class="btn btn-neutral-outline btn-sm" onclick="closeDetailModal()">닫기</button>
+              </div>
+            ` : `
+              <div>
+                <label for="fds-resolve-note" style="display:block; font-weight:700; font-size:0.88rem; color:#0f172a; margin-bottom:6px;">
+                  확인 메모
+                </label>
+                <textarea id="fds-resolve-note" rows="3" style="width:100%; border:1px solid #cbd5e1; border-radius:6px; padding:10px 12px; font-family:inherit; font-size:0.88rem; box-sizing:border-box; resize:vertical;" placeholder="확인 메모를 입력하세요 (선택)"></textarea>
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+                  <button type="button" class="btn btn-neutral-outline btn-sm" onclick="closeDetailModal()">취소</button>
+                  <button type="button" class="btn btn-primary btn-sm" id="btn-submit-resolve" onclick="submitResolveWithMemo(${alert.id})" style="font-weight:700; background:#0284c7; color:#fff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer;">
+                    확인 완료
+                  </button>
+                </div>
+              </div>
+            `}
+          </div>
+        `;
+
+        if (autoFocusMemo && !alert.resolved) {
+          setTimeout(() => {
+            const ta = document.getElementById('fds-resolve-note');
+            if (ta) ta.focus();
+          }, 150);
+        }
+      } catch (err) {
+        body.innerHTML = `
+          <div style="padding:40px; text-align:center; color:#ef4444;">
+            <div style="font-size:2rem; margin-bottom:8px;">⚠️</div>
+            <strong>상세 정보 로드 실패</strong><br>
+            <small style="color:#64748b;">${escapeHtml(err.message || '데이터를 불러오는 중 오류가 발생했습니다.')}</small>
+          </div>
+        `;
       }
     };
 
+    window.submitResolveWithMemo = async (id) => {
+      const ta = document.getElementById('fds-resolve-note');
+      const note = ta ? ta.value.trim() : '';
+
+      if (!confirm('확인 완료 처리하시겠습니까?')) {
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-resolve');
+      if (btn) btn.disabled = true;
+
+      try {
+        await api.patch(`/admin/fds/${id}/resolve`, { note });
+        showToast('확인 완료 처리되었습니다.', 'success');
+        closeDetailModal();
+        await loadFDS();
+      } catch (e) {
+        showToast(e.message || '처리 중 오류가 발생했습니다.', 'error');
+        if (btn) btn.disabled = false;
+      }
+    };
+
+    // ── 모달 제어 함수 ──
+    const guideModal = document.getElementById('modal-fds-guide');
+    const btnOpenGuide = document.getElementById('btn-open-fds-guide');
+    const btnCloseGuide = document.getElementById('btn-close-guide');
+    const btnModalConfirm = document.getElementById('btn-modal-confirm');
+
+    function openModal() {
+      guideModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      guideModal.classList.remove('active');
+      document.body.style.overflow = '';
+      // 이전 하이라이트 잔여물 제거
+      document.querySelectorAll('.rule-card.highlighted').forEach(el => el.classList.remove('highlighted'));
+    }
+
+    window.openFdsGuideWithHighlight = (ruleId) => {
+      openModal();
+      const targetCardId = getRuleTargetCardId(ruleId);
+      if (targetCardId) {
+        setTimeout(() => {
+          const card = document.getElementById(targetCardId);
+          if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.add('highlighted');
+            setTimeout(() => {
+              card.classList.remove('highlighted');
+            }, 3000);
+          }
+        }, 150);
+      }
+    };
+
+    btnOpenGuide.addEventListener('click', () => openModal());
+    btnCloseGuide.addEventListener('click', closeModal);
+    btnModalConfirm.addEventListener('click', closeModal);
+
+    // 모달 바깥 배경 클릭 시 닫기
+    guideModal.addEventListener('click', (e) => {
+      if (e.target === guideModal) {
+        closeModal();
+      }
+    });
+
+    // ESC 키 입력 시 닫기
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && guideModal.classList.contains('active')) {
+        closeModal();
+      }
+    });
+
+    // 탭 필터링 이벤트 연동
+    document.querySelectorAll('.tab-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderTable();
+      });
+    });
+
+    // 초기 데이터 로딩
     loadFDS();
+
+    // 새로고침 버튼
+    const btnRefreshFds = document.getElementById('btn-refresh-fds');
+    if (btnRefreshFds) {
+      btnRefreshFds.addEventListener('click', async () => {
+        btnRefreshFds.disabled = true;
+        try {
+          await loadFDS();
+          let tc = document.getElementById('toast-container');
+          if (!tc) {
+            tc = document.createElement('div');
+            tc.id = 'toast-container';
+            tc.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:99999; display:flex; flex-direction:column; gap:8px;';
+            document.body.appendChild(tc);
+          }
+          const t = document.createElement('div');
+          t.style.cssText = 'padding: 10px 16px; border-radius: 6px; background: #0f172a; color: #fff; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+          t.innerText = 'FDS 탐지 내역이 새로고침되었습니다.';
+          tc.appendChild(t);
+          setTimeout(() => {
+            t.style.opacity = '0';
+            t.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => t.remove(), 300);
+          }, 2000);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          btnRefreshFds.disabled = false;
+        }
+      });
+    }
   </script>
 </body>
 </html>
