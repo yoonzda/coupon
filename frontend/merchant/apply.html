@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="icon" href="../shared/images/favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>가맹점 입점 신청 | 옹진 관광 쿠폰</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
+  <!-- 카카오(다음) 우편번호 주소 검색 API -->
+  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <!-- 네이버 지도 API (NCP Client ID 및 Geocoder 서브모듈 적용) -->
+  <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=x0h48m56fw&submodules=geocoder"></script>
+  <style>
+    *, *::before, *::after { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      word-break: keep-all; 
+    }
+
+    html.font-scale-anim {
+      transition: font-size 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      background: #f0fdf4;
+      background-image: 
+        radial-gradient(circle at 10% 20%, #dcfce7 0%, #f0fdf4 100%);
+      position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 40px 20px;
+      color: #1e293b;
+    }
+
+    .bg-decorations {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .decor-circle {
+      position: absolute;
+      border-radius: 50%;
+    }
+    .decor-top {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+      top: -200px; right: -200px;
+    }
+    .decor-bottom {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(74, 222, 128, 0.06) 0%, transparent 60%);
+      bottom: -150px; left: -150px;
+    }
+
+    .apply-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      border-top: 4px solid #10b981;
+      border-radius: 0; 
+      padding: 3rem 2.6rem;
+      width: 100%;
+      max-width: 700px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 20px 40px rgba(16, 185, 129, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    html.font-scale-anim .apply-card {
+      transition: max-width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+                  padding 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    html[data-font-scale="large"] .apply-card {
+      max-width: 740px;
+      padding: 2.3rem 1.8rem;
+    }
+
+    .logo-area {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 2.35rem;
+      width: 100%;
+    }
+    .logo-subtitle {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #059669;
+      letter-spacing: 1.2px;
+      margin-bottom: 0.45rem;
+      line-height: 1.4;
+    }
+    .logo-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 400; 
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      line-height: 1.28;
+    }
+
+    /* 상단 첫 줄: 좌측 돌아가기 버튼 + 우측 글자 크기 조절 컨트롤 */
+    .logo-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 1.25rem;
+      gap: 0.75rem;
+    }
+
+    .btn-back-login {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3em;
+      color: #64748b;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 500;
+      text-decoration: none;
+      line-height: 1;
+      white-space: nowrap;
+      transition: color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-back-login svg {
+      width: 1.08em;
+      height: 1.08em;
+      stroke: currentColor;
+      stroke-width: 2.3;
+      fill: none;
+      flex-shrink: 0;
+      display: block;
+      position: relative;
+      top: 0.06em;
+      transition: transform 0.2s ease;
+    }
+    .btn-back-login:hover {
+      color: #0f172a;
+    }
+    .btn-back-login:hover svg {
+      transform: translateX(-3px);
+    }
+
+    .font-size-control {
+      position: relative;
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      height: 36px;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .font-size-slider {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: calc(50% - 3px);
+      background: #ffffff;
+      border-radius: 999px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+      transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+      z-index: 0;
+    }
+    html[data-font-scale="large"] .font-size-slider {
+      transform: translateX(100%);
+    }
+    .font-size-btn {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-width: 54px;
+      padding: 0 14px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 700;
+      border-radius: 999px;
+      cursor: pointer;
+      line-height: 1;
+      white-space: nowrap;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-size-btn:hover {
+      color: #0f172a;
+    }
+    .font-size-btn.active {
+      color: #059669;
+    }
+
+    .section-title {
+      font-size: 1.12rem;
+      font-weight: 600;
+      color: #475569;
+      margin: 2.6rem 0 1.35rem 0;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      line-height: 1.4;
+      letter-spacing: -0.01em;
+    }
+    .section-title:first-of-type {
+      margin-top: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      row-gap: 1.75rem;
+      column-gap: 1.35rem;
+    }
+    .full-width {
+      grid-column: span 2;
+    }
+
+    html[data-font-scale="large"] .form-grid {
+      grid-template-columns: 1fr;
+      row-gap: 1.75rem;
+    }
+    html[data-font-scale="large"] .full-width {
+      grid-column: span 1;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+    label {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.42rem;
+      letter-spacing: -0.1px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      line-height: 1.4;
+    }
+    .label-sub {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #64748b;
+      margin-left: 6px;
+    }
+    .required-mark {
+      color: #ef4444;
+      margin-left: 4px;
+    }
+
+    .input-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .input-wrap input[type="password"],
+    .input-wrap input[type="text"] {
+      padding-right: 2.85rem;
+    }
+    input::-ms-reveal,
+    input::-ms-clear {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    .pw-toggle {
+      position: absolute;
+      right: 0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.35rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+    }
+    .pw-toggle svg {
+      width: 1.2rem;
+      height: 1.2rem;
+      stroke: #94a3b8;
+      fill: none;
+      transition: stroke 0.2s;
+    }
+    .pw-toggle:hover svg {
+      stroke: #10b981;
+    }
+    
+    input[type="text"], input[type="password"], input[type="tel"], select {
+      width: 100%;
+      padding: 1rem 1.05rem;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      color: #0f172a;
+      font-size: 1.05rem;
+      font-family: inherit;
+      line-height: 1.45;
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+      outline: none;
+    }
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.9rem center;
+      background-size: 1.1rem;
+      padding-right: 2.4rem !important;
+    }
+    input[type="text"]:focus, input[type="password"]:focus, input[type="tel"]:focus, select:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.14);
+    }
+    input::placeholder { color: #94a3b8; }
+
+    /* Custom Select Dropdown (화면 전체를 덮지 않는 적당한 높이의 선택창) */
+    .sr-only-select {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+      pointer-events: none !important;
+    }
+    .custom-select-wrap {
+      position: relative;
+      width: 100%;
+      min-width: 0;
+    }
+    .custom-select-trigger {
+      width: 100%;
+      padding: 1rem 2.5rem 1rem 1.05rem;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      color: #0f172a;
+      font-size: 1.05rem;
+      font-family: inherit;
+      font-weight: 500;
+      line-height: 1.45;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+      outline: none;
+    }
+    .custom-select-trigger.is-placeholder {
+      color: #64748b;
+    }
+    .custom-select-trigger:focus,
+    .custom-select-wrap.open .custom-select-trigger {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.14);
+    }
+    .custom-select-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .custom-select-arrow {
+      position: absolute;
+      right: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.15rem;
+      height: 1.15rem;
+      stroke: #475569;
+      flex-shrink: 0;
+      transition: transform 0.2s ease, stroke 0.2s ease;
+      pointer-events: none;
+    }
+    .custom-select-wrap.open .custom-select-arrow {
+      transform: translateY(-50%) rotate(180deg);
+      stroke: #10b981;
+    }
+    .custom-select-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      max-height: 14.5rem;
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+      z-index: 60;
+      padding: 0.35rem;
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 0.16s ease, transform 0.16s ease;
+    }
+    .custom-select-wrap.open .custom-select-menu {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .custom-select-menu::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-select-menu::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-select-menu::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 999px;
+    }
+    .custom-select-option {
+      padding: 0.72rem 0.9rem;
+      border-radius: 7px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #1e293b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .custom-select-option:hover {
+      background: #f0fdf4;
+      color: #059669;
+      font-weight: 600;
+    }
+    .custom-select-option.selected {
+      background: #ecfdf5;
+      color: #059669;
+      font-weight: 700;
+    }
+
+    /* 택배식 주소 검색 레이아웃 */
+    .address-search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.65rem;
+      align-items: stretch;
+    }
+    html[data-font-scale="large"] .address-search-row {
+      grid-template-columns: 1fr;
+    }
+    .address-search-row input {
+      min-width: 0;
+      cursor: pointer;
+      background: #f8fafc;
+    }
+    .btn-address-search {
+      padding: 1.05rem 1.25rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      line-height: 1.4;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-address-search:hover {
+      filter: brightness(1.06);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22);
+    }
+    .btn-address-search:active {
+      transform: scale(0.99);
+    }
+    .address-detail-input {
+      margin-top: 0.75rem;
+    }
+    .postcode-wrap {
+      display: none;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 0.75rem;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+    .postcode-wrap.open {
+      display: block;
+    }
+    .postcode-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 0.95rem;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: #475569;
+    }
+    .btn-close-postcode {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.9rem;
+      height: 1.9rem;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      padding: 0;
+      color: #64748b;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .btn-close-postcode:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+    .btn-close-postcode svg {
+      width: 1.15rem;
+      height: 1.15rem;
+      stroke: currentColor;
+      flex-shrink: 0;
+    }
+    .postcode-container {
+      width: 100%;
+      height: 360px;
+    }
+
+    /* Custom File Uploaders */
+    .file-upload-box {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+      padding: 1.25rem 1.2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 5.5rem;
+    }
+    .file-upload-box:hover {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+    .file-upload-box input[type="file"] {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .upload-plus-btn {
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 50%;
+      background: #10b981;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .upload-plus-btn svg {
+      width: 1rem;
+      height: 1rem;
+      stroke: currentColor;
+      fill: none;
+    }
+    .file-upload-box:hover .upload-plus-btn {
+      background: #059669;
+    }
+    .file-upload-box p {
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.45;
+      transition: color 0.2s ease;
+    }
+    .file-upload-box:hover p {
+      color: #059669;
+    }
+
+    /* Thumbnail previews */
+    .preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.85rem;
+    }
+    .preview-item {
+      width: 84px; height: 84px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      position: relative;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+    .preview-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .preview-remove-btn {
+      position: absolute;
+      top: 3px; right: 3px;
+      background: rgba(15, 23, 42, 0.65);
+      color: #ffffff;
+      border: none;
+      border-radius: 50%;
+      width: 22px; height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+    .preview-remove-btn:hover {
+      background: rgba(239, 68, 68, 0.9);
+    }
+
+    /* Hours grid */
+    .hours-picker-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .hours-picker-grid > span {
+      text-align: center;
+      color: #64748b;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    html[data-font-scale="large"] .hours-picker-grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    html[data-font-scale="large"] .hours-picker-grid > span {
+      display: none;
+    }
+
+    /* Weekday selector (선택됨 vs 해제됨 확실한 대비) */
+    .weekday-selector {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.45rem;
+      margin-top: 0.2rem;
+    }
+    html[data-font-scale="large"] .weekday-selector {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+    }
+    .day-pill {
+      min-width: 0;
+      height: 3.25rem;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      color: #94a3b8;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+      outline: none;
+      padding: 0;
+      font-family: inherit;
+    }
+    .day-pill:hover:not(.active) {
+      border-color: #cbd5e1;
+      color: #64748b;
+      background: #f1f5f9;
+    }
+    .day-pill.active {
+      background: #10b981;
+      border: 1.5px solid #059669;
+      color: #ffffff;
+      font-weight: 800;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+    }
+    .day-pill.active:hover {
+      background: #059669;
+      border-color: #047857;
+    }
+
+    /* Bank Account grid */
+    .bank-account-grid {
+      display: grid;
+      grid-template-columns: 10.5rem 1fr;
+      gap: 0.75rem;
+    }
+    html[data-font-scale="large"] .bank-account-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pw-guide-text {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: #64748b;
+      line-height: 1.55;
+      margin-top: -0.6rem;
+    }
+
+    .notice-box {
+      margin-top: 2.2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #f1f5f9;
+      text-align: center;
+      font-size: 0.94rem;
+      font-weight: 500;
+      color: #64748b;
+      line-height: 1.7;
+    }
+
+    .btn-submit-apply {
+      width: 100%;
+      padding: 1.05rem 1.25rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      line-height: 1.4;
+      cursor: pointer;
+      transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      margin-top: 1.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+    }
+    .btn-submit-apply:hover:not(:disabled) {
+      filter: brightness(1.06);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22);
+    }
+    .btn-submit-apply:active:not(:disabled) { transform: scale(0.99); }
+    .btn-submit-apply:disabled {
+      background: #e2e8f0;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .error-msg {
+      display: none;
+      color: #ef4444;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-top: 0.95rem;
+      text-align: left;
+    }
+    .error-msg.show { display: block; }
+
+    /* Input Error / Highlight Style */
+    input.invalid-highlight, select.invalid-highlight, .custom-select-trigger.invalid-highlight, .file-upload-box.invalid-highlight, .weekday-selector.invalid-highlight {
+      border-color: #ef4444 !important;
+      background-color: rgba(239, 68, 68, 0.04) !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+      animation: shake 0.3s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
+    /* Success Screen */
+    .success-screen {
+      text-align: center;
+      padding: 2.5rem 0;
+      display: none;
+    }
+    .success-icon-svg {
+      width: 64px; height: 64px;
+      stroke: #10b981;
+      fill: none;
+      margin-bottom: 1.5rem;
+    }
+    .success-screen h2 {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.75rem;
+    }
+    .success-screen p {
+      font-size: 1.05rem;
+      color: #475569;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .btn-success-go {
+      display: inline-block;
+      padding: 1rem 1.85rem;
+      background: #10b981;
+      color: #ffffff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 1.05rem;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+    .btn-success-go:hover {
+      background: #059669;
+    }
+
+    .spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%; 
+      animation: spin 0.8s linear infinite;
+    }
+    .btn-submit-apply.loading .spinner { display: block; }
+    .btn-submit-apply.loading .btn-text { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── 토스트 알림 ── */
+    #toast-container {
+      position: fixed;
+      bottom: 2.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      pointer-events: none;
+      width: 90%;
+      max-width: 420px;
+    }
+    .toast {
+      width: 100%;
+      padding: 0.85rem 1.15rem;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+      animation: toastSlideUp 0.22s ease-out;
+    }
+    .toast.success { background: #059669; }
+    .toast.error { background: #ef4444; }
+    @keyframes toastSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive & Mobile First Styles ── */
+    @media (max-width: 640px) {
+      body {
+        background: #ffffff;
+        background-image: none;
+        padding: 0;
+        align-items: flex-start;
+      }
+      .bg-decorations {
+        display: none;
+      }
+      .apply-card,
+      html[data-font-scale="large"] .apply-card {
+        border: none;
+        border-top: 4px solid #10b981;
+        padding: 2rem 1.25rem 2.8rem 1.25rem;
+        box-shadow: none;
+        background: #ffffff;
+        min-height: 100vh;
+        min-height: 100dvh;
+        max-width: 100%;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+        row-gap: 1.65rem;
+      }
+      .full-width {
+        grid-column: span 1;
+      }
+      .bank-account-grid,
+      .address-search-row {
+        grid-template-columns: 1fr;
+      }
+      .hours-picker-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .hours-picker-grid > span {
+        display: none;
+      }
+      .weekday-selector {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.55rem;
+      }
+      .logo-title {
+        font-size: 1.85rem;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Fixed background decoration circles -->
+  <div class="bg-decorations">
+    <div class="decor-circle decor-top"></div>
+    <div class="decor-circle decor-bottom"></div>
+  </div>
+
+  <div class="apply-card" id="apply-card-container">
+    <!-- 신청 폼 화면 -->
+    <div id="form-view">
+      <div class="logo-area">
+        <div class="logo-top-row">
+          <a href="/merchant/login.html" class="btn-back-login">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            <span>뒤로가기</span>
+          </a>
+          <div class="font-size-control" role="group" aria-label="글자 크기 조절">
+            <span class="font-size-slider" aria-hidden="true"></span>
+            <button type="button" class="font-size-btn active" data-scale="normal" title="글자 보통">보통</button>
+            <button type="button" class="font-size-btn" data-scale="large" title="글자 크게">크게</button>
+          </div>
+        </div>
+        <span class="logo-subtitle">옹진 관광 쿠폰</span>
+        <h1 class="logo-title">가맹점 입점 신청</h1>
+      </div>
+
+      <form id="form-merchant-apply" novalidate>
+        <!-- 1. 가맹점 정보 -->
+        <h3 class="section-title">가맹점 정보</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="owner-name">대표자 성명 <span class="required-mark">*</span></label>
+            <input type="text" id="owner-name" placeholder="대표자 성명을 입력하세요" required />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">연락처 <span class="required-mark">*</span></label>
+            <input type="tel" id="phone" inputmode="numeric" placeholder="010-0000-0000" maxlength="13" required />
+          </div>
+
+          <div class="form-group">
+            <label for="shop-name">상호명 <span class="required-mark">*</span></label>
+            <input type="text" id="shop-name" placeholder="가게 상호명을 입력하세요" required />
+          </div>
+
+          <div class="form-group">
+            <label for="store-phone">가게 전화번호</label>
+            <input type="tel" id="store-phone" inputmode="numeric" placeholder="지역번호 또는 일반 번호" maxlength="12" />
+          </div>
+
+          <div class="form-group full-width">
+            <label for="category">카테고리 <span class="required-mark">*</span></label>
+            <select id="category" required>
+              <option value="">선택해 주세요</option>
+              <option value="음식점">음식점</option>
+              <option value="숙박">숙박</option>
+              <option value="수산물·농산물">수산물·농산물</option>
+              <option value="관광·레저">관광·레저</option>
+              <option value="쇼핑">쇼핑</option>
+              <option value="교통">교통</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="address">위치 (주소) <span class="required-mark">*</span></label>
+            <div class="address-search-row">
+              <input type="text" id="address" placeholder="주소 검색 버튼을 눌러 주소를 선택하세요" readonly required />
+              <button type="button" class="btn-address-search" id="btn-search-address">주소 검색</button>
+            </div>
+            <div id="postcode-wrap" class="postcode-wrap">
+              <div class="postcode-header">
+                <span>도로명·지번 주소 검색</span>
+                <button type="button" id="btn-close-postcode" class="btn-close-postcode" aria-label="주소 검색창 닫기">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              <div id="postcode-container" class="postcode-container"></div>
+            </div>
+            <input type="text" id="address-detail" class="address-detail-input" placeholder="상세주소를 입력하세요" />
+          </div>
+        </div>
+
+        <!-- 2. 운영 정보 -->
+        <h3 class="section-title">운영 정보</h3>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>영업시간 <span class="required-mark">*</span></label>
+            <div class="hours-picker-grid">
+              <select id="open-time" required>
+                <option value="">오픈 시간</option>
+              </select>
+              <span>~</span>
+              <select id="close-time" required>
+                <option value="">마감 시간</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>영업 요일 <span class="required-mark">*</span></label>
+            <div class="weekday-selector">
+              <button type="button" class="day-pill active" data-day="월">월</button>
+              <button type="button" class="day-pill active" data-day="화">화</button>
+              <button type="button" class="day-pill active" data-day="수">수</button>
+              <button type="button" class="day-pill active" data-day="목">목</button>
+              <button type="button" class="day-pill active" data-day="금">금</button>
+              <button type="button" class="day-pill active" data-day="토">토</button>
+              <button type="button" class="day-pill active" data-day="일">일</button>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>
+              가게 이미지 <span class="required-mark">*</span>
+              <span class="label-sub">(최대 5장 등록 가능)</span>
+            </label>
+            <div class="file-upload-box">
+              <span class="upload-plus-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </span>
+              <p>가게 이미지 사진 등록</p>
+              <input type="file" id="store-images" multiple accept="image/*" />
+            </div>
+            <div class="preview-container" id="store-images-previews"></div>
+          </div>
+        </div>
+
+        <!-- 3. 서류 및 계좌 정보 -->
+        <h3 class="section-title">서류 및 정산 정보</h3>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="business-no">사업자등록번호 <span class="required-mark">*</span></label>
+            <input type="text" id="business-no" inputmode="numeric" placeholder="000-00-00000" maxlength="12" required />
+          </div>
+
+          <div class="form-group full-width">
+            <label>사업자등록증 <span class="required-mark">*</span></label>
+            <div class="file-upload-box">
+              <span class="upload-plus-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </span>
+              <p>사업자등록증 사진 등록</p>
+              <input type="file" id="business-cert" accept="image/*" required />
+            </div>
+            <div class="preview-container" id="business-cert-preview"></div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>정산 계좌 정보 <span class="required-mark">*</span></label>
+            <div class="bank-account-grid">
+              <select id="bank-name" required>
+                <option value="">은행 선택</option>
+                <option value="농협">농협은행</option>
+                <option value="신한">신한은행</option>
+                <option value="국민">KB국민은행</option>
+                <option value="우리">우리은행</option>
+                <option value="하나">하나은행</option>
+                <option value="기업">IBK기업은행</option>
+                <option value="우체국">우체국</option>
+                <option value="수협">수협은행</option>
+                <option value="카카오뱅크">카카오뱅크</option>
+                <option value="토스뱅크">토스뱅크</option>
+              </select>
+              <input type="text" id="account-no" inputmode="numeric" placeholder="계좌번호를 입력하세요 (- 제외)" required />
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>통장사본 <span class="required-mark">*</span></label>
+            <div class="file-upload-box">
+              <span class="upload-plus-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </span>
+              <p>통장사본 사진 등록</p>
+              <input type="file" id="bankbook" accept="image/*" required />
+            </div>
+            <div class="preview-container" id="bankbook-preview"></div>
+          </div>
+        </div>
+
+        <!-- 4. 로그인 비밀번호 설정 -->
+        <h3 class="section-title">로그인 비밀번호 설정</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="password">비밀번호 <span class="required-mark">*</span></label>
+            <div class="input-wrap">
+              <input type="password" id="password" placeholder="사용할 비밀번호 입력" autocomplete="new-password" required />
+              <button type="button" class="pw-toggle" id="pw-toggle" aria-label="비밀번호 보기">
+                <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password-confirm">비밀번호 확인 <span class="required-mark">*</span></label>
+            <div class="input-wrap">
+              <input type="password" id="password-confirm" placeholder="비밀번호를 한 번 더 입력" autocomplete="new-password" required />
+              <button type="button" class="pw-toggle" id="pw-confirm-toggle" aria-label="비밀번호 확인 보기">
+                <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <p class="pw-guide-text full-width">
+            입점 승인 후 로그인 화면에서 가게를 선택하고, 설정하신 비밀번호를 입력하면 바로 로그인됩니다.
+          </p>
+        </div>
+
+        <!-- 승인 대기 안내 메시지 -->
+        <div class="notice-box">
+          관리자 확인 후 가맹점 등록이 진행됩니다.<br />
+          승인 완료 시 등록하신 번호로 안내 문자가 발송됩니다.
+        </div>
+
+        <div class="error-msg" id="error-msg"></div>
+
+        <button type="submit" class="btn-submit-apply" id="btn-submit">
+          <span class="btn-text">입점 신청 완료하기</span>
+          <span class="spinner"></span>
+        </button>
+      </form>
+    </div>
+
+    <!-- 신청 성공 화면 -->
+    <div class="success-screen" id="success-view">
+      <svg class="success-icon-svg" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <h2>입점 신청 완료</h2>
+      <p>
+        신청서 제출이 성공적으로 완료되었습니다.<br />
+        관리자 확인 후 최종 가맹점 등록이 진행됩니다.<br />
+        승인 완료 시 등록하신 번호로 안내 문자가 발송됩니다.
+      </p>
+      <a href="/merchant/apply-pending.html" class="btn-success-go">입점 심사 대기 화면으로 이동</a>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { api, showToast } from '../shared/js/api.js';
+
+    // ── 글자 크기 조절 (사용자 페이지 'ongjin_font_scale' 연동 · 신청서 가독성 확대) ──
+    const fontScaleMap = {
+      normal: '17.5px',
+      large: '23px'
+    };
+    const fontSizeButtons = document.querySelectorAll('.font-size-btn');
+    function applyFontScale(scale, animateLayout = false) {
+      const validScale = fontScaleMap[scale] ? scale : 'normal';
+      const currentScale = document.documentElement.getAttribute('data-font-scale');
+      if (animateLayout && currentScale && currentScale !== validScale) {
+        const formEl = document.getElementById('form-merchant-apply');
+        const subGridSelector = '.address-search-row, .hours-picker-grid, .weekday-selector, .bank-account-grid';
+        const subGrids = Array.from(formEl.querySelectorAll(subGridSelector));
+        const targets = Array.from(
+          formEl.querySelectorAll(
+            '.section-title, .form-group, .address-search-row > *, .hours-picker-grid > .custom-select-wrap, .weekday-selector > .day-pill, .bank-account-grid > *, .notice-box, .btn-submit-apply'
+          )
+        );
+        const beforeRects = new Map();
+        subGrids.forEach((g) => beforeRects.set(g, g.getBoundingClientRect()));
+        targets.forEach((el) => beforeRects.set(el, el.getBoundingClientRect()));
+        const beforeFormHeight = formEl.getBoundingClientRect().height;
+
+        document.documentElement.classList.add('font-scale-anim');
+        document.documentElement.style.fontSize = fontScaleMap[validScale];
+        document.documentElement.setAttribute('data-font-scale', validScale);
+        localStorage.setItem('ongjin_font_scale', validScale);
+        fontSizeButtons.forEach((btn) => {
+          btn.classList.toggle('active', btn.getAttribute('data-scale') === validScale);
+        });
+
+        const afterParentRects = new Map();
+        subGrids.forEach((g) => afterParentRects.set(g, g.getBoundingClientRect()));
+        const afterFormHeight = formEl.getBoundingClientRect().height;
+        const deltaH = beforeFormHeight - afterFormHeight;
+        const animOpts = { duration: 450, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' };
+
+        if (Math.abs(deltaH) > 1) {
+          formEl.animate(
+            [{ marginBottom: `${deltaH}px` }, { marginBottom: '0px' }],
+            animOpts
+          );
+        }
+
+        targets.forEach((el) => {
+          const parent = el.parentElement;
+          if (parent && beforeRects.has(parent)) {
+            const b = beforeRects.get(el);
+            const a = el.getBoundingClientRect();
+            const bp = beforeRects.get(parent);
+            const ap = afterParentRects.get(parent);
+            const dx = (b.left - bp.left) - (a.left - ap.left);
+            const dy = (b.top - bp.top) - (a.top - ap.top);
+            const dw = b.width - a.width;
+            if (Math.abs(dx) > 1 || Math.abs(dy) > 1 || Math.abs(dw) > 2) {
+              const frames = Math.abs(dx) > 5 && Math.abs(dy) > 2
+                ? [
+                    { transform: `translate(${dx}px, ${dy}px)`, width: `${b.width}px`, opacity: 1 },
+                    { opacity: 0.25, offset: 0.45 },
+                    { transform: 'translate(0px, 0px)', width: '100%', opacity: 1 }
+                  ]
+                : [
+                    { transform: `translate(${dx}px, ${dy}px)`, width: `${b.width}px` },
+                    { transform: 'translate(0px, 0px)', width: '100%' }
+                  ];
+              el.animate(frames, animOpts);
+            }
+            return;
+          }
+
+          const b = beforeRects.get(el);
+          const a = el.getBoundingClientRect();
+          const dx = b.left - a.left;
+          const dy = b.top - a.top;
+          const dw = b.width - a.width;
+
+          if (Math.abs(dw) > 2) {
+            const frames = Math.abs(dx) > 5
+              ? [
+                  { transform: `translate(${dx}px, ${dy}px)`, width: `${b.width}px`, opacity: 1 },
+                  { opacity: 0.25, offset: 0.45 },
+                  { transform: 'translate(0px, 0px)', width: '100%', opacity: 1 }
+                ]
+              : [
+                  { transform: `translate(${dx}px, ${dy}px)`, width: `${b.width}px` },
+                  { transform: 'translate(0px, 0px)', width: '100%' }
+                ];
+            el.animate(frames, animOpts);
+          } else if (Math.abs(dy) > 1) {
+            el.animate(
+              [{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0px)' }],
+              animOpts
+            );
+          }
+        });
+        return;
+      }
+
+      document.documentElement.style.fontSize = fontScaleMap[validScale];
+      document.documentElement.setAttribute('data-font-scale', validScale);
+      localStorage.setItem('ongjin_font_scale', validScale);
+      fontSizeButtons.forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-scale') === validScale);
+      });
+    }
+    applyFontScale(localStorage.getItem('ongjin_font_scale') || 'normal', false);
+    fontSizeButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        applyFontScale(btn.getAttribute('data-scale'), true);
+      });
+    });
+
+    // ── 다음(카카오) 우편번호 주소 검색 연동 ──
+    const addressInput = document.getElementById('address');
+    const addressDetailInput = document.getElementById('address-detail');
+    const btnSearchAddress = document.getElementById('btn-search-address');
+    const postcodeWrap = document.getElementById('postcode-wrap');
+    const postcodeContainer = document.getElementById('postcode-container');
+    const btnClosePostcode = document.getElementById('btn-close-postcode');
+
+    function openAddressSearch() {
+      if (!window.daum || !window.daum.Postcode) {
+        // 외부 스크립트 차단 환경일 경우 직접 입력 허용
+        addressInput.removeAttribute('readonly');
+        addressInput.style.background = '#ffffff';
+        addressInput.placeholder = '주소를 직접 입력해 주세요';
+        addressInput.focus();
+        return;
+      }
+
+      postcodeWrap.classList.add('open');
+      new window.daum.Postcode({
+        oncomplete: function(data) {
+          let fullAddr = data.roadAddress || data.jibunAddress;
+          let extraAddr = '';
+
+          if (data.userSelectedType === 'R') {
+            if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+              extraAddr += data.bname;
+            }
+            if (data.buildingName !== '' && data.apartment === 'Y') {
+              extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+            }
+            if (extraAddr !== '') {
+              fullAddr += ` (${extraAddr})`;
+            }
+          }
+
+          addressInput.value = fullAddr;
+          addressInput.classList.remove('invalid-highlight');
+          postcodeWrap.classList.remove('open');
+          addressDetailInput.focus();
+        },
+        width: '100%',
+        height: '100%'
+      }).embed(postcodeContainer);
+    }
+
+    btnSearchAddress.addEventListener('click', openAddressSearch);
+    addressInput.addEventListener('click', openAddressSearch);
+    btnClosePostcode.addEventListener('click', () => {
+      postcodeWrap.classList.remove('open');
+    });
+
+    // ── 영업시간 옵션 자동 생성 (오전/오후 표기 병행) ──
+    const openSelect = document.getElementById('open-time');
+    const closeSelect = document.getElementById('close-time');
+
+    function formatTimeLabel(hhmm) {
+      const [hStr, mStr] = hhmm.split(':');
+      const h = parseInt(hStr, 10);
+      if (h === 0) return `오전 12:${mStr}`;
+      if (h < 12) return `오전 ${String(h).padStart(2, '0')}:${mStr}`;
+      if (h === 12) return `오후 12:${mStr}`;
+      return `오후 ${String(h - 12).padStart(2, '0')}:${mStr}`;
+    }
+
+    for (let hour = 0; hour < 24; hour++) {
+      const hStr = String(hour).padStart(2, '0');
+      const t1 = `${hStr}:00`;
+      const t2 = `${hStr}:30`;
+
+      const opt1 = document.createElement('option');
+      opt1.value = t1;
+      opt1.textContent = formatTimeLabel(t1);
+      openSelect.appendChild(opt1);
+
+      const opt2 = document.createElement('option');
+      opt2.value = t2;
+      opt2.textContent = formatTimeLabel(t2);
+      openSelect.appendChild(opt2);
+
+      const opt3 = document.createElement('option');
+      opt3.value = t1;
+      opt3.textContent = formatTimeLabel(t1);
+      closeSelect.appendChild(opt3);
+
+      const opt4 = document.createElement('option');
+      opt4.value = t2;
+      opt4.textContent = formatTimeLabel(t2);
+      closeSelect.appendChild(opt4);
+    }
+
+    // ── 커스텀 셀렉트 드롭다운 (화면 전체를 덮지 않고 주요 시간대로 바로 스크롤) ──
+    function enhanceSelect(selectEl, defaultScrollVal = '') {
+      const wrap = document.createElement('div');
+      wrap.className = 'custom-select-wrap';
+      selectEl.parentNode.insertBefore(wrap, selectEl);
+      wrap.appendChild(selectEl);
+      selectEl.classList.add('sr-only-select');
+
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'custom-select-trigger is-placeholder';
+      trigger.innerHTML = `
+        <span class="custom-select-label"></span>
+        <svg class="custom-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      `;
+
+      const menu = document.createElement('div');
+      menu.className = 'custom-select-menu';
+
+      wrap.appendChild(trigger);
+      wrap.appendChild(menu);
+
+      function syncTrigger() {
+        const selectedOpt = selectEl.options[selectEl.selectedIndex];
+        const val = selectEl.value;
+        const text = selectedOpt ? selectedOpt.textContent : '';
+        trigger.querySelector('.custom-select-label').textContent = text;
+        trigger.classList.toggle('is-placeholder', !val);
+        menu.querySelectorAll('.custom-select-option').forEach((optEl) => {
+          optEl.classList.toggle('selected', optEl.dataset.value === val);
+        });
+      }
+
+      const opts = Array.from(selectEl.options).filter((o) => o.value !== '');
+      menu.innerHTML = opts.map((o) => `
+        <div class="custom-select-option ${selectEl.value === o.value ? 'selected' : ''}" data-value="${o.value}">
+          <span>${o.textContent}</span>
+        </div>
+      `).join('');
+
+      menu.querySelectorAll('.custom-select-option').forEach((optEl) => {
+        optEl.addEventListener('click', () => {
+          selectEl.value = optEl.dataset.value;
+          selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+          trigger.classList.remove('invalid-highlight');
+          wrap.classList.remove('open');
+          syncTrigger();
+        });
+      });
+
+      syncTrigger();
+      selectEl._syncCustomSelect = syncTrigger;
+      selectEl._customTrigger = trigger;
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = wrap.classList.contains('open');
+        document.querySelectorAll('.custom-select-wrap.open').forEach((w) => w.classList.remove('open'));
+        if (!isOpen) {
+          wrap.classList.add('open');
+          const targetVal = selectEl.value || defaultScrollVal;
+          if (targetVal) {
+            const targetItem = menu.querySelector(`.custom-select-option[data-value="${targetVal}"]`);
+            if (targetItem) {
+              requestAnimationFrame(() => {
+                menu.scrollTop = Math.max(0, targetItem.offsetTop - menu.clientHeight / 2 + targetItem.offsetHeight / 2);
+              });
+            }
+          }
+        }
+      });
+    }
+
+    enhanceSelect(document.getElementById('category'));
+    enhanceSelect(openSelect, '09:00');
+    enhanceSelect(closeSelect, '21:00');
+    enhanceSelect(document.getElementById('bank-name'));
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.custom-select-wrap')) {
+        document.querySelectorAll('.custom-select-wrap.open').forEach((w) => w.classList.remove('open'));
+      }
+    });
+
+    // ── 비밀번호 보기 토글 ──
+    function bindPasswordToggle(inputId, btnId) {
+      const inputEl = document.getElementById(inputId);
+      const btnEl = document.getElementById(btnId);
+      if (!inputEl || !btnEl) return;
+      btnEl.addEventListener('click', () => {
+        if (inputEl.type === 'password') {
+          inputEl.type = 'text';
+          btnEl.innerHTML = `<svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>`;
+        } else {
+          inputEl.type = 'password';
+          btnEl.innerHTML = `<svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>`;
+        }
+      });
+    }
+    bindPasswordToggle('password', 'pw-toggle');
+    bindPasswordToggle('password-confirm', 'pw-confirm-toggle');
+
+    // ── 전화번호 · 사업자번호 · 계좌번호 숫자 자동 포맷 기능 ──
+    document.getElementById('account-no').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+    function formatPhoneInput(e) {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.length < 4) {
+        e.target.value = val;
+      } else if (val.length < 8) {
+        e.target.value = val.substring(0, 3) + '-' + val.substring(3);
+      } else {
+        e.target.value = val.substring(0, 3) + '-' + val.substring(3, 7) + '-' + val.substring(7, 11);
+      }
+    }
+    document.getElementById('phone').addEventListener('input', formatPhoneInput);
+
+    function formatStorePhoneInput(e) {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.startsWith('02')) {
+        if (val.length < 3) e.target.value = val;
+        else if (val.length < 6) e.target.value = val.substring(0, 2) + '-' + val.substring(2);
+        else if (val.length < 10) e.target.value = val.substring(0, 2) + '-' + val.substring(2, 5) + '-' + val.substring(5);
+        else e.target.value = val.substring(0, 2) + '-' + val.substring(2, 6) + '-' + val.substring(6, 10);
+      } else {
+        if (val.length < 4) e.target.value = val;
+        else if (val.length < 7) e.target.value = val.substring(0, 3) + '-' + val.substring(3);
+        else if (val.length < 11) e.target.value = val.substring(0, 3) + '-' + val.substring(3, 6) + '-' + val.substring(6);
+        else e.target.value = val.substring(0, 3) + '-' + val.substring(3, 7) + '-' + val.substring(7, 11);
+      }
+    }
+    document.getElementById('store-phone').addEventListener('input', formatStorePhoneInput);
+
+    function formatBusinessNo(e) {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.length < 4) {
+        e.target.value = val;
+      } else if (val.length < 6) {
+        e.target.value = val.substring(0, 3) + '-' + val.substring(3);
+      } else {
+        e.target.value = val.substring(0, 3) + '-' + val.substring(3, 5) + '-' + val.substring(5, 10);
+      }
+    }
+    document.getElementById('business-no').addEventListener('input', formatBusinessNo);
+
+    // ── 파일 업로드 처리 및 Base64 변환 ──
+    const fileStates = {
+      storeImages: [],
+      businessCert: null,
+      bankbook: null
+    };
+
+    function readAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    // 1. 가게 이미지 다중 업로드 (최대 5장)
+    document.getElementById('store-images').addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      const remainingSlots = 5 - fileStates.storeImages.length;
+      
+      if (files.length > remainingSlots) {
+        showToast(`가게 이미지는 최대 5장까지 등록 가능합니다. (현재 ${fileStates.storeImages.length}장 등록됨)`, 'error');
+      }
+      
+      const filesToProcess = files.slice(0, remainingSlots);
+      
+      for (const file of filesToProcess) {
+        try {
+          const b64 = await readAsBase64(file);
+          fileStates.storeImages.push(b64);
+        } catch (err) {
+          showToast('이미지 변환 중 오류가 발생했습니다.', 'error');
+        }
+      }
+      renderStoreImagesPreviews();
+      e.target.value = '';
+    });
+
+    function renderStoreImagesPreviews() {
+      const container = document.getElementById('store-images-previews');
+      container.innerHTML = fileStates.storeImages.map((img, idx) => `
+        <div class="preview-item">
+          <img src="${img}" alt="가게 이미지" />
+          <button type="button" class="preview-remove-btn" onclick="window.removeStoreImage(${idx})">X</button>
+        </div>
+      `).join('');
+    }
+
+    window.removeStoreImage = (idx) => {
+      fileStates.storeImages.splice(idx, 1);
+      renderStoreImagesPreviews();
+    };
+
+    // 2. 사업자등록증 단일 업로드
+    document.getElementById('business-cert').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        try {
+          fileStates.businessCert = await readAsBase64(file);
+          renderSinglePreview('business-cert-preview', fileStates.businessCert, () => {
+            fileStates.businessCert = null;
+          });
+        } catch (err) {
+          showToast('사업자등록증 이미지 변환 실패', 'error');
+        }
+      }
+    });
+
+    // 3. 통장사본 단일 업로드
+    document.getElementById('bankbook').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        try {
+          fileStates.bankbook = await readAsBase64(file);
+          renderSinglePreview('bankbook-preview', fileStates.bankbook, () => {
+            fileStates.bankbook = null;
+          });
+        } catch (err) {
+          showToast('통장사본 이미지 변환 실패', 'error');
+        }
+      }
+    });
+
+    function renderSinglePreview(containerId, b64, clearCallback) {
+      const container = document.getElementById(containerId);
+      if (!b64) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = `
+        <div class="preview-item" style="width: 100px; height: 100px;">
+          <img src="${b64}" alt="첨부서류" />
+          <button type="button" class="preview-remove-btn" id="btn-clear-${containerId}">X</button>
+        </div>
+      `;
+      document.getElementById(`btn-clear-${containerId}`).onclick = () => {
+        clearCallback();
+        container.innerHTML = '';
+      };
+    }
+
+    // ── 영업 요일 선택 토글 기능 ──
+    document.querySelectorAll('.day-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+      });
+    });
+
+    // 입력 시 에러 하이라이트 제거
+    document.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('input', () => el.classList.remove('invalid-highlight'));
+      el.addEventListener('change', () => el.classList.remove('invalid-highlight'));
+    });
+
+    // ── 신청 양식 제출 ──
+    document.getElementById('form-merchant-apply').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const ownerNameInput = document.getElementById('owner-name');
+      const phoneInput = document.getElementById('phone');
+      const shopNameInput = document.getElementById('shop-name');
+      const storePhoneInput = document.getElementById('store-phone');
+      const passwordInput = document.getElementById('password');
+      const passwordConfirmInput = document.getElementById('password-confirm');
+      const categoryInput = document.getElementById('category');
+      
+      const openTimeInput = document.getElementById('open-time');
+      const closeTimeInput = document.getElementById('close-time');
+      
+      const weekdaySelectorEl = document.querySelector('.weekday-selector');
+      const activePills = Array.from(document.querySelectorAll('.day-pill.active'));
+      const selectedDays = activePills.map(btn => btn.getAttribute('data-day'));
+
+      const storeImagesBox = document.getElementById('store-images').closest('.file-upload-box');
+      const businessNoInput = document.getElementById('business-no');
+      const businessCertBox = document.getElementById('business-cert').closest('.file-upload-box');
+      const bankNameInput = document.getElementById('bank-name');
+      const accountNoInput = document.getElementById('account-no');
+      const bankbookBox = document.getElementById('bankbook').closest('.file-upload-box');
+
+      const btn = document.getElementById('btn-submit');
+      const errEl = document.getElementById('error-msg');
+
+      // 이전 하이라이트 및 에러 초기화
+      document.querySelectorAll('.invalid-highlight').forEach(el => el.classList.remove('invalid-highlight'));
+      errEl.classList.remove('show');
+
+      let firstInvalidEl = null;
+      function markInvalid(el) {
+        if (el) {
+          const targetEl = el._customTrigger || el;
+          targetEl.classList.add('invalid-highlight');
+          if (!firstInvalidEl) firstInvalidEl = targetEl;
+        }
+      }
+
+      const ownerName = ownerNameInput.value.trim();
+      const phone = phoneInput.value.trim();
+      const shopName = shopNameInput.value.trim();
+      const storePhone = storePhoneInput.value.trim();
+      const password = passwordInput.value.trim();
+      const passwordConfirm = passwordConfirmInput.value.trim();
+      const category = categoryInput.value;
+      const baseAddress = addressInput.value.trim();
+      const detailAddress = addressDetailInput.value.trim();
+      const finalAddress = detailAddress ? `${baseAddress} ${detailAddress}` : baseAddress;
+
+      const openTime = openTimeInput.value;
+      const closeTime = closeTimeInput.value;
+      const businessNo = businessNoInput.value.trim();
+      const bankName = bankNameInput.value;
+      const accountNo = accountNoInput.value.trim();
+
+      // 유효성 체크
+      if (!ownerName) markInvalid(ownerNameInput);
+      if (!phone || phone.replace(/\D/g, '').length < 10) markInvalid(phoneInput);
+      if (!shopName) markInvalid(shopNameInput);
+      if (!category) markInvalid(categoryInput);
+      if (!baseAddress) markInvalid(addressInput);
+      if (!openTime) markInvalid(openTimeInput);
+      if (!closeTime) markInvalid(closeTimeInput);
+      if (selectedDays.length === 0) markInvalid(weekdaySelectorEl);
+      if (fileStates.storeImages.length === 0) markInvalid(storeImagesBox);
+      if (!businessNo) markInvalid(businessNoInput);
+      if (!fileStates.businessCert) markInvalid(businessCertBox);
+      if (!bankName) markInvalid(bankNameInput);
+      if (!accountNo) markInvalid(accountNoInput);
+      if (!fileStates.bankbook) markInvalid(bankbookBox);
+      if (!password) markInvalid(passwordInput);
+      if (!passwordConfirm) markInvalid(passwordConfirmInput);
+
+      if (firstInvalidEl) {
+        errEl.textContent = '필수 입력 항목(*)을 확인 후 입력해 주세요.';
+        errEl.classList.add('show');
+        showToast('입력되지 않은 필수 항목(*)이 있습니다.', 'error');
+
+        firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof firstInvalidEl.focus === 'function') {
+          firstInvalidEl.focus({ preventScroll: true });
+        }
+        return;
+      }
+
+      if (password !== passwordConfirm) {
+        markInvalid(passwordConfirmInput);
+        errEl.textContent = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
+        errEl.classList.add('show');
+        showToast('비밀번호가 서로 일치하지 않습니다.', 'error');
+        passwordConfirmInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        passwordConfirmInput.focus({ preventScroll: true });
+        return;
+      }
+
+      // 영업시간 및 영업 요일 문자열 조합
+      let businessHours = '';
+      if (selectedDays.length === 7) {
+        businessHours = `매일 ${openTime} ~ ${closeTime} (연중무휴)`;
+      } else if (selectedDays.length === 5 && !selectedDays.includes('토') && !selectedDays.includes('일')) {
+        businessHours = `평일 ${openTime} ~ ${closeTime} (주말 휴무)`;
+      } else {
+        businessHours = `영업일: ${selectedDays.join(', ')} (${openTime} ~ ${closeTime})`;
+      }
+
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      const submitPayload = async (lat = null, lng = null) => {
+        const payload = {
+          ownerName,
+          phone,
+          shopName,
+          storePhone,
+          password,
+          category,
+          address: finalAddress,
+          images: fileStates.storeImages,
+          businessHours,
+          businessNo,
+          businessCertImage: fileStates.businessCert,
+          bankName,
+          accountNo,
+          bankbookImage: fileStates.bankbook,
+          lat,
+          lng
+        };
+
+        try {
+          const res = await api.post('/auth/merchant/apply', payload);
+          if (res.success) {
+            document.getElementById('form-view').style.display = 'none';
+            document.getElementById('success-view').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        } catch (err) {
+          errEl.textContent = err.message || '입점 신청 중 오류가 발생했습니다.';
+          errEl.classList.add('show');
+          btn.disabled = false;
+          btn.classList.remove('loading');
+          window.scrollTo({ top: errEl.offsetTop - 100, behavior: 'smooth' });
+        }
+      };
+
+      // 네이버 지도 Geocoder 서비스를 통해 주소를 좌표로 변환 시도
+      if (window.naver && window.naver.maps && window.naver.maps.Service && window.naver.maps.Service.geocode) {
+        naver.maps.Service.geocode({ query: baseAddress }, function(status, response) {
+          if (status === naver.maps.Service.Status.OK && response.v2 && response.v2.addresses.length > 0) {
+            const first = response.v2.addresses[0];
+            submitPayload(parseFloat(first.y), parseFloat(first.x));
+          } else {
+            submitPayload(null, null);
+          }
+        });
+      } else {
+        submitPayload(null, null);
+      }
+    });
+  </script>
+</body>
+</html>
+

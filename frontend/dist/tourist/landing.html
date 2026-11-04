@@ -4,7 +4,7 @@
   <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>쿠폰 등록 | 옹진관광 쿠폰</title>
+  <title>쿠폰 등록 | 옹진관광 쿠폰</title>
   <style>
     .claim-container {
       padding: 24px 20px;
@@ -27,7 +27,7 @@
       border: 1.5px solid var(--primary);
       border-radius: var(--radius-lg);
       padding: 20px;
-      margin: 20px 0;
+      margin: 20px 0 16px;
     }
 
     .claim-amount {
@@ -35,6 +35,35 @@
       font-weight: 900;
       color: var(--navy);
       letter-spacing: -0.8px;
+    }
+
+    .claim-breakdown {
+      margin-top: 6px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #0369a1;
+    }
+
+    .claim-meta-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.86rem;
+    }
+
+    .claim-meta-box .lbl {
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .claim-meta-box .val {
+      color: #0f172a;
+      font-weight: 700;
     }
 
     .form-group {
@@ -61,8 +90,49 @@
       color: var(--navy);
       outline: none;
     }
+
+    .dev-otp-notice {
+      margin: 8px 0 4px;
+      font-size: 0.84rem;
+      color: #64748b;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .dev-otp-notice strong {
+      color: #0284c7;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+      padding: 1px 4px;
+    }
+
+    .already-claimed-box {
+      display: none;
+      padding: 18px 16px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .already-claimed-title {
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .already-claimed-desc {
+      font-size: 0.88rem;
+      color: #64748b;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
   </style>
-  <script type="module" crossorigin src="/assets/tourist-landing-B8mI3nJe.js"></script>
+  <script type="module" crossorigin src="/assets/tourist-landing-BMtVJBdK.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
   <link rel="stylesheet" crossorigin href="/assets/tourist-theme-kNdEf_n5.css">
@@ -93,6 +163,22 @@
         <div class="claim-amount-box">
           <div style="font-size:0.82rem; font-weight:700; color:var(--primary-dark); margin-bottom:4px;">할인 쿠폰 금액</div>
           <div class="claim-amount" id="face-value">0원</div>
+          <div class="claim-breakdown" id="coupon-breakdown" style="display:none;"></div>
+        </div>
+
+        <div class="claim-meta-box">
+          <span class="lbl">유효 기간</span>
+          <span class="val" id="validity-text">발급일로부터 1년간 유효</span>
+        </div>
+
+        <div class="already-claimed-box" id="already-claimed-box">
+          <div class="already-claimed-title" id="already-claimed-title">이미 수령 완료된 쿠폰입니다</div>
+          <div class="already-claimed-desc" id="already-claimed-desc">
+            본 쿠폰 링크는 1회성 보안 세션으로 이미 모바일 지갑에 등록되었습니다.
+          </div>
+          <a href="/tourist/mypage.html" class="btn-primary-bold" style="display:flex; align-items:center; justify-content:center; text-decoration:none;">
+            내 쿠폰 지갑 확인하기
+          </a>
         </div>
 
         <form id="claim-form">
@@ -106,7 +192,8 @@
 
           <div class="form-group" id="otp-group" style="display:none;">
             <label class="form-label">인증번호 6자리</label>
-            <input type="text" id="otp-code" class="phone-input" placeholder="000000" maxlength="6" style="letter-spacing:4px; text-align:center;" />
+            <input type="text" id="otp-code" class="phone-input" placeholder="000000" maxlength="6" inputmode="numeric" style="letter-spacing:4px; text-align:center;" />
+            <p class="dev-otp-notice" id="dev-otp-notice" style="display:none;"></p>
           </div>
 
           <button type="submit" class="btn-primary-bold" id="btn-claim" style="margin-top:12px;">지갑으로 쿠폰 받기</button>
@@ -122,7 +209,7 @@
         </svg>
         홈
       </a>
-      <a href="/tourist/map.html" class="nav-tab">
+      <a href="/tourist/mypage.html?tab=map" class="nav-tab">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
@@ -138,6 +225,6 @@
   </div>
 
   <div id="toast-container"></div>
-
+
 </body>
 </html>

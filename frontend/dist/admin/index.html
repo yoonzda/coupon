@@ -1,16 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="옹진 관광쿠폰">
-  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
-  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
-  <meta property="og:locale" content="ko_KR">
   <title>관리자 대시보드 | 옹진 관광 쿠폰</title>
   <script>
     (function() {
@@ -18,112 +11,81 @@
         document.documentElement.classList.add('sidebar-collapsed');
       }
     })();
-  </script>
-  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </script>
   <style>
-    * {
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
       background: #f1f5f9;
-      color: #0f172a; 
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      color: #1e293b; 
     }
 
     /* 통계 카드 */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 20px;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
     }
     .stat-card {
       background: #fff;
-      padding: 22px 24px;
-      border-radius: 16px;
-      border: 1px solid #cbd5e1;
-      box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease-in-out;
     }
-    .stat-card:hover {
+    .stat-card.clickable {
+      cursor: pointer;
+    }
+    .stat-card.clickable:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.08);
-      border-color: #94a3b8;
+      box-shadow: var(--shadow-md);
+      border-color: #3b82f6;
     }
-    .stat-label { 
-      font-size: 13.5px; 
-      font-weight: 700; 
-      color: #475569; 
-      margin-bottom: 8px; 
-      letter-spacing: -0.01em;
-    }
-    .stat-value { 
-      font-size: 2.15rem; 
-      font-weight: 900; 
-      color: #0f172a; 
-      letter-spacing: -0.03em;
-      font-variant-numeric: tabular-nums;
-      line-height: 1.2;
-    }
-    .stat-trend { 
-      font-size: 13px; 
-      font-weight: 600; 
-      margin-top: 6px; 
-      color: #475569;
-    }
-    .trend-up { color: #16a34a; font-weight: 700; }
+    .stat-label { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; }
+    .stat-value { font-size: 1.8rem; font-weight: 900; color: var(--text-primary); }
+    .stat-trend { font-size: 0.75rem; margin-top: 4px; }
 
-    /* 데이터 테이블 및 차트 카드 */
+    /* 데이터 테이블 */
     .admin-card {
       background: #fff;
-      border-radius: 16px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
       overflow: hidden;
     }
     .card-header {
       padding: 20px 24px;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .card-title { font-size: 1.15rem; font-weight: 800; color: #0f172a; }
+    .card-title { font-size: 1.1rem; font-weight: 700; }
     .admin-table {
       width: 100%;
       border-collapse: collapse;
     }
     .admin-table th {
-      background: #f8fafc;
-      padding: 14px 24px;
+      background: var(--surface-2);
+      padding: 12px 24px;
       text-align: left;
-      font-size: 13px;
-      font-weight: 700;
-      color: #475569;
-      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
     }
     .admin-table td {
       padding: 16px 24px;
-      font-size: 13.5px;
-      color: #334155;
-      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border);
     }
-    .admin-table tr:hover { background: #f8fafc; }
-    @media (max-width: 1080px) {
-      .dashboard-chart-grid {
-        grid-template-columns: 1fr !important;
-      }
-    }
+    .admin-table tr:hover { background: var(--surface-2); }
   </style>
-  <script type="module" crossorigin src="/assets/admin-index-CZ0wO3Qw.js"></script>
+  <script type="module" crossorigin src="/assets/admin-index-Co0N_SSI.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-DIUxAG8e.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-DxYVQPuN.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-03q0TmgI.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
 </head>
 <body>
   <div class="app-shell">
@@ -132,197 +94,60 @@
 
     <!-- 메인 컨텐츠 -->
     <main class="admin-content">
-      <!-- 표준 업무 헤더 -->
       <header class="dashboard-header">
         <div class="header-title-area">
+          <span class="header-category">Dashboard</span>
           <h1>대시보드</h1>
-          <p class="header-desc">실시간 쿠폰 발행 및 이용 현황을 확인합니다.</p>
-        </div>
-        <div class="header-actions">
-          <button type="button" id="btn-refresh-dashboard" class="btn btn-secondary" title="대시보드 새로고침" onclick="window.location.reload()">
-            <span>새로고침</span>
-          </button>
-          <button type="button" id="btn-start-tutorial" class="btn btn-secondary" title="담당자 업무 튜토리얼을 시작합니다.">
-            <span>업무 가이드</span>
-          </button>
-          <button type="button" id="btn-open-cheatsheet" class="btn btn-secondary" title="인수인계 체크리스트 및 업무 흐름도 열람">
-            <span>인수인계 매뉴얼</span>
-          </button>
+          <p class="header-desc">실시간 쿠폰 발행 및 결제 데이터를 확인합니다.</p>
         </div>
       </header>
 
-      <!-- 1. 핵심 지표 현황 보드 (단일 직사각형 분할 블록) -->
-      <div class="kpi-board">
-        <!-- 1-1. 금월 누적 결제액 -->
-        <div class="kpi-item" onclick="location.href='settlement.html'" title="정산 관리 바로가기">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <div class="kpi-label" data-i18n="stat_total_amount" style="margin-bottom: 0;">금월 누적 결제액</div>
-            <a href="settlement.html" class="kpi-shortcut" onclick="event.stopPropagation();">
-              <span>바로가기</span>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </a>
-          </div>
-          <div class="kpi-value" id="stat-total-amount">0원</div>
-          <div class="kpi-sub" id="stat-tx-count">결제 0건</div>
+      <!-- 기본 통계 지표 -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat_total_amount">금월 누적 결제액</div>
+          <div class="stat-value" id="stat-total-amount">₩0</div>
+          <div class="stat-trend" id="stat-tx-count" style="color: var(--text-muted); font-size:0.8rem;">결제 0건</div>
         </div>
-
-        <!-- 1-2. 가입 관광객 -->
-        <div class="kpi-item" onclick="location.href='users.html'" title="회원 계정 관리 바로가기">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <div class="kpi-label" data-i18n="stat_users" style="margin-bottom: 0;">가입 관광객</div>
-            <a href="users.html" class="kpi-shortcut" onclick="event.stopPropagation();">
-              <span>바로가기</span>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </a>
-          </div>
-          <div class="kpi-value" id="stat-users">0명</div>
-          <div class="kpi-sub">누적 회원</div>
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat_users">가입 관광객</div>
+          <div class="stat-value" id="stat-users">0</div>
+          <div class="stat-trend" style="color: var(--text-muted); font-size:0.8rem;">누적 회원</div>
         </div>
-
-        <!-- 1-3. 승인 가맹점 -->
-        <div class="kpi-item" onclick="location.href='merchants.html'" title="가맹점 관리 바로가기">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <div class="kpi-label" data-i18n="stat_merchants" style="margin-bottom: 0;">승인 가맹점</div>
-            <a href="merchants.html" class="kpi-shortcut" onclick="event.stopPropagation();">
-              <span>바로가기</span>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </a>
-          </div>
-          <div class="kpi-value" id="stat-merchants">0곳</div>
-          <div class="kpi-sub" id="stat-pending">대기 0곳</div>
+        <div class="stat-card clickable" onclick="location.href='/admin/merchants.html'">
+          <div class="stat-label" data-i18n="stat_merchants">승인 가맹점</div>
+          <div class="stat-value" id="stat-merchants">0</div>
+          <div class="stat-trend" id="stat-pending" style="color: var(--text-muted); font-size:0.8rem;">대기 0곳</div>
         </div>
-
-        <!-- 1-4. 발행 쿠폰 / 사용 -->
-        <div class="kpi-item" onclick="location.href='coupons.html'" title="쿠폰 관리 바로가기">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <div class="kpi-label" style="margin-bottom: 0;">발행 쿠폰 / 사용</div>
-            <a href="coupons.html" class="kpi-shortcut" onclick="event.stopPropagation();">
-              <span>바로가기</span>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </a>
-          </div>
-          <div class="kpi-value" id="stat-coupon-issued">0 / 0</div>
-          <div class="kpi-sub" id="stat-coupon-rate" style="color: var(--adm-success);">사용률 0%</div>
+        <div class="stat-card">
+          <div class="stat-label">발행 쿠폰 / 사용</div>
+          <div class="stat-value" id="stat-coupon-issued">0</div>
+          <div class="stat-trend" id="stat-coupon-rate" style="color: #10b981; font-size:0.8rem;">사용률 0%</div>
         </div>
-
-        <!-- 1-5. FDS 미해결 알림 -->
-        <div class="kpi-item" onclick="location.href='fds.html'" title="FDS 모니터링 바로가기">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <div class="kpi-label" data-i18n="stat_fds" style="margin-bottom: 0;">FDS 미해결 알림</div>
-            <a href="fds.html" class="kpi-shortcut" onclick="event.stopPropagation();">
-              <span>바로가기</span>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </a>
-          </div>
-          <div class="kpi-value" id="stat-fds" style="color: var(--adm-danger);">0건</div>
-          <div class="kpi-sub">이상거래 탐지</div>
-        </div>
-
-        <!-- 1-6. 오늘 방문자 / 회원접속 -->
-        <div class="kpi-item" onclick="location.href='visitor-stats.html'" title="접속자 통계 분석 바로가기">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <div class="kpi-label" style="margin-bottom: 0;">오늘 방문자 / 회원접속</div>
-            <a href="visitor-stats.html" class="kpi-shortcut" onclick="event.stopPropagation();">
-              <span>바로가기</span>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </a>
-          </div>
-          <div class="kpi-value" id="stat-today-visitors">0명</div>
-          <div class="kpi-sub" style="justify-content: space-between;">
-            <span id="stat-today-dau">회원 0명</span>
-            <span id="stat-realtime-badge" class="badge badge-success">실시간 0명</span>
-          </div>
+        <div class="stat-card">
+          <div class="stat-label" data-i18n="stat_fds">FDS 미해결 알림</div>
+          <div class="stat-value" style="color: var(--danger);" id="stat-fds">0</div>
+          <div class="stat-trend" style="color: var(--text-muted); font-size:0.8rem;">이상거래 탐지</div>
         </div>
       </div>
 
-      <!-- 2. 접속자 및 이용 현황 요약 바 (차분한 공공 패널 스타일) -->
-      <div class="traffic-summary-bar">
-        <div>
-          <div class="traffic-summary-title">접속자 및 관광객 이용 통계</div>
-          <div class="traffic-summary-stats">
-            <span>오늘 방문 <strong id="banner-today-uv">0</strong>명</span>
-            <span style="color: var(--adm-border);">|</span>
-            <span>페이지뷰 <strong id="banner-today-pv">0</strong>회</span>
-            <span style="color: var(--adm-border);">|</span>
-            <span>회원 로그인 <strong id="banner-today-dau">0</strong>명</span>
-            <span style="color: var(--adm-border);">|</span>
-            <span>실시간 접속 <strong id="banner-rt-users" style="color: var(--adm-success);">0</strong>명</span>
-          </div>
-        </div>
-        <div>
-          <a href="/admin/visitor-stats.html" class="btn btn-secondary">
-            <span>상세 접속자 통계 &gt;</span>
-          </a>
-        </div>
-      </div>
-
-      <!-- 3. 대시보드 접속자 추이 & 환경 시각화 차트 섹션 -->
-      <div class="dashboard-chart-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px;">
-        <!-- 접속자 주간 추이 차트 -->
-        <div class="admin-card" style="padding: 20px 24px; display: flex; flex-direction: column;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-            <div>
-              <span id="dash-chart-title" style="font-size: 16px; font-weight: 700; color: var(--adm-text-main); display: block;">최근 7일 접속자 추이</span>
-              <span style="font-size: 13px; color: var(--adm-text-sub);">전체 방문자와 로그인 회원의 일별 이용 흐름</span>
-            </div>
-            <div class="adm-seg-tabs" style="display: inline-flex; border: 1px solid var(--adm-border); border-radius: var(--adm-radius-sm); overflow: hidden;">
-              <button type="button" id="btn-chart-7d" class="btn-dash-period active" style="padding: 6px 14px; font-size: 13px; font-weight: 600; border: none; background: var(--adm-primary); color: #fff; cursor: pointer;">최근 7일</button>
-              <button type="button" id="btn-chart-today" class="btn-dash-period" style="padding: 6px 14px; font-size: 13px; font-weight: 500; border: none; border-left: 1px solid var(--adm-border); background: var(--adm-surface); color: var(--adm-text-sub); cursor: pointer;">오늘 시간별</button>
-            </div>
-          </div>
-          <div style="position: relative; height: 320px; width: 100%;">
-            <canvas id="dashboardTrendChart"></canvas>
-          </div>
-        </div>
-
-        <!-- 접속 기기 및 유입 요약 미니 차트 -->
-        <div class="admin-card" style="padding: 20px 24px; display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-              <div>
-                <span style="font-size: 16px; font-weight: 700; color: var(--adm-text-main);">접속 기기 환경</span>
-              </div>
-              <a href="/admin/visitor-stats.html" class="btn btn-secondary" style="font-size: 12px; padding: 4px 10px; height: 28px;">상세보기</a>
-            </div>
-            <div style="position: relative; height: 200px; width: 100%; display: flex; align-items: center; justify-content: center;">
-              <canvas id="dashboardDeviceChart"></canvas>
-            </div>
-          </div>
-          <div style="margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-            <div style="background: var(--adm-bg); border: 1px solid var(--adm-border); border-radius: var(--adm-radius-sm); padding: 10px 6px; text-align: center;">
-              <div style="color: var(--adm-text-sub); font-size: 12px; font-weight: 500;">모바일 비율</div>
-              <div id="dash-mobile-rate" style="font-weight: 700; color: var(--adm-primary); font-size: 16px; margin-top: 4px; font-variant-numeric: tabular-nums;">0%</div>
-            </div>
-            <div style="background: var(--adm-bg); border: 1px solid var(--adm-border); border-radius: var(--adm-radius-sm); padding: 10px 6px; text-align: center;">
-              <div style="color: var(--adm-text-sub); font-size: 12px; font-weight: 500;">실시간 세션</div>
-              <div id="dash-realtime-users" style="font-weight: 700; color: var(--adm-success); font-size: 16px; margin-top: 4px; font-variant-numeric: tabular-nums;">0명</div>
-            </div>
-            <div style="background: var(--adm-bg); border: 1px solid var(--adm-border); border-radius: var(--adm-radius-sm); padding: 10px 6px; text-align: center;">
-              <div style="color: var(--adm-text-sub); font-size: 12px; font-weight: 500;">금월 순방문</div>
-              <div id="dash-month-uv" style="font-weight: 700; color: var(--adm-text-main); font-size: 16px; margin-top: 4px; font-variant-numeric: tabular-nums;">0명</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4. 최근 FDS 알림 -->
+      <!-- 최근 FDS 알림 -->
       <div class="admin-card">
         <div class="card-header">
           <div class="card-title" data-i18n="fds_recent_title">최근 이상거래 의심 내역 (FDS)</div>
-          <a href="/admin/fds.html" class="btn btn-secondary" data-i18n="btn_view_all" style="font-size: 12px; padding: 4px 12px; height: 30px;">전체보기</a>
+          <a href="/admin/fds.html" class="btn btn-neutral-outline" data-i18n="btn_view_all" style="padding: 6px 12px; font-size: 0.8rem;">전체보기</a>
         </div>
         <table class="admin-table">
           <thead>
             <tr>
               <th data-i18n="th_date">탐지 일시</th>
               <th data-i18n="th_merchant">가맹점</th>
-              <th data-i18n="th_user">사용자</th>
-              <th data-i18n="th_rule">탐지 규칙</th>
+              <th data-i18n="th_user">관광객</th>
+              <th data-i18n="th_rule">룰 ID</th>
               <th data-i18n="th_status">상태</th>
             </tr>
           </thead>
           <tbody id="fds-recent-list">
-            <!-- JS로 렌더링 -->
             <tr><td colspan="5" class="text-center" style="padding: 40px; color: var(--text-muted);">데이터를 불러오고 있습니다...</td></tr>
           </tbody>
         </table>

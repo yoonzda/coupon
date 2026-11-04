@@ -1,1039 +1,1775 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <!-- PWA & Mobile Web App -->
-  <link rel="manifest" href="/assets/manifest-C2E8yHgd.webmanifest">
-  <meta name="theme-color" content="#FFFFFF">
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon-Lwcp8xrE.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="옹진쿠폰">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <script src="/shared/js/pwa-install.js?v=20261022" data-pwa-banner defer></script>
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="옹진 관광쿠폰">
-  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
-  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
-  <meta property="og:locale" content="ko_KR">
-  <meta name="description" content="내 쿠폰 지갑 — 옹진관광 쿠폰 마이페이지" />
-  <title>내 쿠폰 지갑 | 옹진관광 쿠폰</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="옹진 관광 쿠폰 — 내 지갑 및 가맹점 지도" />
+  <title>옹진 관광 쿠폰 | 모바일 지갑</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
+
+  <!-- 지도 렌더링용 Leaflet 오픈스트리트맵 CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <style>
-    /* 종이쿠폰 등록 및 발행처 바텀시트 모달 스타일 보강 (하단 네비 탭바보다 상위 z-index 10050 보장) */
-    #register-sheet.sheet-overlay,
-    #issuer-sheet.sheet-overlay {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      max-width: var(--max-mobile, 480px);
-      height: 100%;
-      margin: 0 auto;
-      background: rgba(0, 0, 0, 0.55);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      z-index: 10050 !important;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      align-items: stretch;
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #f0f9ff;
+      --primary-border: #bae6fd;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-400: #94a3b8;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --white: #ffffff;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.07);
+      --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.1);
+    }
+
+    *, *::before, *::after {
       box-sizing: border-box;
-    }
-    #register-sheet .sheet,
-    #issuer-sheet .sheet {
-      background: #ffffff;
-      border-radius: 24px 24px 0 0;
+      margin: 0;
       padding: 0;
+      word-break: keep-all;
+    }
+
+    html {
+      overflow-y: scroll;
+      scrollbar-gutter: stable;
+    }
+
+    html, body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      background-color: #f8fafc;
+      font-family: 'Pretendard', sans-serif;
+      color: var(--slate-800);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* 폰트 스케일별 간격·여백·줄간격 비례 변수 */
+    :root {
+      --panel-pad-x: 1.25rem;
+      --panel-pad-top: 1.25rem;
+      --panel-pad-bottom: 2.5rem;
+      --section-gap: 1rem;
+      --card-pad: 1.15rem;
+      --card-gap: 0.85rem;
+      --info-row-gap: 0.35rem;
+      --chip-gap: 0.45rem;
+    }
+
+    html[data-font-scale="small"] {
+      --panel-pad-x: 1.1rem;
+      --panel-pad-top: 1rem;
+      --panel-pad-bottom: 2rem;
+      --section-gap: 0.85rem;
+      --card-pad: 1rem;
+      --card-gap: 0.7rem;
+      --info-row-gap: 0.28rem;
+      --chip-gap: 0.4rem;
+    }
+
+    html[data-font-scale="large"] {
+      --panel-pad-x: 1.15rem;
+      --panel-pad-top: 1.25rem;
+      --panel-pad-bottom: 2.75rem;
+      --section-gap: 1.15rem;
+      --card-pad: 1.25rem;
+      --card-gap: 1rem;
+      --info-row-gap: 0.48rem;
+      --chip-gap: 0.5rem;
+    }
+
+    /* 메인 앱 컨테이너 */
+    .app-shell {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: var(--white);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
       position: relative;
-      box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.25);
-      max-height: 86vh;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      animation: registerSheetUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .sheet-scroll-area {
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      padding: 0 20px 16px;
-      flex: 1;
+
+    /* ── 상단 고정 래퍼 (헤더 + 탭바: 스크롤 연동 60fps 부드러운 이동) ── */
+    .top-sticky-wrap {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 520px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transform: translate3d(0, 0, 0);
+      transition: box-shadow 0.3s ease;
+      will-change: transform;
     }
-    .sheet-sticky-footer {
-      position: sticky;
-      bottom: 0;
-      background: #ffffff;
-      padding: 12px 20px calc(14px + env(safe-area-inset-bottom, 12px));
-      border-top: 1px solid #E2E8F0;
+
+    .top-sticky-wrap.is-scrolled {
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+
+    /* 공통 SVG 아이콘 (폰트 사이즈에 비례해 자동 확대/축소) */
+    .ui-icon {
+      width: 1.18em;
+      height: 1.18em;
+      flex-shrink: 0;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* ── 상단 헤더 (로고만 적당히 고정, 글자 크기 조절 버튼 및 탭은 함께 스케일링) ── */
+    .header-bar {
+      border-bottom: 1px solid var(--slate-100);
+      padding: 0.7rem var(--panel-pad-x);
       display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
       gap: 8px;
-      z-index: 30;
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+      text-decoration: none;
+      flex-shrink: 0;
+      user-select: none;
+      cursor: default;
+    }
+
+    .brand-logo {
+      width: 25px;
+      height: 25px;
+      object-fit: contain;
       flex-shrink: 0;
     }
-    @keyframes registerSheetUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-    #register-sheet .sheet-close-btn,
-    #issuer-sheet .sheet-close-btn {
-      position: absolute;
-      top: 14px;
-      right: 16px;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: #F3F4F6;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 20;
-      color: #4B5563;
-      transition: background 0.2s ease;
-    }
-    #register-sheet .sheet-close-btn:hover {
-      background: #E5E7EB;
-      color: #111827;
+
+    .brand-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 18.5px;
+      font-weight: 700;
+      color: var(--slate-900);
+      letter-spacing: -0.3px;
+      line-height: 1.1;
+      white-space: nowrap;
     }
 
-    /* QR 사용 모달 */
-    .use-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.52);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      z-index: 10050 !important;
+    .brand-title span {
+      color: var(--primary);
+    }
+
+    .header-actions {
       display: flex;
       align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity var(--duration-slow) var(--ease-standard);
+      gap: 0.35rem;
+      flex-shrink: 0;
+      margin-left: auto;
     }
-    .use-modal-backdrop.active {
-      opacity: 1;
+
+    /* 헤더 글자 크기 조절 컨트롤 (슬라이딩 토글) */
+    .font-size-control {
+      position: relative;
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      height: 34px;
+      background: var(--slate-100);
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid var(--slate-200);
+      user-select: none;
+    }
+
+    .font-size-slider {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: calc(50% - 3px);
+      background: var(--white);
+      border-radius: 999px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+      transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    html[data-font-scale="large"] .font-size-slider {
+      transform: translateX(100%);
+    }
+
+    .font-size-btn {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-width: 50px;
+      padding: 0 12px;
+      border: none;
+      background: transparent;
+      color: var(--slate-600);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 999px;
+      cursor: pointer;
+      line-height: 1;
+      white-space: nowrap;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .font-size-btn:hover {
+      color: var(--slate-900);
+    }
+
+    .font-size-btn.active {
+      color: var(--primary);
+    }
+
+    /* 내 쿠폰 탭 내부 계정/로그아웃 바 (번호 + 로그아웃만 깔끔하게 배치) */
+    .wallet-account-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 0.8rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: var(--section-gap);
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .wallet-account-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .user-phone-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.94rem;
+      color: var(--slate-800);
+      font-weight: 700;
+      background: var(--white);
+      border: 1px solid var(--slate-200);
+      padding: 0.35rem 0.78rem;
+      border-radius: 99px;
+      letter-spacing: 0.2px;
+    }
+
+    .btn-logout {
+      font-size: 0.88rem;
+      color: var(--slate-600);
+      background: var(--white);
+      border: 1px solid var(--slate-200);
+      text-decoration: none;
+      font-weight: 700;
+      padding: 0.42rem 0.82rem;
+      border-radius: 0.55rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-logout:hover {
+      color: var(--slate-900);
+      background: var(--slate-100);
+      border-color: var(--slate-300);
+    }
+
+    /* ── 상단 세그먼트 네비게이션 탭 (rem 비례 확대) ── */
+    .nav-tabs-wrap {
+      position: relative;
+      background: var(--white);
+      border-bottom: 1px solid var(--slate-200);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 0;
+    }
+
+    .nav-tab-btn {
+      min-height: 3.1rem;
+      padding: 0.7rem 0.25rem;
+      background: transparent;
+      border: none;
+      font-family: inherit;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--slate-500);
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.38rem;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .nav-tab-label {
+      display: inline-flex;
+      align-items: center;
+      line-height: 1;
+    }
+
+    .nav-tab-btn.active {
+      color: var(--primary);
+    }
+
+    .nav-tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.38em;
+      height: 1.38em;
+      padding: 0 0.4em;
+      font-size: 0.82em;
+      font-weight: 700;
+      line-height: 1;
+      background: var(--slate-300, #cbd5e1);
+      color: var(--slate-700);
+      border-radius: 999px;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .nav-tab-btn.active .nav-tab-badge {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    /* 탭 하단 슬라이딩 인디케이터 바 */
+    .nav-tab-indicator {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: calc(100% / 3);
+      height: 3px;
+      pointer-events: none;
+      transform: translate3d(0%, 0, 0);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    .nav-tab-indicator::after {
+      content: '';
+      display: block;
+      width: 64%;
+      height: 100%;
+      margin: 0 auto;
+      background: var(--primary);
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* ── 본문 영역 & 100dvh 전체 비율 활용 슬라이딩 탭 트랙 ── */
+    .main-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--top-bar-offset, 102px);
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .tab-track {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      width: 300%;
+      transform: translate3d(0%, 0, 0);
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    .tab-panel {
+      width: calc(100% / 3);
+      flex-shrink: 0;
+      min-height: calc(100dvh - var(--top-bar-offset, 102px));
+      padding: var(--panel-pad-top) var(--panel-pad-x) var(--panel-pad-bottom);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tab-panel:not(.active) {
+      max-height: calc(100dvh - var(--top-bar-offset, 102px));
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    #coupon-list-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--card-gap);
+    }
+
+    .store-filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem 0.6rem;
+      margin-bottom: var(--section-gap);
+    }
+
+    .store-total-badge {
+      font-size: 0.88rem;
+      color: var(--slate-500);
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    /* ── [쿠폰 카드] 티켓 스타일 (화면 비율에 맞춰 여유로운 구성) ── */
+    .coupon-card {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      border-radius: var(--radius-md);
+      color: var(--white);
+      padding: 1.5rem 1.4rem;
+      min-height: 220px;
+      flex: 1 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.28);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .coupon-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(2, 132, 199, 0.35);
+    }
+
+    .coupon-card::before,
+    .coupon-card::after {
+      content: '';
+      position: absolute;
+      top: 52%;
+      width: 1.15rem;
+      height: 1.15rem;
+      background-color: var(--white);
+      border-radius: 50%;
+      transform: translateY(-50%);
+    }
+
+    .coupon-card::before { left: -0.58rem; }
+    .coupon-card::after { right: -0.58rem; }
+
+    .coupon-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .coupon-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.28rem 0.7rem;
+      border-radius: 99px;
+      backdrop-filter: blur(4px);
+      letter-spacing: 0.2px;
+    }
+
+    .coupon-dday {
+      font-size: 0.88rem;
+      font-weight: 700;
+      background: #f59e0b;
+      color: #78350f;
+      padding: 0.28rem 0.65rem;
+      border-radius: 0.4rem;
+    }
+
+    .coupon-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-bottom: 1.15rem;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+      margin-bottom: 1rem;
+    }
+
+    .coupon-amount {
+      font-size: 2.05rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.25rem;
+    }
+
+    .coupon-desc {
+      font-size: 0.92rem;
+      opacity: 0.92;
+      line-height: 1.4;
+    }
+
+    .coupon-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+    }
+
+    .coupon-expiry {
+      font-size: 0.88rem;
+      opacity: 0.92;
+    }
+
+    .btn-coupon-qr {
+      background: var(--white);
+      color: var(--primary-dark);
+      border: none;
+      padding: 0.65rem 1.15rem;
+      border-radius: 0.55rem;
+      font-size: 0.94rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-coupon-qr:hover {
+      background: #f0f9ff;
+      transform: translateY(-1px);
+    }
+
+    /* 내 쿠폰 하단 안내 박스 (100dvh 화면 균형 배분) */
+    .wallet-bottom-guide {
+      margin-top: auto;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      padding: var(--card-pad);
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .wallet-guide-title {
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: var(--slate-800);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .wallet-guide-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-size: 0.86rem;
+      color: var(--slate-600);
+      line-height: 1.5;
+    }
+
+    /* 쿠폰 없음 빈 상태 (100dvh 비율에 맞춰 넉넉하게 채움) */
+    .empty-coupon-box {
+      flex: 1;
+      min-height: clamp(280px, 54dvh, 520px);
+      background: var(--slate-50);
+      border: 1.5px dashed var(--slate-300, #cbd5e1);
+      border-radius: var(--radius-md);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .empty-icon {
+      width: 3.2rem;
+      height: 3.2rem;
+      margin: 0 auto 0.4rem;
+      color: var(--slate-400);
+    }
+
+    .empty-title {
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--slate-800);
+    }
+
+    .empty-desc {
+      font-size: 0.94rem;
+      color: var(--slate-500);
+      line-height: 1.6;
+      max-width: 24rem;
+    }
+
+    /* ── [가맹점 지도 섹션 - 분리형 & 100dvh 비율 레이아웃] ── */
+    .island-chips-scroll {
+      display: flex;
+      gap: var(--chip-gap);
+      overflow-x: auto;
+      padding: 0.15rem 0.15rem var(--section-gap);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      flex-shrink: 0;
+    }
+
+    .island-chips-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip-btn {
+      flex-shrink: 0;
+      padding: 0.52rem 0.98rem;
+      border-radius: 99px;
+      border: 1.5px solid var(--slate-200);
+      background: var(--white);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--slate-600);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .chip-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .chip-btn.active {
+      background: var(--primary);
+      color: var(--white);
+      border-color: var(--primary);
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+    }
+
+    /* 2. 순수 지도 프레임 (100dvh 화면 비율에 맞춰 확장) */
+    .map-container-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1.5px solid var(--slate-200);
+      box-shadow: var(--shadow-sm);
+      background: var(--slate-100);
+      position: relative;
+      margin-bottom: var(--section-gap);
+      min-height: clamp(280px, 42dvh, 500px);
+    }
+
+    .interactive-map-frame {
+      flex: 1;
+      width: 100%;
+      min-height: clamp(280px, 42dvh, 500px);
+      position: relative;
+      background: #e2e8f0;
+      z-index: 1;
+    }
+
+    /* 3. 지도 하단 검색 바 & 선택된 가맹점 길찾기 카드 */
+    .map-bottom-search-wrap {
+      margin-bottom: var(--section-gap);
+      flex-shrink: 0;
+    }
+
+    .map-search-bar {
+      background: var(--white);
+      border-radius: 0.75rem;
+      padding: 0.6rem 0.95rem;
+      min-height: 3.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border: 1.5px solid var(--slate-200);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      font-size: 0.95rem;
+      color: var(--slate-400);
+    }
+
+    .map-search-bar:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+    }
+
+    .map-search-bar input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 0.96rem;
+      font-family: inherit;
+      color: var(--slate-800);
+      width: 100%;
+    }
+
+    /* 지도 핀 클릭 시 올라오는 네이티브형 가맹점 바텀시트 (지도 가림/블러 없음) */
+    .store-bottom-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 520px;
+      background: var(--white);
+      border-top: 1px solid var(--slate-200);
+      border-radius: 1.35rem 1.35rem 0 0;
+      padding: 0.85rem var(--panel-pad-x) 1.5rem;
+      box-shadow: 0 -10px 32px rgba(15, 23, 42, 0.12);
+      z-index: 1500;
+      transform: translate3d(0, 105%, 0);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+    }
+
+    .store-bottom-sheet.active {
+      transform: translate3d(0, 0, 0);
       pointer-events: auto;
     }
-    .use-modal-sheet {
-      background: #fff;
-      border-radius: 22px;
-      width: 90%;
-      max-width: 360px;
-      padding: 32px 24px 28px;
-      text-align: center;
-      box-shadow: var(--shadow-modal);
-      transform: scale(0.92);
-      transition: transform var(--duration-slow) var(--ease-standard);
+
+    .store-sheet-handle {
+      width: 2.25rem;
+      height: 0.25rem;
+      background: var(--slate-200);
+      border-radius: 99px;
+      margin: 0 auto 0.85rem;
     }
-    .use-modal-backdrop.active .use-modal-sheet {
-      transform: scale(1);
-    }
-    .qr-container {
-      background: var(--app-bg);
-      border: 1px solid #EEF0F2;
-      border-radius: 16px;
-      padding: 16px;
-      margin: 0;
+
+    .store-sheet-header {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      aspect-ratio: 1;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.35rem;
+      text-align: left;
     }
-    .qr-img {
+
+    .store-sheet-title {
+      font-size: 1.22rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+      word-break: keep-all;
+    }
+
+    .store-sheet-close-icon {
+      width: 1.9rem;
+      height: 1.9rem;
+      border-radius: 99px;
+      border: none;
+      background: var(--slate-100);
+      color: var(--slate-500);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .store-sheet-close-icon:hover {
+      background: var(--slate-200);
+      color: var(--slate-900);
+    }
+
+    .store-sheet-body {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 0.32rem;
+      margin-bottom: 1rem;
+    }
+
+    .store-sheet-address {
+      font-size: 0.92rem;
+      color: var(--slate-500);
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+
+    .store-sheet-hours {
+      font-size: 0.88rem;
+      color: var(--slate-500);
+      line-height: 1.45;
+    }
+
+    .store-sheet-phone {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--slate-700);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.12rem;
+    }
+
+    /* 가맹점 사진 가로 스크롤 갤러리 */
+    .store-photo-strip {
+      display: flex;
+      gap: 0.55rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      margin: 0.35rem 0 0.15rem;
+      padding-bottom: 0.1rem;
+    }
+
+    .store-photo-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .store-photo-item {
+      width: 6.8rem;
+      height: 5.1rem;
+      border-radius: 0.6rem;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+    }
+
+    .store-photo-item img {
       width: 100%;
       height: 100%;
-      max-width: 200px;
-      max-height: 200px;
+      object-fit: cover;
+      display: block;
     }
 
-    /* 발급 QR 모달 */
-    .qr-modal-backdrop {
-      position: fixed; inset: 0;
-      background: rgba(0, 7, 16, 0.44);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 10050 !important; opacity: 0; pointer-events: none;
-      transition: opacity var(--duration-slow) var(--ease-standard);
+    .store-sheet-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      width: 100%;
     }
-    .qr-modal-backdrop.active { opacity: 1; pointer-events: auto; }
-    .qr-modal-sheet {
-      background: #fff;
-      border-radius: 22px;
-      width: 85%; max-width: 340px;
-      padding: 32px 20px; text-align: center;
-      box-shadow: var(--shadow-modal);
-      transform: scale(0.9);
-      transition: transform var(--duration-slow) var(--ease-standard);
-    }
-    .qr-modal-backdrop.active .qr-modal-sheet { transform: scale(1); }
 
-    /* 서브페이지 헤더 (다른 페이지와 통일) */
-    .subpage-header {
-      height: 64px;
-      padding: 0 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #FFFFFF;
-      border-bottom: 1px solid #EEF0F2;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .subpage-header .btn-back {
-      position: absolute;
-      left: 14px;
-      background: none;
-      border: none;
-      padding: 8px;
-      border-radius: 50%;
-      cursor: pointer;
-      color: var(--fg-strong, #111827);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-    .subpage-header .btn-back:hover {
-      background: rgba(0, 104, 249, 0.08);
-      color: var(--primary, #0068F9);
-      transform: translateX(-2px);
-    }
-    .subpage-header .btn-back:active {
-      transform: scale(0.92);
-    }
-    .subpage-header .title {
-      font-size: 22px;
+    .btn-sheet-call {
+      padding: 0.68rem 0.85rem;
+      border: 1px solid var(--slate-200);
+      border-radius: 0.6rem;
+      background: var(--slate-50);
+      color: var(--slate-700);
+      font-family: inherit;
+      font-size: 0.92rem;
       font-weight: 700;
-      color: var(--fg-strong, #111827);
-      letter-spacing: -0.04em;
-      text-align: center;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
     }
-    .subpage-header .btn-right {
-      position: absolute;
-      right: 18px;
-      font-size: 12.5px;
-      font-weight: 500;
-      color: var(--fg-secondary);
-      background: #FFFFFF;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      padding: 5px 10px;
+
+    .btn-sheet-call:hover {
+      background: var(--slate-100);
+      border-color: var(--slate-300, #cbd5e1);
+      color: var(--slate-900);
+    }
+
+    .btn-sheet-route {
+      padding: 0.68rem 0.85rem;
+      border: 1px solid var(--primary-border);
+      border-radius: 0.6rem;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-sheet-route:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--white);
+    }
+
+    .btn-use-coupon-primary {
+      grid-column: 1 / -1;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--primary);
+      border-radius: 0.6rem;
+      background: var(--primary);
+      color: var(--white);
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(2, 132, 199, 0.2);
+      transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+    }
+
+    .btn-use-coupon-primary:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+    }
+
+    .btn-use-coupon-primary:active {
+      transform: scale(0.99);
+    }
+
+    /* 쿠폰 사용 요청 모달 내 쿠폰 선택 리스트 */
+    .use-req-coupon-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      max-height: 220px;
+      overflow-y: auto;
+      margin: 0.85rem 0 1rem;
+      text-align: left;
+    }
+
+    .use-req-coupon-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.8rem 0.95rem;
+      border: 1.5px solid var(--slate-200);
+      border-radius: 0.75rem;
+      background: var(--white);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .use-req-coupon-item.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .use-req-coupon-item input[type="checkbox"] {
+      width: 1.15rem;
+      height: 1.15rem;
+      accent-color: var(--primary);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .use-req-summary-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0.95rem;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 0.65rem;
+      margin-bottom: 1rem;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--slate-700);
+    }
+
+    .use-req-summary-amount {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .waiting-pulse-ring {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      animation: reqPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes reqPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.25); }
+      50% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(2, 132, 199, 0); }
+    }
+
+    /* ── [가맹점 목록 섹션] ── */
+    .category-filter-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--chip-gap);
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .category-filter-wrap::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-btn {
+      flex-shrink: 0;
+      padding: 0.48rem 0.9rem;
+      border-radius: 99px;
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--slate-600);
       cursor: pointer;
       font-family: inherit;
       transition: all 0.15s ease;
     }
-    .subpage-header .btn-right:hover {
-      background: #F3F4F6;
-      border-color: #D1D5DB;
-      color: #111827;
-    }
-    .subpage-header .btn-right:active {
-      background: #E5E7EB;
-      border-color: #9CA3AF;
+
+    .category-btn:hover {
+      background: var(--slate-200);
+      color: var(--slate-800);
     }
 
-    /* 사용자 계정 식별 프로필 바 */
-    .user-profile-bar {
-      margin: 14px 18px 2px;
-      padding: 14px 16px;
-      background: #FFFFFF;
-      border: 1px solid #E5E7EB;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    .category-btn.active {
+      background: var(--slate-900);
+      border-color: var(--slate-900);
+      color: var(--white);
     }
-    .profile-avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: #EEF4FF;
-      color: #0068F9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+
+    /* 검색 인풋 */
+    .store-search-box {
+      margin-bottom: var(--section-gap);
+      position: relative;
+      font-size: 0.96rem;
       flex-shrink: 0;
-      font-size: 20px;
     }
-    .profile-avatar.kakao {
-      background: #FEE500;
-      color: #191919;
+
+    .store-search-input {
+      width: 100%;
+      min-height: 3.1rem;
+      border: 1.5px solid var(--slate-200);
+      border-radius: 0.75rem;
+      padding: 0.6rem 1rem 0.6rem 2.65rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      background: var(--white);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .profile-avatar.naver {
-      background: #03C75A;
-      color: #FFFFFF;
+
+    .store-search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.08);
     }
-    .profile-avatar.phone {
-      background: #EBF5FF;
-      color: #0068F9;
+
+    .store-search-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.18em;
+      height: 1.18em;
+      color: var(--slate-400);
+      pointer-events: none;
     }
-    .profile-info {
+
+    /* 세련되고 정돈된 가맹점 카드 리스트 */
+    .store-list-container {
       flex: 1;
-      min-width: 0;
-    }
-    .profile-name-row {
       display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 2px;
-      flex-wrap: wrap;
-    }
-    .profile-name {
-      font-size: 15px;
-      font-weight: 700;
-      color: #111827;
-      letter-spacing: -0.02em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 180px;
-    }
-    .profile-badge {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 6px;
-      background: #F3F4F6;
-      color: #4B5563;
-    }
-    .profile-badge.kakao {
-      background: rgba(254, 229, 0, 0.25);
-      color: #3C1E1E;
-    }
-    .profile-badge.naver {
-      background: rgba(3, 199, 90, 0.15);
-      color: #027A37;
-    }
-    .profile-badge.phone {
-      background: rgba(0, 104, 249, 0.1);
-      color: #0068F9;
-    }
-    .profile-sub {
-      font-size: 12px;
-      color: #6B7280;
-      letter-spacing: -0.01em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      flex-direction: column;
+      gap: var(--card-gap);
     }
 
-
-    .balance-card {
-      margin: 30px 20px 0 !important;
-    }
-
-    /* 관광쿠폰 혜택 온보딩 카드 배너 */
-    .pass-benefit-card {
-      margin: 16px 20px 0;
-      padding: 16px 18px;
-      background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-      border: 1px solid #BFDBFE;
-      border-radius: 16px;
+    .store-card {
+      background: var(--white);
+      border: 1px solid var(--slate-200);
+      border-radius: 1rem;
+      padding: var(--card-pad);
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      text-decoration: none;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.9rem;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+      cursor: pointer;
     }
-    .pass-benefit-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 14px rgba(0, 104, 249, 0.12);
-    }
-    .pass-benefit-card:active {
-      transform: scale(0.98);
-    }
-    .pbc-left {
-      flex: 1;
-      padding-right: 12px;
-    }
-    .pbc-tag {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      color: #0068F9;
-      background: #FFFFFF;
-      padding: 2px 8px;
-      border-radius: 6px;
-      margin-bottom: 6px;
-    }
-    .pbc-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: #111827;
-      letter-spacing: -0.02em;
-      margin-bottom: 3px;
-    }
-    .pbc-sub {
-      font-size: 12px;
-      color: #4B5563;
-      letter-spacing: -0.01em;
-      line-height: 1.35;
-    }
-    .pbc-btn {
-      background: var(--primary, #0068F9);
-      color: #FFFFFF;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      white-space: nowrap;
-      flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(0, 104, 249, 0.25);
-    }
-    .empty-coupon-container {
-      text-align: center;
-      padding: 42px 24px;
-      background: #F9FAFB;
-      border-radius: 16px;
-      margin: 10px 0;
-      border: 1px dashed #E5E7EB;
-    }
-    .empty-coupon-icon {
-      font-size: 36px;
-      margin-bottom: 12px;
-    }
-    .empty-coupon-title {
-      font-size: 15.5px;
-      font-weight: 700;
-      color: #111827;
-      margin-bottom: 6px;
-    }
-    .empty-coupon-desc {
-      font-size: 13px;
-      color: #6B7280;
-      line-height: 1.45;
-      margin: 0 0 20px;
-    }
-    .empty-coupon-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 20px;
-      background: var(--primary, #0068F9);
-      color: #FFFFFF;
-      font-size: 14px;
-      font-weight: 700;
-      border-radius: 12px;
-      text-decoration: none;
-      box-shadow: 0 3px 10px rgba(0, 104, 249, 0.28);
-      transition: background 0.18s ease, transform 0.15s ease;
-    }
-    .empty-coupon-btn:hover {
-      background: #0052C9;
+
+    .store-card:hover {
+      border-color: var(--primary-border);
+      box-shadow: var(--shadow-md);
       transform: translateY(-1px);
     }
-    .empty-coupon-btn:active {
-      transform: scale(0.97);
-    }
-    .empty-simple-text {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--fg-tertiary);
-      font-size: 13px;
+
+    .store-info {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.32rem;
     }
 
-    /* 모달 닫기 버튼 */
-    .modal-close-btn {
-      position: absolute;
-      top: 16px; right: 16px;
-      width: 36px; height: 36px;
-      display: flex; align-items: center; justify-content: center;
-      color: #111827; cursor: pointer;
-      border: none; background: none; padding: 0;
-      transition: color 0.15s ease, transform 0.15s ease;
-    }
-    .modal-close-btn:hover {
-      color: var(--primary);
+    .store-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+      word-break: keep-all;
     }
 
-    /* 완료 버튼 호버 효과 (컬러 변경만 적용) */
-    #btn-complete-payment {
-      background: var(--primary);
-      color: #FFFFFF;
+    .store-address {
+      font-size: 0.92rem;
+      color: var(--slate-500);
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+
+    .store-phone {
+      font-size: 0.92rem;
+      color: var(--slate-700);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.12rem;
+    }
+
+    .store-card-actions {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .btn-view-map {
+      padding: 0.66rem 0.85rem;
+      border: 1px solid var(--slate-200);
+      border-radius: 0.6rem;
+      background: var(--slate-50);
+      color: var(--slate-700);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      transition: background 0.18s ease;
-    }
-    #btn-complete-payment:hover {
-      background: #004ecc;
+      transition: all 0.15s ease;
     }
 
-    /* Toast */
+    .btn-view-map:hover {
+      background: var(--slate-100);
+      border-color: var(--slate-300, #cbd5e1);
+      color: var(--slate-900);
+    }
+
+    .btn-store-route {
+      padding: 0.66rem 0.85rem;
+      border: 1px solid var(--primary-border);
+      border-radius: 0.6rem;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-store-route:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--white);
+    }
+
+    /* ── 어르신 맞춤형 왕큰글씨 모드 (data-font-scale="large") ── */
+    html[data-font-scale="large"] .nav-tab-btn {
+      font-size: 1.04rem;
+      min-height: 3.25rem;
+    }
+
+    html[data-font-scale="large"] .wallet-account-bar {
+      padding: 0.85rem 1rem;
+    }
+
+    html[data-font-scale="large"] .user-phone-tag,
+    html[data-font-scale="large"] .btn-logout {
+      font-size: 0.98rem;
+    }
+
+    html[data-font-scale="large"] .empty-title {
+      font-size: 1.3rem;
+    }
+
+    html[data-font-scale="large"] .empty-desc {
+      font-size: 1.02rem;
+      line-height: 1.6;
+    }
+
+    html[data-font-scale="large"] .coupon-label,
+    html[data-font-scale="large"] .coupon-dday,
+    html[data-font-scale="large"] .coupon-expiry {
+      font-size: 0.96rem;
+    }
+
+    html[data-font-scale="large"] .coupon-desc {
+      font-size: 1rem;
+    }
+
+    html[data-font-scale="large"] .coupon-amount {
+      font-size: 2.15rem;
+    }
+
+    html[data-font-scale="large"] .coupon-footer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+    }
+
+    html[data-font-scale="large"] .btn-coupon-qr {
+      width: 100%;
+      justify-content: center;
+      padding: 0.78rem 1rem;
+      font-size: 1.04rem;
+    }
+
+    html[data-font-scale="large"] .chip-btn,
+    html[data-font-scale="large"] .category-btn,
+    html[data-font-scale="large"] .map-quick-item,
+    html[data-font-scale="large"] .store-total-badge {
+      font-size: 0.98rem;
+    }
+
+    html[data-font-scale="large"] .store-card {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.9rem;
+    }
+
+    html[data-font-scale="large"] .store-info {
+      flex: 1 1 auto;
+    }
+
+    html[data-font-scale="large"] .store-name {
+      font-size: 1.28rem;
+    }
+
+    html[data-font-scale="large"] .store-address,
+    html[data-font-scale="large"] .store-phone {
+      font-size: 1.02rem;
+      color: var(--slate-700);
+    }
+
+    html[data-font-scale="large"] .store-card-actions {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+
+    html[data-font-scale="large"] .btn-view-map,
+    html[data-font-scale="large"] .btn-store-route,
+    html[data-font-scale="large"] .btn-sheet-call,
+    html[data-font-scale="large"] .btn-sheet-route {
+      padding: 0.72rem 0.8rem;
+      font-size: 0.98rem;
+    }
+
+    html[data-font-scale="large"] .store-sheet-title {
+      font-size: 1.32rem;
+    }
+
+    html[data-font-scale="large"] .store-sheet-address,
+    html[data-font-scale="large"] .store-sheet-phone {
+      font-size: 1.02rem;
+      color: var(--slate-700);
+    }
+
+    /* ── 초소형 화면 (280px ~ 360px) 완벽 대응 ── */
+    @media (max-width: 360px) {
+      .header-bar {
+        padding: 0.55rem 0.6rem;
+        gap: 0.35rem;
+      }
+      .brand-wrap {
+        gap: 5px;
+      }
+      .brand-logo {
+        width: 20px;
+        height: 20px;
+      }
+      .brand-title {
+        font-size: 15px;
+      }
+      .font-size-label {
+        display: none;
+      }
+      .font-size-btn {
+        font-size: 12px;
+        min-width: 44px;
+        padding: 0 10px;
+      }
+      .nav-tab-btn,
+      html[data-font-scale="large"] .nav-tab-btn {
+        font-size: 0.82rem;
+        gap: 0.2rem;
+        padding: 0.5rem 0.15rem;
+        min-height: 2.75rem;
+      }
+      .tab-panel {
+        padding: 0.9rem 0.75rem 3rem;
+      }
+      .wallet-account-bar {
+        padding: 0.65rem 0.65rem;
+      }
+      .store-filter-bar {
+        flex-wrap: wrap;
+      }
+      .store-card {
+        padding: 0.85rem;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .store-card-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .map-selected-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── QR 모달 바텀시트 ── */
+    .qr-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .qr-modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .qr-modal-sheet {
+      width: 100vw;
+      max-width: 480px;
+      background: var(--white);
+      border-radius: 24px 24px 0 0;
+      padding: 30px 24px 40px;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      text-align: center;
+    }
+
+    .qr-modal-backdrop.active .qr-modal-sheet {
+      transform: translateY(0);
+    }
+
+    .qr-drag-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--slate-300, #cbd5e1);
+      border-radius: 99px;
+      margin: 0 auto 18px;
+    }
+
+    .qr-image-wrap {
+      width: 200px;
+      height: 200px;
+      margin: 16px auto;
+      border: 2px solid var(--primary-border);
+      padding: 10px;
+      background: var(--white);
+      border-radius: 14px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .qr-timer {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .btn-modal-close {
+      width: 100%;
+      height: 48px;
+      border: 1.5px solid var(--slate-200);
+      background: var(--slate-50);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--slate-700);
+      cursor: pointer;
+    }
+
     #toast-container {
       position: fixed;
-      top: 20px;
+      top: 24px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 9999;
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 8px;
       pointer-events: none;
+      width: 90%;
+      max-width: 400px;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    @keyframes scanLaser {
-      0% { top: 10px; opacity: 0; }
-      15% { opacity: 1; }
-      85% { opacity: 1; }
-      100% { top: 160px; opacity: 0; }
+    .toast {
+      pointer-events: auto;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #ffffff;
+      background: rgba(15, 23, 42, 0.9);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      animation: toastFadeIn 0.25s ease-out;
     }
 
-    .scanner-tab-bar {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 16px;
-      background: #F3F4F6;
-      padding: 4px;
-      border-radius: 12px;
+    .toast.error {
+      background: rgba(225, 29, 72, 0.95);
     }
-    .scanner-tab-btn {
-      flex: 1;
-      height: 38px;
-      border: none;
-      background: transparent;
-      border-radius: 9px;
-      font-size: 13.5px;
-      font-weight: 600;
-      color: #6B7280;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.18s ease;
+
+    .toast.info {
+      background: rgba(2, 132, 199, 0.95);
     }
-    .scanner-tab-btn.active {
-      background: #FFFFFF;
-      color: var(--primary, #0068F9);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+
+    .toast.success {
+      background: rgba(16, 185, 129, 0.95);
+    }
+
+    @keyframes toastFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
-  <!-- 실시간 QR 디코딩 라이브러리 -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-  <script type="module" crossorigin src="/assets/tourist-mypage-DjiaNk76.js"></script>
+  <script type="module" crossorigin src="/assets/tourist-mypage-BJlwMLiS.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
-  <link rel="modulepreload" crossorigin href="/assets/i18n-Y-He8y1g.js">
-  <link rel="stylesheet" crossorigin href="/assets/app-styles-CmrLvQNp.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
 </head>
 <body>
-  <div class="app-container">
-    <div class="my-scroll">
-
-      <!-- ── 서브페이지 헤더 ── -->
-      <div class="subpage-header" style="position: relative;">
-        <a href="/tourist/index.html" class="btn-back" title="메인 페이지로 이동">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        </a>
-        <div class="title" data-i18n="mypage_page_title">내 쿠폰함</div>
-        <div style="position: absolute; right: 14px; display: flex; align-items: center; gap: 8px;">
-          <div class="header-popover-wrap">
-            <button class="icon-btn" id="btn-lang" title="언어 변경 / Change Language" style="display:flex;align-items:center;gap:4px;padding:6px 9px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M2 12h20"/>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-              </svg>
-              <span class="lang-indicator-text" style="font-size:11.5px;font-weight:700;letter-spacing:-0.02em;color:var(--primary);">KO</span>
-            </button>
-            <div class="header-dropdown" id="dropdown-lang">
-              <button class="dropdown-item" data-lang="ko" data-i18n="lang_ko">KOR</button>
-              <button class="dropdown-item" data-lang="en" data-i18n="lang_en">ENG</button>
-            </div>
-          </div>
-          <button class="btn-right" id="nav-logout" data-i18n="logout" style="position: static;">로그아웃</button>
+  <div class="app-shell">
+    <!-- 상단 고정 영역 (헤더 + 탭바) -->
+    <div class="top-sticky-wrap">
+      <!-- 상단 헤더 바 -->
+      <header class="header-bar">
+        <div class="brand-wrap">
+          <img src="/assets/favicon-JK0pTB8M.png" alt="옹진 로고" class="brand-logo" />
+          <span class="brand-title">옹진 <span>관광쿠폰</span></span>
         </div>
-      </div>
-
-      <!-- ── 사용자 계정 식별 프로필 바 ── -->
-      <div class="user-profile-bar" id="user-profile-card">
-        <div class="profile-avatar" id="profile-avatar">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </div>
-        <div class="profile-info">
-          <div class="profile-name-row">
-            <span class="profile-name" id="profile-name">로그인 정보 확인 중...</span>
-            <span class="profile-badge" id="profile-badge" data-i18n="mypage_profile_badge">간편인증</span>
-          </div>
-          <div class="profile-sub" id="profile-sub" data-i18n="mypage_profile_sub">발급받은 디지털 쿠폰이 안전하게 저장됩니다.</div>
-        </div>
-      </div>
-
-      <!-- ── 잔액 요약 카드 (첫 번째 이미지 기반 화이트 모던 카드) ── -->
-
-      <div class="balance-card">
-        <div class="balance-grid">
-          <!-- 왼쪽: 보유 쿠폰 -->
-          <div class="balance-col">
-            <div class="balance-label" data-i18n="mypage_hold_coupon">보유 쿠폰</div>
-            <div class="balance-value" id="coupon-count" style="color:var(--primary, #0068F9);">0장</div>
-          </div>
-
-          <!-- 중앙 구분선 -->
-          <div class="balance-divider"></div>
-
-          <!-- 오른쪽: 내 쿠폰 잔액 -->
-          <div class="balance-col">
-            <div class="balance-label" data-i18n="mypage_balance">내 쿠폰 잔액</div>
-            <div class="balance-value" id="total-balance">₩0</div>
+        <div class="header-actions">
+          <div class="font-size-control" role="group" aria-label="글자 크기 조절">
+            <span class="font-size-slider" aria-hidden="true"></span>
+            <button type="button" class="font-size-btn active" data-scale="normal" title="글자 보통">보통</button>
+            <button type="button" class="font-size-btn" data-scale="large" title="글자 크게">크게</button>
           </div>
         </div>
+      </header>
 
-        <div class="balance-actions">
-          <button class="balance-action" id="btn-register-coupon" type="button" onclick="window.openRegisterSheet(event)">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
-            <span data-i18n="mypage_register_paper">종이쿠폰 등록</span>
-          </button>
-          <a href="/tourist/map.html" class="balance-action secondary" style="text-decoration:none;">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span data-i18n="mypage_find_merchant">가맹점 지도</span>
-          </a>
-        </div>
-      </div>
-
-      <!-- ── 쿠폰 현장 발행처 안내 배너 카드 (발급받는 부분 대체) ── -->
-      <div class="pass-benefit-card" id="pass-issuer-banner" onclick="window.openIssuerSheet(event)" style="cursor: pointer;">
-        <div class="pbc-left">
-          <span class="pbc-tag" data-i18n="mypage_banner_tag">쿠폰 수령 안내</span>
-          <div class="pbc-title" data-i18n="mypage_banner_title">현장 쿠폰 발행처 안내</div>
-          <div class="pbc-sub" data-i18n="mypage_banner_sub">옹진군 운영 관광시설 4곳 이용 시 현장 발급</div>
-        </div>
-        <div class="pbc-btn">
-          <span data-i18n="mypage_banner_btn">발행처 보기</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-        </div>
-      </div>
-
-      <!-- ── 쿠폰 탭 ── -->
-      <div class="coupon-tabs">
-        <button class="coupon-tab" data-active="true" data-filter="available" data-i18n="mypage_tab_available">사용 가능</button>
-        <button class="coupon-tab" data-filter="used" data-i18n="mypage_tab_used">사용 완료</button>
-        <button class="coupon-tab" data-filter="expired">만료 / 취소</button>
-      </div>
-
-      <!-- ── 쿠폰 리스트 ── -->
-      <div class="coupon-list" id="coupon-list">
-        <!-- JS에서 렌더링 -->
-      </div>
-
-      <!-- ── 하단 가맹점 입점 배너 (메인 화면과 100% 동일한 연속성 디자인) ── -->
-      <div style="padding: 24px 20px 16px;">
-        <a href="/tourist/apply-guide.html" class="merchant-banner" style="margin: 0; text-decoration: none;">
-          <div class="merchant-banner-inner">
-            <div class="merchant-banner-deco1"></div>
-            <div class="merchant-banner-text">
-              <div class="merchant-banner-title" data-i18n="merchant_banner_title">매장을 운영 중이신가요?</div>
-              <div class="merchant-banner-desc" data-i18n="merchant_banner_desc">지금 입점하고 더 많은 섬 여행객을 만나보세요.</div>
-            </div>
-            <div class="merchant-banner-cta">
-              <span data-i18n="merchant_banner_cta">입점 신청</span>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <!-- ── 하단 계정 설정 및 회원 탈퇴 ── -->
-      <div style="padding: 10px 20px 48px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-        <button type="button" id="btn-add-homescreen" style="background: #EEF4FF; border: 1px solid #C7D9FE; border-radius: 10px; font-size: 13px; color: #0068F9; font-weight: 700; cursor: pointer; padding: 9px 16px; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0, 104, 249, 0.08);">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-            <line x1="12" y1="18" x2="12.01" y2="18"/>
-          </svg>
-          홈 화면에 바로가기 추가
+      <!-- 탭 네비게이션 -->
+      <nav class="nav-tabs-wrap">
+        <button type="button" class="nav-tab-btn active" data-target="sec-coupon" data-index="0">
+          <span class="nav-tab-label">내 쿠폰</span>
+          <span class="nav-tab-badge" id="tab-coupon-count">0</span>
         </button>
-        <button type="button" id="btn-manage-pin" style="background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 10px; font-size: 13px; color: #4B5563; font-weight: 600; cursor: pointer; padding: 9px 16px; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-          간편 비밀번호(4자리) 변경/등록
+        <button type="button" class="nav-tab-btn" data-target="sec-map" data-index="1">
+          <span class="nav-tab-label">가맹점 지도</span>
         </button>
-        <button type="button" id="btn-withdraw-account" data-i18n="mypage_withdraw" style="background: none; border: none; font-size: 12px; color: #9CA3AF; text-decoration: underline; cursor: pointer; padding: 6px 12px; font-family: inherit;">
-          회원 탈퇴 (계정 삭제)
+        <button type="button" class="nav-tab-btn" data-target="sec-store" data-index="2">
+          <span class="nav-tab-label">가맹점 목록</span>
         </button>
-      </div>
-
-    </div><!-- /.my-scroll -->
-
-    <!-- ── 4자리 간편비밀번호 변경/등록 모달 ── -->
-    <div class="pin-modal-overlay" id="modal-pin-setup" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;">
-      <div class="pin-modal-card" style="width: 100%; max-width: 360px; background: #FFFFFF; border-radius: 20px; padding: 26px 22px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); text-align: center;">
-        <div style="width: 52px; height: 52px; border-radius: 16px; background: #EEF4FF; color: var(--primary, #0068F9); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-        </div>
-        <div style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 6px;">간편 비밀번호(4자리) 설정</div>
-        <div style="font-size: 13.5px; color: #6B7280; line-height: 1.45; margin-bottom: 20px;">
-          로그인 시 사용할 <strong>4자리 숫자 비밀번호</strong>를 입력해 주세요.
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
-          <div>
-            <label style="font-size: 12.5px; font-weight: 600; color: #4B5563; margin-bottom: 4px; display: block;">새 비밀번호 (4자리)</label>
-            <input type="password" id="modal-pin-input" style="width: 100%; height: 48px; border: 1.5px solid #E5E7EB; border-radius: 12px; letter-spacing: 12px; text-align: center; font-size: 24px; font-weight: 700; box-sizing: border-box;" placeholder="••••" maxlength="4" pattern="[0-9]*" inputmode="numeric" />
-          </div>
-          <div>
-            <label style="font-size: 12.5px; font-weight: 600; color: #4B5563; margin-bottom: 4px; display: block;">비밀번호 확인</label>
-            <input type="password" id="modal-pin-confirm" style="width: 100%; height: 48px; border: 1.5px solid #E5E7EB; border-radius: 12px; letter-spacing: 12px; text-align: center; font-size: 24px; font-weight: 700; box-sizing: border-box;" placeholder="••••" maxlength="4" pattern="[0-9]*" inputmode="numeric" />
-          </div>
-        </div>
-
-        <div id="modal-pin-error" style="display: none; color: #DC2626; font-size: 12px; margin-top: 10px; font-weight: 500; text-align: center;"></div>
-
-        <button type="button" id="btn-modal-pin-save" style="width: 100%; height: 48px; border-radius: 12px; background: var(--primary, #0068F9); color: #FFF; border: none; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 18px;">
-          비밀번호 저장하기
-        </button>
-
-        <button type="button" id="btn-modal-pin-cancel" style="width: 100%; background: none; border: none; font-size: 13px; color: #9CA3AF; margin-top: 12px; cursor: pointer; text-decoration: underline;">
-          취소
-        </button>
-      </div>
+        <div class="nav-tab-indicator" id="nav-tab-indicator"></div>
+      </nav>
     </div>
 
+    <!-- 메인 본문 -->
+    <main class="main-body">
+      <div class="tab-track" id="tab-track">
 
+      <!-- ── 1. 내 쿠폰 탭 ── -->
+      <section class="tab-panel active" id="sec-coupon">
+        <div class="wallet-account-bar">
+          <div class="wallet-account-info">
+            <span class="user-phone-tag" id="user-phone-display">010-0000-0000</span>
+          </div>
+          <button type="button" id="nav-logout" class="btn-logout">로그아웃</button>
+        </div>
 
-    <!-- ── 하단 네비게이션 ── -->
-    <nav class="tabbar tab-bar" style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; max-width: 440px !important; margin: 0 auto !important; height: calc(68px + env(safe-area-inset-bottom, 0px)) !important; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important; background: rgba(255, 255, 255, 0.98) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-top: 1px solid #E2E8F0 !important; display: flex !important; flex-direction: row !important; justify-content: space-around !important; align-items: center !important; z-index: 9999 !important; box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05) !important; box-sizing: border-box !important;">
-      <a class="tab-item" href="/tourist/index.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-5a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9.5z"/></svg>
-        <span class="label" data-i18n="nav_home" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">Home</span>
-      </a>
-      <a class="tab-item" href="/tourist/about-pass.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-        <span class="label" data-i18n="nav_island_pass" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">관광쿠폰</span>
-      </a>
-      <a class="tab-item" href="/tourist/map.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>
-        <span class="label" data-i18n="nav_map" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">가맹점지도</span>
-      </a>
-      <a class="tab-item" href="/tourist/apply-guide.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #9CA3AF !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l2-6h12l2 6M4 10v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V10M4 10h16M10 21v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/></svg>
-        <span class="label" data-i18n="nav_apply" style="font-size: 11px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">입점신청</span>
-      </a>
-      <a class="tab-item active" data-active="true" href="/tourist/mypage.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: var(--primary, #059669) !important; font-weight: 700 !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span class="label" data-i18n="nav_my" style="font-size: 11px !important; font-weight: 700 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">My</span>
-      </a>
-    </nav>
+        <div id="coupon-list-container">
+          <div style="padding: 30px; text-align: center; color: var(--slate-400);">쿠폰 정보를 불러오는 중...</div>
+        </div>
+      </section>
+
+      <!-- ── 2. 가맹점 지도 탭 ── -->
+      <section class="tab-panel" id="sec-map">
+        <!-- 1) 상단 섬 선택 칩 (지도 밖 독립 배치) -->
+        <div class="island-chips-scroll" id="island-chips">
+          <button type="button" class="chip-btn active" data-island="all">전체</button>
+          <button type="button" class="chip-btn" data-island="자월면" data-lat="37.2511" data-lng="126.3107">자월도</button>
+          <button type="button" class="chip-btn" data-island="덕적면" data-lat="37.2283" data-lng="126.1439">덕적도·소야도</button>
+          <button type="button" class="chip-btn" data-island="영흥면" data-lat="37.2536" data-lng="126.4950">영흥도</button>
+          <button type="button" class="chip-btn" data-island="백령면" data-lat="37.9724" data-lng="124.6830">백령도</button>
+          <button type="button" class="chip-btn" data-island="대청면" data-lat="37.8291" data-lng="124.7098">대청도</button>
+          <button type="button" class="chip-btn" data-island="연평면" data-lat="37.6704" data-lng="125.6870">연평도</button>
+        </div>
+
+        <!-- 2) 순수 지도 영역 -->
+        <div class="map-container-box">
+          <div class="interactive-map-frame" id="real-map"></div>
+        </div>
+
+        <!-- 3) 지도 하단 가맹점 검색창 -->
+        <div class="map-bottom-search-wrap">
+          <div class="map-search-bar">
+            <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" id="map-search-input" placeholder="지도에서 찾을 가맹점 이름·주소 검색" />
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 3. 가맹점 목록 탭 ── -->
+      <section class="tab-panel" id="sec-store">
+        <!-- 업종 필터 칩 + 총 개수 -->
+        <div class="store-filter-bar">
+          <div class="category-filter-wrap" id="category-filter-wrap">
+            <button type="button" class="category-btn active" data-cat="all">전체</button>
+            <button type="button" class="category-btn" data-cat="음식점">음식점</button>
+            <button type="button" class="category-btn" data-cat="카페">카페</button>
+            <button type="button" class="category-btn" data-cat="수산물">수산물·특산물</button>
+            <button type="button" class="category-btn" data-cat="숙박">숙박</button>
+          </div>
+          <span class="store-total-badge" id="merchant-total-count">총 0곳</span>
+        </div>
+
+        <!-- 가맹점 검색창 -->
+        <div class="store-search-box">
+          <svg class="store-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" id="store-search-input" class="store-search-input" placeholder="가맹점 이름 또는 지역을 검색해보세요" />
+        </div>
+
+        <!-- 가맹점 목록 리스트 -->
+        <div class="store-list-container" id="merchant-list-container">
+          <div style="padding: 30px; text-align: center; color: var(--slate-400);">가맹점 목록을 불러오는 중...</div>
+        </div>
+      </section>
+
+      </div>
+    </main>
   </div>
 
-  <!-- 종이쿠폰 등록 바텀시트 (실시간 카메라 스캐너 탑재) -->
-  <div class="sheet-overlay" id="register-sheet" style="display:none;" onclick="if(event.target===this) window.closeRegisterSheet()">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <button type="button" class="sheet-close-btn" id="btn-x-register-close" title="닫기" onclick="window.closeRegisterSheet()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
+  <!-- 지도 핀 클릭 시 올라오는 네이티브형 가맹점 상세 바텀시트 (지도 가림 없음) -->
+  <div class="store-bottom-sheet" id="store-detail-modal">
+    <div class="store-sheet-handle"></div>
+    <div class="store-sheet-header">
+      <div class="store-sheet-title" id="sheet-store-name">가맹점명</div>
+      <button type="button" class="store-sheet-close-icon" onclick="window.closeStoreSheet()" aria-label="닫기">
+        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
-
-      <!-- 스크롤 가능 본문 영역 -->
-      <div class="sheet-scroll-area">
-        <div class="sheet-title" style="margin-top: 10px;">종이쿠폰 등록</div>
-        <div class="sheet-sub">키오스크·매표소 영수증의 <strong>QR코드 / 바코드를 스캔</strong>하거나 쿠폰 번호를 직접 입력하세요.</div>
-
-        <!-- 모드 전환 탭 -->
-        <div class="scanner-tab-bar">
-          <button type="button" class="scanner-tab-btn active" id="tab-btn-manual">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>
-            번호 직접 입력
-          </button>
-          <button type="button" class="scanner-tab-btn" id="tab-btn-scan">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            QR · 바코드 스캔
-          </button>
-        </div>
-
-        <!-- 1. 카메라 스캐너 영역 (선택 시 활성화) -->
-        <div id="panel-scan" style="display: none;">
-          <div id="scanner-viewfinder" style="position:relative; width:100%; height:230px; background:#0f172a; border-radius:16px; overflow:hidden; display:flex; align-items:center; justify-content:center; margin-bottom:12px;">
-            <video id="scanner-video" playsinline style="width:100%; height:100%; object-fit:cover;"></video>
-            <canvas id="scanner-canvas" style="display:none;"></canvas>
-            
-            <!-- 조준 가이드 박스 -->
-            <div style="position:absolute; width:180px; height:120px; border:2.5px solid #38bdf8; border-radius:10px; box-shadow:0 0 0 4000px rgba(15, 23, 42, 0.55); pointer-events:none; display:flex; align-items:center; justify-content:center;">
-              <div style="position:absolute; left:4px; right:4px; height:2px; background:linear-gradient(to right, transparent, #38bdf8, transparent); animation:scanLaser 2s infinite ease-in-out;"></div>
-            </div>
-            <div id="scanner-status" style="position:absolute; bottom:12px; background:rgba(0,0,0,0.7); color:#fff; font-size:12px; font-weight:500; padding:5px 14px; border-radius:100px; letter-spacing:-0.01em;">
-              영수증의 QR코드 또는 바코드를 비춰주세요
-            </div>
-          </div>
-
-          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; font-size:12.5px; color:#1e40af; margin-bottom:12px; line-height:1.6;">
-            📌 <strong>스캔 안내</strong><br>
-            키오스크 영수증의 <strong>QR코드 또는 바코드(Code 128)</strong>를 가이드 박스 안에 맞춰주세요.<br>
-            인식이 되지 않으면 <strong>"번호 직접 입력"</strong> 탭을 이용하세요.
-          </div>
-
-          <div style="display:flex; gap:8px; margin-bottom:16px;">
-            <button type="button" id="btn-toggle-camera" style="flex:1; height:42px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; font-weight:600; color:#475569; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
-              카메라 재연결
-            </button>
-            <button type="button" id="btn-file-scan" style="flex:1; height:42px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; font-weight:600; color:#475569; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-              사진으로 스캔
-            </button>
-            <input type="file" id="scan-file-fallback" accept="image/*" capture="environment" style="display:none;" />
-          </div>
-        </div>
-
-        <!-- 2. 직접 입력 영역 -->
-        <div id="panel-manual" style="display: block;">
-          <div class="sheet-field-lbl">쿠폰 번호 입력</div>
-          <input type="text" class="form-input" id="paper-coupon-code"
-            placeholder="예: OJ-XXXX-XXXX" maxlength="12"
-            style="font-family: monospace; font-size: 17px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;"
-            autocomplete="off" inputmode="text" />
-          <div id="paper-coupon-error" style="display: none; font-size: 13px; color: #ef4444; margin-top: 6px; font-weight: 600;"></div>
-          
-          <!-- 등록 유의사항 안내 박스 -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-top: 12px; text-align: left;">
-            <div style="font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-              <span>ℹ️</span> 종이쿠폰 모바일 등록 유의사항
-            </div>
-            <ul style="margin: 0; padding-left: 16px; font-size: 11.5px; color: #64748b; line-height: 1.6;">
-              <li>모바일 등록 즉시 지류 종이쿠폰은 <strong>재사용 불가(무효화)</strong> 처리됩니다.</li>
-              <li>등록된 쿠폰은 <strong>발급일로부터 1년간</strong> 옹진군 가맹점에서 자유롭게 사용하실 수 있습니다.</li>
-              <li>이미 다른 계정에 등록되었거나 사용 완료된 쿠폰은 등록할 수 없습니다.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- 하단 고정 액션 버튼 바 -->
-      <div class="sheet-sticky-footer">
-        <button type="button" class="sheet-register" id="btn-register-submit" style="flex: 1; height: 50px; margin: 0; border-radius: 12px; background: #0068F9; color: #FFFFFF; font-size: 15px; font-weight: 700; box-shadow: 0 4px 14px rgba(0, 104, 249, 0.28);">쿠폰 등록하기</button>
-        <button type="button" class="sheet-cancel" id="btn-register-cancel" style="width: 84px; height: 50px; margin: 0; border-radius: 12px; background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; font-size: 14.5px; font-weight: 700;">닫기</button>
-      </div>
     </div>
-  </div>
-
-  <!-- 쿠폰 현장 발행처 안내 바텀시트 모달 -->
-  <div class="sheet-overlay" id="issuer-sheet" style="display:none;" onclick="if(event.target===this) window.closeIssuerSheet()">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <button type="button" class="sheet-close-btn" id="btn-x-issuer-close" title="닫기" onclick="window.closeIssuerSheet()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
+    <div class="store-sheet-body">
+      <div class="store-photo-strip" id="sheet-store-photos" style="display:none;"></div>
+      <div class="store-sheet-address" id="sheet-store-address">주소</div>
+      <div class="store-sheet-hours" id="sheet-store-hours" style="display:none;"></div>
+      <div class="store-sheet-phone">
+        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
         </svg>
-      </button>
-      
-      <!-- 스크롤 가능 본문 영역 -->
-      <div class="sheet-scroll-area">
-        <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 4px;">
-          <span style="font-size: 11px; font-weight: 700; color: #0284C7; background: #E0F2FE; padding: 3px 8px; border-radius: 6px;">옹진군 지정 공식 발행처 (4개소)</span>
-        </div>
-        <div class="sheet-title" style="font-size: 19px; font-weight: 800; color: #0F172A; margin-bottom: 6px;">옹진군 관광시설 쿠폰 발행처</div>
-        <div class="sheet-sub" style="font-size: 13px; color: #64748B; margin-bottom: 20px; line-height: 1.45;">
-          옹진군에서 직접 운영하는 아래 <strong>4개 관광시설</strong> 이용 시, 입장료·체험료 결제 금액에 따라 관광쿠폰을 현장에서 환급 발급해 드립니다.
-        </div>
-
-        <!-- 발행처 목록 카드 (옹진군 운영 4대 관광시설) -->
-        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
-          
-          <!-- 1. 자월달빛천문대 -->
-          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 14px 16px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-              <div style="font-size: 15px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px;">
-                <span style="font-size: 16px;">🔭</span> 자월달빛천문대
-              </div>
-              <span style="font-size: 11px; font-weight: 700; color: #1D4ED8; background: #DBEAFE; padding: 2px 8px; border-radius: 4px;">자월면</span>
-            </div>
-            <div style="font-size: 12.5px; color: #475569; line-height: 1.5;">
-              • 위치: 인천광역시 옹진군 자월면 자월서로 396-35<br>
-              • 발급 혜택: 투영관(2,000원), 관측실(3,000원) 이용 시 발급
-            </div>
-          </div>
-
-          <!-- 2. 장골해수욕장 야영장 -->
-          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 14px 16px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-              <div style="font-size: 15px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px;">
-                <span style="font-size: 16px;">⛺</span> 장골해수욕장 야영장
-              </div>
-              <span style="font-size: 11px; font-weight: 700; color: #1D4ED8; background: #DBEAFE; padding: 2px 8px; border-radius: 4px;">자월면</span>
-            </div>
-            <div style="font-size: 12.5px; color: #475569; line-height: 1.5;">
-              • 위치: 인천광역시 옹진군 자월면 자월서로 101번길 13<br>
-              • 발급 혜택: 야영장 이용료 결제 시 10,000원 쿠폰 발급
-            </div>
-          </div>
-
-          <!-- 3. 소야랑 -->
-          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 14px 16px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-              <div style="font-size: 15px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px;">
-                <span style="font-size: 16px;">🏡</span> 소야랑
-              </div>
-              <span style="font-size: 11px; font-weight: 700; color: #047857; background: #D1FAE5; padding: 2px 8px; border-radius: 4px;">덕적면 (소야도)</span>
-            </div>
-            <div style="font-size: 12.5px; color: #475569; line-height: 1.5;">
-              • 위치: 인천광역시 옹진군 덕적면 소야로 188-14<br>
-              • 발급 혜택: 시설 이용 시 5,000원 쿠폰 발급
-            </div>
-          </div>
-
-          <!-- 4. 덕적도 자연휴양림 -->
-          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 14px 16px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-              <div style="font-size: 15px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px;">
-                <span style="font-size: 16px;">🌲</span> 덕적도 자연휴양림
-              </div>
-              <span style="font-size: 11px; font-weight: 700; color: #047857; background: #D1FAE5; padding: 2px 8px; border-radius: 4px;">덕적면</span>
-            </div>
-            <div style="font-size: 12.5px; color: #475569; line-height: 1.5;">
-              • 위치: 인천광역시 옹진군 덕적면 덕적남로 220<br>
-              • 발급 혜택: 휴양림 및 야영데크 이용 시 10,000원(비수기 5,000원) 쿠폰 발급
-            </div>
-          </div>
-
-        </div>
-
-        <!-- 안내 팁 박스 -->
-        <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 13px 15px; margin-bottom: 10px;">
-          <div style="font-size: 13px; font-weight: 700; color: #1D4ED8; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-            현장에서 종이(지류) 쿠폰을 받으셨나요?
-          </div>
-          <div style="font-size: 12px; color: #2563EB; line-height: 1.45;">
-            지류 쿠폰의 바코드 또는 번호를 모바일 지갑에 등록하시면 스마트폰 QR 스캔으로 가맹점에서 손쉽게 사용하실 수 있습니다.
-          </div>
-        </div>
+        <span id="sheet-store-phone-text">032-000-0000</span>
       </div>
-
-      <!-- 하단 고정 액션 버튼 바 -->
-      <div class="sheet-sticky-footer">
-        <button type="button" onclick="window.closeIssuerSheet(); window.openRegisterSheet();" style="flex: 1; height: 50px; border-radius: 12px; background: #0068F9; color: #FFFFFF; border: none; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 14px rgba(0, 104, 249, 0.28);">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
-          종이쿠폰 등록하기
-        </button>
-        <button type="button" onclick="window.closeIssuerSheet();" style="width: 84px; height: 50px; border-radius: 12px; background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; font-size: 14.5px; font-weight: 700; cursor: pointer;">
-          닫기
-        </button>
-      </div>
-
+    </div>
+    <div class="store-sheet-actions">
+      <a href="#" class="btn-sheet-call" id="sheet-store-phone">전화걸기</a>
+      <a href="#" target="_blank" rel="noopener noreferrer" class="btn-sheet-route" id="sheet-route-kakao">길찾기</a>
+      <button type="button" class="btn-use-coupon-primary" id="sheet-btn-use-coupon">쿠폰 사용하기</button>
     </div>
   </div>
 
-  <!-- 종이쿠폰 전환 등록 성공 축하 모달 -->
-  <div class="use-modal-backdrop" id="claim-success-modal">
-    <div class="use-modal-sheet" style="position: relative; text-align: center; padding: 32px 24px;">
-      <div style="width: 64px; height: 64px; background: #ecfdf5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-        <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-      </div>
-      <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">쿠폰 등록 완료!</h3>
-      <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">종이쿠폰이 내 모바일 지갑으로 성공적으로 전환되었습니다.</p>
-      
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; margin-bottom: 24px; text-align: left;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <span style="font-size: 13px; color: #64748b;">충전된 쿠폰 금액</span>
-          <span id="success-coupon-amount" style="font-size: 20px; font-weight: 800; color: #0068F9;">₩0</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 12.5px;">
-          <span style="color: #64748b;">발권 장소</span>
-          <span id="success-coupon-loc" style="font-weight: 600; color: #1e293b;">-</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12.5px;">
-          <span style="color: #64748b;">유효기간</span>
-          <span style="font-weight: 600; color: #1e293b;">발급일로부터 1년</span>
-        </div>
-      </div>
-
-      <button type="button" class="btn-submit-coupon" id="btn-success-confirm" style="margin-bottom: 0;">내 쿠폰함에서 확인하기</button>
-    </div>
-  </div>
-
-  <!-- 쿠폰 사용 QR 모달 -->
-  <div class="use-modal-backdrop" id="use-qr-modal">
-    <div class="use-modal-sheet" style="position: relative;">
-      <button class="modal-close-btn" onclick="window.closeUseModal()" title="닫기">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-      
-      <!-- QR 및 타이머 영역 -->
-      <div id="use-modal-qr-container" style="margin-top: 24px;">
-        <div class="qr-container">
-          <img id="use-modal-qr-img" class="qr-img" src="" alt="쿠폰 결제용 QR 코드" />
-        </div>
-        
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 24px 0 22px;">
-          <div style="font-size: 14px; color: #6B7280; font-weight: 400; font-family: var(--font-sans);">남은 시간</div>
-          <div id="use-modal-timer" style="font-size: 27px; font-weight: 700; color: var(--primary); font-family: var(--font-sans); letter-spacing: normal; line-height: 1.1;">03:00</div>
-        </div>
-      </div>
-      
-      <!-- 만료된 화면 -->
-      <div id="use-modal-expired-container" style="display: none; margin: 30px 0; text-align: center;">
-        <div style="width: 56px; height: 56px; border-radius: 100px; background: #FEE2E2; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <p style="font-size: 14px; color: #DC2626; font-weight: 700; margin-bottom: 6px;">유효 시간이 만료되었습니다</p>
-        <p style="font-size: 13px; color: var(--fg-secondary); margin-bottom: 20px;">보안을 위해 QR 코드가 소멸되었습니다.</p>
-        <button onclick="window.regenerateQr()" style="padding: 8px 16px; font-size: 13px; border-radius: 10px; border: 1.5px solid var(--accent); color: var(--accent); background: #fff; font-family: inherit; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 auto;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
-          다시 받기
-        </button>
-      </div>
-      
-      <!-- 완료 버튼 -->
-      <button class="reg-cta" id="btn-complete-payment" onclick="window.completePayment()" style="width: 100%; margin: 0;">완료</button>
-    </div>
-  </div>
-
-  <!-- Kiosk 발급 모달 -->
-  <div class="qr-modal-backdrop" id="qr-modal">
+  <!-- 가맹점 사장님께 쿠폰 사용 요청 모달 바텀시트 -->
+  <div class="qr-modal-backdrop" id="use-request-modal">
     <div class="qr-modal-sheet">
-      <div id="qr-state-loading" style="display: block;">
-        <div style="width: 48px; height: 48px; border: 4px solid var(--accent-soft); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
-        <h3 style="font-size: 16px; font-weight: 700; color: var(--fg-strong); margin: 0 0 8px 0;">QR 코드 분석 중</h3>
-        <p style="font-size: 13px; color: var(--fg-secondary); margin: 0; line-height: 1.5;">카메라로 촬영된 이미지를 디코딩하여<br>쿠폰을 발급받고 있습니다.</p>
-      </div>
-      
-      <div id="qr-state-success" style="display: none;">
-        <div style="width: 64px; height: 64px; border-radius: 100px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; animation: bounce 0.6s ease-out;">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <div class="qr-drag-handle"></div>
+
+      <!-- 1단계: 쿠폰 선택 및 사용 요청 발송 -->
+      <div id="use-req-step-select">
+        <h3 id="use-req-store-title" style="font-size:1.3rem; font-weight:800; color:var(--slate-900); margin-bottom:4px;">가맹점 쿠폰 사용하기</h3>
+        <p style="font-size:0.88rem; color:var(--slate-500); margin-bottom:8px;">사용할 쿠폰을 선택해 요청하면 사장님께 즉시 알림이 전송됩니다.</p>
+
+        <div class="use-req-coupon-list" id="use-req-coupon-list"></div>
+
+        <div class="use-req-summary-bar">
+          <span id="use-req-selected-count">선택 1장</span>
+          <span class="use-req-summary-amount" id="use-req-selected-amount">5,000원</span>
         </div>
-        <h3 style="font-size: 16px; font-weight: 700; color: var(--fg-strong); margin: 0 0 8px 0;">쿠폰 발급 성공!</h3>
-        <p id="qr-success-msg" style="font-size: 14px; color: var(--accent); font-weight: 700; margin-bottom: 24px;">쿠폰이 지갑에 등록되었습니다.</p>
-        <button class="reg-cta" id="btn-qr-success-ok" style="width: 100%; margin: 0;">확인</button>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button type="button" class="btn-use-coupon-primary" id="btn-submit-use-req" style="width:100%; height:48px; font-size:0.98rem;">사장님께 사용 요청 보내기</button>
+          <button type="button" class="btn-modal-close" onclick="window.closeUseRequestModal()">닫기</button>
+        </div>
       </div>
 
-      <div id="qr-state-error" style="display: none;">
-        <div style="width: 64px; height: 64px; border-radius: 100px; background: #FEE2E2; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <!-- 2단계: 사장님 승인 대기 중 -->
+      <div id="use-req-step-waiting" style="display:none; padding:10px 0 4px;">
+        <div class="waiting-pulse-ring">
+          <svg style="width:28px; height:28px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
         </div>
-        <h3 style="font-size: 16px; font-weight: 700; color: var(--fg-strong); margin: 0 0 8px 0;">인식 실패</h3>
-        <p id="qr-error-msg" style="font-size: 13px; color: #DC2626; margin-bottom: 24px; line-height: 1.5;">QR 코드를 찾을 수 없습니다.<br>밝은 곳에서 다시 시도해주세요.</p>
-        <button class="reg-cta" id="btn-qr-error-close" style="width: 100%; margin: 0; background: var(--fg-strong);">닫기</button>
+        <h3 style="font-size:1.3rem; font-weight:800; color:var(--slate-900); margin-bottom:6px;">사장님 승인 대기 중</h3>
+        <p id="use-req-waiting-desc" style="font-size:0.92rem; color:var(--slate-600); line-height:1.55; margin-bottom:16px;">
+          사장님 화면으로 쿠폰 사용 요청 알림이 전송되었습니다.<br>사장님이 [승인] 버튼을 누르면 즉시 사용 완료됩니다.
+        </p>
+        <div class="use-req-summary-bar" style="margin-bottom:16px;">
+          <span id="use-req-waiting-store" style="color:var(--slate-800);">가맹점</span>
+          <span class="use-req-summary-amount" id="use-req-waiting-amount">5,000원</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button type="button" class="btn-modal-close" id="btn-cancel-use-req" style="color:#dc2626; border-color:#fecaca; background:#fff5f5;">사용 요청 취소하기</button>
+        </div>
+      </div>
+
+      <!-- 3단계: 사장님 승인 완료 -->
+      <div id="use-req-step-approved" style="display:none; padding:10px 0 4px;">
+        <div style="width:56px; height:56px; border-radius:50%; background:#dcfce7; color:#059669; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+          <svg style="width:30px; height:30px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h3 style="font-size:1.35rem; font-weight:800; color:var(--slate-900); margin-bottom:6px;">쿠폰 사용이 승인되었습니다</h3>
+        <div id="use-req-approved-amount" style="font-size:1.75rem; font-weight:900; color:#059669; margin-bottom:8px;">5,000원 결제 완료</div>
+        <p id="use-req-approved-desc" style="font-size:0.92rem; color:var(--slate-600); margin-bottom:18px;">
+          가맹점 사장님이 쿠폰 사용을 정상 승인했습니다.
+        </p>
+        <button type="button" class="btn-use-coupon-primary" style="width:100%; height:48px; background:#059669; border-color:#059669;" onclick="window.closeUseRequestModal()">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR 코드 사용 모달 바텀시트 -->
+  <div class="qr-modal-backdrop" id="use-qr-modal">
+    <div class="qr-modal-sheet">
+      <div class="qr-drag-handle"></div>
+      <h3 style="font-family:'Gowun Dodum',sans-serif; font-size:1.45rem; color:var(--slate-900); margin-bottom:4px;">가맹점 결제용 QR 코드</h3>
+      <p style="font-size:0.85rem; color:var(--slate-500); margin-bottom:14px;">가맹점 대표님께 화면을 보여주세요.</p>
+
+      <div id="use-modal-qr-container">
+        <div class="qr-image-wrap">
+          <img id="use-modal-qr-img" src="" alt="결제 QR 코드" style="width:100%;height:100%;object-fit:contain;" />
+        </div>
+        <div class="qr-timer" id="use-modal-timer">03:00</div>
+        <button type="button" class="btn-modal-close" onclick="window.closeUseModal()">닫기</button>
+      </div>
+
+      <div id="use-modal-expired-container" style="display: none; padding: 20px 0;">
+        <p style="font-size: 0.95rem; color: #dc2626; font-weight: 700; margin-bottom: 16px;">유효 시간이 만료되었습니다.</p>
+        <button type="button" class="btn-modal-close" style="background:var(--primary); color:var(--white); border-color:var(--primary);" id="btn-re-qr">QR 코드 다시 생성</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 간편로그인 후 휴대폰 번호 미수신 시 최초 1회 번호 연동(지갑 통합) 모달 -->
+  <div class="qr-modal-backdrop" id="phone-link-modal">
+    <div class="qr-modal-sheet" style="text-align: left;">
+      <div class="qr-drag-handle"></div>
+      <h3 style="font-family:'Gowun Dodum',sans-serif; font-size:1.35rem; color:var(--slate-900); margin-bottom:6px; text-align:center;">쿠폰 지갑 통합 안내</h3>
+      <p style="font-size:0.86rem; color:var(--slate-500); margin-bottom:20px; text-align:center; line-height:1.5;">
+        간편로그인 계정에 휴대폰 번호를 최초 1회 연결하면<br>어떤 방식으로 로그인하든 동일한 쿠폰 지갑이 표시됩니다.
+      </p>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:0.84rem; font-weight:700; color:var(--slate-700); margin-bottom:6px;">휴대폰 번호</label>
+        <div style="display:flex; gap:8px;">
+          <input type="tel" id="link-phone-input" placeholder="'-' 없이 숫자만 입력" maxlength="13" style="flex:1; height:46px; border:1.5px solid var(--slate-200); border-radius:10px; padding:0 14px; font-size:0.95rem; font-family:inherit; outline:none;" />
+          <button type="button" id="btn-link-send-otp" style="height:46px; padding:0 16px; border-radius:10px; border:none; background:var(--primary); color:#fff; font-weight:700; font-size:0.88rem; cursor:pointer; white-space:nowrap;">인증번호 받기</button>
+        </div>
+      </div>
+
+      <div id="link-otp-wrap" style="display:none; margin-bottom:16px;">
+        <label style="display:block; font-size:0.84rem; font-weight:700; color:var(--slate-700); margin-bottom:6px;">인증번호 6자리</label>
+        <input type="text" id="link-otp-input" placeholder="6자리 숫자 입력" maxlength="6" style="width:100%; height:46px; border:1.5px solid var(--slate-200); border-radius:10px; padding:0 14px; font-size:1rem; text-align:center; letter-spacing:2px; font-family:inherit; outline:none;" />
+        <p id="link-dev-otp-notice" style="display:none; margin-top:8px; font-size:0.84rem; color:var(--slate-500); text-align:center;"></p>
+        <button type="button" id="btn-link-verify-otp" style="width:100%; height:48px; margin-top:12px; border-radius:10px; border:none; background:var(--primary); color:#fff; font-weight:700; font-size:0.95rem; cursor:pointer;">번호 연결 및 지갑 통합하기</button>
       </div>
     </div>
   </div>
 
   <div id="toast-container"></div>
 
-  <!-- ── 기존 비즈니스 로직 (100% 유지) ── -->
 </body>
 </html>

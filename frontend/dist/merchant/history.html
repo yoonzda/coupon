@@ -1,419 +1,301 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="거래 내역 | 옹진 가맹점 매니저">
-  <meta property="og:description" content="옹진 관광쿠폰 가맹점 관리자 — 정산 및 결제 이력">
-  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
-  <meta property="og:locale" content="ko_KR">
-  <title>거래 내역 | 옹진 가맹점 매니저</title>
+  <title>거래 내역 | 옹진관광 가맹점</title>
   <style>
-    :root {
-      --merchant-primary: #059669;
-      --merchant-primary-deep: #064E3B;
-      --merchant-accent: #10B981;
+    * {
+      box-sizing: border-box;
+      border-radius: 0 !important;
     }
 
-    /* ── 가맹점 하단 네비게이션 탭바 (가로 균등 정렬 완벽 보장) ── */
-    .tabbar, .tab-bar {
-      position: fixed !important;
-      bottom: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      margin: 0 auto !important;
-      width: 100% !important;
-      max-width: 440px !important;
-      height: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
-      padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
-      background: rgba(255, 255, 255, 0.98) !important;
-      backdrop-filter: blur(16px) !important;
-      -webkit-backdrop-filter: blur(16px) !important;
-      border-top: 1px solid #E2E8F0 !important;
-      display: flex !important;
-      flex-direction: row !important;
-      justify-content: space-around !important;
-      align-items: center !important;
-      z-index: 999 !important;
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05) !important;
-      box-sizing: border-box !important;
-    }
-    .tabbar .tab-item, .tab-bar .tab-item {
-      flex: 1 1 0 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      justify-content: center !important;
-      gap: 4px !important;
-      padding: 4px 2px !important;
-      text-decoration: none !important;
-      color: #64748B !important;
-      cursor: pointer !important;
-      background: transparent !important;
-      border: none !important;
-      font-family: inherit !important;
-      transition: all 0.2s ease !important;
-      -webkit-tap-highlight-color: transparent !important;
-      min-width: 0 !important;
-    }
-    .tabbar .tab-item svg, .tab-bar .tab-item svg {
-      width: 24px !important;
-      height: 24px !important;
-      stroke: #64748B !important;
-      flex-shrink: 0 !important;
-      transition: stroke 0.2s ease, transform 0.2s ease !important;
-    }
-    .tabbar .tab-item .label, .tab-bar .tab-item .label {
-      font-size: 11.5px !important;
-      font-weight: 500 !important;
-      color: #64748B !important;
-      letter-spacing: -0.02em !important;
-      white-space: nowrap !important;
-      line-height: 1 !important;
-    }
-    .tabbar .tab-item.active, .tab-bar .tab-item.active,
-    .tabbar .tab-item[data-active="true"], .tab-bar .tab-item[data-active="true"] {
-      color: var(--merchant-primary) !important;
-    }
-    .tabbar .tab-item.active svg, .tab-bar .tab-item.active svg,
-    .tabbar .tab-item[data-active="true"] svg, .tab-bar .tab-item[data-active="true"] svg {
-      stroke: var(--merchant-primary) !important;
-      transform: translateY(-1px) !important;
-    }
-    .tabbar .tab-item.active .label, .tab-bar .tab-item.active .label,
-    .tabbar .tab-item[data-active="true"] .label, .tab-bar .tab-item[data-active="true"] .label {
-      font-weight: 700 !important;
-      color: var(--merchant-primary) !important;
-    }
-    .app-container .scroll {
-      padding-bottom: 84px !important;
+    html, body {
+      background: #f8fafc !important;
+      color: #0f172a !important;
+      min-height: 100dvh;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow-x: hidden;
+      position: relative;
     }
 
-    /* 서브페이지 공통 헤더 */
-    .subpage-header {
-      height: 60px;
-      padding: 0 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #FFFFFF;
-      border-bottom: 1px solid #EEF0F2;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .subpage-header .btn-back {
+    /* 좌측 상단 원형 동그라미 뒤로가기 버튼 */
+    .btn-top-back {
       position: absolute;
-      left: 14px;
-      background: none;
-      border: none;
-      padding: 8px;
-      border-radius: 50%;
-      cursor: pointer;
-      color: var(--fg-strong, #111827);
+      top: 24px;
+      left: 24px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: #334155;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 50% !important;
       text-decoration: none;
       transition: all 0.2s ease;
-    }
-    .subpage-header .btn-back:hover {
-      background: rgba(5, 150, 105, 0.08);
-      color: var(--merchant-primary);
-    }
-    .subpage-header .title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--fg-strong);
-      letter-spacing: -0.03em;
+      z-index: 50;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
     }
 
-    /* 요약 그리드 */
-    .history-summary-wrap {
-      padding: 20px 20px 14px;
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 12px;
+    .btn-top-back:hover {
+      color: #059669;
+      border-color: #059669;
+      background: #fafdfb;
+      transform: scale(1.05);
     }
-    .h-summary-card {
-      background: #FFFFFF;
-      border: 1px solid #EEF0F2;
-      border-radius: 18px;
-      padding: 18px 16px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.02);
+
+    /* 화면 전체 레이아웃 */
+    .history-fullscreen-container {
+      width: 100vw;
+      min-height: 100dvh;
+      padding: 80px 24px 40px 24px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
-    }
-    .h-summary-card .label {
-      font-size: 12px;
-      color: var(--fg-tertiary);
-      font-weight: 500;
-    }
-    .h-summary-card .val {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--fg-strong);
-      letter-spacing: -0.03em;
-    }
-    .h-summary-card.highlight .val {
-      color: var(--merchant-primary);
+      align-items: center;
     }
 
-    /* 내역 리스트 섹션 */
-    .history-list-section {
-      padding: 10px 20px 30px;
-    }
-    .history-list-section .list-head-row {
+    .history-content-wrapper {
+      width: 100%;
+      max-width: 520px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
+      flex-direction: column;
+      gap: 32px;
     }
-    .history-list-section .list-head-row h3 {
-      font-size: 16px;
+
+    .history-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* 타이틀 */
+    .history-title {
+      font-size: 2rem;
       font-weight: 700;
-      color: var(--fg-strong);
+      color: #1e293b;
+      letter-spacing: -0.5px;
       margin: 0;
     }
-    .history-list-section .count-badge {
-      font-size: 12.5px;
-      color: var(--merchant-primary);
-      font-weight: 600;
+
+    /* 2행 양끝 정렬 보드 */
+    .summary-rows-board {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 4px 4px 20px 4px;
+      border-bottom: 2px solid #e2e8f0;
     }
 
-    .tx-item-card {
-      background: #FFFFFF;
-      border: 1px solid #EEF0F2;
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 10px;
+    .summary-row {
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-      transition: transform 0.15s ease;
     }
-    .tx-item-card:active {
-      transform: scale(0.99);
-      background: #F9FAFB;
+
+    /* 라벨과 수치/단위의 폰트 크기(1rem) 및 굵기(600) 완벽 동일 통합 스타일 */
+    .summary-row-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #475569;
     }
-    .tx-left-col {
+
+    .summary-val-wrap {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .tx-type-tag {
-      display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-      width: fit-content;
     }
-    .tx-type-tag.digital {
-      background: #ECFDF5;
+
+    .num-text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .unit-text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* 거래 내역 섹션 */
+    .tx-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .tx-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1.5px solid #f1f5f9;
+    }
+
+    .tx-section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+
+    .tx-section-sub {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .tx-list-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 플랫 거래 행 */
+    .tx-item-row {
+      padding: 18px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .tx-info-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tx-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 9px;
+      color: #059669;
+      background: #ecfdf5;
+      border: 1.5px solid #a7f3d0;
+    }
+
+    .tx-badge.paper {
+      color: #0284c7;
+      background: #f0f9ff;
+      border-color: #bae6fd;
+    }
+
+    .tx-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .tx-sub {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 3px;
+    }
+
+    .tx-val-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tx-val-num {
+      font-size: 1rem;
+      font-weight: 600;
       color: #059669;
     }
-    .tx-type-tag.paper {
-      background: #EFF6FF;
-      color: #2563EB;
-    }
-    .tx-date-text {
-      font-size: 12.5px;
-      color: var(--fg-quiet);
-    }
-    .tx-right-col {
-      text-align: right;
+
+    /* 빈 데이터 상태 */
+    .empty-state {
+      text-align: center;
+      padding: 56px 20px;
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
-      gap: 3px;
-    }
-    .tx-amount-text {
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--merchant-primary);
-    }
-    .btn-cancel-tx {
-      margin-top: 6px;
-      padding: 4px 10px;
-      background: #fef2f2;
-      color: #dc2626;
-      border: 1px solid #fecaca;
-      border-radius: 6px;
-      font-size: 11.5px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .btn-cancel-tx:hover {
-      background: #fee2e2;
-    }
-    .tx-item-card.cancelled {
-      background: #f8fafc;
-      opacity: 0.85;
-      border-color: #e2e8f0;
-    }
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      display: none;
       align-items: center;
-      justify-content: center;
-      z-index: 100000;
-      padding: 20px;
-    }
-    .modal-overlay.active {
-      display: flex !important;
-    }
-    .modal-card {
-      background: #ffffff;
-      border-radius: 20px;
-      padding: 24px;
-      width: 100%;
-      max-width: 360px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      gap: 12px;
+      color: #64748b;
     }
 
-    .empty-state-box {
-      text-align: center;
-      padding: 50px 20px;
-      background: #FFFFFF;
-      border: 1px dashed #E5E7EB;
-      border-radius: 18px;
-      color: var(--fg-tertiary);
-      margin-top: 10px;
+    .empty-icon {
+      width: 44px;
+      height: 44px;
+      color: #cbd5e1;
+      stroke-width: 1.2;
+    }
+
+    .empty-text {
+      font-size: 0.95rem;
+      font-weight: 500;
     }
   </style>
-  <script type="module" crossorigin src="/assets/merchant-history-DG9tXTIR.js"></script>
+  <script type="module" crossorigin src="/assets/merchant-history-9MaBmQsJ.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-DIUxAG8e.js">
-  <link rel="stylesheet" crossorigin href="/assets/app-styles-CmrLvQNp.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
 </head>
 <body>
-  <div class="app-container">
-    <div class="scroll">
+  <!-- 좌측 상단 원형 동그라미 뒤로가기 버튼 -->
+  <a class="btn-top-back" href="/merchant/index.html" title="메인 메뉴로 이동">
+    <svg style="width: 22px; height: 22px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+    </svg>
+  </a>
 
-      <!-- 서브페이지 헤더 -->
-      <div class="subpage-header">
-        <a href="/merchant/index.html" class="btn-back" title="가맹점 홈으로 이동">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        </a>
-        <div class="title">정산 및 거래 내역</div>
+  <!-- 폰트 크기와 굵기가 동일하게 통일된 양끝 정렬 레이아웃 -->
+  <div class="history-fullscreen-container">
+    <div class="history-content-wrapper">
+      <div class="history-header">
+        <h1 class="history-title">가맹점 거래 내역</h1>
       </div>
 
-      <!-- 상단 요약 그리드 -->
-      <div class="history-summary-wrap" id="history-summary">
-        <div class="h-summary-card highlight">
-          <span class="label">총 정산 금액</span>
-          <span class="val" id="sum-total-amount">₩ 0</span>
+      <!-- 라벨과 수치/단위의 폰트 크기(1rem) 및 굵기(600)가 완전히 통일된 스코어 보드 -->
+      <div class="summary-rows-board">
+        <div class="summary-row">
+          <span class="summary-row-label">총 정산 금액</span>
+          <div class="summary-val-wrap">
+            <span class="num-text" id="total-amount-num">0</span>
+            <span class="unit-text">원</span>
+          </div>
         </div>
-        <div class="h-summary-card">
-          <span class="label">총 승인 건수</span>
-          <span class="val" id="sum-total-count">0건</span>
-        </div>
-      </div>
-
-      <!-- 거래 내역 목록 섹션 -->
-      <div class="history-list-section">
-        <div class="list-head-row">
-          <h3>승인 상세 이력</h3>
-          <span class="count-badge" id="list-count-badge">총 0건</span>
-        </div>
-
-        <div id="tx-list-container">
-          <div class="empty-state-box">거래 내역을 불러오는 중입니다...</div>
+        <div class="summary-row">
+          <span class="summary-row-label">총 결제 건수</span>
+          <div class="summary-val-wrap">
+            <span class="num-text" id="total-count-num">0</span>
+            <span class="unit-text">건</span>
+          </div>
         </div>
       </div>
 
+      <!-- 거래 상세 목록 섹션 -->
+      <div class="tx-section">
+        <div class="tx-section-header">
+          <h3 class="tx-section-title">결제 승인 내역</h3>
+          <span class="tx-section-sub">최근 순</span>
+        </div>
+
+        <div class="tx-list-container" id="tx-list">
+          <div class="empty-state">
+            <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="square" stroke-linejoin="miter" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+            <span class="empty-text">조회된 거래 내역이 없습니다.</span>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- ── 하단 공통 네비게이션 탭바 ── -->
-    <nav class="tabbar tab-bar" style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; max-width: 440px !important; margin: 0 auto !important; height: calc(68px + env(safe-area-inset-bottom, 0px)) !important; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important; background: rgba(255, 255, 255, 0.98) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-top: 1px solid #E2E8F0 !important; display: flex !important; flex-direction: row !important; justify-content: space-around !important; align-items: center !important; z-index: 9999 !important; box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05) !important; box-sizing: border-box !important;">
-      <a class="tab-item" href="/merchant/index.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #64748B !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-        <span class="label" style="font-size: 11.5px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">홈</span>
-      </a>
-
-      <a class="tab-item" href="/merchant/scan.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #64748B !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
-        <span class="label" style="font-size: 11.5px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">QR스캔</span>
-      </a>
-
-      <a class="tab-item" href="/merchant/manage-store.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #64748B !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <rect x="9" y="13" width="6" height="8"/>
-        </svg>
-        <span class="label" style="font-size: 11.5px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">매장관리</span>
-      </a>
-
-      <a class="tab-item active" href="/merchant/history.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #059669 !important; font-weight: 700 !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-        </svg>
-        <span class="label" style="font-size: 11.5px !important; font-weight: 700 !important; color: #059669 !important; line-height: 1 !important; white-space: nowrap !important;">거래내역</span>
-      </a>
-
-      <button type="button" class="tab-item" id="btn-merchant-logout" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #64748B !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        <span class="label" style="font-size: 11.5px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">로그아웃</span>
-      </button>
-    </nav>
   </div>
 
   <div id="toast-container"></div>
-
-  <!-- 결제 취소 확인 모달 -->
-  <div class="modal-overlay" id="modal-cancel-confirm">
-    <div class="modal-card">
-      <div style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">결제 취소 / 환불</div>
-      <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 16px;">
-        해당 쿠폰 승인을 취소하고 관광객에게 쿠폰을 다시 복구하시겠습니까?
-      </p>
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px;">
-          <span style="color:#64748b;">취소 대상 금액</span>
-          <strong style="color:#dc2626; font-size:15px;" id="cancel-modal-amount">₩ 0</strong>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b;">
-          <span>승인 일시</span>
-          <span id="cancel-modal-date">-</span>
-        </div>
-      </div>
-      <div style="margin-bottom: 20px;">
-        <label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">취소 사유 선택</label>
-        <select id="cancel-reason-select" style="width:100%; height:40px; border-radius:8px; border:1px solid #cbd5e1; padding:0 10px; font-size:13px;">
-          <option value="고객 단순 주문 취소">고객 단순 주문 취소</option>
-          <option value="가맹점 착오 승인">가맹점 착오 승인</option>
-          <option value="결제 금액 변경">결제 금액 변경</option>
-          <option value="기타 사유">기타 사유</option>
-        </select>
-      </div>
-      <div style="display:flex; gap:10px;">
-        <button type="button" id="btn-cancel-modal-close" style="flex:1; height:44px; border-radius:10px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:700; color:#475569; cursor:pointer;">닫기</button>
-        <button type="button" id="btn-cancel-modal-confirm" style="flex:1; height:44px; border-radius:10px; border:none; background:#dc2626; font-weight:700; color:#fff; cursor:pointer;">결제 취소 승인</button>
-      </div>
-    </div>
-  </div>
 
 </body>
 </html>

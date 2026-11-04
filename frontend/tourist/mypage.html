@@ -189,47 +189,61 @@
       margin-left: auto;
     }
 
-    /* 헤더 글자 크기 조절 컨트롤 ('가가' 심볼 + 버튼) */
+    /* 헤더 글자 크기 조절 컨트롤 (슬라이딩 토글) */
     .font-size-control {
-      display: inline-flex;
+      position: relative;
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
       align-items: center;
+      height: 34px;
       background: var(--slate-100);
-      padding: 0.22rem;
-      border-radius: 99px;
+      padding: 3px;
+      border-radius: 999px;
       border: 1px solid var(--slate-200);
-      gap: 0.15rem;
-    }
-
-    .font-size-label {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 0.3rem 0 0.5rem;
       user-select: none;
-      line-height: 1;
     }
 
-    .gaga-icon {
-      width: 1.75rem;
-      height: 1.2rem;
-      display: block;
-      overflow: visible;
-      flex-shrink: 0;
+    .font-size-slider {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: calc(50% - 3px);
+      background: var(--white);
+      border-radius: 999px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+      transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    html[data-font-scale="large"] .font-size-slider {
+      transform: translateX(100%);
     }
 
     .font-size-btn {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-width: 50px;
+      padding: 0 12px;
       border: none;
       background: transparent;
       color: var(--slate-600);
       font-family: inherit;
-      font-size: 0.8rem;
+      font-size: 13px;
       font-weight: 700;
-      padding: 0.34rem 0.62rem;
-      border-radius: 99px;
+      border-radius: 999px;
       cursor: pointer;
-      line-height: 1.15;
+      line-height: 1;
       white-space: nowrap;
-      transition: all 0.15s ease;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .font-size-btn:hover {
@@ -237,9 +251,7 @@
     }
 
     .font-size-btn.active {
-      background: var(--white);
       color: var(--primary);
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
     }
 
     /* 내 쿠폰 탭 내부 계정/로그아웃 바 (번호 + 로그아웃만 깔끔하게 배치) */
@@ -430,7 +442,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.6rem;
+      flex-wrap: wrap;
+      gap: 0.5rem 0.6rem;
       margin-bottom: var(--section-gap);
     }
 
@@ -440,6 +453,7 @@
       font-weight: 700;
       white-space: nowrap;
       flex-shrink: 0;
+      margin-left: auto;
     }
 
     /* ── [쿠폰 카드] 티켓 스타일 (화면 비율에 맞춰 여유로운 구성) ── */
@@ -833,6 +847,38 @@
       margin-top: 0.12rem;
     }
 
+    /* 가맹점 사진 가로 스크롤 갤러리 */
+    .store-photo-strip {
+      display: flex;
+      gap: 0.55rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      margin: 0.35rem 0 0.15rem;
+      padding-bottom: 0.1rem;
+    }
+
+    .store-photo-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .store-photo-item {
+      width: 6.8rem;
+      height: 5.1rem;
+      border-radius: 0.6rem;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+    }
+
+    .store-photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
     .store-sheet-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -997,10 +1043,7 @@
     /* ── [가맹점 목록 섹션] ── */
     .category-filter-wrap {
       display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
+      flex-wrap: wrap;
       gap: var(--chip-gap);
       flex: 1 1 auto;
       min-width: 0;
@@ -1188,11 +1231,6 @@
     }
 
     /* ── 어르신 맞춤형 왕큰글씨 모드 (data-font-scale="large") ── */
-    html[data-font-scale="large"] .font-size-btn {
-      font-size: 0.86rem;
-      padding: 0.35rem 0.62rem;
-    }
-
     html[data-font-scale="large"] .nav-tab-btn {
       font-size: 1.04rem;
       min-height: 3.25rem;
@@ -1314,10 +1352,10 @@
       .font-size-label {
         display: none;
       }
-      .font-size-btn,
-      html[data-font-scale="large"] .font-size-btn {
-        font-size: 0.75rem;
-        padding: 0.28rem 0.48rem;
+      .font-size-btn {
+        font-size: 12px;
+        min-width: 44px;
+        padding: 0 10px;
       }
       .nav-tab-btn,
       html[data-font-scale="large"] .nav-tab-btn {
@@ -1489,12 +1527,7 @@
         </div>
         <div class="header-actions">
           <div class="font-size-control" role="group" aria-label="글자 크기 조절">
-            <span class="font-size-label" aria-hidden="true">
-              <svg class="gaga-icon" viewBox="0 0 32 22">
-                <text x="11.5" y="17" font-family="'Pretendard', sans-serif" font-size="15.5" font-weight="800" fill="#64748b">가</text>
-                <text x="1.5" y="18.5" font-family="'Pretendard', sans-serif" font-size="11.5" font-weight="900" fill="#0f172a" stroke="#f1f5f9" stroke-width="3.2" stroke-linejoin="round" style="paint-order: stroke fill;">가</text>
-              </svg>
-            </span>
+            <span class="font-size-slider" aria-hidden="true"></span>
             <button type="button" class="font-size-btn active" data-scale="normal" title="글자 보통">보통</button>
             <button type="button" class="font-size-btn" data-scale="large" title="글자 크게">크게</button>
           </div>
@@ -1608,6 +1641,7 @@
       </button>
     </div>
     <div class="store-sheet-body">
+      <div class="store-photo-strip" id="sheet-store-photos" style="display:none;"></div>
       <div class="store-sheet-address" id="sheet-store-address">주소</div>
       <div class="store-sheet-hours" id="sheet-store-hours" style="display:none;"></div>
       <div class="store-sheet-phone">
@@ -2164,9 +2198,24 @@
       const phoneEl = document.getElementById('sheet-store-phone');
       const phoneTextEl = document.getElementById('sheet-store-phone-text');
       const kakaoEl = document.getElementById('sheet-route-kakao');
+      const photosEl = document.getElementById('sheet-store-photos');
 
       if (nameEl) nameEl.textContent = m.name || '가맹점';
       if (addrEl) addrEl.textContent = m.address || '인천광역시 옹진군';
+      if (photosEl) {
+        const imgs = Array.isArray(m.images) ? m.images.filter(Boolean) : [];
+        if (imgs.length > 0) {
+          photosEl.innerHTML = imgs.map(src => `
+            <div class="store-photo-item">
+              <img src="${src}" alt="${m.name || '가맹점'} 사진" loading="lazy" onerror="const item=this.closest('.store-photo-item'); const strip=this.closest('.store-photo-strip'); if(item) item.remove(); if(strip && !strip.children.length) strip.style.display='none';" />
+            </div>
+          `).join('');
+          photosEl.style.display = 'flex';
+        } else {
+          photosEl.innerHTML = '';
+          photosEl.style.display = 'none';
+        }
+      }
       if (hoursEl) {
         if (m.business_hours) {
           hoursEl.textContent = `영업시간: ${m.business_hours}`;
@@ -2299,11 +2348,22 @@
 
       container.innerHTML = filtered.map(m => {
         const kakaoUrl = getKakaoRouteUrl(m);
+        const imgs = Array.isArray(m.images) ? m.images.filter(Boolean) : [];
+        const photosHtml = imgs.length > 0 ? `
+          <div class="store-photo-strip">
+            ${imgs.map(src => `
+              <div class="store-photo-item">
+                <img src="${src}" alt="${m.name} 사진" loading="lazy" onerror="const item=this.closest('.store-photo-item'); const strip=this.closest('.store-photo-strip'); if(item) item.remove(); if(strip && !strip.children.length) strip.style.display='none';" />
+              </div>
+            `).join('')}
+          </div>
+        ` : '';
 
         return `
           <div class="store-card" onclick="window.focusStoreOnMap('${m.id}')">
             <div class="store-info">
               <div class="store-name">${m.name}</div>
+              ${photosHtml}
               <div class="store-address">${m.address || '인천광역시 옹진군'}</div>
               <div class="store-phone">
                 <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2421,7 +2481,7 @@
       }
       update();
 
-      qrTimerInterval = setInterval(() => {
+      qrTimerInterval = setInterval(async () => {
         left--;
         if (left <= 0) {
           stopModalTimer();
@@ -2429,6 +2489,16 @@
           document.getElementById('use-modal-expired-container').style.display = 'block';
         } else {
           update();
+          if (activeCouponId && left % 2 === 0) {
+            try {
+              const stRes = await api.get(`/coupon/${activeCouponId}/status`);
+              if (stRes && stRes.success && stRes.status === 'used') {
+                window.closeUseModal();
+                showToast('쿠폰 결제가 완료되었습니다!', 'success');
+                await initPageData();
+              }
+            } catch (_) {}
+          }
         }
       }, 1000);
     }

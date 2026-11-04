@@ -1,19 +1,12 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="옹진 관광쿠폰">
-  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
-  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
-  <meta property="og:locale" content="ko_KR">
   <title>가맹점 로그인 | 옹진 관광 쿠폰</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { 
@@ -22,9 +15,14 @@
       padding: 0; 
       word-break: keep-all; 
     }
+
+    html.font-scale-anim {
+      transition: font-size 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
     
     body {
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -33,115 +31,190 @@
       background-image: 
         radial-gradient(circle at 10% 20%, #dcfce7 0%, #f0fdf4 100%);
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
       color: #1e293b;
     }
 
     /* Decorative blurred glow circles (bright green) */
     body::before {
       content: '';
-      position: absolute;
+      position: fixed;
       width: 600px; height: 600px;
       background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
       top: -200px; right: -200px;
       z-index: 0;
+      pointer-events: none;
     }
     body::after {
       content: '';
-      position: absolute;
+      position: fixed;
       width: 500px; height: 500px;
       background: radial-gradient(circle, rgba(74, 222, 128, 0.08) 0%, transparent 60%);
       bottom: -150px; left: -150px;
       z-index: 0;
+      pointer-events: none;
     }
 
     .login-card {
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(16, 185, 129, 0.15);
       border-top: 3px solid #10b981;
       border-radius: 0; 
-      padding: 56px 48px;
+      padding: 3rem 2.6rem;
       width: 100%;
-      max-width: 440px;
+      max-width: 460px;
       position: relative;
       z-index: 1;
       box-shadow: 0 20px 40px rgba(16, 185, 129, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
       animation: fadeIn 0.5s ease-out;
     }
 
+    html.font-scale-anim .login-card {
+      transition: max-width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+                  padding 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    html[data-font-scale="large"] .login-card {
+      max-width: 520px;
+      padding: 2.3rem 1.8rem;
+    }
+
     .logo-area {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      margin-bottom: 40px;
+      margin-bottom: 2.1rem;
+      width: 100%;
     }
     .logo-subtitle {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: 700;
-      color: #059669; /* green point color */
+      color: #059669;
       letter-spacing: 1.5px;
-      margin-bottom: 8px;
       text-transform: uppercase;
+      margin-bottom: 0.45rem;
+      line-height: 1.4;
     }
     .logo-title {
       font-family: 'Gowun Dodum', sans-serif;
-      font-size: 2.2rem;
+      font-size: 2.15rem;
       font-weight: 400; 
       color: #0f172a;
       letter-spacing: -0.5px;
+      line-height: 1.28;
+    }
+
+    /* 글자 크기 조절 컨트롤 (상단 배치 & 슬라이딩 토글) */
+    .font-size-control {
+      position: relative;
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      height: 36px;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
+      margin-bottom: 1.15rem;
+      align-self: flex-start;
+      user-select: none;
+    }
+    .font-size-slider {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: calc(50% - 3px);
+      background: #ffffff;
+      border-radius: 999px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+      transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+      z-index: 0;
+    }
+    html[data-font-scale="large"] .font-size-slider {
+      transform: translateX(100%);
+    }
+    .font-size-btn {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-width: 54px;
+      padding: 0 14px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 700;
+      border-radius: 999px;
+      cursor: pointer;
+      line-height: 1;
+      white-space: nowrap;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-size-btn:hover {
+      color: #0f172a;
+    }
+    .font-size-btn.active {
+      color: #059669;
     }
 
     .form-group {
-      margin-bottom: 24px;
+      margin-bottom: 1.65rem;
     }
     label {
       display: block;
-      font-size: 0.8rem;
+      font-size: 0.98rem;
       font-weight: 700;
-      color: #475569;
-      margin-bottom: 10px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      color: #334155;
+      margin-bottom: 0.42rem;
+      letter-spacing: 0.2px;
+      line-height: 1.4;
     }
     .input-wrap {
       position: relative;
     }
     .input-icon-svg {
       position: absolute;
-      left: 16px;
+      left: 0.95rem;
       top: 50%;
       transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
+      width: 1.125rem;
+      height: 1.125rem;
       stroke: #94a3b8;
       fill: none;
       pointer-events: none;
       transition: stroke 0.3s;
     }
     
-    input[type="text"], 
-    input[type="password"],
-    input[type="tel"],
-    input[type="number"],
-    input[type="email"] {
+    input[type="text"], input[type="password"] {
       width: 100%;
-      height: 52px;
-      padding: 0 16px 0 46px;
+      padding: 0.95rem 2.6rem 0.95rem 2.75rem;
       background: #ffffff;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
       color: #0f172a;
-      font-size: 16px; /* iOS 자동 줌 방지 (16px 이상) */
+      font-size: 1rem;
       font-family: inherit;
-      box-sizing: border-box;
-      transition: all 0.2s;
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
       outline: none;
-      -webkit-appearance: none;
+    }
+    #username {
+      cursor: pointer;
     }
     #password {
-      padding-right: 48px !important;
+      padding-right: 2.85rem !important;
     }
     input::-ms-reveal,
     input::-ms-clear {
@@ -149,42 +222,142 @@
       width: 0 !important;
       height: 0 !important;
     }
-    input[type="text"]:focus, 
-    input[type="password"]:focus,
-    input[type="tel"]:focus,
-    input[type="number"]:focus,
-    input[type="email"]:focus {
+    input[type="text"]:focus, input[type="password"]:focus {
       border-color: #10b981;
       background: #ffffff;
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
     }
     input[type="text"]:focus ~ .input-icon-svg, 
-    input[type="password"]:focus ~ .input-icon-svg,
-    input[type="tel"]:focus ~ .input-icon-svg,
-    input[type="number"]:focus ~ .input-icon-svg,
-    input[type="email"]:focus ~ .input-icon-svg {
+    input[type="password"]:focus ~ .input-icon-svg {
       stroke: #10b981;
     }
     input::placeholder { color: #94a3b8; }
 
-    /* Password visibility toggle */
-    .pw-toggle {
+    /* Custom Select Chevron & Dropdown Menu */
+    .select-chevron {
       position: absolute;
-      right: 12px;
+      right: 0.65rem;
       top: 50%;
       transform: translateY(-50%);
       background: none;
       border: none;
       cursor: pointer;
-      padding: 6px;
+      padding: 0.35rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+    }
+    .select-chevron svg {
+      width: 1.125rem;
+      height: 1.125rem;
+      stroke: #94a3b8;
+      fill: none;
+      transition: transform 0.2s ease, stroke 0.2s ease;
+    }
+    .input-wrap.open .select-chevron svg {
+      transform: rotate(180deg);
+      stroke: #10b981;
+    }
+
+    .custom-select-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      max-height: 13.5rem;
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
+      z-index: 50;
+      padding: 0.35rem;
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .input-wrap.open .custom-select-menu {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .custom-select-menu::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-select-menu::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-select-menu::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 999px;
+    }
+    .custom-select-menu::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .custom-select-option {
+      padding: 0.7rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #1e293b;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 0.2rem;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .custom-select-option:hover {
+      background: #f0fdf4;
+      color: #059669;
+      font-weight: 600;
+    }
+    .custom-select-option.selected {
+      background: #ecfdf5;
+      color: #059669;
+      font-weight: 700;
+    }
+    .custom-select-option .recent-label {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: #059669;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+    .custom-select-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 0.3rem 0.4rem;
+    }
+    .custom-select-empty {
+      padding: 0.85rem;
+      text-align: center;
+      font-size: 0.88rem;
+      color: #94a3b8;
+    }
+
+    /* Password visibility toggle */
+    .pw-toggle {
+      position: absolute;
+      right: 0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.35rem;
       display: flex;
       align-items: center;
       justify-content: center;
       outline: none;
     }
     .pw-toggle svg {
-      width: 18px;
-      height: 18px;
+      width: 1.125rem;
+      height: 1.125rem;
       stroke: #94a3b8;
       fill: none;
       transition: stroke 0.2s;
@@ -193,27 +366,30 @@
 
     .btn-login {
       width: 100%;
-      padding: 18px;
+      padding: 1.05rem 1.25rem;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
       border: none;
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 0.3px;
+      line-height: 1.4;
       cursor: pointer;
-      transition: all 0.2s;
-      margin-top: 20px;
+      transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      margin-top: 1.1rem;
       position: relative;
       overflow: hidden;
       font-family: inherit;
-      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .btn-login:hover:not(:disabled) {
-      filter: brightness(1.08);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+      filter: brightness(1.06);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22);
     }
-    .btn-login:active { transform: scale(0.99); }
+    .btn-login:active:not(:disabled) { transform: scale(0.99); }
     .btn-login:disabled {
       background: #e2e8f0;
       color: #94a3b8;
@@ -225,7 +401,7 @@
       color: #ef4444;
       font-size: 0.85rem;
       font-weight: 600;
-      margin-top: 16px;
+      margin-top: 0.9rem;
       text-align: left;
     }
     .error-msg.show { display: block; }
@@ -252,124 +428,6 @@
     .btn-login.loading .btn-text { display: none; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Login Mode Tabs */
-    .login-tabs {
-      display: flex;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      padding: 4px;
-      border-radius: 10px;
-      margin-bottom: 24px;
-      gap: 3px;
-    }
-    .login-tab-btn {
-      flex: 1;
-      padding: 9px 4px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #64748b;
-      border: none;
-      background: none;
-      border-radius: 7px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: inherit;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      white-space: nowrap;
-    }
-    .login-tab-btn:hover {
-      color: #0f172a;
-    }
-    .login-tab-btn.active {
-      background: #ffffff;
-      color: #059669;
-      font-weight: 700;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.12);
-    }
-    .login-tab-btn svg {
-      width: 16px;
-      height: 16px;
-      stroke-width: 2.2;
-    }
-
-    /* OTP Form Styles */
-    .phone-input-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      width: 100%;
-    }
-    .phone-input-row .input-wrap {
-      flex: 1 1 auto;
-      min-width: 0;
-      position: relative;
-    }
-    .phone-input-row input[type="tel"] {
-      width: 100% !important;
-      display: block;
-      font-size: 17px !important;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-    .btn-send-otp {
-      padding: 0 16px;
-      background: #ffffff;
-      border: 1.5px solid #10b981;
-      color: #059669;
-      border-radius: 10px;
-      font-size: 0.92rem;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
-      font-family: inherit;
-      flex-shrink: 0;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .btn-send-otp:hover:not(:disabled) {
-      background: #ecfdf5;
-      border-color: #059669;
-      color: #047857;
-    }
-    .btn-send-otp:disabled {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-      color: #94a3b8;
-      cursor: not-allowed;
-    }
-    .otp-timer-badge {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #ef4444;
-      font-variant-numeric: tabular-nums;
-    }
-    .otp-info-box {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 0.8rem;
-      color: #166534;
-      line-height: 1.5;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
-    }
-    .otp-info-box svg {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      margin-top: 1px;
-      color: #10b981;
-    }
 
     /* Verification Overlay */
     .verify-overlay {
@@ -444,7 +502,7 @@
     }
     .btn-text-q {
       color: #059669;
-      font-size: 2.2rem;
+      font-size: 35px;
       font-weight: 500;
       transition: color 0.3s ease, text-shadow 0.3s ease;
       z-index: 10;
@@ -476,12 +534,13 @@
     .modal-container {
       background: #ffffff;
       border: 1px solid rgba(16, 185, 129, 0.2);
-      border-radius: 0;
-      width: 360px;
-      padding: 40px 28px 32px 28px;
+      border-radius: 12px;
+      width: calc(100% - 2rem);
+      max-width: 23.5rem;
+      padding: 2rem 1.5rem 1.75rem;
       position: relative;
       text-align: center;
-      box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.15);
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18);
       transform: scale(0.95);
       transition: transform 0.25s ease;
     }
@@ -489,19 +548,21 @@
     
     .modal-close-x {
       position: absolute;
-      top: 16px;
-      right: 16px;
+      top: 14px;
+      right: 14px;
       background: none;
       border: none;
       color: #94a3b8;
       cursor: pointer;
-      padding: 4px;
+      padding: 6px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: color 0.2s;
+      transition: background 0.15s ease, color 0.15s ease;
     }
     .modal-close-x:hover {
+      background: #f1f5f9;
       color: #334155;
     }
     .modal-close-x svg {
@@ -513,70 +574,107 @@
 
     .modal-header-area {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 1.25rem;
     }
     .modal-title {
       font-family: 'Gowun Dodum', sans-serif;
-      font-size: 1.45rem;
+      font-size: 1.4rem;
       font-weight: 700;
-      background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 10px;
+      color: #0f172a;
+      margin-bottom: 8px;
       letter-spacing: -0.5px;
     }
     .title-divider {
       width: 28px;
       height: 2px;
-      background: rgba(16, 185, 129, 0.2);
-      margin: 12px auto 16px auto;
+      background: rgba(16, 185, 129, 0.25);
+      margin: 10px auto 14px auto;
     }
     .modal-desc {
       color: #475569;
-      font-size: 0.85rem;
-      line-height: 1.6;
-      font-weight: 400;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      font-weight: 500;
       letter-spacing: -0.2px;
     }
     .modal-desc span {
       display: block;
-      margin-bottom: 4px;
-      font-weight: 600;
+      margin-bottom: 2px;
+      font-weight: 700;
       color: #0f172a;
     }
 
     .inquiry-info-box {
-      background: rgba(16, 185, 129, 0.05);
-      padding: 22px 28px;
-      margin-top: 24px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      align-items: flex-start;
-      border: 1px solid rgba(16, 185, 129, 0.1);
+      gap: 0.65rem;
+      width: 100%;
     }
-    .inquiry-info-item {
-      color: #334155;
-      font-size: 0.95rem;
-      font-weight: 500;
+    .inquiry-call-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.22rem;
+      padding: 0.95rem 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      text-decoration: none;
+      text-align: center;
+      transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .inquiry-call-item:hover {
+      background: #f0fdf4;
+      border-color: #10b981;
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.1);
+    }
+    .inquiry-call-label {
+      color: #64748b;
+      font-size: 0.86rem;
+      font-weight: 600;
+      line-height: 1.35;
+      white-space: nowrap;
+    }
+    .inquiry-call-number {
+      color: #059669;
+      font-size: 1.12rem;
+      font-weight: 700;
       letter-spacing: 0.3px;
+      line-height: 1.35;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
 
-    .apply-notice-container {
-      margin-top: 32px;
+    /* Secondary Outline Button (입점 신청하기) */
+    .btn-apply-outline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 1.05rem 1.25rem;
+      margin-top: 0.75rem;
+      background: #ffffff;
+      border: 1.5px solid #10b981;
+      color: #059669;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      line-height: 1.4;
       text-align: center;
+      text-decoration: none;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      box-sizing: border-box;
     }
-    .btn-apply-text-link {
-      font-size: 0.88rem;
-      color: #059669; /* green point color */
-      font-weight: 600;
-      text-decoration: underline;
-      text-underline-offset: 4px;
-      transition: color 0.2s;
-      outline: none;
+    .btn-apply-outline:hover {
+      background: #f0fdf4;
+      border-color: #059669;
+      color: #047857;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.14);
     }
-    .btn-apply-text-link:hover {
-      color: #10b981;
+    .btn-apply-outline:active {
+      transform: scale(0.99);
     }
 
     /* ── Responsive & Mobile First Styles ── */
@@ -584,20 +682,22 @@
       body {
         background: #ffffff;
         background-image: none;
-        align-items: flex-start; /* Start from top on mobile */
+        align-items: stretch;
+        min-height: 100dvh;
       }
       
       body::before, body::after {
-        display: none; /* Hide background circles for a cleaner layout */
+        display: none;
       }
 
-      .login-card {
+      .login-card,
+      html[data-font-scale="large"] .login-card {
         width: 100%;
         max-width: 100%;
-        min-height: 100vh;
+        min-height: 100dvh;
         border: none;
-        border-top: 4px solid #10b981; /* Keep top accent line */
-        padding: 48px 24px 32px 24px;
+        border-top: 4px solid #10b981;
+        padding: 1.4rem 1.35rem 2.2rem 1.35rem;
         box-shadow: none;
         background: #ffffff;
         backdrop-filter: none;
@@ -608,68 +708,36 @@
       }
 
       .logo-area {
-        margin-bottom: 32px;
+        margin-bottom: 1.6rem;
       }
       
       .logo-title {
-        font-size: 2rem; /* Slightly smaller for mobile header space */
-      }
-
-      input[type="text"], 
-      input[type="password"],
-      input[type="tel"],
-      input[type="number"],
-      input[type="email"] {
-        height: 52px;
-        padding: 0 14px 0 44px;
-        font-size: 16px; /* iOS 자동 줌 방지 (16px 이상) */
-        box-sizing: border-box;
-      }
-      .phone-input-row {
-        gap: 8px;
-      }
-      .phone-input-row input[type="tel"] {
-        font-size: 16.5px !important;
-        padding-left: 42px !important;
-      }
-      .btn-send-otp {
-        height: 52px;
-        padding: 0 14px;
-        font-size: 0.88rem;
-      }
-
-      .btn-login {
-        padding: 16px;
-        margin-top: 16px;
-      }
-
-      .floating-inquiry-btn {
-        bottom: 20px;
-        right: 20px;
-        width: 60px;
-        height: 60px;
-        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
-      }
-      .btn-text-q {
         font-size: 1.8rem;
       }
 
-      .modal-container {
-        width: 90%;
-        max-width: 330px;
-        padding: 32px 20px 24px 20px;
+      .form-group {
+        margin-bottom: 1.35rem;
       }
-      .inquiry-info-box {
-        padding: 16px 20px;
-        gap: 10px;
-        margin-top: 20px;
+
+      .btn-login {
+        margin-top: 0.85rem;
+        padding: 1rem 1.2rem;
       }
-      .inquiry-info-item {
-        font-size: 0.88rem;
+
+      .btn-apply-outline {
+        margin-top: 0.65rem;
+        padding: 1rem 1.2rem;
       }
-      
-      .apply-notice-container {
-        margin-top: 24px;
+
+      .floating-inquiry-btn {
+        bottom: 16px;
+        right: 16px;
+        width: 52px;
+        height: 52px;
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+      }
+      .btn-text-q {
+        font-size: 26px;
       }
     }
 
@@ -677,11 +745,44 @@
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* ── 토스트 알림 ── */
+    #toast-container {
+      position: fixed;
+      bottom: 2.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      pointer-events: none;
+      width: 90%;
+      max-width: 420px;
+    }
+    .toast {
+      width: 100%;
+      padding: 0.85rem 1.15rem;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+      animation: toastSlideUp 0.22s ease-out;
+    }
+    .toast.success { background: #059669; }
+    .toast.error { background: #ef4444; }
+    @keyframes toastSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
-  <script type="module" crossorigin src="/assets/merchant-login-BUQl_qBo.js"></script>
+  <script type="module" crossorigin src="/assets/merchant-login-DlVGceFO.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-DIUxAG8e.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
 </head>
 <body>
   <div class="login-card" id="login-card-container">
@@ -692,55 +793,38 @@
     </div>
 
     <div class="logo-area">
-      <div style="margin-bottom: 16px;">
-        <img src="/assets/images/ongjin-coupon-logo.png" alt="옹진관광쿠폰" style="height: 44px; width: auto; max-width: 160px; object-fit: contain; display: block;" />
+      <div class="font-size-control" role="group" aria-label="글자 크기 조절">
+        <span class="font-size-slider" aria-hidden="true"></span>
+        <button type="button" class="font-size-btn active" data-scale="normal" title="글자 보통">보통</button>
+        <button type="button" class="font-size-btn" data-scale="large" title="글자 크게">크게</button>
       </div>
-      <span class="logo-subtitle">옹진관광쿠폰 가맹점</span>
+      <span class="logo-subtitle">옹진 관광 쿠폰</span>
       <div class="logo-title">가맹점 로그인</div>
     </div>
 
-    <!-- 탭 전환 컨트롤 (3분할: 휴대폰 OTP / 아이디 / 직원 PIN) -->
-    <div class="login-tabs" role="tablist">
-      <button type="button" class="login-tab-btn active" id="tab-otp" role="tab" aria-selected="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-          <line x1="12" y1="18" x2="12.01" y2="18"></line>
-        </svg>
-        휴대폰 OTP
-      </button>
-      <button type="button" class="login-tab-btn" id="tab-id" role="tab" aria-selected="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-        아이디 로그인
-      </button>
-      <button type="button" class="login-tab-btn" id="tab-staff" role="tab" aria-selected="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-        직원 PIN (스캔)
-      </button>
-    </div>
-
-    <!-- 1. 아이디 로그인 폼 -->
-    <form id="form-merchant-login" style="display: none;" novalidate>
+    <!-- 로그인 폼 -->
+    <form id="form-merchant-login" novalidate>
       <div class="form-group">
-        <label for="username">아이디</label>
-        <div class="input-wrap">
+        <label for="username">가맹점</label>
+        <div class="input-wrap" id="store-select-wrap">
           <input
             type="text"
             id="username"
             name="username"
-            placeholder="아이디를 입력하세요"
-            autocomplete="username"
+            placeholder="가맹점을 선택하세요"
+            autocomplete="off"
             required
           />
           <svg class="input-icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
+          <button type="button" class="select-chevron" id="btn-select-chevron" aria-label="가맹점 목록 열기">
+            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="custom-select-menu" id="custom-select-menu"></div>
         </div>
       </div>
 
@@ -761,7 +845,7 @@
           </svg>
           <button type="button" class="pw-toggle" id="pw-toggle" aria-label="비밀번호 보기">
             <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
           </button>
@@ -775,147 +859,7 @@
         <span class="spinner"></span>
       </button>
 
-      <div class="apply-notice-container">
-        <a href="/tourist/apply-merchant.html" class="btn-apply-text-link">입점 신청하기</a>
-      </div>
-    </form>
-
-    <!-- 2. 휴대폰 OTP 로그인 폼 (기본 활성) -->
-    <form id="form-merchant-otp" novalidate>
-      <div class="otp-info-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
-        <div>
-          담당 공무원이 직접 등록했거나 승인 완료된 <strong>대표자 휴대전화번호</strong>로 간편하게 인증하여 접속합니다.
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="otp-phone">대표자 휴대폰 번호</label>
-        <div class="phone-input-row">
-          <div class="input-wrap" style="flex: 1; min-width: 0;">
-            <input
-              type="tel"
-              id="otp-phone"
-              name="phone"
-              placeholder="010-0000-0000"
-              maxlength="13"
-              autocomplete="tel"
-              required
-            />
-            <svg class="input-icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-            </svg>
-          </div>
-          <button type="button" class="btn-send-otp" id="btn-send-otp">인증번호 받기</button>
-        </div>
-      </div>
-
-      <div class="form-group" id="group-otp-code" style="display: none;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-          <label for="otp-code" style="margin-bottom: 0;">인증번호 6자리</label>
-          <span class="otp-timer-badge" id="otp-timer">03:00</span>
-        </div>
-        <div class="input-wrap">
-          <input
-            type="text"
-            id="otp-code"
-            name="otp"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            placeholder="인증번호 6자리 입력"
-            maxlength="6"
-            autocomplete="one-time-code"
-          />
-          <svg class="input-icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-        </div>
-      </div>
-
-      <div class="error-msg" id="error-msg-otp"></div>
-
-      <button type="submit" class="btn-login" id="btn-submit-otp" style="display: none;">
-        <span class="btn-text">간편 로그인</span>
-        <span class="spinner"></span>
-      </button>
-
-      <div class="apply-notice-container">
-        <a href="/tourist/apply-merchant.html" class="btn-apply-text-link">입점 신청하기</a>
-      </div>
-    </form>
-
-    <!-- 3. 직원 스캔 전용 PIN 로그인 폼 -->
-    <form id="form-merchant-staff" style="display: none;" novalidate>
-      <div class="otp-info-box" style="background: #eff6ff; border-color: #bfdbfe; color: #1e40af;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #3b82f6;">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-        <div>
-          점주님이 설정한 <strong>4자리 PIN 번호</strong>로 접속하여 스캔 결제를 진행합니다. (정산/계좌 정보는 안전하게 차단됩니다)
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="staff-identifier">매장 번호(ID) 또는 대표자 휴대폰</label>
-        <div class="input-wrap">
-          <input
-            type="text"
-            id="staff-identifier"
-            name="identifier"
-            placeholder="매장 번호(예: 12) 또는 대표자 번호"
-            autocomplete="off"
-            required
-          />
-          <svg class="input-icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="staff-pin">직원 간편 PIN (4자리)</label>
-        <div class="input-wrap">
-          <input
-            type="password"
-            id="staff-pin"
-            name="pin"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            maxlength="4"
-            placeholder="4자리 숫자 입력"
-            autocomplete="current-password"
-            required
-          />
-          <svg class="input-icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-          <button type="button" class="pw-toggle" id="staff-pw-toggle" aria-label="PIN 보기">
-            <svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="error-msg" id="error-msg-staff"></div>
-
-      <button type="submit" class="btn-login" id="btn-submit-staff" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">
-        <span class="btn-text">스캔 모드로 로그인</span>
-        <span class="spinner"></span>
-      </button>
-
-      <div class="apply-notice-container">
-        <a href="/tourist/apply-merchant.html" class="btn-apply-text-link">가맹점 신규 입점 신청하기</a>
-      </div>
+      <a href="/merchant/apply.html" class="btn-apply-outline">입점 신청하기</a>
     </form>
   </div>
 
@@ -938,8 +882,14 @@
       </div>
       
       <div class="inquiry-info-box">
-        <div class="inquiry-info-item">옹진군청 :</div>
-        <div class="inquiry-info-item">프로그램 관리자 :</div>
+        <a href="tel:032-899-2210" class="inquiry-call-item">
+          <span class="inquiry-call-label">옹진군청 관광문화과</span>
+          <span class="inquiry-call-number">032-899-2210</span>
+        </a>
+        <a href="tel:032-899-2114" class="inquiry-call-item">
+          <span class="inquiry-call-label">프로그램 관리자</span>
+          <span class="inquiry-call-number">032-899-2114</span>
+        </a>
       </div>
     </div>
   </div>
@@ -956,6 +906,6 @@
   </button>
 
   <div id="toast-container"></div>
-
+
 </body>
 </html>

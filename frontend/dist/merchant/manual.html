@@ -4,11 +4,15 @@
   <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>수동 등록 | 옹진관광 가맹점</title>
+  <title>요청 보기 | 옹진관광 가맹점</title>
   <style>
     * {
       box-sizing: border-box;
       border-radius: 0 !important;
+    }
+
+    html.font-scale-anim {
+      transition: font-size 0.45s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     html, body {
@@ -23,7 +27,7 @@
       position: relative;
     }
 
-    /* 좌측 상단 원형 동그라미 뒤로가기 버튼 */
+    /* 좌측 상단 원형 동그라미 뒤로가기 버튼 (history.html, etc.html과 완벽 통일) */
     .btn-top-back {
       position: absolute;
       top: 24px;
@@ -50,33 +54,35 @@
       transform: scale(1.05);
     }
 
-    /* 화면 전체 중앙 스케일 컨테이너 */
-    .manual-fullscreen-container {
+    /* 화면 전체 레이아웃 (history.html과 동일) */
+    .history-fullscreen-container {
       width: 100vw;
       min-height: 100dvh;
-      padding: 24px;
+      padding: 80px 24px 40px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 36px;
     }
 
-    .manual-content-wrapper {
+    .history-content-wrapper {
       width: 100%;
-      max-width: 540px;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    html[data-font-scale="large"] .history-content-wrapper {
+      max-width: 620px;
+    }
+
+    .history-header {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 28px;
-    }
-
-    .manual-title-group {
       text-align: center;
     }
 
-    /* 수동 등록 제목 */
-    .manual-title {
+    .history-title {
       font-size: 2rem;
       font-weight: 700;
       color: #1e293b;
@@ -84,148 +90,222 @@
       margin: 0;
     }
 
-    /* 폼 그룹 스타일 */
-    .manual-form-group {
+    /* 2행 양끝 정렬 보드 (history.html과 동일) */
+    .summary-rows-board {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 4px 4px 20px 4px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .summary-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .summary-row-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .summary-val-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .num-text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .unit-text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* 섹션 공통 (history.html과 동일) */
+    .tx-section {
       width: 100%;
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
 
-    .input-field-wrapper {
-      width: 100%;
-      background: #ffffff;
-      border: 1.5px solid #cbd5e1;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+    .tx-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1.5px solid #f1f5f9;
     }
 
-    .input-field-wrapper:focus-within {
-      border-color: #059669;
-      box-shadow: 0 0 0 3.5px rgba(5, 150, 105, 0.12);
-    }
-
-    .input-field-wrapper input {
-      width: 100%;
-      padding: 18px 20px;
-      font-size: 1.15rem;
-      font-weight: 700;
-      border: none !important;
-      outline: none;
-      color: #0f172a;
-      background: transparent;
-      text-align: center;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-
-    .input-field-wrapper input::placeholder {
-      color: #94a3b8;
-      font-weight: 400;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .btn-manual-submit {
-      width: 100%;
-      padding: 18px;
+    .tx-section-title {
       font-size: 1.05rem;
       font-weight: 700;
-      background: #059669;
-      color: #ffffff;
-      border: none !important;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.1s ease;
-      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
-    }
-
-    .btn-manual-submit:hover {
-      background: #047857;
-    }
-
-    .manual-desc {
-      font-size: 0.93rem;
-      color: #64748b;
-      line-height: 1.65;
-      text-align: center;
+      color: #1e293b;
       margin: 0;
-      width: 100%;
-      word-break: keep-all;
     }
 
-    /* 팝업 모달 오버레이 */
-    .result-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100dvh;
-      background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(6px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 24px;
+    .tx-section-sub {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 500;
     }
 
-    .result-modal-card {
+    .tx-list-container {
       width: 100%;
-      max-width: 440px;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 0 !important;
-      padding: 36px 32px;
       display: flex;
       flex-direction: column;
+    }
+
+    /* 플랫 요청 행 */
+    .tx-item-row {
+      padding: 18px 4px;
+      display: flex;
       align-items: center;
-      text-align: center;
-      gap: 16px;
-      color: #0f172a;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid #f1f5f9;
     }
 
-    .result-modal-title {
-      font-size: 1.3rem;
+    .tx-item-row.pending-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+      padding: 20px 16px;
+      background: #ffffff;
+      border: 1.5px solid #059669;
+      margin-bottom: 10px;
+    }
+
+    .pending-top-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tx-info-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tx-badge {
+      font-size: 0.78rem;
       font-weight: 700;
-      color: #64748b !important;
-      letter-spacing: -0.3px;
-      margin: 0;
+      padding: 4px 9px;
+      color: #059669;
+      background: #ecfdf5;
+      border: 1.5px solid #a7f3d0;
+      white-space: nowrap;
     }
 
-    .result-modal-amount {
-      font-size: 2.3rem;
-      font-weight: 900;
+    .tx-badge.rejected {
+      color: #dc2626;
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    .tx-badge.cancelled {
+      color: #64748b;
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .tx-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .tx-sub {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 3px;
+    }
+
+    .tx-val-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .tx-val-num {
+      font-size: 1.05rem;
+      font-weight: 700;
       color: #059669;
     }
 
-    .result-modal-desc {
-      font-size: 0.96rem;
-      font-weight: 500;
-      color: #475569;
-      line-height: 1.6;
-      margin: 2px 0 0 0;
-      word-break: keep-all;
+    .pending-actions {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 10px;
     }
 
-    .btn-modal-confirm {
-      width: 100%;
-      padding: 15px;
-      font-size: 1rem;
-      font-weight: 700;
+    .btn-approve {
+      height: 44px;
       background: #059669;
       color: #ffffff;
-      border: none !important;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 700;
       cursor: pointer;
-      margin-top: 6px;
-      transition: background 0.2s ease;
+      transition: background 0.15s ease;
     }
-
-    .btn-modal-confirm:hover {
+    .btn-approve:hover {
       background: #047857;
     }
+
+    .btn-reject {
+      height: 44px;
+      background: #f8fafc;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-reject:hover {
+      background: #fee2e2;
+      color: #dc2626;
+      border-color: #fecaca;
+    }
+
+    /* 빈 데이터 상태 (history.html과 동일) */
+    .empty-state {
+      text-align: center;
+      padding: 56px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: #64748b;
+    }
+
+    .empty-icon {
+      width: 44px;
+      height: 44px;
+      color: #cbd5e1;
+      stroke-width: 1.2;
+    }
+
+    .empty-text {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
   </style>
-  <script type="module" crossorigin src="/assets/merchant-manual-BgVVpY98.js"></script>
+  <script type="module" crossorigin src="/assets/merchant-manual-LgSKS_6f.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
   <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
@@ -238,40 +318,64 @@
     </svg>
   </a>
 
-  <!-- 모던 수동 등록 레이아웃 -->
-  <div class="manual-fullscreen-container">
-    <div class="manual-content-wrapper">
-      <div class="manual-title-group">
-        <h1 class="manual-title">수동 등록</h1>
+  <div class="history-fullscreen-container">
+    <div class="history-content-wrapper">
+      <div class="history-header">
+        <h1 class="history-title">쿠폰 사용 요청</h1>
       </div>
 
-      <div class="manual-form-group">
-        <div class="input-field-wrapper">
-          <!-- '예:' 문구 제거 및 자릿수 명시 깔끔한 플레이스홀더 -->
-          <input type="text" id="manual-code" placeholder="쿠폰 번호 12자리를 입력해 주세요" autocomplete="off" maxLength="14" />
+      <!-- 요약 보드 (history.html과 동일 구조) -->
+      <div class="summary-rows-board">
+        <div class="summary-row">
+          <span class="summary-row-label">승인 대기 요청</span>
+          <div class="summary-val-wrap">
+            <span class="num-text" id="pending-count-num">0</span>
+            <span class="unit-text">건</span>
+          </div>
         </div>
-        <button type="button" class="btn-manual-submit" id="btn-manual">
-          조회 및 결제하기
-        </button>
+        <div class="summary-row">
+          <span class="summary-row-label">대기 요청 금액</span>
+          <div class="summary-val-wrap">
+            <span class="num-text" id="pending-amount-num">0</span>
+            <span class="unit-text">원</span>
+          </div>
+        </div>
       </div>
 
-      <p class="manual-desc">
-        종이 지류 쿠폰 번호 또는 모바일 문자로 전달받으신 12자리 무작위 쿠폰 코드를 입력창에 타이핑하여 결제 승인을 진행할 수 있습니다.
-      </p>
-    </div>
+      <!-- 승인 대기 중인 요청 섹션 -->
+      <div class="tx-section">
+        <div class="tx-section-header">
+          <h3 class="tx-section-title">승인 대기 요청</h3>
+          <span class="tx-section-sub">실시간 갱신</span>
+        </div>
 
-    <!-- 결과 모달 -->
-    <div class="result-overlay" id="result-overlay">
-      <div class="result-modal-card">
-        <h3 class="result-modal-title" id="result-badge">결제 실패</h3>
-        <div class="result-modal-amount" id="result-amount"></div>
-        <p class="result-modal-desc" id="result-msg">입력하신 쿠폰 번호를 다시 한번 확인해 주세요.</p>
-        <button type="button" class="btn-modal-confirm" id="btn-result-confirm">확인</button>
+        <div class="tx-list-container" id="pending-list">
+          <div class="empty-state">
+            <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+            </svg>
+            <span class="empty-text">현재 대기 중인 사용 요청이 없습니다.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 최근 처리 내역 섹션 -->
+      <div class="tx-section">
+        <div class="tx-section-header">
+          <h3 class="tx-section-title">최근 처리 내역</h3>
+          <span class="tx-section-sub">최근 20건</span>
+        </div>
+
+        <div class="tx-list-container" id="processed-list">
+          <div class="empty-state">
+            <span class="empty-text">최근 처리된 요청 내역이 없습니다.</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <div id="toast-container"></div>
-
+
 </body>
 </html>

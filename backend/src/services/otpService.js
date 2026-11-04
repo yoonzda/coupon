@@ -10,17 +10,10 @@ const OTP_TTL_SECONDS = 180; // 3분
  */
 async function saveOTP(phoneHash, otp) {
   const expiresAt = new Date(Date.now() + OTP_TTL_SECONDS * 1000);
-  
-  // 1. 기존 미사용 세션 즉시 만료 처리 (중첩 유효 방지)
   await pool.execute(
-    `UPDATE otp_sessions SET used = 1 WHERE phone_hash = ? AND used = 0`,
-    [phoneHash]
-  );
-
-  // 2. 신규 OTP 세션 발급
-  await pool.execute(
-    `INSERT INTO otp_sessions (phone_hash, otp_code, expires_at, used)
-     VALUES (?, ?, ?, 0)`,
+    `INSERT INTO otp_sessions (phone_hash, otp_code, expires_at)
+     VALUES (?, ?, ?)
+     ON DUPLICATE KEY UPDATE otp_code = VALUES(otp_code), expires_at = VALUES(expires_at), used = 0`,
     [phoneHash, otp, expiresAt]
   );
 }
@@ -35,16 +28,13 @@ async function verifyOTP(phoneHash, otp) {
   const [rows] = await pool.execute(
     `SELECT * FROM otp_sessions
      WHERE phone_hash = ? AND otp_code = ? AND expires_at > NOW() AND used = 0
-     ORDER BY id DESC LIMIT 1`,
+     LIMIT 1`,
     [phoneHash, otp]
   );
 
-  if (rows.length === 0) {
-    logger.warn(`가맹점 OTP 검증 실패 [${phoneHash.slice(0, 8)}...]`);
-    return null;
-  }
+  if (rows.length === 0) return null;
 
-  // 성공 즉시 1회용 사용 처리 (재사용 방지)
+  // 사용 처리
   await pool.execute(
     `UPDATE otp_sessions SET used = 1 WHERE id = ?`,
     [rows[0].id]

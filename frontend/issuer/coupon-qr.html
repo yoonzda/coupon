@@ -1401,9 +1401,15 @@
 
 
 
-    /* ── 종이 영수증 인쇄 영역 ── */
+    /* ── 종이 영수증 인쇄 영역 (숨김 상태에서도 QR 이미지가 즉시 로드되도록 오프스크린 배치) ── */
     #print-receipt-area {
-      display: none;
+      position: fixed;
+      left: -9999px;
+      top: 0;
+      width: 76mm;
+      opacity: 0;
+      pointer-events: none;
+      z-index: -1;
     }
 
     @media print {
@@ -1415,6 +1421,8 @@
       }
       #print-receipt-area {
         display: block !important;
+        opacity: 1 !important;
+        z-index: 9999 !important;
         position: absolute;
         left: 0;
         top: 0;
@@ -1661,12 +1669,15 @@
                   <!-- QR 1개 출력 시: 단일 대표 번호 -->
                   <div id="single-phone-wrap">
                     <div style="font-size: 0.92rem; font-weight: 600; color: #475569; margin-bottom: 8px;">수령자 휴대폰 번호</div>
-                    <input type="text" class="phone-screen" id="phone-number-field" readonly />
+                    <input type="text" class="phone-screen" id="phone-number-field" inputmode="numeric" placeholder="010-0000-0000" oninput="window.onSinglePhoneInput(this.value)" />
                   </div>
 
                   <!-- QR 개별 출력 시: 쿠폰별 개별 번호 입력 목록 -->
                   <div id="multi-phone-wrap" style="display: none;">
-                    <div style="font-size: 1rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;">쿠폰별 수령 휴대폰 번호</div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px;">
+                      <span style="font-size: 1rem; font-weight: 700; color: #0f172a;">쿠폰별 수령 휴대폰 번호</span>
+                      <button type="button" onclick="window.fillAllSlotsWithFirst()" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; cursor: pointer;">1번 번호로 전체 적용</button>
+                    </div>
                     <div class="phone-individual-list" id="phone-individual-list"></div>
                   </div>
 
@@ -1780,6 +1791,7 @@
                     1번 쿠폰부터 차례로 QR 스캔하기
                   </button>
                 </div>
+                <div id="individual-scan-progress" style="margin-bottom: 10px; font-size: 0.92rem; font-weight: 700; color: #334155; text-align: center;"></div>
                 <div class="individual-coupon-list" id="res-individual-coupon-list"></div>
               </div>
 
@@ -1914,6 +1926,14 @@
       });
     }
 
+    function getPublicOrigin() {
+      const origin = window.location.origin;
+      if (state.serverIp && state.serverIp !== 'localhost') {
+        return origin.replace(/\/\/(localhost|127\.0\.0\.1)(?=[:/]|$)/i, `//${state.serverIp}`);
+      }
+      return origin;
+    }
+
     // ── 데이터 로드 (관리자 등록 상품 & 쿠폰 지급 규정) ──
     async function loadData() {
       try {
@@ -1921,6 +1941,9 @@
         if (res.success) {
           state.allocations = res.allocations || res.data || [];
           state.rules = res.rules || [];
+          if (res.serverIp) {
+            state.serverIp = res.serverIp;
+          }
 
           if (res.products && res.products.length > 0) {
             state.products = res.products;
@@ -2121,9 +2144,11 @@
         const isActive = (i === state.activePhoneSlot);
         return `
           <div class="phone-slot ${isActive ? 'active' : ''}" id="phone-slot-${i}" onclick="window.selectPhoneSlot(${i})">
-            <span class="slot-coupon-title">${Number(c.faceValue).toLocaleString()}원</span>
-            <input type="text" class="slot-input" id="slot-input-${i}" readonly 
-                   value="${formatPhone(c.rawPhone)}" placeholder="휴대폰 번호" />
+            <span class="slot-coupon-title">${i + 1}번 · ${Number(c.faceValue).toLocaleString()}원</span>
+            <input type="text" class="slot-input" id="slot-input-${i}" inputmode="numeric" maxlength="13"
+                   value="${formatPhone(c.rawPhone)}" placeholder="010-0000-0000"
+                   onfocus="window.selectPhoneSlot(${i})"
+                   oninput="window.onSlotPhoneInput(${i}, this.value)" />
           </div>
         `;
       }).join('');
@@ -2136,6 +2161,46 @@
           slot.classList.toggle('active', i === index);
         });
       }
+    };
+
+    window.onSinglePhoneInput = function(val) {
+      const digits = String(val || '').replace(/\D/g, '').slice(0, 11);
+      state.rawPhone = digits;
+      if (phoneInput) {
+        phoneInput.value = formatPhone(digits);
+      }
+    };
+
+    window.onSlotPhoneInput = function(index, val) {
+      const item = state.individualCoupons[index];
+      if (!item) return;
+      const digits = String(val || '').replace(/\D/g, '').slice(0, 11);
+      item.rawPhone = digits;
+      const inputEl = document.getElementById(`slot-input-${index}`);
+      if (inputEl) {
+        inputEl.value = formatPhone(digits);
+      }
+      if (digits.length === 11 && index < state.individualCoupons.length - 1) {
+        window.selectPhoneSlot(index + 1);
+        const nextInput = document.getElementById(`slot-input-${index + 1}`);
+        if (nextInput) nextInput.focus();
+      }
+    };
+
+    window.fillAllSlotsWithFirst = function() {
+      if (!state.individualCoupons || state.individualCoupons.length === 0) return;
+      const firstRaw = state.individualCoupons[0].rawPhone;
+      if (!firstRaw || firstRaw.length < 10) {
+        showToast('먼저 1번 쿠폰의 휴대폰 번호를 입력해 주세요.', 'error');
+        window.selectPhoneSlot(0);
+        return;
+      }
+      state.individualCoupons.forEach((c, idx) => {
+        c.rawPhone = firstRaw;
+        const inputEl = document.getElementById(`slot-input-${idx}`);
+        if (inputEl) inputEl.value = formatPhone(firstRaw);
+      });
+      showToast('1번 휴대폰 번호가 전체 쿠폰에 동일하게 적용되었습니다.', 'info');
     };
 
     // ── 전화번호 키패드 ──
@@ -2563,20 +2628,33 @@
       if (data.deliveryMethod === 'paper') {
         paperList.style.display = 'block';
         reprintWrap.style.display = 'block';
-        paperList.innerHTML = data.coupons.map(c => `
-          <div class="serial-tag-item">
-            <span>[${Number(c.faceValue).toLocaleString()}원] ${c.serialCode}</span>
-            <span style="color: #2563eb;">인쇄 완료</span>
-          </div>
-        `).join('');
+        const origin = getPublicOrigin();
+        paperList.innerHTML = data.coupons.map(c => {
+          const qrDataUrl = `${origin}${c.qrUrl}&code=${encodeURIComponent(c.serialCode)}`;
+          const qrImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrDataUrl)}`;
+          return `
+            <div class="serial-tag-item" id="ticket-item-${c.kioskSessionId}" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <img src="${qrImgSrc}" alt="QR" style="width:48px; height:48px; border:1px solid #cbd5e1; background:#fff; padding:2px; flex-shrink:0;" />
+                <div style="text-align:left;">
+                  <div style="font-weight:800; color:#0f172a;">[${Number(c.faceValue).toLocaleString()}원] ${c.serialCode}</div>
+                  <div style="font-size:0.78rem; color:#64748b; margin-top:2px;">종이 영수증 QR · 가맹점 결제 또는 모바일 등록 가능</div>
+                </div>
+              </div>
+              <span id="pill-status-${c.kioskSessionId}" style="color: #2563eb; font-weight:700; white-space:nowrap;">인쇄 완료</span>
+            </div>
+          `;
+        }).join('');
 
         buildPrintReceipt(data);
-        setTimeout(() => window.print(), 400);
+        printReceiptWhenReady();
+        startMultiPolling(data.allocationId, data.coupons.map(c => c.kioskSessionId));
 
       } else if (data.deliveryMethod === 'qr') {
         if (data.distributionType === 'individual') {
           // QR 개별 출력: 1건씩 팝업 집중 스캔 방식
           individualQrWrap.style.display = 'block';
+          updateIndividualProgress(0, data.coupons.length);
 
           individualList.innerHTML = data.coupons.map((c, i) => {
             const sessId = c.kioskSessionId;
@@ -2614,7 +2692,7 @@
         } else {
           // QR 1개 출력: 단일 대표 QR 코드 표출
           qrWrap.style.display = 'block';
-          const landingUrl = `${window.location.origin}${data.qrUrl}`;
+          const landingUrl = `${getPublicOrigin()}${data.qrUrl}`;
           qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(landingUrl)}`;
 
           const statusEl = document.getElementById('res-qr-status');
@@ -2624,7 +2702,24 @@
           startPolling(data.allocationId, data.kioskSessionId);
         }
       } else {
-        // 카카오톡, 문자 발급 완료 시 화면 유지
+        // 카카오톡, 문자 발급 완료 시에도 실시간 수령 폴링 지원
+        if (data.distributionType === 'individual' && Array.isArray(data.coupons)) {
+          startMultiPolling(data.allocationId, data.coupons.map(c => c.kioskSessionId));
+        } else if (data.kioskSessionId) {
+          startPolling(data.allocationId, data.kioskSessionId);
+        }
+      }
+    }
+
+    function updateIndividualProgress(claimedCount, totalCount) {
+      const progEl = document.getElementById('individual-scan-progress');
+      if (!progEl) return;
+      if (claimedCount >= totalCount && totalCount > 0) {
+        progEl.textContent = `전체 ${totalCount}장 모두 등록 완료되었습니다`;
+        progEl.style.color = '#15803d';
+      } else {
+        progEl.textContent = `등록 현황: ${claimedCount} / ${totalCount}장 완료`;
+        progEl.style.color = '#334155';
       }
     }
 
@@ -2639,7 +2734,7 @@
 
       const amountEl = document.getElementById('modal-coupon-amount');
       if (amountEl) {
-        amountEl.textContent = `${Number(c.faceValue).toLocaleString()}원`;
+        amountEl.textContent = `${index + 1}번 · ${Number(c.faceValue).toLocaleString()}원`;
       }
       const titleEl = document.getElementById('modal-coupon-title');
       if (titleEl) {
@@ -2647,7 +2742,7 @@
       }
       document.getElementById('modal-serial-code').textContent = c.serialCode;
 
-      const landingUrl = `${window.location.origin}${c.qrUrl}`;
+      const landingUrl = `${getPublicOrigin()}${c.qrUrl}`;
       document.getElementById('modal-qr-img').src = 
         `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(landingUrl)}`;
 
@@ -2707,8 +2802,11 @@
     function buildPrintReceipt(data) {
       const area = document.getElementById('print-receipt-area');
       area.innerHTML = '';
+      const origin = getPublicOrigin();
 
       data.coupons.forEach(c => {
+        const qrDataUrl = `${origin}${c.qrUrl}&code=${encodeURIComponent(c.serialCode)}`;
+        const qrImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrDataUrl)}`;
         const ticket = document.createElement('div');
         ticket.className = 'receipt-ticket';
         ticket.innerHTML = `
@@ -2718,7 +2816,7 @@
           <div class="receipt-amount">${Number(c.faceValue).toLocaleString()}원</div>
           <div class="receipt-serial">${c.serialCode}</div>
           <div class="receipt-divider"></div>
-          <img class="receipt-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(c.serialCode)}" alt="바코드" />
+          <img class="receipt-qr" src="${qrImgSrc}" alt="QR 바코드" crossorigin="anonymous" />
           <div class="receipt-divider"></div>
           <div class="receipt-row">
             <span>발행일자</span>
@@ -2730,14 +2828,41 @@
           </div>
           <div class="receipt-notice">
             * 옹진군 관내 등록 가맹점에서 현금처럼 사용 가능합니다.<br/>
-            * 가맹점 결제 시 본 쿠폰의 바코드/일련번호를 제시하세요.
+            * 가맹점 결제 시 본 영수증의 QR/일련번호를 제시하거나 스마트폰 카메라로 스캔해 지갑에 등록하세요.
           </div>
         `;
         area.appendChild(ticket);
       });
     }
 
-    document.getElementById('btn-reprint').addEventListener('click', () => window.print());
+    function printReceiptWhenReady() {
+      const area = document.getElementById('print-receipt-area');
+      const imgs = area ? Array.from(area.querySelectorAll('img.receipt-qr')) : [];
+      if (imgs.length === 0) {
+        window.print();
+        return;
+      }
+
+      let printed = false;
+      const triggerPrint = () => {
+        if (printed) return;
+        printed = true;
+        setTimeout(() => window.print(), 120);
+      };
+
+      const waitPromises = imgs.map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(resolve => {
+          img.addEventListener('load', resolve, { once: true });
+          img.addEventListener('error', resolve, { once: true });
+        });
+      });
+
+      Promise.all(waitPromises).then(triggerPrint);
+      setTimeout(triggerPrint, 2500);
+    }
+
+    document.getElementById('btn-reprint').addEventListener('click', () => printReceiptWhenReady());
 
     function startPolling(allocId, sessId) {
       stopPolling();
@@ -2745,8 +2870,10 @@
 
       let pollCount = 0;
       const statusEl = document.getElementById('res-qr-status');
-      statusEl.textContent = '미등록';
-      statusEl.style.color = '#475569';
+      if (statusEl) {
+        statusEl.textContent = '미등록';
+        statusEl.style.color = '#475569';
+      }
 
       state.pollTimer = setInterval(async () => {
         if (document.hidden) return; // 백그라운드 탭에서는 네트워크 요청 억제
@@ -2760,8 +2887,10 @@
           if (res.success && res.isIssued) {
             stopPolling();
             const phoneText = res.phone ? ` (${formatPhone(res.phone)})` : '';
-            statusEl.textContent = `등록 완료${phoneText}`;
-            statusEl.style.color = '#059669';
+            if (statusEl) {
+              statusEl.textContent = `등록 완료${phoneText}`;
+              statusEl.style.color = '#059669';
+            }
             showToast('쿠폰이 성공적으로 등록되었습니다.', 'success');
           }
         } catch (e) {}
@@ -2782,29 +2911,35 @@
         }
 
         try {
+          const res = await api.get(`/coupon/kiosk-poll?allocationId=${allocId}&kioskSessionIds=${encodeURIComponent(validSessionIds.join(','))}`);
+          if (!res.success || !res.sessions) return;
+
           for (let i = 0; i < validSessionIds.length; i++) {
             const sessId = validSessionIds[i];
             if (state.claimedSet.has(sessId)) continue;
 
-            const res = await api.get(`/coupon/kiosk-poll?allocationId=${allocId}&kioskSessionId=${sessId}`);
-            if (res.success && res.isIssued) {
+            const sInfo = res.sessions[sessId];
+            if (sInfo && sInfo.isIssued) {
               state.claimedSet.add(sessId);
-              state.claimedMap.set(sessId, { isRegistered: true, phone: res.phone || '' });
+              state.claimedMap.set(sessId, { isRegistered: true, phone: sInfo.phone || '' });
 
-              const phoneText = res.phone ? ` (${formatPhone(res.phone)})` : '';
+              const phoneText = sInfo.phone ? ` (${formatPhone(sInfo.phone)})` : '';
 
               // 1. 목록 카드 상태 실시간 갱신
               const pill = document.getElementById(`pill-status-${sessId}`);
               if (pill) {
                 pill.textContent = `등록 완료${phoneText}`;
                 pill.classList.add('claimed');
+                pill.style.color = '#15803d';
               }
               const ticketItem = document.getElementById(`ticket-item-${sessId}`);
               if (ticketItem) {
                 ticketItem.classList.add('claimed');
               }
 
-              // 2. 현재 모달에서 이 쿠폰을 보고 있다면 상태 실시간 즉시 갱신
+              updateIndividualProgress(state.claimedSet.size, validSessionIds.length);
+
+              // 2. 현재 모달에서 이 쿠폰을 보고 있다면 상태 실시간 즉시 갱신 후 다음 미수령 쿠폰으로 자동 이동
               const data = state.issuedResult;
               if (data && data.coupons && data.coupons[state.modalIndex] && data.coupons[state.modalIndex].kioskSessionId === sessId) {
                 const modalStatus = document.getElementById('modal-qr-status');
@@ -2813,14 +2948,23 @@
                   modalStatus.className = 'qr-modal-status claimed';
                 }
 
-                // 다음 미수령 쿠폰이 있다면 2.2초 후 자동 이동
-                if (state.modalIndex < validSessionIds.length - 1) {
+                // 다음 미수령 쿠폰 인덱스 탐색
+                let nextUnclaimedIdx = -1;
+                for (let step = 1; step < validSessionIds.length; step++) {
+                  const candidateIdx = (state.modalIndex + step) % validSessionIds.length;
+                  if (!state.claimedSet.has(validSessionIds[candidateIdx])) {
+                    nextUnclaimedIdx = candidateIdx;
+                    break;
+                  }
+                }
+
+                if (nextUnclaimedIdx !== -1) {
                   setTimeout(() => {
                     const modal = document.getElementById('qr-scan-modal');
-                    if (modal && modal.classList.contains('open') && state.modalIndex < validSessionIds.length - 1) {
-                      window.nextQrModal();
+                    if (modal && modal.classList.contains('open') && !state.claimedSet.has(validSessionIds[nextUnclaimedIdx])) {
+                      window.openQrModal(nextUnclaimedIdx);
                     }
-                  }, 2200);
+                  }, 1500);
                 }
               }
             }
@@ -2829,7 +2973,11 @@
           // 모든 쿠폰 수령 완료 시
           if (state.claimedSet.size === validSessionIds.length) {
             stopPolling();
+            updateIndividualProgress(validSessionIds.length, validSessionIds.length);
             showToast('모든 쿠폰 등록이 완료되었습니다.', 'success');
+            setTimeout(() => {
+              window.closeQrModal();
+            }, 1200);
           }
         } catch (e) {}
       }, 2000);

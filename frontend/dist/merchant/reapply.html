@@ -6,8 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>가맹점 입점 재신청 | 옹진 관광 쿠폰</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
+  <!-- 카카오(다음) 우편번호 주소 검색 API -->
+  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <!-- 네이버 지도 API (NCP Client ID 및 Geocoder 서브모듈 적용) -->
   <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=x0h48m56fw&submodules=geocoder"></script>
   <style>
@@ -17,9 +19,14 @@
       padding: 0; 
       word-break: keep-all; 
     }
+
+    html.font-scale-anim {
+      transition: font-size 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
     
     body {
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -57,34 +64,45 @@
     }
 
     .apply-card {
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(16, 185, 129, 0.15);
       border-top: 4px solid #10b981;
       border-radius: 0; 
-      padding: 56px 48px;
+      padding: 3rem 2.6rem;
       width: 100%;
-      max-width: 680px;
+      max-width: 700px;
       position: relative;
       z-index: 1;
       box-shadow: 0 20px 40px rgba(16, 185, 129, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
       animation: fadeIn 0.5s ease-out;
     }
 
+    html.font-scale-anim .apply-card {
+      transition: max-width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+                  padding 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    html[data-font-scale="large"] .apply-card {
+      max-width: 740px;
+      padding: 2.3rem 1.8rem;
+    }
+
     .logo-area {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      margin-bottom: 24px;
+      margin-bottom: 1.8rem;
+      width: 100%;
     }
     .logo-subtitle {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: #059669;
-      letter-spacing: 1.5px;
-      margin-bottom: 8px;
-      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 0.45rem;
+      line-height: 1.4;
     }
     .logo-title {
       font-family: 'Gowun Dodum', sans-serif;
@@ -92,38 +110,124 @@
       font-weight: 400; 
       color: #0f172a;
       letter-spacing: -0.5px;
+      line-height: 1.28;
     }
 
-    /* 반려 안내 띠 */
-    .rejection-banner {
-      background: #fef2f2;
-      border: 1.5px solid #fecaca;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 36px;
-      color: #991b1b;
-      font-size: 0.9rem;
-      line-height: 1.6;
-    }
-    .rejection-banner strong {
-      color: #ef4444;
-      font-size: 0.95rem;
+    /* 상단 첫 줄: 좌측 돌아가기 버튼 + 우측 글자 크기 조절 컨트롤 */
+    .logo-top-row {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 8px;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 1.25rem;
+      gap: 0.75rem;
+    }
+
+    .btn-back-login {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3em;
+      color: #64748b;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 500;
+      text-decoration: none;
+      line-height: 1;
+      white-space: nowrap;
+      transition: color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-back-login svg {
+      width: 1.08em;
+      height: 1.08em;
+      stroke: currentColor;
+      stroke-width: 2.3;
+      fill: none;
+      flex-shrink: 0;
+      display: block;
+      position: relative;
+      top: 0.06em;
+      transition: transform 0.2s ease;
+    }
+    .btn-back-login:hover {
+      color: #0f172a;
+    }
+    .btn-back-login:hover svg {
+      transform: translateX(-3px);
+    }
+
+    .font-size-control {
+      position: relative;
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      height: 36px;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .font-size-slider {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: calc(50% - 3px);
+      background: #ffffff;
+      border-radius: 999px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+      transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+      z-index: 0;
+    }
+    html[data-font-scale="large"] .font-size-slider {
+      transform: translateX(100%);
+    }
+    .font-size-btn {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-width: 54px;
+      padding: 0 14px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 700;
+      border-radius: 999px;
+      cursor: pointer;
+      line-height: 1;
+      white-space: nowrap;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-size-btn:hover {
+      color: #0f172a;
+    }
+    .font-size-btn.active {
+      color: #059669;
     }
 
     .section-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #0f172a;
-      margin: 32px 0 16px 0;
-      padding-bottom: 8px;
-      border-bottom: 2px solid rgba(16, 185, 129, 0.15);
+      font-size: 1.12rem;
+      font-weight: 600;
+      color: #475569;
+      margin: 2.6rem 0 1.35rem 0;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid #e2e8f0;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.5rem;
+      line-height: 1.4;
+      letter-spacing: -0.01em;
     }
     .section-title:first-of-type {
       margin-top: 0;
@@ -132,41 +236,97 @@
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      row-gap: 1.75rem;
+      column-gap: 1.35rem;
     }
     .full-width {
       grid-column: span 2;
+    }
+    html[data-font-scale="large"] .form-grid {
+      grid-template-columns: 1fr;
+      row-gap: 1.75rem;
+    }
+    html[data-font-scale="large"] .full-width {
+      grid-column: span 1;
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
+      width: 100%;
     }
     label {
-      font-size: 0.8rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      color: #475569;
-      margin-bottom: 8px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      display: inline-flex;
+      color: #1e293b;
+      margin-bottom: 0.42rem;
+      letter-spacing: -0.1px;
+      display: flex;
       align-items: center;
+      flex-wrap: wrap;
+      line-height: 1.4;
+    }
+    .label-sub {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #64748b;
+      margin-left: 6px;
     }
     .required-mark {
       color: #ef4444;
-      margin-left: 3px;
+      margin-left: 4px;
+    }
+
+    .input-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .input-wrap input[type="password"],
+    .input-wrap input[type="text"] {
+      padding-right: 2.85rem;
+    }
+    input::-ms-reveal,
+    input::-ms-clear {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    .pw-toggle {
+      position: absolute;
+      right: 0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.35rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+    }
+    .pw-toggle svg {
+      width: 1.2rem;
+      height: 1.2rem;
+      stroke: #94a3b8;
+      fill: none;
+      transition: stroke 0.2s;
+    }
+    .pw-toggle:hover svg {
+      stroke: #10b981;
     }
     
     input[type="text"], input[type="password"], input[type="tel"], select {
       width: 100%;
-      padding: 16px;
+      padding: 1rem 1.05rem;
       background: #ffffff;
-      border: 1px solid #cbd5e1;
+      border: 1.5px solid #cbd5e1;
       border-radius: 8px;
       color: #0f172a;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-family: inherit;
-      transition: all 0.2s;
+      line-height: 1.45;
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
       outline: none;
     }
     select {
@@ -175,9 +335,9 @@
       -moz-appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'%3E%3C/path%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 16px center;
-      background-size: 16px;
-      padding-right: 40px !important;
+      background-position: right 0.9rem center;
+      background-size: 1.1rem;
+      padding-right: 2.4rem !important;
     }
     input[type="text"]:focus, input[type="password"]:focus, input[type="tel"]:focus, select:focus {
       border-color: #10b981;
@@ -185,26 +345,244 @@
     }
     input::placeholder { color: #94a3b8; }
 
+    /* Custom Select Dropdown (화면 전체를 덮지 않는 적당한 높이의 선택창) */
+    .sr-only-select {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+      pointer-events: none !important;
+    }
+    .custom-select-wrap {
+      position: relative;
+      width: 100%;
+      min-width: 0;
+    }
+    .custom-select-trigger {
+      width: 100%;
+      padding: 1rem 2.5rem 1rem 1.05rem;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      color: #0f172a;
+      font-size: 1.05rem;
+      font-family: inherit;
+      font-weight: 500;
+      line-height: 1.45;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+      outline: none;
+    }
+    .custom-select-trigger.is-placeholder {
+      color: #64748b;
+    }
+    .custom-select-trigger:focus,
+    .custom-select-wrap.open .custom-select-trigger {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    .custom-select-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .custom-select-arrow {
+      position: absolute;
+      right: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.15rem;
+      height: 1.15rem;
+      stroke: #475569;
+      flex-shrink: 0;
+      transition: transform 0.2s ease, stroke 0.2s ease;
+      pointer-events: none;
+    }
+    .custom-select-wrap.open .custom-select-arrow {
+      transform: translateY(-50%) rotate(180deg);
+      stroke: #10b981;
+    }
+    .custom-select-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      max-height: 14.5rem;
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+      z-index: 60;
+      padding: 0.35rem;
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 0.16s ease, transform 0.16s ease;
+    }
+    .custom-select-wrap.open .custom-select-menu {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .custom-select-menu::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-select-menu::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-select-menu::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 999px;
+    }
+    .custom-select-option {
+      padding: 0.72rem 0.9rem;
+      border-radius: 7px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #1e293b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .custom-select-option:hover {
+      background: #f0fdf4;
+      color: #059669;
+      font-weight: 600;
+    }
+    .custom-select-option.selected {
+      background: #ecfdf5;
+      color: #059669;
+      font-weight: 700;
+    }
+
+    /* 택배식 주소 검색 레이아웃 */
+    .address-search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.65rem;
+      align-items: stretch;
+    }
+    html[data-font-scale="large"] .address-search-row {
+      grid-template-columns: 1fr;
+    }
+    .address-search-row input {
+      min-width: 0;
+      cursor: pointer;
+      background: #f8fafc;
+    }
+    .btn-address-search {
+      padding: 1.05rem 1.25rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      line-height: 1.4;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-address-search:hover {
+      filter: brightness(1.06);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22);
+    }
+    .btn-address-search:active {
+      transform: scale(0.99);
+    }
+    .address-detail-input {
+      margin-top: 0.75rem;
+    }
+    .postcode-wrap {
+      display: none;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 0.75rem;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+    .postcode-wrap.open {
+      display: block;
+    }
+    .postcode-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 0.95rem;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: #475569;
+    }
+    .btn-close-postcode {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.9rem;
+      height: 1.9rem;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      padding: 0;
+      color: #64748b;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .btn-close-postcode:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+    .btn-close-postcode svg {
+      width: 1.15rem;
+      height: 1.15rem;
+      stroke: currentColor;
+      flex-shrink: 0;
+    }
+    .postcode-container {
+      width: 100%;
+      height: 360px;
+    }
+
     /* Custom File Uploaders */
     .file-upload-box {
-      border: 1px dashed #cbd5e1;
-      border-radius: 6px;
-      background: #ffffff;
-      padding: 20px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+      padding: 1.25rem 1.2rem;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      min-height: 100px;
+      gap: 0.5rem;
+      min-height: 5.5rem;
     }
     .file-upload-box:hover {
       border-color: #10b981;
-      background: rgba(16, 185, 129, 0.02);
+      background: #f0fdf4;
     }
     .file-upload-box input[type="file"] {
       position: absolute;
@@ -212,30 +590,46 @@
       opacity: 0;
       cursor: pointer;
     }
-    .file-upload-box .upload-icon {
-      width: 24px; height: 24px;
-      stroke: #94a3b8;
+    .upload-plus-btn {
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 50%;
+      background: #10b981;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .upload-plus-btn svg {
+      width: 1rem;
+      height: 1rem;
+      stroke: currentColor;
       fill: none;
     }
-    .file-upload-box:hover .upload-icon {
-      stroke: #10b981;
+    .file-upload-box:hover .upload-plus-btn {
+      background: #059669;
     }
     .file-upload-box p {
-      font-size: 0.8rem;
-      color: #64748b;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.45;
+      transition: color 0.2s ease;
     }
-    .file-upload-box strong {
+    .file-upload-box:hover p {
       color: #059669;
     }
 
     .preview-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 0.75rem;
+      margin-top: 0.85rem;
     }
     .preview-item {
-      width: 80px; height: 80px;
+      width: 84px; height: 84px;
       border-radius: 6px;
       border: 1px solid #cbd5e1;
       position: relative;
@@ -248,17 +642,17 @@
     }
     .preview-remove-btn {
       position: absolute;
-      top: 2px; right: 2px;
-      background: rgba(15, 23, 42, 0.6);
+      top: 3px; right: 3px;
+      background: rgba(15, 23, 42, 0.65);
       color: #ffffff;
       border: none;
       border-radius: 50%;
-      width: 18px; height: 18px;
+      width: 22px; height: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
       transition: background 0.2s;
     }
@@ -271,98 +665,122 @@
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      gap: 10px;
+      gap: 0.55rem;
     }
-    .hours-picker-grid span {
+    .hours-picker-grid > span {
       text-align: center;
       color: #64748b;
-      font-size: 0.9rem;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    html[data-font-scale="large"] .hours-picker-grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    html[data-font-scale="large"] .hours-picker-grid > span {
+      display: none;
     }
 
     /* Weekday selector */
     .weekday-selector {
-      display: flex;
-      gap: 8px;
-      margin-top: 4px;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.45rem;
+      margin-top: 0.2rem;
+    }
+    html[data-font-scale="large"] .weekday-selector {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
     }
     .day-pill {
-      flex: 1;
-      min-width: 44px;
-      height: 44px;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
+      min-width: 0;
+      height: 3.25rem;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
       border-radius: 8px;
-      color: #64748b;
-      font-size: 0.95rem;
+      color: #94a3b8;
+      font-size: 1.05rem;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
+      transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
       outline: none;
+      padding: 0;
+      font-family: inherit;
     }
-    .day-pill:hover {
-      border-color: #10b981;
-      color: #059669;
+    .day-pill:hover:not(.active) {
+      border-color: #cbd5e1;
+      color: #64748b;
+      background: #f1f5f9;
     }
     .day-pill.active {
       background: #10b981;
-      border-color: #10b981;
+      border: 1.5px solid #059669;
       color: #ffffff;
+      font-weight: 800;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
     }
     .day-pill.active:hover {
       background: #059669;
-      border-color: #059669;
-      color: #ffffff;
+      border-color: #047857;
     }
 
     /* Bank Account grid */
     .bank-account-grid {
       display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: 10px;
+      grid-template-columns: 10.5rem 1fr;
+      gap: 0.75rem;
+    }
+    html[data-font-scale="large"] .bank-account-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pw-guide-text {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: #64748b;
+      line-height: 1.55;
+      margin-top: -0.6rem;
     }
 
     .notice-box {
-      margin-top: 32px;
-      padding: 16px 20px;
-      background: rgba(16, 185, 129, 0.05);
-      border: 1px solid rgba(16, 185, 129, 0.15);
-      border-radius: 6px;
+      margin-top: 2.2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #f1f5f9;
       text-align: center;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #047857;
-      line-height: 1.5;
+      font-size: 0.94rem;
+      font-weight: 500;
+      color: #64748b;
+      line-height: 1.7;
     }
 
     .btn-submit-apply {
       width: 100%;
-      padding: 18px;
+      padding: 1.05rem 1.25rem;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
       border: none;
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 0.3px;
+      line-height: 1.4;
       cursor: pointer;
-      transition: all 0.2s;
-      margin-top: 24px;
+      transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      margin-top: 1.65rem;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
       font-family: inherit;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
     }
     .btn-submit-apply:hover:not(:disabled) {
-      filter: brightness(1.08);
-      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
+      filter: brightness(1.06);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22);
     }
-    .btn-submit-apply:active { transform: scale(0.99); }
+    .btn-submit-apply:active:not(:disabled) { transform: scale(0.99); }
     .btn-submit-apply:disabled {
       background: #e2e8f0;
       color: #94a3b8;
@@ -372,49 +790,64 @@
     .error-msg {
       display: none;
       color: #ef4444;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       font-weight: 600;
-      margin-top: 16px;
+      margin-top: 0.95rem;
       text-align: left;
     }
     .error-msg.show { display: block; }
 
+    /* Input Error / Highlight Style */
+    input.invalid-highlight, select.invalid-highlight, .custom-select-trigger.invalid-highlight, .file-upload-box.invalid-highlight, .weekday-selector.invalid-highlight {
+      border-color: #ef4444 !important;
+      background-color: rgba(239, 68, 68, 0.04) !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+      animation: shake 0.3s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
     /* Success Screen */
     .success-screen {
       text-align: center;
-      padding: 40px 0;
+      padding: 2.5rem 0;
       display: none;
     }
     .success-icon-svg {
       width: 64px; height: 64px;
-      stroke: #ef4444;
+      stroke: #10b981;
       fill: none;
-      margin-bottom: 24px;
+      margin-bottom: 1.5rem;
     }
     .success-screen h2 {
-      font-size: 1.8rem;
+      font-size: 1.85rem;
       font-weight: 700;
       color: #0f172a;
-      margin-bottom: 12px;
+      margin-bottom: 0.75rem;
     }
     .success-screen p {
-      font-size: 1rem;
-      color: #64748b;
+      font-size: 1.05rem;
+      color: #475569;
       line-height: 1.7;
-      margin-bottom: 32px;
+      margin-bottom: 2rem;
     }
     .btn-success-go {
       display: inline-block;
-      padding: 16px 32px;
-      background: #ef4444;
+      padding: 1rem 1.85rem;
+      background: #10b981;
       color: #ffffff;
       border-radius: 8px;
       text-decoration: none;
+      font-size: 1.05rem;
       font-weight: 700;
       transition: background 0.2s;
     }
     .btn-success-go:hover {
-      background: #b91c1c;
+      background: #059669;
     }
 
     .spinner {
@@ -430,6 +863,40 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── 토스트 알림 ── */
+    #toast-container {
+      position: fixed;
+      bottom: 2.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      pointer-events: none;
+      width: 90%;
+      max-width: 420px;
+    }
+    .toast {
+      width: 100%;
+      padding: 0.85rem 1.15rem;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+      animation: toastSlideUp 0.22s ease-out;
+    }
+    .toast.success { background: #059669; }
+    .toast.error { background: #ef4444; }
+    @keyframes toastSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     @media (max-width: 640px) {
       body {
         background: #ffffff;
@@ -440,26 +907,41 @@
       .bg-decorations {
         display: none;
       }
-      .apply-card {
+      .apply-card,
+      html[data-font-scale="large"] .apply-card {
         border: none;
         border-top: 4px solid #ef4444;
-        padding: 40px 20px 32px 20px;
+        padding: 2rem 1.25rem 2.8rem 1.25rem;
         box-shadow: none;
         background: #ffffff;
         min-height: 100vh;
+        min-height: 100dvh;
+        max-width: 100%;
       }
       .form-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
+        row-gap: 1.65rem;
       }
       .full-width {
         grid-column: span 1;
       }
-      .bank-account-grid {
+      .bank-account-grid,
+      .address-search-row {
         grid-template-columns: 1fr;
       }
+      .hours-picker-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .hours-picker-grid > span {
+        display: none;
+      }
+      .weekday-selector {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.55rem;
+      }
       .logo-title {
-        font-size: 1.8rem;
+        font-size: 1.85rem;
       }
     }
 
@@ -468,7 +950,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
   </style>
-  <script type="module" crossorigin src="/assets/merchant-reapply-BedmblSO.js"></script>
+  <script type="module" crossorigin src="/assets/merchant-reapply-DkACk_L8.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
 </head>
@@ -483,6 +965,19 @@
     <!-- 신청 폼 화면 -->
     <div id="form-view">
       <div class="logo-area">
+        <div class="logo-top-row">
+          <a href="/merchant/login.html" class="btn-back-login" id="btn-back-login">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            <span>뒤로가기</span>
+          </a>
+          <div class="font-size-control" role="group" aria-label="글자 크기 조절">
+            <span class="font-size-slider" aria-hidden="true"></span>
+            <button type="button" class="font-size-btn active" data-scale="normal" title="글자 보통">보통</button>
+            <button type="button" class="font-size-btn" data-scale="large" title="글자 크게">크게</button>
+          </div>
+        </div>
         <span class="logo-subtitle">재입점 신청</span>
         <h1 class="logo-title">가맹점 정보 수정</h1>
       </div>
@@ -498,7 +993,7 @@
 
           <div class="form-group">
             <label for="phone">연락처 <span class="required-mark">*</span></label>
-            <input type="tel" id="phone" placeholder="010-0000-0000" maxlength="13" required />
+            <input type="tel" id="phone" inputmode="numeric" placeholder="010-0000-0000" maxlength="13" required />
           </div>
 
           <div class="form-group">
@@ -508,10 +1003,10 @@
 
           <div class="form-group">
             <label for="store-phone">가게 전화번호</label>
-            <input type="tel" id="store-phone" placeholder="지역번호 또는 일반 번호" maxlength="12" />
+            <input type="tel" id="store-phone" inputmode="numeric" placeholder="지역번호 또는 일반 번호" maxlength="12" />
           </div>
 
-          <div class="form-group">
+          <div class="form-group full-width">
             <label for="category">카테고리 <span class="required-mark">*</span></label>
             <select id="category" required>
               <option value="">선택해 주세요</option>
@@ -525,9 +1020,25 @@
             </select>
           </div>
 
-          <div class="form-group">
-            <label for="address">위치 <span class="required-mark">*</span></label>
-            <input type="text" id="address" placeholder="예: 인천광역시 옹진군 백령면 ..." required />
+          <div class="form-group full-width">
+            <label for="address">위치 (주소) <span class="required-mark">*</span></label>
+            <div class="address-search-row">
+              <input type="text" id="address" placeholder="주소 검색 버튼을 눌러 주소를 선택하세요" readonly required />
+              <button type="button" class="btn-address-search" id="btn-search-address">주소 검색</button>
+            </div>
+            <div id="postcode-wrap" class="postcode-wrap">
+              <div class="postcode-header">
+                <span>도로명·지번 주소 검색</span>
+                <button type="button" id="btn-close-postcode" class="btn-close-postcode" aria-label="주소 검색창 닫기">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              <div id="postcode-container" class="postcode-container"></div>
+            </div>
+            <input type="text" id="address-detail" class="address-detail-input" placeholder="상세주소를 입력하세요" />
           </div>
         </div>
 
@@ -547,28 +1058,32 @@
             </div>
           </div>
 
-          <div class="form-group full-width" style="margin-top: 10px;">
-            <label>영업 요일 <span class="required-mark">*</span> <span style="font-weight:400;color:#64748b;margin-left:5px;">(영업하는 요일을 모두 선택해 주세요)</span></label>
+          <div class="form-group full-width">
+            <label>영업 요일 <span class="required-mark">*</span></label>
             <div class="weekday-selector">
-              <button type="button" class="day-pill" data-day="월">월</button>
-              <button type="button" class="day-pill" data-day="화">화</button>
-              <button type="button" class="day-pill" data-day="수">수</button>
-              <button type="button" class="day-pill" data-day="목">목</button>
-              <button type="button" class="day-pill" data-day="금">금</button>
-              <button type="button" class="day-pill" data-day="토">토</button>
-              <button type="button" class="day-pill" data-day="일">일</button>
+              <button type="button" class="day-pill active" data-day="월">월</button>
+              <button type="button" class="day-pill active" data-day="화">화</button>
+              <button type="button" class="day-pill active" data-day="수">수</button>
+              <button type="button" class="day-pill active" data-day="목">목</button>
+              <button type="button" class="day-pill active" data-day="금">금</button>
+              <button type="button" class="day-pill active" data-day="토">토</button>
+              <button type="button" class="day-pill active" data-day="일">일</button>
             </div>
           </div>
 
           <div class="form-group full-width">
-            <label>가게 이미지 <span class="required-mark">*</span> <span style="font-weight:400;color:#64748b;margin-left:5px;">(최대 5장 등록 가능)</span></label>
+            <label>
+              가게 이미지 <span class="required-mark">*</span>
+              <span class="label-sub">(최대 5장 등록 가능)</span>
+            </label>
             <div class="file-upload-box">
-              <svg class="upload-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <polyline points="21 15 16 10 5 21"></polyline>
-              </svg>
-              <p>파일을 끌어놓거나 <strong>여기를 클릭</strong>하여 업로드하세요</p>
+              <span class="upload-plus-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </span>
+              <p>가게 이미지 사진 등록</p>
               <input type="file" id="store-images" multiple accept="image/*" />
             </div>
             <div class="preview-container" id="store-images-previews"></div>
@@ -580,13 +1095,19 @@
         <div class="form-grid">
           <div class="form-group full-width">
             <label for="business-no">사업자등록번호 <span class="required-mark">*</span></label>
-            <input type="text" id="business-no" placeholder="000-00-00000" maxlength="12" required />
+            <input type="text" id="business-no" inputmode="numeric" placeholder="000-00-00000" maxlength="12" required />
           </div>
 
           <div class="form-group full-width">
             <label>사업자등록증 <span class="required-mark">*</span></label>
-            <div class="file-upload-box" style="min-height: 80px; padding: 10px;">
-              <p><strong>사업자등록증 이미지 등록</strong></p>
+            <div class="file-upload-box">
+              <span class="upload-plus-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </span>
+              <p>사업자등록증 사진 등록</p>
               <input type="file" id="business-cert" accept="image/*" />
             </div>
             <div class="preview-container" id="business-cert-preview"></div>
@@ -608,18 +1129,66 @@
                 <option value="카카오뱅크">카카오뱅크</option>
                 <option value="토스뱅크">토스뱅크</option>
               </select>
-              <input type="text" id="account-no" placeholder="계좌번호를 입력하세요 (- 제외)" required />
+              <input type="text" id="account-no" inputmode="numeric" placeholder="계좌번호를 입력하세요 (- 제외)" required />
             </div>
           </div>
 
           <div class="form-group full-width">
             <label>통장사본 <span class="required-mark">*</span></label>
-            <div class="file-upload-box" style="min-height: 80px; padding: 10px;">
-              <p><strong>통장사본 이미지 등록</strong></p>
+            <div class="file-upload-box">
+              <span class="upload-plus-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </span>
+              <p>통장사본 사진 등록</p>
               <input type="file" id="bankbook" accept="image/*" />
             </div>
             <div class="preview-container" id="bankbook-preview"></div>
           </div>
+        </div>
+
+        <!-- 4. 로그인 비밀번호 설정 -->
+        <h3 class="section-title">로그인 비밀번호 설정</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="password">비밀번호 변경</label>
+            <div class="input-wrap">
+              <input type="password" id="password" placeholder="변경 시에만 입력하세요" autocomplete="new-password" />
+              <button type="button" class="pw-toggle" id="pw-toggle" aria-label="비밀번호 표시 전환">
+                <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password-confirm">비밀번호 확인</label>
+            <div class="input-wrap">
+              <input type="password" id="password-confirm" placeholder="비밀번호를 한 번 더 입력" autocomplete="new-password" />
+              <button type="button" class="pw-toggle" id="pw-confirm-toggle" aria-label="비밀번호 확인 표시 전환">
+                <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <p class="pw-guide-text full-width">
+            입점 승인 후 로그인 화면에서 가게를 선택하고, 설정하신 비밀번호를 입력하면 바로 로그인됩니다.
+          </p>
         </div>
 
         <div class="notice-box">
@@ -647,11 +1216,11 @@
         관리자의 확인을 거쳐 영업일 기준 1~2일 내에 심사가 진행됩니다.<br />
         승인 처리 시 가입 시 작성해주신 대표자 번호로 안내 문자가 발송됩니다.
       </p>
-      <a href="/tourist/apply-pending.html" class="btn-success-go" style="background: #10b981;">심사 대기 화면으로 이동</a>
+      <a href="/merchant/apply-pending.html" class="btn-success-go">심사 대기 화면으로 이동</a>
     </div>
   </div>
 
   <div id="toast-container"></div>
-
+
 </body>
 </html>

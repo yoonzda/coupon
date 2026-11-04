@@ -32,13 +32,11 @@ async function generateSettlementFiles() {
 
     // XML 생성
     const xml = buildSettlementXML(rows, period);
-    const outputDir = path.join(__dirname, '../../storage/settlements');
+    const outputDir = path.join(__dirname, '../../../storage/settlements');
     fs.mkdirSync(outputDir, { recursive: true });
-    const fileName = `settlement_batch_${period}.xml`;
+    const fileName = `settlement_${period}.xml`;
     const filePath = path.join(outputDir, fileName);
     fs.writeFileSync(filePath, xml, 'utf8');
-
-    const downloadPath = `/api/admin/settlements/download/${fileName}`;
 
     // DB 기록
     for (const row of rows) {
@@ -47,7 +45,7 @@ async function generateSettlementFiles() {
          VALUES (?, ?, ?, 'file_generated', NOW(), ?)
          ON DUPLICATE KEY UPDATE total_amount = VALUES(total_amount), status = 'file_generated',
            generated_at = NOW(), file_path = VALUES(file_path)`,
-        [row.merchant_id, period, row.total_amount, downloadPath]
+        [row.merchant_id, period, row.total_amount, filePath]
       );
     }
 

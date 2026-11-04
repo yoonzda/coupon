@@ -12,20 +12,15 @@ class SettlementService {
     try {
       await connection.beginTransaction();
 
-      // 1. 해당 기간의 정상 승인 가맹점별 실거래 쿠폰 사용 합계 조회 (테스트 거래/가맹점 제외)
+      // 1. 해당 기간의 가맹점별 쿠폰 사용 합계 조회
       const [transactions] = await connection.execute(
         `SELECT 
-           ct.merchant_id, 
-           SUM(ct.amount) as total_amount,
+           merchant_id, 
+           SUM(amount) as total_amount,
            COUNT(*) as transaction_count
-         FROM coupon_transactions ct
-         JOIN merchants m ON ct.merchant_id = m.id
-         WHERE DATE_FORMAT(ct.scanned_at, '%Y-%m') = ?
-           AND m.status = 'approved'
-           AND m.name NOT LIKE '%테스트%'
-           AND (m.business_no IS NULL OR m.business_no NOT LIKE '000-00%')
-            AND COALESCE(ct.is_cancelled, 0) = 0
-         GROUP BY ct.merchant_id`,
+         FROM coupon_transactions
+         WHERE DATE_FORMAT(scanned_at, '%Y-%m') = ?
+         GROUP BY merchant_id`,
         [period]
       );
 
@@ -78,48 +73,35 @@ class SettlementService {
 
     if (!settlement) throw new Error('정산 내역을 찾을 수 없습니다.');
 
-    // XML 특수문자 이스케이프 함수 (XML 인젝션 방어)
-    const escapeXml = (str) => String(str || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
-
-    // CDATA 탈출(]]>) 방어
-    const safeMerchantName = String(settlement.merchant_name || '').replace(/\]\]>/g, ']]]]><![CDATA[>');
-
     const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <SettlementRequest>
   <Header>
-    <TargetPeriod>${escapeXml(settlement.period)}</TargetPeriod>
+    <TargetPeriod>${settlement.period}</TargetPeriod>
     <GeneratedAt>${new Date().toISOString()}</GeneratedAt>
   </Header>
   <Body>
     <Merchant>
       <Id>${settlement.merchant_id}</Id>
-      <Name><![CDATA[${safeMerchantName}]]></Name>
+      <Name>${settlement.merchant_name}</Name>
       <Amount>${settlement.total_amount}</Amount>
     </Merchant>
   </Body>
 </SettlementRequest>`;
 
-    const safePeriod = settlement.period.replace(/[^0-9-]/g, '');
-    const fileName = `settlement_${settlement.merchant_id}_${safePeriod}.xml`;
+    const fileName = `settlement_${settlement.merchant_id}_${settlement.period}.xml`;
+    const publicPath = path.join(__dirname, '../../../frontend/public/settlements');
     
-    // 공개 public 디렉터리가 아닌 내부 보호 스토리지에 격리 저장
-    const storagePath = path.join(__dirname, '../../storage/settlements');
-    await fs.mkdir(storagePath, { recursive: true });
-    await fs.writeFile(path.join(storagePath, fileName), xmlContent, 'utf8');
+    // 폴더 생성
+    await fs.mkdir(publicPath, { recursive: true });
+    await fs.writeFile(path.join(publicPath, fileName), xmlContent);
 
-    // DB 업데이트 (다운로드 API 경로로 기록)
-    const downloadPath = `/api/admin/settlements/download/${fileName}`;
+    // DB 업데이트
     await pool.execute(
       `UPDATE settlements SET status = 'file_generated', file_path = ? WHERE id = ?`,
-      [downloadPath, settlementId]
+      [`/settlements/${fileName}`, settlementId]
     );
 
-    return downloadPath;
+    return `/settlements/${fileName}`;
   }
 }
 

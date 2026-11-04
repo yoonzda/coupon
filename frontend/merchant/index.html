@@ -6,13 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>가맹점 포털 | 옹진관광 쿠폰</title>
   <link rel="stylesheet" href="../shared/css/main.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    
+
+    html.font-scale-anim {
+      transition: font-size 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
     body {
       background: #f8fafc;
       min-height: 100dvh;
@@ -21,8 +26,72 @@
       justify-content: center;
       color: #0f172a;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      position: relative;
     }
-    
+
+    /* 우측 상단 글자 크기 조절 컨트롤 (login.html과 동일한 슬라이딩 화이트 필 스타일) */
+    .font-size-control {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      height: 36px;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 999px !important;
+      border: 1px solid #e2e8f0;
+      user-select: none;
+      z-index: 50;
+    }
+    .font-size-slider {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: calc(50% - 3px);
+      background: #ffffff;
+      border-radius: 999px !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+      transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+      z-index: 0;
+    }
+    html[data-font-scale="large"] .font-size-slider {
+      transform: translateX(100%);
+    }
+    .font-size-btn {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-width: 54px;
+      padding: 0 14px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 700;
+      border-radius: 999px !important;
+      cursor: pointer;
+      line-height: 1;
+      white-space: nowrap;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-size-btn:hover {
+      color: #0f172a;
+    }
+    .font-size-btn.active {
+      color: #059669;
+    }
+
     .intro-wrapper {
       width: 100%;
       max-width: 580px;
@@ -33,51 +102,11 @@
       justify-content: center;
       gap: 20px;
     }
-
-    .merchant-top-bar {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #ffffff;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 12px !important;
-      padding: 14px 18px;
+    html[data-font-scale="large"] .intro-wrapper {
+      max-width: 660px;
     }
 
-    .merchant-shop-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #0f172a;
-      letter-spacing: -0.3px;
-    }
-
-    .merchant-shop-sub {
-      font-size: 0.82rem;
-      color: #64748b;
-      font-weight: 500;
-      margin-top: 2px;
-    }
-
-    .btn-merchant-logout {
-      padding: 8px 14px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #475569;
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px !important;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .btn-merchant-logout:hover {
-      color: #0f172a;
-      background: #f1f5f9;
-      border-color: #94a3b8;
-    }
-
-    /* 실시간 쿠폰 사용 요청 알림 영역 */
+    /* 실시간 쿠폰 사용 요청 알림 영역 (요청이 있을 때만 표시) */
     .usage-requests-wrap {
       width: 100%;
       display: none;
@@ -249,8 +278,9 @@
     }
 
     .icon-box {
-      width: 48px;
-      height: 48px;
+      position: relative;
+      width: 3rem;
+      height: 3rem;
       background: transparent !important;
       display: flex;
       align-items: center;
@@ -258,13 +288,34 @@
     }
 
     .card-icon {
-      width: 44px;
-      height: 44px;
+      width: 2.75rem;
+      height: 2.75rem;
       color: #1e293b;
       stroke-width: 1.25;
       stroke-linecap: square;
       stroke-linejoin: miter;
       transition: color 0.2s ease, stroke-width 0.2s ease;
+    }
+
+    .card-req-badge {
+      position: absolute;
+      top: -6px;
+      right: -10px;
+      min-width: 1.35rem;
+      height: 1.35rem;
+      padding: 0 0.35rem;
+      border-radius: 999px !important;
+      background: #ef4444;
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
+    }
+    .card-req-badge.show {
+      display: inline-flex;
     }
 
     .card-name {
@@ -274,44 +325,154 @@
       letter-spacing: -0.3px;
       transition: color 0.2s ease;
     }
+
+    .btn-bottom-logout {
+      margin-top: 4px;
+      background: none;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #94a3b8;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-color: #e2e8f0;
+      cursor: pointer;
+      padding: 6px 12px;
+      font-family: inherit;
+      transition: color 0.15s ease, text-decoration-color 0.15s ease;
+    }
+    .btn-bottom-logout:hover {
+      color: #475569;
+      text-decoration-color: #94a3b8;
+    }
+
+    /* 스캔 결제 결과 모달 */
+    .scan-result-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(15, 23, 42, 0.55);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .scan-result-overlay.show {
+      display: flex;
+    }
+    .scan-result-card {
+      width: 100%;
+      max-width: 360px;
+      background: #ffffff;
+      border-radius: 14px !important;
+      padding: 28px 24px 22px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+      border: 1px solid #e2e8f0;
+    }
+    .scan-result-badge {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 999px !important;
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .scan-result-badge.success {
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+    }
+    .scan-result-badge.error {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+    .scan-result-amount {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .scan-result-msg {
+      font-size: 0.95rem;
+      color: #475569;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      word-break: keep-all;
+    }
+    .btn-scan-result-close {
+      width: 100%;
+      height: 46px;
+      border: none;
+      border-radius: 8px !important;
+      background: #059669;
+      color: #ffffff;
+      font-size: 0.98rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        min-height: 100dvh;
+      }
+      .font-size-control {
+        top: 16px;
+        right: 16px;
+      }
+      .intro-wrapper {
+        padding: 16px;
+        gap: 14px;
+      }
+      .card-grid {
+        gap: 12px;
+      }
+      .main-card {
+        padding: 26px 14px;
+        gap: 12px;
+        aspect-ratio: auto;
+        min-height: 124px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="intro-wrapper">
-    <!-- 상단 가맹점 정보 및 로그아웃 바 -->
-    <div class="merchant-top-bar">
-      <div>
-        <div class="merchant-shop-title" id="merchant-shop-name">가맹점 포털</div>
-        <div class="merchant-shop-sub">손님의 쿠폰 사용 요청 시 아래에 실시간 표시됩니다</div>
-      </div>
-      <button type="button" class="btn-merchant-logout" id="btn-merchant-logout">로그아웃</button>
-    </div>
+  <div class="font-size-control" role="group" aria-label="글자 크기 조절">
+    <span class="font-size-slider" aria-hidden="true"></span>
+    <button type="button" class="font-size-btn active" data-scale="normal" title="글자 보통">보통</button>
+    <button type="button" class="font-size-btn" data-scale="large" title="글자 크게">크게</button>
+  </div>
 
-    <!-- 실시간 쿠폰 사용 승인 요청 영역 -->
+  <div class="intro-wrapper">
+    <!-- 실시간 쿠폰 사용 승인 요청 영역 (요청 도착 시에만 노출) -->
     <div class="usage-requests-wrap" id="usage-requests-wrap"></div>
 
     <div class="card-grid">
-      <!-- 1. 쿠폰 스캔 -->
-      <a class="main-card" href="/merchant/scan.html">
+      <!-- 1. 쿠폰 스캔 (터치 시 중간 화면 없이 즉시 카메라 연결) -->
+      <label class="main-card" for="direct-camera-input" id="card-scan-trigger">
         <div class="icon-box">
           <svg class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="square" stroke-linejoin="miter" d="M3.75 7.5V4.5h3m9 0h3v3m0 9v3h-3m-9 0h-3v-3M9 12h6" />
           </svg>
         </div>
-        <span class="card-name">쿠폰 스캔</span>
-      </a>
+        <span class="card-name" id="card-scan-label">쿠폰 스캔</span>
+      </label>
+      <input type="file" id="direct-camera-input" accept="image/*" capture="environment" style="display: none;" />
 
-      <!-- 2. 수동 등록 (쿠폰 수동 입력/작성을 상징하는 샤프 씬 라인 연필 수동입력 SVG 아이콘) -->
+      <!-- 2. 요청 보기 -->
       <a class="main-card" href="/merchant/manual.html">
         <div class="icon-box">
           <svg class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="square" stroke-linejoin="miter" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zM3.75 20.25h16.5" stroke-width="1.25"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" stroke-width="1.25"/>
           </svg>
+          <span class="card-req-badge" id="req-count-badge">0</span>
         </div>
-        <span class="card-name">수동 등록</span>
+        <span class="card-name">요청 보기</span>
       </a>
 
-      <!-- 3. 거래내역 (히스토리 시계/타임라인 아이콘) -->
+      <!-- 3. 거래내역 -->
       <a class="main-card" href="/merchant/history.html">
         <div class="icon-box">
           <svg class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -331,6 +492,18 @@
         <span class="card-name">기타</span>
       </a>
     </div>
+
+    <button type="button" class="btn-bottom-logout" id="btn-merchant-logout">로그아웃</button>
+  </div>
+
+  <!-- 스캔 결과 모달 -->
+  <div class="scan-result-overlay" id="scan-result-overlay">
+    <div class="scan-result-card">
+      <span class="scan-result-badge success" id="scan-result-badge">승인 완료</span>
+      <div class="scan-result-amount" id="scan-result-amount">0원</div>
+      <p class="scan-result-msg" id="scan-result-msg">쿠폰 결제가 정상적으로 처리되었습니다.</p>
+      <button type="button" class="btn-scan-result-close" id="btn-scan-result-close">확인</button>
+    </div>
   </div>
 
   <div id="toast-container"></div>
@@ -338,29 +511,36 @@
   <script type="module">
     import { api, getToken, clearTokens, showToast, fmtMoney } from '../shared/js/api.js'
 
+    const fontScaleMap = {
+      normal: '16px',
+      large: '22px'
+    };
+    const fontSizeButtons = document.querySelectorAll('.font-size-btn');
+    function applyFontScale(scale) {
+      const validScale = fontScaleMap[scale] ? scale : 'normal';
+      document.documentElement.style.fontSize = fontScaleMap[validScale];
+      document.documentElement.setAttribute('data-font-scale', validScale);
+      localStorage.setItem('ongjin_font_scale', validScale);
+      fontSizeButtons.forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-scale') === validScale);
+      });
+    }
+    applyFontScale(localStorage.getItem('ongjin_font_scale') || 'normal');
+    fontSizeButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.documentElement.classList.add('font-scale-anim');
+        applyFontScale(btn.getAttribute('data-scale'));
+      });
+    });
+
     const token = getToken();
     if (!token) {
       window.location.replace('/merchant/login.html');
     }
 
-    const shopNameEl = document.getElementById('merchant-shop-name');
     const logoutBtn = document.getElementById('btn-merchant-logout');
     const requestsWrap = document.getElementById('usage-requests-wrap');
-
-    try {
-      const savedUser = JSON.parse(localStorage.getItem('ongjin_user') || '{}');
-      if (savedUser.shopName && shopNameEl) {
-        shopNameEl.textContent = `${savedUser.shopName} 사장님`;
-      }
-    } catch (_) {}
-
-    api.get('/merchant/basic-info')
-      .then(res => {
-        if (res.success && res.data && shopNameEl) {
-          shopNameEl.textContent = `${res.data.name} 사장님`;
-        }
-      })
-      .catch(() => {});
+    const reqCountBadge = document.getElementById('req-count-badge');
 
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
@@ -370,6 +550,11 @@
     }
 
     function renderRequests(list) {
+      if (reqCountBadge) {
+        const count = Array.isArray(list) ? list.length : 0;
+        reqCountBadge.textContent = String(count);
+        reqCountBadge.classList.toggle('show', count > 0);
+      }
       if (!requestsWrap) return;
       if (!list || list.length === 0) {
         requestsWrap.classList.remove('active');
@@ -439,6 +624,121 @@
         await pollUsageRequests();
       }
     };
+
+    // ── 쿠폰 스캔 (중간 화면 없이 즉시 기본 카메라 실행 & QR 인식) ──
+    const directCameraInput = document.getElementById('direct-camera-input');
+    const cardScanLabel = document.getElementById('card-scan-label');
+    const scanResultOverlay = document.getElementById('scan-result-overlay');
+    const scanResultBadge = document.getElementById('scan-result-badge');
+    const scanResultAmount = document.getElementById('scan-result-amount');
+    const scanResultMsg = document.getElementById('scan-result-msg');
+    const btnScanResultClose = document.getElementById('btn-scan-result-close');
+
+    const barcodeDetector = ('BarcodeDetector' in window)
+      ? new window.BarcodeDetector({ formats: ['qr_code', 'code_128', 'code_39', 'ean_13'] })
+      : null;
+
+    if (btnScanResultClose) {
+      btnScanResultClose.addEventListener('click', () => {
+        scanResultOverlay.classList.remove('show');
+      });
+    }
+
+    function showScanResult(type, amount, customMsg = '') {
+      const isSuccess = type === 'success';
+      scanResultBadge.textContent = isSuccess ? '승인 완료' : '결제 실패';
+      scanResultBadge.className = `scan-result-badge ${isSuccess ? 'success' : 'error'}`;
+      scanResultAmount.style.display = isSuccess ? 'block' : 'none';
+      scanResultAmount.textContent = isSuccess ? fmtMoney(amount) : '';
+      scanResultMsg.textContent = customMsg || (isSuccess
+        ? '쿠폰 결제가 정상적으로 처리되었습니다.'
+        : '유효하지 않거나 이미 사용된 쿠폰입니다.');
+      scanResultOverlay.classList.add('show');
+    }
+
+    function extractCouponCode(rawText) {
+      if (!rawText) return '';
+      const trimmed = String(rawText).trim();
+      try {
+        if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+          const u = new URL(trimmed);
+          const tokenParam = u.searchParams.get('code') || u.searchParams.get('qrToken') || u.searchParams.get('kioskSessionId') || u.searchParams.get('token');
+          if (tokenParam) return tokenParam.trim();
+        }
+      } catch (_) {}
+      return trimmed;
+    }
+
+    async function decodeQrFromImage(img) {
+      if (barcodeDetector) {
+        try {
+          const detected = await barcodeDetector.detect(img);
+          if (detected && detected.length > 0 && detected[0].rawValue) {
+            return detected[0].rawValue;
+          }
+        } catch (_) {}
+      }
+
+      if (!window.jsQR) return null;
+
+      const scales = [1024, 720, 480, 1440];
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+      for (const maxDim of scales) {
+        const ratio = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * ratio));
+        const h = Math.max(1, Math.round(img.height * ratio));
+        canvas.width = w;
+        canvas.height = h;
+        ctx.drawImage(img, 0, 0, w, h);
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const code = window.jsQR(imageData.data, w, h, {
+          inversionAttempts: 'attemptBoth'
+        });
+        if (code && code.data) {
+          return code.data;
+        }
+      }
+      return null;
+    }
+
+    if (directCameraInput) {
+      directCameraInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        if (cardScanLabel) cardScanLabel.textContent = '인식 중...';
+
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.onload = async () => {
+          URL.revokeObjectURL(objectUrl);
+          try {
+            const rawCode = await decodeQrFromImage(img);
+            const couponCode = extractCouponCode(rawCode);
+            if (!couponCode) {
+              showScanResult('error', 0, 'QR 코드가 선명하게 찍히지 않았습니다. 다시 촬영해 주세요.');
+              return;
+            }
+            const res = await api.post('/merchant/scan', { couponCode });
+            showScanResult('success', res.amount);
+            await pollUsageRequests();
+          } catch (err) {
+            showScanResult('error', 0, err.message || '쿠폰을 다시 확인해 주세요.');
+          } finally {
+            if (cardScanLabel) cardScanLabel.textContent = '쿠폰 스캔';
+          }
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          if (cardScanLabel) cardScanLabel.textContent = '쿠폰 스캔';
+          showScanResult('error', 0, '촬영한 이미지를 불러오지 못했습니다.');
+        };
+        img.src = objectUrl;
+        e.target.value = '';
+      });
+    }
 
     pollUsageRequests();
     setInterval(pollUsageRequests, 2000);

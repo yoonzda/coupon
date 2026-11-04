@@ -1,955 +1,515 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="옹진 가맹점 매니저">
-  <meta property="og:description" content="옹진 관광쿠폰 가맹점 관리자 — 실시간 쿠폰 스캔 및 정산 대시보드">
-  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
-  <meta property="og:locale" content="ko_KR">
-  <title>가맹점 홈 | 옹진 관광쿠폰 매니저</title>
+  <title>가맹점 포털 | 옹진관광 쿠폰</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <style>
-    :root {
-      --merchant-primary: #059669;
-      --merchant-primary-deep: #064E3B;
-      --merchant-accent: #10B981;
-      --merchant-soft-bg: #ECFDF5;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    /* ── 가맹점 하단 네비게이션 탭바 (가로 균등 정렬 완벽 보장) ── */
-    .tabbar, .tab-bar {
-      position: fixed !important;
-      bottom: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      margin: 0 auto !important;
-      width: 100% !important;
-      max-width: 440px !important;
-      height: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
-      padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
-      background: rgba(255, 255, 255, 0.98) !important;
-      backdrop-filter: blur(16px) !important;
-      -webkit-backdrop-filter: blur(16px) !important;
-      border-top: 1px solid #E2E8F0 !important;
-      display: flex !important;
-      flex-direction: row !important;
-      justify-content: space-around !important;
-      align-items: center !important;
-      z-index: 999 !important;
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05) !important;
-      box-sizing: border-box !important;
-    }
-    .tabbar .tab-item, .tab-bar .tab-item {
-      flex: 1 1 0 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      justify-content: center !important;
-      gap: 4px !important;
-      padding: 4px 2px !important;
-      text-decoration: none !important;
-      color: #64748B !important;
-      cursor: pointer !important;
-      background: transparent !important;
-      border: none !important;
-      font-family: inherit !important;
-      transition: all 0.2s ease !important;
-      -webkit-tap-highlight-color: transparent !important;
-      min-width: 0 !important;
-    }
-    .tabbar .tab-item svg, .tab-bar .tab-item svg {
-      width: 24px !important;
-      height: 24px !important;
-      stroke: #64748B !important;
-      flex-shrink: 0 !important;
-      transition: stroke 0.2s ease, transform 0.2s ease !important;
-    }
-    .tabbar .tab-item .label, .tab-bar .tab-item .label {
-      font-size: 11.5px !important;
-      font-weight: 500 !important;
-      color: #64748B !important;
-      letter-spacing: -0.02em !important;
-      white-space: nowrap !important;
-      line-height: 1 !important;
-    }
-    .tabbar .tab-item.active, .tab-bar .tab-item.active,
-    .tabbar .tab-item[data-active="true"], .tab-bar .tab-item[data-active="true"] {
-      color: var(--merchant-primary) !important;
-    }
-    .tabbar .tab-item.active svg, .tab-bar .tab-item.active svg,
-    .tabbar .tab-item[data-active="true"] svg, .tab-bar .tab-item[data-active="true"] svg {
-      stroke: var(--merchant-primary) !important;
-      transform: translateY(-1px) !important;
-    }
-    .tabbar .tab-item.active .label, .tab-bar .tab-item.active .label,
-    .tabbar .tab-item[data-active="true"] .label, .tab-bar .tab-item[data-active="true"] .label {
-      font-weight: 700 !important;
-      color: var(--merchant-primary) !important;
-    }
-    .app-container .scroll {
-      padding-bottom: 84px !important;
+    html.font-scale-anim {
+      transition: font-size 0.45s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
-    /* ── 상단 헤더 커스텀 ── */
-    .merchant-header {
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #FFFFFF;
-      border-bottom: 1px solid #EEF0F2;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .merchant-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: inherit;
-    }
-    .merchant-logo .logo-mark {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+    body {
+      background: #f8fafc;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #FFFFFF;
-      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
-    }
-    .merchant-logo .logo-text {
-      display: flex;
-      flex-direction: column;
-    }
-    .merchant-logo .wm {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--merchant-primary);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-    .merchant-logo .sub {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--fg-strong);
-      letter-spacing: -0.03em;
+      color: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      position: relative;
     }
 
-    .merchant-header-actions {
-      display: flex;
+    /* 우측 상단 글자 크기 조절 컨트롤 (login.html과 동일한 슬라이딩 화이트 필 스타일) */
+    .font-size-control {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
       align-items: center;
-      gap: 8px;
+      height: 36px;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 999px !important;
+      border: 1px solid #e2e8f0;
+      user-select: none;
+      z-index: 50;
     }
-    .status-badge {
+    .font-size-slider {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: calc(50% - 3px);
+      background: #ffffff;
+      border-radius: 999px !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+      transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+      z-index: 0;
+    }
+    html[data-font-scale="large"] .font-size-slider {
+      transform: translateX(100%);
+    }
+    .font-size-btn {
+      position: relative;
+      z-index: 1;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 5px 10px;
-      border-radius: 100px;
-      background: #ECFDF5;
-      color: #059669;
-      font-size: 12px;
-      font-weight: 600;
-      border: 1px solid rgba(16, 185, 129, 0.2);
-    }
-    .status-badge .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #10B981;
-      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
-    }
-
-    /* ── 가게 환영 프로필 영역 ── */
-    .profile-hero {
-      padding: 24px 20px 16px;
-    }
-    .profile-greeting {
-      font-size: 14px;
-      color: var(--fg-tertiary);
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .today-date-text {
-      font-size: 12.5px;
-      color: var(--fg-quiet);
-      font-weight: 500;
-    }
-    .shop-title-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .shop-title-name {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--fg-strong);
-      letter-spacing: -0.04em;
-      line-height: 1.25;
-    }
-    .shop-cat-chip {
-      padding: 3px 9px;
-      border-radius: 6px;
-      background: #F3F4F6;
-      color: var(--fg-secondary);
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    /* ── 오늘 정산 요약 카드 (Hero Card) ── */
-    .summary-card {
-      margin: 8px 20px 20px;
-      background: linear-gradient(135deg, #064E3B 0%, #065F46 50%, #047857 100%);
-      border-radius: 22px;
-      padding: 24px 22px;
-      color: #FFFFFF;
-      box-shadow: 0 10px 25px rgba(6, 78, 59, 0.22);
-      position: relative;
-      overflow: hidden;
-    }
-    .summary-card::after {
-      content: '';
-      position: absolute;
-      width: 220px;
-      height: 220px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(52, 211, 153, 0.18) 0%, transparent 70%);
-      top: -60px;
-      right: -60px;
-      pointer-events: none;
-    }
-    .summary-card .card-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .summary-card .card-head .label {
-      font-size: 13.5px;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.85);
-    }
-    .summary-card .btn-refresh {
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: #FFFFFF;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .summary-card .btn-refresh:active {
-      transform: rotate(180deg) scale(0.9);
-    }
-    .summary-card .main-amount {
-      font-size: 34px;
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-    }
-    .summary-card .main-amount .unit {
-      font-size: 20px;
-      font-weight: 600;
-      opacity: 0.9;
-    }
-    .summary-card .metrics-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-    }
-    .summary-card .metric-item {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    .summary-card .metric-item .sub-label {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.75);
-    }
-    .summary-card .metric-item .sub-val {
-      font-size: 16px;
-      font-weight: 700;
-      color: #FFFFFF;
-      letter-spacing: -0.02em;
-    }
-
-    /* ── 핵심 스캔 CTA 버튼 ── */
-    .action-cta-wrap {
-      padding: 0 20px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .btn-main-scan {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      width: 100%;
-      height: 56px;
-      background: linear-gradient(135deg, #059669 0%, #10B981 100%);
-      color: #FFFFFF;
+      height: 100%;
+      min-width: 54px;
+      padding: 0 14px;
       border: none;
-      border-radius: 16px;
-      font-size: 17px;
-      font-weight: 700;
+      background: transparent;
+      color: #64748b;
       font-family: inherit;
-      text-decoration: none;
-      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.32);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .btn-main-scan:active {
-      transform: scale(0.98);
-      filter: brightness(0.95);
-    }
-    .btn-main-scan svg {
-      flex-shrink: 0;
-    }
-
-    .btn-sub-manual {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      height: 48px;
-      background: #FFFFFF;
-      color: var(--fg-strong);
-      border: 1.5px solid #E5E7EB;
-      border-radius: 14px;
-      font-size: 14.5px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .btn-sub-manual:active {
-      background: #F9FAFB;
-      transform: scale(0.98);
-    }
-
-    /* ── 빠른 서비스 그리드 (2x2) ── */
-    .quick-grid-section {
-      padding: 0 20px 24px;
-    }
-    .section-title-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .section-title-row h3 {
-      font-size: 17px;
+      font-size: 13.5px;
       font-weight: 700;
-      color: var(--fg-strong);
-      margin: 0;
-      letter-spacing: -0.03em;
-    }
-    .section-title-row .more-link {
-      font-size: 13px;
-      color: var(--merchant-primary);
-      text-decoration: none;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
-
-    .quick-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .quick-item {
-      background: #FFFFFF;
-      border: 1px solid #EEF0F2;
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      text-align: left;
-      gap: 8px;
-      text-decoration: none;
-      color: inherit;
+      border-radius: 999px !important;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-      transition: all 0.15s ease;
-      touch-action: manipulation;
+      line-height: 1;
+      white-space: nowrap;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: color 0.2s ease;
       -webkit-tap-highlight-color: transparent;
-      font-family: inherit;
-      border: none;
-      width: 100%;
-      box-sizing: border-box;
     }
-    .quick-item * {
-      pointer-events: none;
+    .font-size-btn:hover {
+      color: #0f172a;
     }
-    .quick-item:active {
-      transform: scale(0.98);
-      background: #F9FAFB;
-    }
-    .quick-icon-wrap {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .quick-icon-wrap.green { background: #ECFDF5; color: #059669; }
-    .quick-icon-wrap.blue { background: #EFF6FF; color: #2563EB; }
-    .quick-icon-wrap.amber { background: #FFFBEB; color: #D97706; }
-    .quick-icon-wrap.slate { background: #F3F4F6; color: #4B5563; }
-    .quick-item .t {
-      font-size: 14.5px;
-      font-weight: 700;
-      color: var(--fg-strong);
-      letter-spacing: -0.02em;
-    }
-    .quick-item .d {
-      font-size: 12px;
-      color: var(--fg-tertiary);
-      line-height: 1.35;
+    .font-size-btn.active {
+      color: #059669;
     }
 
-    /* ── 최근 결제 내역 리스트 ── */
-    .recent-tx-section {
-      padding: 0 20px 30px;
-    }
-    .tx-card-list {
+    .intro-wrapper {
+      width: 100%;
+      max-width: 580px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+    html[data-font-scale="large"] .intro-wrapper {
+      max-width: 660px;
+    }
+
+    /* 실시간 쿠폰 사용 요청 알림 영역 (요청이 있을 때만 표시) */
+    .usage-requests-wrap {
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .usage-requests-wrap.active {
+      display: flex;
+    }
+
+    .usage-req-card {
+      width: 100%;
+      background: #ffffff;
+      border: 2px solid #059669;
+      border-radius: 12px !important;
+      padding: 18px 20px;
+      box-shadow: 0 8px 24px rgba(5, 150, 105, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: reqSlideIn 0.25s ease-out;
+    }
+
+    @keyframes reqSlideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .usage-req-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
-    .tx-card-item {
-      background: #FFFFFF;
-      border: 1px solid #EEF0F2;
-      border-radius: 14px;
-      padding: 14px 16px;
+
+    .usage-req-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #059669;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 99px !important;
+      padding: 4px 10px;
+    }
+
+    .usage-req-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50% !important;
+      background: #059669;
+    }
+
+    .usage-req-time {
+      font-size: 0.8rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .usage-req-body {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
     }
-    .tx-card-item .tx-left {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
+
+    .usage-req-phone {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
     }
-    .tx-card-item .tx-title {
-      font-size: 14.5px;
-      font-weight: 600;
-      color: var(--fg-strong);
-      letter-spacing: -0.02em;
+
+    .usage-req-sub {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 2px;
     }
-    .tx-card-item .tx-time {
-      font-size: 12px;
-      color: var(--fg-quiet);
-    }
-    .tx-card-item .tx-right {
-      text-align: right;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 2px;
-    }
-    .tx-card-item .tx-amount {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--merchant-primary);
-      letter-spacing: -0.02em;
-    }
-    .tx-card-item .tx-badge {
-      font-size: 11px;
-      font-weight: 600;
+
+    .usage-req-amount {
+      font-size: 1.35rem;
+      font-weight: 900;
       color: #059669;
-      background: #ECFDF5;
-      padding: 2px 7px;
-      border-radius: 4px;
+      white-space: nowrap;
     }
 
-    .empty-tx-box {
-      text-align: center;
-      padding: 36px 16px;
-      background: #FFFFFF;
-      border: 1px dashed #E5E7EB;
-      border-radius: 14px;
-      color: var(--fg-tertiary);
-      font-size: 13.5px;
+    .usage-req-actions {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 10px;
     }
 
-    /* ── 바텀시트 모달 스타일 ── */
-    .merchant-modal-overlay {
+    .btn-req-approve {
+      padding: 13px 16px;
+      background: #059669;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px !important;
+      font-size: 0.98rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-req-approve:hover {
+      background: #047857;
+    }
+
+    .btn-req-reject {
+      padding: 13px 16px;
+      background: #f8fafc;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px !important;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-req-reject:hover {
+      background: #fee2e2;
+      color: #dc2626;
+      border-color: #fecaca;
+    }
+
+    /* 2열 4개 메인 카드 그리드 */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .main-card {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px !important;
+      padding: 42px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      text-decoration: none;
+      color: #0f172a;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02);
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      aspect-ratio: 1 / 0.88;
+    }
+
+    .main-card:hover {
+      transform: none !important;
+      border-color: #059669;
+      background: #fafdfb;
+      box-shadow: 0 4px 16px rgba(5, 150, 105, 0.08);
+    }
+
+    .main-card:hover .card-icon {
+      color: #059669;
+      stroke-width: 1.5;
+    }
+
+    .main-card:hover .card-name {
+      color: #059669;
+    }
+
+    .icon-box {
+      position: relative;
+      width: 3rem;
+      height: 3rem;
+      background: transparent !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-icon {
+      width: 2.75rem;
+      height: 2.75rem;
+      color: #1e293b;
+      stroke-width: 1.25;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+      transition: color 0.2s ease, stroke-width 0.2s ease;
+    }
+
+    .card-req-badge {
+      position: absolute;
+      top: -6px;
+      right: -10px;
+      min-width: 1.35rem;
+      height: 1.35rem;
+      padding: 0 0.35rem;
+      border-radius: 999px !important;
+      background: #ef4444;
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
+    }
+    .card-req-badge.show {
+      display: inline-flex;
+    }
+
+    .card-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      transition: color 0.2s ease;
+    }
+
+    .btn-bottom-logout {
+      margin-top: 4px;
+      background: none;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #94a3b8;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-color: #e2e8f0;
+      cursor: pointer;
+      padding: 6px 12px;
+      font-family: inherit;
+      transition: color 0.15s ease, text-decoration-color 0.15s ease;
+    }
+    .btn-bottom-logout:hover {
+      color: #475569;
+      text-decoration-color: #94a3b8;
+    }
+
+    /* 스캔 결제 결과 모달 */
+    .scan-result-overlay {
+      display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.55);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      z-index: 9999 !important;
-      display: flex;
-      align-items: flex-end;
+      z-index: 2000;
+      background: rgba(15, 23, 42, 0.55);
+      align-items: center;
       justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
+      padding: 24px;
     }
-    .merchant-modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
+    .scan-result-overlay.show {
+      display: flex;
     }
-    .merchant-modal-sheet {
-      background: #FFFFFF;
-      border-radius: 26px 26px 0 0;
+    .scan-result-card {
       width: 100%;
-      max-width: 440px;
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
-      padding: 20px 20px 32px;
-      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.16);
-      transform: translateY(100%);
-      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      max-width: 360px;
+      background: #ffffff;
+      border-radius: 14px !important;
+      padding: 28px 24px 22px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+      border: 1px solid #e2e8f0;
     }
-    .merchant-modal-overlay.active .merchant-modal-sheet {
-      transform: translateY(0);
+    .scan-result-badge {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 999px !important;
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin-bottom: 12px;
     }
-    .modal-drag-bar {
-      width: 36px;
-      height: 4px;
-      border-radius: 100px;
-      background: #D1D5DB;
-      margin: 0 auto 16px;
+    .scan-result-badge.success {
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
     }
-    .modal-head-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
+    .scan-result-badge.error {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
     }
-    .modal-head-row h4 {
-      font-size: 19px;
-      font-weight: 700;
-      color: var(--fg-strong);
-      margin: 0;
-    }
-    .btn-modal-x {
-      background: #F3F4F6;
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--fg-secondary);
-    }
-    .modal-body-content {
-      overflow-y: auto;
-      flex: 1;
-    }
-
-    /* 수동 입력 인풋 그룹 */
-    .manual-input-box {
-      margin-bottom: 16px;
-    }
-    .manual-input-box label {
-      display: block;
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--fg-strong);
+    .scan-result-amount {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #0f172a;
       margin-bottom: 8px;
+      letter-spacing: -0.5px;
     }
-    .manual-input-box input {
+    .scan-result-msg {
+      font-size: 0.95rem;
+      color: #475569;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      word-break: keep-all;
+    }
+    .btn-scan-result-close {
       width: 100%;
-      height: 52px;
-      padding: 0 16px;
-      border: 1.5px solid #E5E7EB;
-      border-radius: 12px;
-      font-size: 17px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      outline: none;
-      box-sizing: border-box;
-      transition: border-color 0.2s ease;
-    }
-    .manual-input-box input:focus {
-      border-color: var(--merchant-primary);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
-    }
-    .btn-confirm-code {
-      width: 100%;
-      height: 50px;
-      background: var(--merchant-primary);
-      color: #FFFFFF;
+      height: 46px;
       border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
+      border-radius: 8px !important;
+      background: #059669;
+      color: #ffffff;
+      font-size: 0.98rem;
+      font-weight: 800;
       cursor: pointer;
-      font-family: inherit;
     }
 
-    /* 정보 모달 리스트 */
-    .info-dl {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin: 0;
+    @media (max-width: 480px) {
+      body {
+        min-height: 100dvh;
+      }
+      .font-size-control {
+        top: 16px;
+        right: 16px;
+      }
+      .intro-wrapper {
+        padding: 16px;
+        gap: 14px;
+      }
+      .card-grid {
+        gap: 12px;
+      }
+      .main-card {
+        padding: 26px 14px;
+        gap: 12px;
+        aspect-ratio: auto;
+        min-height: 124px;
+      }
     }
-    .info-dl-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #F3F4F6;
-      font-size: 14px;
-    }
-    .info-dl-item dt { color: var(--fg-tertiary); }
-    .info-dl-item dd { color: var(--fg-strong); font-weight: 600; margin: 0; text-align: right; }
   </style>
-  <script type="module" crossorigin src="/assets/merchant-index-Bz3PznXO.js"></script>
+  <script type="module" crossorigin src="/assets/merchant-index-OKur2m4Q.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-DIUxAG8e.js">
-  <link rel="stylesheet" crossorigin href="/assets/app-styles-CmrLvQNp.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
 </head>
 <body>
-  <div class="app-container">
-    <div class="scroll">
+  <div class="font-size-control" role="group" aria-label="글자 크기 조절">
+    <span class="font-size-slider" aria-hidden="true"></span>
+    <button type="button" class="font-size-btn active" data-scale="normal" title="글자 보통">보통</button>
+    <button type="button" class="font-size-btn" data-scale="large" title="글자 크게">크게</button>
+  </div>
 
-      <!-- ── 가맹점 상단 헤더 ── -->
-      <header class="merchant-header">
-        <a href="/merchant/index.html" class="merchant-logo" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
-          <img src="/assets/images/ongjin-coupon-logo.png" alt="옹진관광쿠폰" style="height: 32px; width: auto; max-width: 120px; object-fit: contain; display: block;" />
-          <span style="background: #E0F2FE; color: #0284C7; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; white-space: nowrap;">가맹점</span>
-        </a>
+  <div class="intro-wrapper">
+    <!-- 실시간 쿠폰 사용 승인 요청 영역 (요청 도착 시에만 노출) -->
+    <div class="usage-requests-wrap" id="usage-requests-wrap"></div>
 
-        <div class="merchant-header-actions">
-          <div class="status-badge" id="merchant-status-badge">
-            <span class="dot"></span>
-            <span id="badge-status-text">정상 영업</span>
-          </div>
-        </div>
-      </header>
-
-      <!-- ── 가맹점 환영 프로필 ── -->
-      <section class="profile-hero">
-        <div class="profile-greeting">
-          <span>반갑습니다, 사장님 👋</span>
-          <span class="today-date-text" id="today-date-str">2026.09.08</span>
-        </div>
-        <div class="shop-title-row">
-          <h1 class="shop-title-name" id="shop-name-display">가맹점 불러오는 중...</h1>
-          <span class="shop-cat-chip" id="shop-category-chip">음식점</span>
-        </div>
-      </section>
-
-      <!-- ── 오늘 정산 요약 카드 (Hero Card) ── -->
-      <section class="summary-card">
-        <div class="card-head">
-          <span class="label">오늘 쿠폰 결제 금액</span>
-          <button type="button" class="btn-refresh" id="btn-refresh-summary" title="새로고침">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-            </svg>
-          </button>
-        </div>
-        <div class="main-amount">
-          <span id="stat-today-amount">0</span>
-          <span class="unit">원</span>
-        </div>
-        <div class="metrics-grid">
-          <div class="metric-item">
-            <span class="sub-label">오늘 스캔 건수</span>
-            <span class="sub-val" id="stat-today-count">0건</span>
-          </div>
-          <div class="metric-item">
-            <span class="sub-label">이번 달 누적 정산액</span>
-            <span class="sub-val" id="stat-month-amount">₩ 0</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- ── 원터치 스캔 핵심 CTA ── -->
-      <section class="action-cta-wrap">
-        <a href="/merchant/scan.html" class="btn-main-scan">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-            <rect x="7" y="7" width="10" height="10" rx="1"/>
+    <div class="card-grid">
+      <!-- 1. 쿠폰 스캔 (터치 시 중간 화면 없이 즉시 카메라 연결) -->
+      <label class="main-card" for="direct-camera-input" id="card-scan-trigger">
+        <div class="icon-box">
+          <svg class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="square" stroke-linejoin="miter" d="M3.75 7.5V4.5h3m9 0h3v3m0 9v3h-3m-9 0h-3v-3M9 12h6" />
           </svg>
-          <span>쿠폰 QR / 바코드 스캔하기</span>
-        </a>
-        <button type="button" class="btn-sub-manual" id="btn-open-manual-modal" onclick="window.openManualModal && window.openManualModal()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h8"/>
+        </div>
+        <span class="card-name" id="card-scan-label">쿠폰 스캔</span>
+      </label>
+      <input type="file" id="direct-camera-input" accept="image/*" capture="environment" style="display: none;" />
+
+      <!-- 2. 요청 보기 -->
+      <a class="main-card" href="/merchant/manual.html">
+        <div class="icon-box">
+          <svg class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" stroke-width="1.25"/>
           </svg>
-          <span>쿠폰 번호 직접 입력 (수동 승인)</span>
-        </button>
-      </section>
-
-      <!-- ── 주요 관리 메뉴 그리드 (2x2) ── -->
-      <section class="quick-grid-section">
-        <div class="section-title-row">
-          <h3>주요 관리 서비스</h3>
+          <span class="card-req-badge" id="req-count-badge">0</span>
         </div>
-        <div class="quick-grid">
-          <a href="/merchant/manage-store.html" class="quick-item" style="border: 1.5px solid rgba(16, 185, 129, 0.4); background: #F0FDF4;">
-            <div class="quick-icon-wrap green" style="background: #10B981; color: #FFFFFF;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-              </svg>
-            </div>
-            <div class="t" style="color: #065F46;">매장 & 메뉴 관리</div>
-            <div class="d" style="color: #047857;">사진·대표메뉴·가격 등록</div>
-          </a>
+        <span class="card-name">요청 보기</span>
+      </a>
 
-          <a href="/merchant/history.html" class="quick-item">
-            <div class="quick-icon-wrap green">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-              </svg>
-            </div>
-            <div class="t">정산 및 거래 내역</div>
-            <div class="d">일자별 결제 내역 확인</div>
-          </a>
-
-          <button type="button" class="quick-item" id="btn-open-shop-info" onclick="window.openShopInfo && window.openShopInfo()">
-            <div class="quick-icon-wrap blue">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-              </svg>
-            </div>
-            <div class="t">내 가맹점 정보</div>
-            <div class="d">상호·주소·계좌 확인</div>
-          </button>
-
-          <button type="button" class="quick-item" id="btn-open-guide" onclick="window.openGuideModal && window.openGuideModal()">
-            <div class="quick-icon-wrap amber">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-            </div>
-            <div class="t">쿠폰 처리 가이드</div>
-            <div class="d">결제 및 취소 안내</div>
-          </button>
+      <!-- 3. 거래내역 -->
+      <a class="main-card" href="/merchant/history.html">
+        <div class="icon-box">
+          <svg class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="square" stroke-linejoin="miter" d="M12 6v6l4 2M12 21a9 9 0 100-18 9 9 0 000 18z" stroke-width="1.25"/>
+          </svg>
         </div>
-      </section>
+        <span class="card-name">거래내역</span>
+      </a>
 
-      <!-- ── 최근 쿠폰 결제 내역 ── -->
-      <section class="recent-tx-section">
-        <div class="section-title-row">
-          <h3>최근 결제 내역</h3>
-          <a href="/merchant/history.html" class="more-link">
-            <span>전체보기</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
-          </a>
+      <!-- 4. 기타 -->
+      <a class="main-card" href="/merchant/etc.html">
+        <div class="icon-box">
+          <svg class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="square" stroke-linejoin="miter" d="M12 6.75a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 6.75a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 6.75a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/>
+          </svg>
         </div>
-        <div class="tx-card-list" id="recent-tx-list">
-          <!-- 동적 렌더링 -->
-          <div class="empty-tx-box">거래 내역을 불러오는 중입니다...</div>
-        </div>
-      </section>
-
+        <span class="card-name">기타</span>
+      </a>
     </div>
 
-    <!-- ── 하단 고정 네비게이션 탭바 ── -->
-    <nav class="tabbar tab-bar" style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; max-width: 440px !important; margin: 0 auto !important; height: calc(68px + env(safe-area-inset-bottom, 0px)) !important; padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) !important; background: rgba(255, 255, 255, 0.98) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; border-top: 1px solid #E2E8F0 !important; display: flex !important; flex-direction: row !important; justify-content: space-around !important; align-items: center !important; z-index: 9999 !important; box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05) !important; box-sizing: border-box !important;">
-      <a class="tab-item active" href="/merchant/index.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #059669 !important; font-weight: 700 !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-        <span class="label" style="font-size: 11.5px !important; font-weight: 700 !important; color: #059669 !important; line-height: 1 !important; white-space: nowrap !important;">홈</span>
-      </a>
-
-      <a class="tab-item" href="/merchant/scan.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #64748B !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
-        <span class="label" style="font-size: 11.5px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">QR스캔</span>
-      </a>
-
-      <a class="tab-item" href="/merchant/manage-store.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #64748B !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <rect x="9" y="13" width="6" height="8"/>
-        </svg>
-        <span class="label" style="font-size: 11.5px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">매장관리</span>
-      </a>
-
-      <a class="tab-item" href="/merchant/history.html" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #64748B !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-        </svg>
-        <span class="label" style="font-size: 11.5px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">거래내역</span>
-      </a>
-
-      <button type="button" class="tab-item" id="btn-merchant-logout" style="flex: 1 1 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 4px 2px !important; text-decoration: none !important; color: #64748B !important; cursor: pointer !important; background: transparent !important; border: none !important; min-width: 0 !important; box-sizing: border-box !important;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        <span class="label" style="font-size: 11.5px !important; font-weight: 500 !important; color: inherit !important; line-height: 1 !important; white-space: nowrap !important;">로그아웃</span>
-      </button>
-    </nav>
+    <button type="button" class="btn-bottom-logout" id="btn-merchant-logout">로그아웃</button>
   </div>
 
-  <!-- ── 모달: 쿠폰 번호 수동 승인 ── -->
-  <div class="merchant-modal-overlay" id="modal-manual-scan" onclick="if(event.target===this) window.closeManualModal && window.closeManualModal()">
-    <div class="merchant-modal-sheet">
-      <div class="modal-drag-bar"></div>
-      <div class="modal-head-row">
-        <h4>쿠폰 번호 수동 승인</h4>
-        <button type="button" class="btn-modal-x" id="btn-close-manual" onclick="window.closeManualModal && window.closeManualModal()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body-content">
-        <div class="manual-input-box">
-          <label for="input-coupon-code">쿠폰 번호 입력</label>
-          <input type="text" id="input-coupon-code" placeholder="예: OJ-XXXX-XXXX 또는 코드 입력" maxlength="16" autocomplete="off" />
-        </div>
-        <button type="button" class="btn-confirm-code" id="btn-submit-manual-code">결제 승인 처리</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── 모달: 내 가맹점 정보 ── -->
-  <div class="merchant-modal-overlay" id="modal-shop-info" onclick="if(event.target===this) window.closeShopInfo && window.closeShopInfo()">
-    <div class="merchant-modal-sheet">
-      <div class="modal-drag-bar"></div>
-      <div class="modal-head-row">
-        <h4>내 가맹점 정보</h4>
-        <button type="button" class="btn-modal-x" id="btn-close-shop-info" onclick="window.closeShopInfo && window.closeShopInfo()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body-content">
-        <dl class="info-dl">
-          <div class="info-dl-item">
-            <dt>가맹점 상호명</dt>
-            <dd id="info-shop-name">-</dd>
-          </div>
-          <div class="info-dl-item">
-            <dt>업종 분류</dt>
-            <dd id="info-category">-</dd>
-          </div>
-          <div class="info-dl-item">
-            <dt>사업장 주소</dt>
-            <dd id="info-address">-</dd>
-          </div>
-          <div class="info-dl-item">
-            <dt>매장 연락처</dt>
-            <dd id="info-phone">-</dd>
-          </div>
-          <div class="info-dl-item">
-            <dt>가맹점 상태</dt>
-            <dd id="info-status" style="color: var(--merchant-primary);">승인 완료</dd>
-          </div>
-        </dl>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── 모달: 가이드 및 고객센터 ── -->
-  <div class="merchant-modal-overlay" id="modal-guide" onclick="if(event.target===this) window.closeGuideModal && window.closeGuideModal()">
-    <div class="merchant-modal-sheet">
-      <div class="modal-drag-bar"></div>
-      <div class="modal-head-row">
-        <h4 id="guide-modal-title">가맹점 안내</h4>
-        <button type="button" class="btn-modal-x" id="btn-close-guide" onclick="window.closeGuideModal && window.closeGuideModal()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body-content" id="guide-modal-body" style="font-size: 14px; line-height: 1.6; color: var(--fg-secondary);">
-        <!-- 동적 텍스트 -->
-      </div>
+  <!-- 스캔 결과 모달 -->
+  <div class="scan-result-overlay" id="scan-result-overlay">
+    <div class="scan-result-card">
+      <span class="scan-result-badge success" id="scan-result-badge">승인 완료</span>
+      <div class="scan-result-amount" id="scan-result-amount">0원</div>
+      <p class="scan-result-msg" id="scan-result-msg">쿠폰 결제가 정상적으로 처리되었습니다.</p>
+      <button type="button" class="btn-scan-result-close" id="btn-scan-result-close">확인</button>
     </div>
   </div>
 
   <div id="toast-container"></div>
 
-  <script>
-    // ── 즉시 실행되는 전역 모달 컨트롤러 (ES 모듈 로딩 지연 무관) ──
-    window.openShopInfo = function() {
-      const modal = document.getElementById('modal-shop-info');
-      if (modal) {
-        try {
-          const userStr = localStorage.getItem('ongjin_merchant_user') || localStorage.getItem('ongjin_user');
-          if (userStr) {
-            const user = JSON.parse(userStr);
-            const nameEl = document.getElementById('info-shop-name');
-            if (nameEl && (!nameEl.textContent || nameEl.textContent === '-')) {
-              nameEl.textContent = user.shopName || '우리 가게';
-            }
-          }
-        } catch (e) {}
-        modal.classList.add('active');
-      }
-    };
-    window.closeShopInfo = function() {
-      document.getElementById('modal-shop-info')?.classList.remove('active');
-    };
-
-    window.openGuideModal = function() {
-      const modal = document.getElementById('modal-guide');
-      const gTitle = document.getElementById('guide-modal-title');
-      const gBody = document.getElementById('guide-modal-body');
-      if (gTitle) gTitle.textContent = '쿠폰 결제 처리 가이드';
-      if (gBody) {
-        gBody.innerHTML = `
-          <p><b>1. QR 스캔 결제 방법:</b><br>
-          관광객이 제시한 모바일 쿠폰의 QR코드를 카메라 화면 중앙에 비추면 1초 내에 자동으로 결제 승인됩니다.</p>
-          <p style="margin-top:10px;"><b>2. 종이 쿠폰 결제 방법:</b><br>
-          지류 종이쿠폰의 경우 인쇄된 QR코드를 스캔하거나, 하단의 일련번호를 [쿠폰 번호 직접 입력] 메뉴에서 수동으로 입력하여 결제 처리할 수 있습니다.</p>
-          <p style="margin-top:10px;"><b>3. 정산 입금 안내:</b><br>
-          결제 완료된 쿠폰 금액은 매주 또는 지정된 정산 주기에 맞춰 가맹점 등록 계좌로 안전하게 자동 입금됩니다.</p>
-          <div style="margin-top:16px; padding-top:14px; border-top:1px dashed #E2E8F0; text-align:center;">
-            <a href="/landing/downloads/ongjin_merchant_manual.pdf" target="_blank" download="옹진군_관광쿠폰_가맹점_사용매뉴얼.pdf" class="btn-confirm-code" style="display:inline-flex; align-items:center; justify-content:center; gap:6px; text-decoration:none; height:44px; font-size:14px; background:#059669; color:#fff; border-radius:10px; width:100%; box-sizing:border-box;">
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              가맹점 스마트폰 조작 매뉴얼 (PDF) 다운로드
-            </a>
-          </div>
-        `;
-      }
-      modal?.classList.add('active');
-    };
-    window.closeGuideModal = function() {
-      document.getElementById('modal-guide')?.classList.remove('active');
-    };
-
-    window.openManualModal = function() {
-      const modal = document.getElementById('modal-manual-scan');
-      modal?.classList.add('active');
-      setTimeout(() => document.getElementById('input-coupon-code')?.focus(), 150);
-    };
-    window.closeManualModal = function() {
-      document.getElementById('modal-manual-scan')?.classList.remove('active');
-    };
-  </script>
-
 </body>
 </html>

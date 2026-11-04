@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>가맹점 로그인 | 옹진 관광 쿠폰</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { 
@@ -15,9 +15,14 @@
       padding: 0; 
       word-break: keep-all; 
     }
+
+    html.font-scale-anim {
+      transition: font-size 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
     
     body {
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -26,88 +31,167 @@
       background-image: 
         radial-gradient(circle at 10% 20%, #dcfce7 0%, #f0fdf4 100%);
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
       color: #1e293b;
     }
 
     /* Decorative blurred glow circles (bright green) */
     body::before {
       content: '';
-      position: absolute;
+      position: fixed;
       width: 600px; height: 600px;
       background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
       top: -200px; right: -200px;
       z-index: 0;
+      pointer-events: none;
     }
     body::after {
       content: '';
-      position: absolute;
+      position: fixed;
       width: 500px; height: 500px;
       background: radial-gradient(circle, rgba(74, 222, 128, 0.08) 0%, transparent 60%);
       bottom: -150px; left: -150px;
       z-index: 0;
+      pointer-events: none;
     }
 
     .login-card {
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(16, 185, 129, 0.15);
       border-top: 3px solid #10b981;
       border-radius: 0; 
-      padding: 56px 48px;
+      padding: 3rem 2.6rem;
       width: 100%;
-      max-width: 440px;
+      max-width: 460px;
       position: relative;
       z-index: 1;
       box-shadow: 0 20px 40px rgba(16, 185, 129, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
       animation: fadeIn 0.5s ease-out;
     }
 
+    html.font-scale-anim .login-card {
+      transition: max-width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+                  padding 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    html[data-font-scale="large"] .login-card {
+      max-width: 520px;
+      padding: 2.3rem 1.8rem;
+    }
+
     .logo-area {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      margin-bottom: 40px;
+      margin-bottom: 2.1rem;
+      width: 100%;
     }
     .logo-subtitle {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: 700;
-      color: #059669; /* green point color */
+      color: #059669;
       letter-spacing: 1.5px;
-      margin-bottom: 8px;
       text-transform: uppercase;
+      margin-bottom: 0.45rem;
+      line-height: 1.4;
     }
     .logo-title {
       font-family: 'Gowun Dodum', sans-serif;
-      font-size: 2.2rem;
+      font-size: 2.15rem;
       font-weight: 400; 
       color: #0f172a;
       letter-spacing: -0.5px;
+      line-height: 1.28;
+    }
+
+    /* 글자 크기 조절 컨트롤 (상단 배치 & 슬라이딩 토글) */
+    .font-size-control {
+      position: relative;
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      height: 36px;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
+      margin-bottom: 1.15rem;
+      align-self: flex-start;
+      user-select: none;
+    }
+    .font-size-slider {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: calc(50% - 3px);
+      background: #ffffff;
+      border-radius: 999px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+      transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+      z-index: 0;
+    }
+    html[data-font-scale="large"] .font-size-slider {
+      transform: translateX(100%);
+    }
+    .font-size-btn {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-width: 54px;
+      padding: 0 14px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 700;
+      border-radius: 999px;
+      cursor: pointer;
+      line-height: 1;
+      white-space: nowrap;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-size-btn:hover {
+      color: #0f172a;
+    }
+    .font-size-btn.active {
+      color: #059669;
     }
 
     .form-group {
-      margin-bottom: 24px;
+      margin-bottom: 1.65rem;
     }
     label {
       display: block;
-      font-size: 0.8rem;
+      font-size: 0.98rem;
       font-weight: 700;
-      color: #475569;
-      margin-bottom: 10px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      color: #334155;
+      margin-bottom: 0.42rem;
+      letter-spacing: 0.2px;
+      line-height: 1.4;
     }
     .input-wrap {
       position: relative;
     }
     .input-icon-svg {
       position: absolute;
-      left: 16px;
+      left: 0.95rem;
       top: 50%;
       transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
+      width: 1.125rem;
+      height: 1.125rem;
       stroke: #94a3b8;
       fill: none;
       pointer-events: none;
@@ -116,18 +200,21 @@
     
     input[type="text"], input[type="password"] {
       width: 100%;
-      padding: 16px 16px 16px 46px;
+      padding: 0.95rem 2.6rem 0.95rem 2.75rem;
       background: #ffffff;
       border: 1px solid #cbd5e1;
       border-radius: 8px;
       color: #0f172a;
       font-size: 1rem;
       font-family: inherit;
-      transition: all 0.2s;
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
       outline: none;
     }
+    #username {
+      cursor: pointer;
+    }
     #password {
-      padding-right: 48px !important;
+      padding-right: 2.85rem !important;
     }
     input::-ms-reveal,
     input::-ms-clear {
@@ -146,24 +233,131 @@
     }
     input::placeholder { color: #94a3b8; }
 
-    /* Password visibility toggle */
-    .pw-toggle {
+    /* Custom Select Chevron & Dropdown Menu */
+    .select-chevron {
       position: absolute;
-      right: 12px;
+      right: 0.65rem;
       top: 50%;
       transform: translateY(-50%);
       background: none;
       border: none;
       cursor: pointer;
-      padding: 6px;
+      padding: 0.35rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+    }
+    .select-chevron svg {
+      width: 1.125rem;
+      height: 1.125rem;
+      stroke: #94a3b8;
+      fill: none;
+      transition: transform 0.2s ease, stroke 0.2s ease;
+    }
+    .input-wrap.open .select-chevron svg {
+      transform: rotate(180deg);
+      stroke: #10b981;
+    }
+
+    .custom-select-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      max-height: 13.5rem;
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
+      z-index: 50;
+      padding: 0.35rem;
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .input-wrap.open .custom-select-menu {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .custom-select-menu::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-select-menu::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-select-menu::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 999px;
+    }
+    .custom-select-menu::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .custom-select-option {
+      padding: 0.7rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #1e293b;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 0.2rem;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .custom-select-option:hover {
+      background: #f0fdf4;
+      color: #059669;
+      font-weight: 600;
+    }
+    .custom-select-option.selected {
+      background: #ecfdf5;
+      color: #059669;
+      font-weight: 700;
+    }
+    .custom-select-option .recent-label {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: #059669;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+    .custom-select-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 0.3rem 0.4rem;
+    }
+    .custom-select-empty {
+      padding: 0.85rem;
+      text-align: center;
+      font-size: 0.88rem;
+      color: #94a3b8;
+    }
+
+    /* Password visibility toggle */
+    .pw-toggle {
+      position: absolute;
+      right: 0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.35rem;
       display: flex;
       align-items: center;
       justify-content: center;
       outline: none;
     }
     .pw-toggle svg {
-      width: 18px;
-      height: 18px;
+      width: 1.125rem;
+      height: 1.125rem;
       stroke: #94a3b8;
       fill: none;
       transition: stroke 0.2s;
@@ -172,27 +366,30 @@
 
     .btn-login {
       width: 100%;
-      padding: 18px;
+      padding: 1.05rem 1.25rem;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
       border: none;
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 0.3px;
+      line-height: 1.4;
       cursor: pointer;
-      transition: all 0.2s;
-      margin-top: 20px;
+      transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      margin-top: 1.1rem;
       position: relative;
       overflow: hidden;
       font-family: inherit;
-      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .btn-login:hover:not(:disabled) {
-      filter: brightness(1.08);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+      filter: brightness(1.06);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22);
     }
-    .btn-login:active { transform: scale(0.99); }
+    .btn-login:active:not(:disabled) { transform: scale(0.99); }
     .btn-login:disabled {
       background: #e2e8f0;
       color: #94a3b8;
@@ -204,7 +401,7 @@
       color: #ef4444;
       font-size: 0.85rem;
       font-weight: 600;
-      margin-top: 16px;
+      margin-top: 0.9rem;
       text-align: left;
     }
     .error-msg.show { display: block; }
@@ -305,7 +502,7 @@
     }
     .btn-text-q {
       color: #059669;
-      font-size: 2.2rem;
+      font-size: 35px;
       font-weight: 500;
       transition: color 0.3s ease, text-shadow 0.3s ease;
       z-index: 10;
@@ -337,12 +534,13 @@
     .modal-container {
       background: #ffffff;
       border: 1px solid rgba(16, 185, 129, 0.2);
-      border-radius: 0;
-      width: 360px;
-      padding: 40px 28px 32px 28px;
+      border-radius: 12px;
+      width: calc(100% - 2rem);
+      max-width: 23.5rem;
+      padding: 2rem 1.5rem 1.75rem;
       position: relative;
       text-align: center;
-      box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.15);
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18);
       transform: scale(0.95);
       transition: transform 0.25s ease;
     }
@@ -350,19 +548,21 @@
     
     .modal-close-x {
       position: absolute;
-      top: 16px;
-      right: 16px;
+      top: 14px;
+      right: 14px;
       background: none;
       border: none;
       color: #94a3b8;
       cursor: pointer;
-      padding: 4px;
+      padding: 6px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: color 0.2s;
+      transition: background 0.15s ease, color 0.15s ease;
     }
     .modal-close-x:hover {
+      background: #f1f5f9;
       color: #334155;
     }
     .modal-close-x svg {
@@ -374,78 +574,104 @@
 
     .modal-header-area {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 1.25rem;
     }
     .modal-title {
       font-family: 'Gowun Dodum', sans-serif;
-      font-size: 1.45rem;
+      font-size: 1.4rem;
       font-weight: 700;
-      background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 10px;
+      color: #0f172a;
+      margin-bottom: 8px;
       letter-spacing: -0.5px;
     }
     .title-divider {
       width: 28px;
       height: 2px;
-      background: rgba(16, 185, 129, 0.2);
-      margin: 12px auto 16px auto;
+      background: rgba(16, 185, 129, 0.25);
+      margin: 10px auto 14px auto;
     }
     .modal-desc {
       color: #475569;
-      font-size: 0.85rem;
-      line-height: 1.6;
-      font-weight: 400;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      font-weight: 500;
       letter-spacing: -0.2px;
     }
     .modal-desc span {
       display: block;
-      margin-bottom: 4px;
-      font-weight: 600;
+      margin-bottom: 2px;
+      font-weight: 700;
       color: #0f172a;
     }
 
     .inquiry-info-box {
-      background: rgba(16, 185, 129, 0.05);
-      padding: 22px 28px;
-      margin-top: 24px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      align-items: flex-start;
-      border: 1px solid rgba(16, 185, 129, 0.1);
+      gap: 0.65rem;
+      width: 100%;
     }
-    .inquiry-info-item {
-      color: #334155;
-      font-size: 0.95rem;
-      font-weight: 500;
+    .inquiry-call-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.22rem;
+      padding: 0.95rem 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      text-decoration: none;
+      text-align: center;
+      transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .inquiry-call-item:hover {
+      background: #f0fdf4;
+      border-color: #10b981;
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.1);
+    }
+    .inquiry-call-label {
+      color: #64748b;
+      font-size: 0.86rem;
+      font-weight: 600;
+      line-height: 1.35;
+      white-space: nowrap;
+    }
+    .inquiry-call-number {
+      color: #059669;
+      font-size: 1.12rem;
+      font-weight: 700;
       letter-spacing: 0.3px;
+      line-height: 1.35;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
 
     /* Secondary Outline Button (입점 신청하기) */
     .btn-apply-outline {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
-      padding: 16px;
-      margin-top: 12px;
+      padding: 1.05rem 1.25rem;
+      margin-top: 0.75rem;
       background: #ffffff;
-      border: 1px solid #10b981;
+      border: 1.5px solid #10b981;
       color: #059669;
       border-radius: 8px;
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
+      line-height: 1.4;
       text-align: center;
       text-decoration: none;
-      transition: all 0.2s ease;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
       box-sizing: border-box;
     }
     .btn-apply-outline:hover {
       background: #f0fdf4;
       border-color: #059669;
       color: #047857;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.14);
     }
     .btn-apply-outline:active {
       transform: scale(0.99);
@@ -456,20 +682,22 @@
       body {
         background: #ffffff;
         background-image: none;
-        align-items: flex-start; /* Start from top on mobile */
+        align-items: stretch;
+        min-height: 100dvh;
       }
       
       body::before, body::after {
-        display: none; /* Hide background circles for a cleaner layout */
+        display: none;
       }
 
-      .login-card {
+      .login-card,
+      html[data-font-scale="large"] .login-card {
         width: 100%;
         max-width: 100%;
-        min-height: 100vh;
+        min-height: 100dvh;
         border: none;
-        border-top: 4px solid #10b981; /* Keep top accent line */
-        padding: 48px 24px 32px 24px;
+        border-top: 4px solid #10b981;
+        padding: 1.4rem 1.35rem 2.2rem 1.35rem;
         box-shadow: none;
         background: #ffffff;
         backdrop-filter: none;
@@ -480,54 +708,74 @@
       }
 
       .logo-area {
-        margin-bottom: 32px;
+        margin-bottom: 1.6rem;
       }
       
       .logo-title {
-        font-size: 2rem; /* Slightly smaller for mobile header space */
-      }
-
-      input[type="text"], input[type="password"] {
-        padding: 15px 15px 15px 44px; /* Optimized mobile padding */
-        font-size: 0.95rem;
-      }
-
-      .btn-login {
-        padding: 16px;
-        margin-top: 16px;
-      }
-
-      .floating-inquiry-btn {
-        bottom: 20px;
-        right: 20px;
-        width: 60px;
-        height: 60px;
-        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
-      }
-      .btn-text-q {
         font-size: 1.8rem;
       }
 
-      .modal-container {
-        width: 90%;
-        max-width: 330px;
-        padding: 32px 20px 24px 20px;
+      .form-group {
+        margin-bottom: 1.35rem;
       }
-      .inquiry-info-box {
-        padding: 16px 20px;
-        gap: 10px;
-        margin-top: 20px;
+
+      .btn-login {
+        margin-top: 0.85rem;
+        padding: 1rem 1.2rem;
       }
-      .inquiry-info-item {
-        font-size: 0.88rem;
+
+      .btn-apply-outline {
+        margin-top: 0.65rem;
+        padding: 1rem 1.2rem;
       }
-      
-      .apply-notice-container {
-        margin-top: 24px;
+
+      .floating-inquiry-btn {
+        bottom: 16px;
+        right: 16px;
+        width: 52px;
+        height: 52px;
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+      }
+      .btn-text-q {
+        font-size: 26px;
       }
     }
 
     @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── 토스트 알림 ── */
+    #toast-container {
+      position: fixed;
+      bottom: 2.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      pointer-events: none;
+      width: 90%;
+      max-width: 420px;
+    }
+    .toast {
+      width: 100%;
+      padding: 0.85rem 1.15rem;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+      animation: toastSlideUp 0.22s ease-out;
+    }
+    .toast.success { background: #059669; }
+    .toast.error { background: #ef4444; }
+    @keyframes toastSlideUp {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
@@ -542,6 +790,11 @@
     </div>
 
     <div class="logo-area">
+      <div class="font-size-control" role="group" aria-label="글자 크기 조절">
+        <span class="font-size-slider" aria-hidden="true"></span>
+        <button type="button" class="font-size-btn active" data-scale="normal" title="글자 보통">보통</button>
+        <button type="button" class="font-size-btn" data-scale="large" title="글자 크게">크게</button>
+      </div>
       <span class="logo-subtitle">옹진 관광 쿠폰</span>
       <div class="logo-title">가맹점 로그인</div>
     </div>
@@ -549,20 +802,26 @@
     <!-- 로그인 폼 -->
     <form id="form-merchant-login" novalidate>
       <div class="form-group">
-        <label for="username">아이디</label>
-        <div class="input-wrap">
+        <label for="username">가맹점</label>
+        <div class="input-wrap" id="store-select-wrap">
           <input
             type="text"
             id="username"
             name="username"
-            placeholder="아이디를 입력하세요"
-            autocomplete="username"
+            placeholder="가맹점을 선택하세요"
+            autocomplete="off"
             required
           />
           <svg class="input-icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
+          <button type="button" class="select-chevron" id="btn-select-chevron" aria-label="가맹점 목록 열기">
+            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="custom-select-menu" id="custom-select-menu"></div>
         </div>
       </div>
 
@@ -597,7 +856,7 @@
         <span class="spinner"></span>
       </button>
 
-      <a href="/tourist/apply-merchant.html" class="btn-apply-outline">입점 신청하기</a>
+      <a href="/merchant/apply.html" class="btn-apply-outline">입점 신청하기</a>
     </form>
   </div>
 
@@ -620,8 +879,14 @@
       </div>
       
       <div class="inquiry-info-box">
-        <div class="inquiry-info-item">옹진군청 :</div>
-        <div class="inquiry-info-item">프로그램 관리자 :</div>
+        <a href="tel:032-899-2210" class="inquiry-call-item">
+          <span class="inquiry-call-label">옹진군청 관광문화과</span>
+          <span class="inquiry-call-number">032-899-2210</span>
+        </a>
+        <a href="tel:032-899-2114" class="inquiry-call-item">
+          <span class="inquiry-call-label">프로그램 관리자</span>
+          <span class="inquiry-call-number">032-899-2114</span>
+        </a>
       </div>
     </div>
   </div>
@@ -642,8 +907,145 @@
   <script type="module">
     import { api, setTokens, showToast } from '../shared/js/api.js';
 
-    // ── 패스워드 토글 기능 ──
+    // ── 글자 크기 조절 (사용자 페이지 'ongjin_font_scale' 연동) ──
+    const fontScaleMap = {
+      normal: '16px',
+      large: '22px'
+    };
+    const fontSizeButtons = document.querySelectorAll('.font-size-btn');
+    function applyFontScale(scale) {
+      const validScale = fontScaleMap[scale] ? scale : 'normal';
+      document.documentElement.style.fontSize = fontScaleMap[validScale];
+      document.documentElement.setAttribute('data-font-scale', validScale);
+      localStorage.setItem('ongjin_font_scale', validScale);
+      fontSizeButtons.forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-scale') === validScale);
+      });
+    }
+    applyFontScale(localStorage.getItem('ongjin_font_scale') || 'normal');
+    fontSizeButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.documentElement.classList.add('font-scale-anim');
+        applyFontScale(btn.getAttribute('data-scale'));
+      });
+    });
+
+    // ── 커스텀 가맹점 드롭다운 제어 (최근 로그인 가맹점 최상단 고정) ──
+    const selectWrap = document.getElementById('store-select-wrap');
+    const usernameInput = document.getElementById('username');
+    const chevronBtn = document.getElementById('btn-select-chevron');
+    const selectMenu = document.getElementById('custom-select-menu');
     const pwInput = document.getElementById('password');
+    let merchantList = [];
+
+    function getRecentMerchants() {
+      try {
+        const raw = localStorage.getItem('ongjin_recent_merchants');
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed.filter(Boolean).slice(0, 1) : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function saveRecentMerchant(name) {
+      if (!name) return;
+      const clean = String(name).trim();
+      if (!clean) return;
+      localStorage.setItem('ongjin_recent_merchants', JSON.stringify([clean]));
+    }
+
+    function renderOptions(filterText = '') {
+      const q = filterText.trim().toLowerCase();
+      const filtered = q
+        ? merchantList.filter((m) => (m.name || '').toLowerCase().includes(q))
+        : merchantList;
+
+      if (filtered.length === 0) {
+        selectMenu.innerHTML = `<div class="custom-select-empty">일치하는 가맹점이 없습니다</div>`;
+        return;
+      }
+
+      const recentNames = getRecentMerchants();
+      const recentMatches = [];
+      const otherMatches = [];
+
+      filtered.forEach((m) => {
+        if (recentNames.includes(m.name)) {
+          recentMatches.push(m);
+        } else {
+          otherMatches.push(m);
+        }
+      });
+
+      recentMatches.sort((a, b) => recentNames.indexOf(a.name) - recentNames.indexOf(b.name));
+
+      const currentVal = usernameInput.value.trim();
+      const renderItem = (m, isRecent) => `
+        <div class="custom-select-option ${currentVal === m.name ? 'selected' : ''}" data-name="${m.name}">
+          ${isRecent ? '<span class="recent-label">최근 로그인</span>' : ''}
+          <span>${m.name}</span>
+        </div>
+      `;
+
+      let html = recentMatches.map((m) => renderItem(m, true)).join('');
+      if (recentMatches.length > 0 && otherMatches.length > 0) {
+        html += `<div class="custom-select-divider"></div>`;
+      }
+      html += otherMatches.map((m) => renderItem(m, false)).join('');
+
+      selectMenu.innerHTML = html;
+
+      selectMenu.querySelectorAll('.custom-select-option').forEach((item) => {
+        item.addEventListener('click', () => {
+          usernameInput.value = item.dataset.name;
+          usernameInput.classList.remove('error');
+          selectWrap.classList.remove('open');
+          pwInput.focus();
+        });
+      });
+    }
+
+    async function loadMerchants() {
+      try {
+        const res = await api.get('/merchant/map?lite=1');
+        const list = res && Array.isArray(res.data) ? res.data : [];
+        merchantList = list.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
+        renderOptions('');
+      } catch (e) {
+        console.error('가맹점 목록 로드 실패:', e);
+      }
+    }
+    loadMerchants();
+
+    usernameInput.addEventListener('click', () => {
+      renderOptions('');
+      selectWrap.classList.add('open');
+    });
+
+    usernameInput.addEventListener('input', (e) => {
+      renderOptions(e.target.value);
+      selectWrap.classList.add('open');
+    });
+
+    chevronBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (selectWrap.classList.contains('open')) {
+        selectWrap.classList.remove('open');
+      } else {
+        renderOptions('');
+        selectWrap.classList.add('open');
+        usernameInput.focus();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!selectWrap.contains(e.target)) {
+        selectWrap.classList.remove('open');
+      }
+    });
+
+    // ── 패스워드 토글 기능 ──
     const pwToggleBtn = document.getElementById('pw-toggle');
     pwToggleBtn.addEventListener('click', () => {
       if (pwInput.type === 'password') {
@@ -674,7 +1076,7 @@
           if (userObj.status === 'rejected') {
             window.location.replace('/merchant/reapply.html');
           } else if (userObj.status === 'pending') {
-            window.location.replace('/tourist/apply-pending.html');
+            window.location.replace('/merchant/apply-pending.html');
           } else {
             document.getElementById('verify-loading').classList.add('active');
             api.get('/merchant/transactions') // 가맹점 전용 API 권한 확인
@@ -702,7 +1104,6 @@
     document.getElementById('form-merchant-login').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const usernameInput = document.getElementById('username');
       const passwordInput = document.getElementById('password');
       const btn = document.getElementById('btn-submit');
       const errEl = document.getElementById('error-msg');
@@ -716,9 +1117,9 @@
       passwordInput.classList.remove('error');
 
       if (!username || !password) {
-        usernameInput.classList.add('error');
-        passwordInput.classList.add('error');
-        errEl.textContent = '아이디와 비밀번호를 모두 입력해 주세요.';
+        if (!username) usernameInput.classList.add('error');
+        if (!password) passwordInput.classList.add('error');
+        errEl.textContent = '가맹점과 비밀번호를 모두 입력해 주세요.';
         errEl.classList.add('show');
         return;
       }
@@ -730,6 +1131,7 @@
         const res = await api.post('/auth/merchant/login', { username, password });
         if (res.success) {
           setTokens(res.token, res.refresh);
+          saveRecentMerchant(res.merchant.name);
           
           localStorage.setItem('ongjin_user', JSON.stringify({
             id: res.merchant.id,
@@ -746,7 +1148,7 @@
 
           setTimeout(() => {
             if (res.merchant.status === 'rejected' || res.merchant.status === 'pending') {
-              window.location.replace('/tourist/apply-pending.html');
+              window.location.replace('/merchant/apply-pending.html');
             } else {
               window.location.replace('/merchant/index.html');
             }
@@ -763,10 +1165,11 @@
     });
 
     // Enter 키 다음 입력 포커스 지원
-    document.getElementById('username').addEventListener('keydown', (e) => {
+    usernameInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        document.getElementById('password').focus();
+        selectWrap.classList.remove('open');
+        pwInput.focus();
       }
     });
 

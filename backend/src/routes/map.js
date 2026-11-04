@@ -38,11 +38,8 @@ router.get('/map', async (req, res, next) => {
   const { q, lite } = req.query;
   const isLite = lite === '1' || lite === 'true';
   try {
-    let sql = isLite
-      ? `SELECT id, name, address, category, lat, lng, phone, store_phone, description, business_hours
-         FROM merchants WHERE status = 'approved'`
-      : `SELECT id, name, address, category, lat, lng, phone, store_phone, description, business_hours, images
-         FROM merchants WHERE status = 'approved'`;
+    let sql = `SELECT id, name, address, category, lat, lng, phone, store_phone, description, business_hours, images
+               FROM merchants WHERE status = 'approved'`;
     const params = [];
     if (q) {
       sql += ` AND (name LIKE ? OR address LIKE ?)`;
@@ -57,28 +54,30 @@ router.get('/map', async (req, res, next) => {
 
     const menuMap = {};
     if (!isLite) {
-      const merchantIds = rows.map(r => r.id);
-      const placeholders = merchantIds.map(() => '?').join(',');
-      const [menuRows] = await pool.execute(
-        `SELECT id, merchant_id, name, price, description, image_url, is_signature, sort_order
-         FROM merchant_menus
-         WHERE merchant_id IN (${placeholders})
-         ORDER BY sort_order ASC, id ASC`,
-        merchantIds
-      );
+      try {
+        const merchantIds = rows.map(r => r.id);
+        const placeholders = merchantIds.map(() => '?').join(',');
+        const [menuRows] = await pool.execute(
+          `SELECT id, merchant_id, name, price, description, image_url, is_signature, sort_order
+           FROM merchant_menus
+           WHERE merchant_id IN (${placeholders})
+           ORDER BY sort_order ASC, id ASC`,
+          merchantIds
+        );
 
-      for (const menu of menuRows) {
-        if (!menuMap[menu.merchant_id]) {
-          menuMap[menu.merchant_id] = [];
+        for (const menu of menuRows) {
+          if (!menuMap[menu.merchant_id]) {
+            menuMap[menu.merchant_id] = [];
+          }
+          menuMap[menu.merchant_id].push(menu);
         }
-        menuMap[menu.merchant_id].push(menu);
-      }
+      } catch (_) {}
     }
 
     // 결과 매핑 및 좌표 폴백 적용
     const result = rows.map(m => {
       let parsedImages = [];
-      if (!isLite && m.images) {
+      if (m.images) {
         if (Array.isArray(m.images)) {
           parsedImages = m.images;
         } else {
@@ -88,6 +87,9 @@ router.get('/map', async (req, res, next) => {
             parsedImages = [];
           }
         }
+      }
+      if (isLite) {
+        parsedImages = parsedImages.filter(img => typeof img === 'string' && !img.startsWith('data:'));
       }
 
       const coords = resolveCoordinates(m);
@@ -108,7 +110,9 @@ router.get('/map', async (req, res, next) => {
           island_name: islandName,
           phone: effectivePhone,
           description: m.description,
-          business_hours: m.business_hours
+          business_hours: m.business_hours,
+          images: parsedImages,
+          image_url: mainThumb
         };
       }
 
@@ -165,14 +169,18 @@ router.get('/map/detail/:id', async (req, res, next) => {
       ? parsedImages[0].trim()
       : null;
 
-    const [menus] = await pool.execute(
-      `SELECT id, merchant_id, name, price, description, image_url, is_signature, sort_order
-       FROM merchant_menus
-       WHERE merchant_id = ?
-       ORDER BY sort_order ASC, id ASC`,
-      [merchantId]
-    );
-    merchant.menus = menus;
+    try {
+      const [menus] = await pool.execute(
+        `SELECT id, merchant_id, name, price, description, image_url, is_signature, sort_order
+         FROM merchant_menus
+         WHERE merchant_id = ?
+         ORDER BY sort_order ASC, id ASC`,
+        [merchantId]
+      );
+      merchant.menus = menus;
+    } catch (_) {
+      merchant.menus = [];
+    }
 
     res.json({ success: true, data: merchant });
   } catch (err) { next(err); }

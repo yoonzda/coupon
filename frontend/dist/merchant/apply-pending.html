@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>입점 심사 대기 안내 | 옹진 관광 쿠폰</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      word-break: keep-all; 
+    }
+    
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      background: #f0fdf4;
+      background-image: 
+        radial-gradient(circle at 10% 20%, #dcfce7 0%, #f0fdf4 100%);
+      position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 40px 20px;
+      color: #1e293b;
+    }
+
+    .bg-decorations {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .decor-circle {
+      position: absolute;
+      border-radius: 50%;
+    }
+    .decor-top {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+      top: -200px; right: -200px;
+    }
+    .decor-bottom {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(74, 222, 128, 0.06) 0%, transparent 60%);
+      bottom: -150px; left: -150px;
+    }
+
+    .apply-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      border-top: 4px solid #10b981;
+      border-radius: 0; 
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 580px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+
+    .logo-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .logo-subtitle {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #059669;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+    }
+    .logo-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 400; 
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+
+    .status-icon-svg {
+      width: 64px; height: 64px;
+      stroke: #10b981;
+      fill: none;
+      margin-bottom: 1.5rem;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+
+    .status-desc {
+      font-size: 1.05rem;
+      color: #475569;
+      line-height: 1.7;
+      margin-bottom: 2.25rem;
+    }
+    .status-desc strong {
+      color: #0f172a;
+    }
+
+    /* Stepper UI */
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 0 auto 2.5rem auto;
+      max-width: 440px;
+      padding: 0 10px;
+    }
+    .stepper::before {
+      content: '';
+      position: absolute;
+      top: 15px; left: 40px; right: 40px;
+      height: 2px;
+      background: #e2e8f0;
+      z-index: 0;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
+    .step-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: 2px solid #cbd5e1;
+      color: #64748b;
+      font-size: 0.88rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      transition: all 0.3s;
+    }
+    .step-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748b;
+      white-space: nowrap;
+    }
+
+    .step-item.active .step-dot {
+      background: #10b981;
+      border-color: #10b981;
+      color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    }
+    .step-item.active .step-label {
+      color: #059669;
+      font-weight: 700;
+    }
+
+    .step-item.completed .step-dot {
+      background: #dcfce7;
+      border-color: #10b981;
+      color: #059669;
+    }
+    .step-item.completed .step-label {
+      color: #475569;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    .btn-action {
+      display: block;
+      padding: 1rem;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+      text-align: center;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    }
+    .btn-primary:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
+    }
+    .btn-secondary {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+    }
+    .btn-secondary:hover {
+      background: #f8fafc;
+      color: #1e293b;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        background: #ffffff;
+        background-image: none;
+        padding: 0;
+        align-items: flex-start;
+      }
+      .apply-card {
+        border: none;
+        border-top: 4px solid #10b981;
+        padding: 3rem 1.5rem;
+        box-shadow: none;
+        background: #ffffff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/merchant-apply-pending-CUqPrbuP.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
+</head>
+<body>
+  <div class="bg-decorations">
+    <div class="decor-circle decor-top"></div>
+    <div class="decor-circle decor-bottom"></div>
+  </div>
+
+  <div class="apply-card">
+    <div class="logo-area">
+      <span class="logo-subtitle">옹진 관광 쿠폰</span>
+      <h1 class="logo-title">입점 심사 대기</h1>
+    </div>
+
+    <svg class="status-icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polyline points="12 6 12 12 16 14"></polyline>
+    </svg>
+
+    <div class="status-desc">
+      <p>
+        가맹점 등록 신청서가 성공적으로 접수되어<br />
+        <strong>관리자의 확인 및 심사</strong>가 진행 중입니다.
+      </p>
+      <p style="margin-top: 12px; font-size: 0.92rem; color: #64748b;">
+        서류 검토 절차는 영업일 기준 1~2일이 소요되며,<br />
+        승인이 완료되면 기재하신 연락처로 승인 안내 문자가 발송됩니다.
+      </p>
+    </div>
+
+    <div class="stepper">
+      <div class="step-item completed">
+        <div class="step-dot">1</div>
+        <span class="step-label">신청서 접수</span>
+      </div>
+      <div class="step-item active">
+        <div class="step-dot">2</div>
+        <span class="step-label">서류 심사</span>
+      </div>
+      <div class="step-item">
+        <div class="step-dot">3</div>
+        <span class="step-label">승인 완료</span>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button type="button" onclick="window.logoutAndGoLogin()" class="btn-action btn-primary" style="width: 100%; border: none; cursor: pointer;">
+        로그인 화면으로 돌아가기
+      </button>
+    </div>
+  </div>
+
+</body>
+</html>
+

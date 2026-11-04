@@ -1,16 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="옹진 관광쿠폰">
-  <meta property="og:description" content="옹진군 관광객을 위한 디지털 쿠폰 서비스 — 옹진 관광쿠폰으로 더 알뜰한 옹진 여행">
-  <meta property="og:image" content="https://ongjincoupon.kr/og-image.png?v=20261007">
-  <meta property="og:locale" content="ko_KR">
   <title>정산 관리 | 옹진 관광 쿠폰</title>
   <script>
     (function() {
@@ -27,40 +20,32 @@
       color: #1e293b; 
     }
     
-    .admin-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .admin-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; }
     .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     .admin-table { width: 100%; border-collapse: collapse; }
-    .admin-table th { background: var(--surface-2); padding: 14px 20px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
-    .admin-table td { padding: 16px 20px; font-size: 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .admin-table th { background: var(--surface-2); padding: 12px 24px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+    .admin-table td { padding: 16px 24px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
 
-    .filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
     
-    /* KPI 요약 카드 그리드 */
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .kpi-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .kpi-label { font-size: 0.82rem; font-weight: 700; color: #64748b; margin-bottom: 6px; }
-    .kpi-value { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
-
-    /* 버튼 스피너 스타일 */
-    .btn.loading { position: relative; pointer-events: none; opacity: 0.85; }
-    .btn .btn-spinner {
-      display: inline-block; width: 13px; height: 13px;
-      border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
-      border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle;
-    }
-    .btn-neutral-outline .btn-spinner {
-      border-color: rgba(51,65,85,0.2); border-top-color: #334155;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    /* 필터 셀렉트박스 커스텀 화살표 스타일 적용 */
+    .filter-bar select {
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'%3E%3C/path%3E%3C/svg%3E") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 12px center !important;
+      background-size: 14px !important;
+      padding-right: 32px !important;
+      cursor: pointer;
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-settlement-DXcUS1-w.js"></script>
+  <script type="module" crossorigin src="/assets/admin-settlement-CB2qHCwc.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/tracker-D60jFAt5.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-DIUxAG8e.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-DxYVQPuN.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-03q0TmgI.css">
+  <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
 </head>
 <body>
   <div class="app-shell">
@@ -70,79 +55,39 @@
     <main class="admin-content">
       <header class="dashboard-header">
         <div class="header-title-area">
+          <span class="header-category">Settlement Management</span>
           <h1>정산 관리</h1>
-          <p class="header-desc">월별 가맹점 정산 내역 집계 및 XML 정산 파일 생성을 관리합니다.</p>
-        </div>
-        <div class="header-actions" style="display: flex; gap: 8px; align-items: center;">
-          <button type="button" class="btn btn-secondary" id="btn-refresh-settlement" title="정산 내역 새로고침">
-            <span>새로고침</span>
-          </button>
+          <p class="header-desc">월별 가맹점 정산 내역 및 XML 파일 생성을 관리합니다.</p>
         </div>
       </header>
 
-      <!-- KPI 요약 통계 카드 -->
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">조회 정산 기간</div>
-          <div class="kpi-value" id="kpi-period">-</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">정산 대상 가맹점</div>
-          <div class="kpi-value" id="kpi-merchants">0개소</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">총 정산 지급액</div>
-          <div class="kpi-value" id="kpi-amount" style="color: #2563eb;">0원</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">정산 파일 생성</div>
-          <div class="kpi-value" id="kpi-files" style="color: #059669;">0건</div>
-        </div>
+      <div class="filter-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px; justify-content: flex-start;">
+        <select id="filter-year" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 120px; outline: none;">
+        </select>
+        <select id="filter-month" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 100px; outline: none;">
+        </select>
+        <button class="btn btn-neutral-outline btn-sm" id="btn-search" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">검색</button>
+        <button class="btn btn-neutral btn-sm" id="btn-generate-file" style="height: 38px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">이달의 정산파일 생성</button>
       </div>
 
-      <!-- 검색 및 액션 툴바 -->
-      <div class="filter-bar">
-        <select class="form-input" style="width: 130px; font-weight: 600;" id="filter-year"></select>
-        <select class="form-input" style="width: 110px; font-weight: 600;" id="filter-month"></select>
-        <button type="button" class="btn btn-neutral-outline" id="btn-search" style="display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <span class="btn-text">검색</span>
-        </button>
-        <button type="button" class="btn btn-primary" id="btn-generate-file">
-          <span class="btn-text" id="btn-generate-text">선택기간 정산파일 생성</span>
-        </button>
-        <button type="button" class="btn btn-secondary" id="btn-export-csv">
-          <span class="btn-text">전체 정산 CSV 다운로드</span>
-        </button>
-        <button type="button" class="btn btn-secondary" id="btn-batch-transfer" style="margin-left: auto;">
-          <span class="btn-text">일괄 지급완료 처리</span>
-        </button>
-      </div>
-
-      <!-- 정산 내역 테이블 -->
       <div class="admin-card">
         <table class="admin-table">
           <thead>
             <tr>
-              <th style="width: 18%;">가맹점명</th>
-              <th style="width: 22%;">입금 계좌 정보</th>
-              <th style="width: 10%;">정산 기간</th>
-              <th style="width: 10%; text-align: center;">결제 건수</th>
-              <th style="width: 14%; text-align: right;">총 정산 대상액</th>
-              <th style="width: 11%; text-align: center;">상태</th>
-              <th style="width: 15%; text-align: center;">정산 관리</th>
+              <th>가맹점명</th>
+              <th>정산 기간</th>
+              <th>총 결제 금액</th>
+              <th>상태</th>
+              <th>파일</th>
             </tr>
           </thead>
           <tbody id="settlement-list">
-            <tr><td colspan="7" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
+            <tr><td colspan="5" class="text-center" style="padding: 40px;">정산 기간을 선택해 주세요.</td></tr>
           </tbody>
         </table>
       </div>
     </main>
   </div>
-
-  <div id="toast-container"></div>
 
 </body>
 </html>
-
