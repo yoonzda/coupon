@@ -441,15 +441,16 @@
     </form>
 
     <div class="footer-links">
-      <a href="/tourist/" class="footer-link" target="_blank" rel="noopener noreferrer">관광객</a>
+      <a href="../tourist/index.html" class="footer-link" target="_blank" rel="noopener noreferrer">관광객</a>
       <span class="dot-separator"></span>
-      <a href="/merchant/" class="footer-link" target="_blank" rel="noopener noreferrer">가맹점</a>
+      <a href="../merchant/login.html" class="footer-link" target="_blank" rel="noopener noreferrer">가맹점</a>
       <span class="dot-separator"></span>
-      <a href="/issuer/login.html" class="footer-link" target="_blank" rel="noopener noreferrer">발행처</a>
+      <a href="../issuer/login.html" class="footer-link" target="_blank" rel="noopener noreferrer">발행처</a>
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import '../shared/js/mock-backend.js';
     // 이미 로그인된 경우 대시보드로 이동
     const existing = localStorage.getItem('ongjin_admin_token');
     if (existing) {
@@ -457,7 +458,7 @@
       fetch('/api/admin/auth/me', {
         headers: { Authorization: `Bearer ${existing}` }
       }).then(r => {
-        if (r.ok) window.location.replace('/admin/index.html');
+        if (r.ok) window.location.replace('./index.html');
         else localStorage.removeItem('ongjin_admin_token');
       }).catch(() => localStorage.removeItem('ongjin_admin_token'));
     }
@@ -523,7 +524,7 @@
           btn.querySelector('.spinner').style.display = 'none';
           btn.style.background = '#059669'; // Green success color
           btn.classList.remove('loading');
-          setTimeout(() => window.location.replace('/admin/index.html'), 600);
+          setTimeout(() => window.location.replace('./index.html'), 600);
         } else {
           throw new Error(data.message || '로그인에 실패했습니다.');
         }

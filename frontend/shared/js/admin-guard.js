@@ -3,6 +3,8 @@
 // 모든 admin 페이지 상단에서 import 하여 사용
 // =====================================================
 
+import { resolvePortalPath } from './mock-backend.js';
+
 const ADMIN_TOKEN_KEY = 'ongjin_admin_token';
 const ADMIN_INFO_KEY = 'ongjin_admin_info';
 const LOGIN_PAGE = '/admin/login.html';
@@ -50,7 +52,7 @@ export function adminLogout() {
   sessionStorage.removeItem('ongjin_prev_nav_height');
   sessionStorage.removeItem('ongjin_last_nav_top');
   sessionStorage.removeItem('ongjin_last_nav_height');
-  window.location.replace(LOGIN_PAGE);
+  window.location.replace(resolvePortalPath(LOGIN_PAGE));
 }
 
 /**
@@ -63,7 +65,7 @@ export async function requireAdminAuth() {
   const token = getAdminToken();
 
   if (!token) {
-    window.location.replace(LOGIN_PAGE);
+    window.location.replace(resolvePortalPath(LOGIN_PAGE));
     return false;
   }
 
@@ -82,16 +84,16 @@ export async function requireAdminAuth() {
       // 토큰 만료 또는 무효
       localStorage.removeItem(ADMIN_TOKEN_KEY);
       localStorage.removeItem(ADMIN_INFO_KEY);
-      window.location.replace(LOGIN_PAGE);
+      window.location.replace(resolvePortalPath(LOGIN_PAGE));
       return false;
     }
 
     const { admin } = await res.json();
 
     // 일반 운영자는 관리자 계정 관리 페이지 접근 차단
-    if (admin.role !== 'super' && window.location.pathname === '/admin/managers.html') {
+    if (admin.role !== 'super' && window.location.pathname.endsWith('/admin/managers.html')) {
       alert('접근 권한이 없습니다.');
-      window.location.replace('/admin/index.html');
+      window.location.replace(resolvePortalPath('/admin/index.html'));
       return false;
     }
 
@@ -152,7 +154,7 @@ function renderAdminSidebar(admin) {
   const sidebar = document.querySelector('.admin-sidebar');
   if (!sidebar) return;
 
-  let currentPath = window.location.pathname;
+  let currentPath = window.location.pathname.replace(/^(\/coupon)?(\/frontend)?(?=\/)/, '');
 
   // 동적 서브페이지 자동 부모 매핑 규칙 (예: register-xxx, detail-xxx, edit-xxx, allocate-xxx)
   // 예: /admin/detail-merchant.html -> /admin/merchants.html
@@ -199,7 +201,7 @@ function renderAdminSidebar(admin) {
 
     // 최고 관리자(super)일 때만 관리자 계정 관리 메뉴가 보이도록 함
     const managerMenu = admin && admin.role === 'super' ? `
-          <a href="/admin/managers.html" class="nav-manager">
+          <a href="${resolvePortalPath('/admin/managers.html')}" class="nav-manager">
             ${ICONS.manager}
             <span>관리자 계정 관리</span>
           </a>
@@ -225,39 +227,39 @@ function renderAdminSidebar(admin) {
           </div>
         </div>
         <nav class="admin-nav">
-          <a href="/admin/index.html">
+          <a href="${resolvePortalPath('/admin/index.html')}">
             ${ICONS.dashboard}
             <span>대시보드</span>
           </a>
-          <a href="/admin/budget.html">
+          <a href="${resolvePortalPath('/admin/budget.html')}">
             ${ICONS.budget}
             <span>예산 관리</span>
           </a>
-          <a href="/admin/coupons.html">
+          <a href="${resolvePortalPath('/admin/coupons.html')}">
             ${ICONS.coupon}
             <span>쿠폰 관리</span>
           </a>
-          <a href="/admin/issuers.html">
+          <a href="${resolvePortalPath('/admin/issuers.html')}">
             ${ICONS.issuer}
             <span>발행처 관리</span>
           </a>
-          <a href="/admin/merchants.html">
+          <a href="${resolvePortalPath('/admin/merchants.html')}">
             ${ICONS.merchant}
             <span>가맹점 관리</span>
           </a>
-          <a href="/admin/settlement.html">
+          <a href="${resolvePortalPath('/admin/settlement.html')}">
             ${ICONS.settlement}
             <span>정산 관리</span>
           </a>
-          <a href="/admin/statistics.html">
+          <a href="${resolvePortalPath('/admin/statistics.html')}">
             ${ICONS.statistics}
             <span>통계 및 보고서</span>
           </a>
-          <a href="/admin/fds.html">
+          <a href="${resolvePortalPath('/admin/fds.html')}">
             ${ICONS.fds}
             <span>FDS 모니터링</span>
           </a>
-          <a href="/admin/users.html">
+          <a href="${resolvePortalPath('/admin/users.html')}">
             ${ICONS.users}
             <span>회원 계정 관리</span>
           </a>
@@ -290,7 +292,11 @@ function renderAdminSidebar(admin) {
   // 현재 활성화된 탭 하이라이트 (active 클래스 부여)
   const navLinks = sidebar.querySelectorAll('.admin-nav a');
   navLinks.forEach(link => {
-    const isTarget = link.getAttribute('href') === currentPath || (currentPath === '/admin/' && link.getAttribute('href') === '/admin/index.html');
+    const rawHref = link.getAttribute('href') || '';
+    const resolvedHref = resolvePortalPath(rawHref);
+    if (resolvedHref !== rawHref) link.setAttribute('href', resolvedHref);
+    const normalizedHref = rawHref.replace(/^(\/coupon)?(\/frontend)?(?=\/)/, '');
+    const isTarget = normalizedHref === currentPath || (currentPath === '/admin/' && normalizedHref === '/admin/index.html');
     link.classList.toggle('active', isTarget);
   });
 

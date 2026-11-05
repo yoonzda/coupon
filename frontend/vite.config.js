@@ -2,10 +2,12 @@ import { resolve } from 'path'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  base: process.env.GITHUB_PAGES === 'true' ? '/coupon/' : '/',
   // 멀티페이지 앱: 3개 포털을 별도 엔트리로 구성
   build: {
     rollupOptions: {
       input: {
+        'index':            resolve(__dirname, 'index.html'),
         // 관광객 포털
         'tourist-index':    resolve(__dirname, 'tourist/index.html'),
         'tourist-mypage':   resolve(__dirname, 'tourist/mypage.html'),

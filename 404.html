@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>옹진 관광 쿠폰</title>
+  <script>
+    (function () {
+      var p = window.location.pathname;
+      var q = window.location.search + window.location.hash;
+      // /coupon/admin/... -> /coupon/frontend/admin/...
+      var match = p.match(/^(\/coupon)?\/(admin|issuer|merchant|tourist|shared)(\/.*)?$/);
+      if (match) {
+        var prefix = match[1] || '';
+        var rest = '/' + match[2] + (match[3] || '/index.html');
+        if (rest.endsWith('/')) rest += 'index.html';
+        window.location.replace(prefix + '/frontend' + rest + q);
+        return;
+      }
+      window.location.replace('/coupon/frontend/tourist/index.html' + q);
+    })();
+  </script>
+</head>
+<body></body>
+</html>

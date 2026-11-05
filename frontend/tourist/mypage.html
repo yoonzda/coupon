@@ -2307,12 +2307,12 @@
       navLogoutBtn.addEventListener('click', (e) => {
         e.preventDefault();
         if (!localStorage.getItem('ongjin_token')) {
-          window.location.href = '/tourist/index.html';
+          window.location.href = './index.html';
           return;
         }
         if (confirm('로그아웃 하시겠습니까?')) {
           clearTokens();
-          window.location.href = '/tourist/index.html';
+          window.location.href = './index.html';
         }
       });
     }
@@ -3143,7 +3143,7 @@
     window.openUseRequestModal = function(merchantId) {
       if (!localStorage.getItem('ongjin_token')) {
         showToast('쿠폰을 사용하려면 로그인이 필요합니다.', 'info');
-        setTimeout(() => { window.location.href = '/tourist/index.html'; }, 700);
+        setTimeout(() => { window.location.href = './index.html'; }, 700);
         return;
       }
 

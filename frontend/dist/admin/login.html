@@ -377,6 +377,8 @@
       to { opacity: 1; transform: translateY(0); }
     }
   </style>
+  <script type="module" crossorigin src="/assets/admin-login-DjhMkBgF.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/mock-backend-a_Dp-F9x.js">
 </head>
 <body>
   <div class="login-card">
@@ -441,109 +443,13 @@
     </form>
 
     <div class="footer-links">
-      <a href="/tourist/" class="footer-link" target="_blank" rel="noopener noreferrer">관광객</a>
+      <a href="../tourist/index.html" class="footer-link" target="_blank" rel="noopener noreferrer">관광객</a>
       <span class="dot-separator"></span>
-      <a href="/merchant/" class="footer-link" target="_blank" rel="noopener noreferrer">가맹점</a>
+      <a href="../merchant/login.html" class="footer-link" target="_blank" rel="noopener noreferrer">가맹점</a>
       <span class="dot-separator"></span>
-      <a href="/issuer/login.html" class="footer-link" target="_blank" rel="noopener noreferrer">발행처</a>
+      <a href="../issuer/login.html" class="footer-link" target="_blank" rel="noopener noreferrer">발행처</a>
     </div>
   </div>
-
-  <script>
-    // 이미 로그인된 경우 대시보드로 이동
-    const existing = localStorage.getItem('ongjin_admin_token');
-    if (existing) {
-      // 토큰 유효성 확인
-      fetch('/api/admin/auth/me', {
-        headers: { Authorization: `Bearer ${existing}` }
-      }).then(r => {
-        if (r.ok) window.location.replace('/admin/index.html');
-        else localStorage.removeItem('ongjin_admin_token');
-      }).catch(() => localStorage.removeItem('ongjin_admin_token'));
-    }
-
-    // 비밀번호 토글
-    document.getElementById('pw-toggle').addEventListener('click', () => {
-      const pw = document.getElementById('password');
-      const btn = document.getElementById('pw-toggle');
-      if (pw.type === 'password') {
-        pw.type = 'text';
-        btn.innerHTML = `<svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-          <line x1="1" y1="1" x2="23" y2="23"></line>
-        </svg>`;
-      } else {
-        pw.type = 'password';
-        btn.innerHTML = `<svg class="eye-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-          <circle cx="12" cy="12" r="3"></circle>
-        </svg>`;
-      }
-    });
-
-    // 로그인 처리
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      const btn = document.getElementById('btn-login');
-      const errEl = document.getElementById('error-msg');
-      const btnText = btn.querySelector('.btn-text');
-
-      // 입력 초기화
-      errEl.classList.remove('show');
-      document.getElementById('username').classList.remove('error');
-      document.getElementById('password').classList.remove('error');
-
-      if (!username || !password) {
-        errEl.textContent = '아이디와 비밀번호를 모두 입력해주세요.';
-        errEl.classList.add('show');
-        return;
-      }
-
-      // 로딩 상태
-      btn.disabled = true;
-      btn.classList.add('loading');
-
-      try {
-        const res = await fetch('/api/admin/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password }),
-        });
-        const data = await res.json();
-
-        if (res.ok && data.success) {
-          localStorage.setItem('ongjin_admin_token', data.token);
-          localStorage.setItem('ongjin_token', data.token); // api.js 호환
-          localStorage.setItem('ongjin_admin_info', JSON.stringify(data.admin));
-          // 성공 처리
-          btnText.textContent = 'SUCCESS';
-          btnText.style.display = 'block';
-          btn.querySelector('.spinner').style.display = 'none';
-          btn.style.background = '#059669'; // Green success color
-          btn.classList.remove('loading');
-          setTimeout(() => window.location.replace('/admin/index.html'), 600);
-        } else {
-          throw new Error(data.message || '로그인에 실패했습니다.');
-        }
-      } catch (err) {
-        document.getElementById('username').classList.add('error');
-        document.getElementById('password').classList.add('error');
-        errEl.textContent = err.message;
-        errEl.classList.add('show');
-        btn.disabled = false;
-        btn.classList.remove('loading');
-      }
-    });
-
-    // Enter 키 지원
-    document.getElementById('username').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        document.getElementById('password').focus();
-      }
-    });
-  </script>
+
 </body>
 </html>

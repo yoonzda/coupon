@@ -879,7 +879,7 @@
       api.get('/auth/issuer/me')
         .then((res) => {
           if (res.success) {
-            window.location.replace('/issuer/coupon-qr.html');
+            window.location.replace('./coupon-qr.html');
           } else {
             clearIssuerTokens();
             document.getElementById('verify-loading').classList.remove('active');
@@ -939,7 +939,7 @@
           btn.classList.remove('loading');
 
           setTimeout(() => {
-            window.location.replace('/issuer/coupon-qr.html');
+            window.location.replace('./coupon-qr.html');
           }, 600);
         }
       } catch (err) {

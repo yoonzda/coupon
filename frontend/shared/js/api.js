@@ -2,6 +2,8 @@
 // shared/js/api.js — 공통 API 클라이언트
 // =====================================================
 
+import { isStaticDemoEnv, handleMockApiRequest, resolvePortalPath } from './mock-backend.js'
+
 const BASE = '/api'
 
 function getToken() {
@@ -46,14 +48,26 @@ function redirectToLogin() {
   } else if (path.includes('/issuer/')) {
     target = '/issuer/login.html'
   }
-  
+
+  const resolvedTarget = resolvePortalPath(target)
   const cleanTarget = target.replace('.html', '')
-  if (path !== target && !path.includes(cleanTarget)) {
-    window.location.href = target
+  if (path !== resolvedTarget && !path.includes(cleanTarget)) {
+    window.location.href = resolvedTarget
   }
 }
 
 async function request(method, path, body = null) {
+  if (isStaticDemoEnv()) {
+    const mockRes = await handleMockApiRequest(method, path, body)
+    if (mockRes.status >= 400) {
+      const error = new Error(mockRes.data?.message || '요청에 실패했습니다.')
+      error.status = mockRes.status
+      error.data = mockRes.data
+      throw error
+    }
+    return mockRes.data
+  }
+
   const token = getToken()
   const headers = { 'Content-Type': 'application/json' }
   if (token) headers['Authorization'] = `Bearer ${token}`
@@ -207,7 +221,7 @@ export function showToast(msg, type = '') {
 // ── 로그인 여부 확인 ─────────────────────────────────
 export function requireAuth(redirectTo = '/tourist/index.html') {
   if (!getToken()) {
-    window.location.href = redirectTo
+    window.location.href = resolvePortalPath(redirectTo)
     return false
   }
   return true
