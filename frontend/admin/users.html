@@ -10,63 +10,57 @@
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
         document.documentElement.classList.add('sidebar-collapsed');
       }
+      var cached = sessionStorage.getItem('ongjin_sidebar_cache');
+      if (cached) {
+        var obs = new MutationObserver(function() {
+          var sb = document.querySelector('.admin-sidebar');
+          if (sb) {
+            obs.disconnect();
+            if (!sb.innerHTML.trim()) {
+              sb.innerHTML = cached;
+              sb.dataset.prehydrated = 'true';
+            }
+          }
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+      }
     })();
   </script>
-  <link rel="stylesheet" href="../shared/css/reset.css" />
   <link rel="stylesheet" href="../shared/css/main.css" />
   
   <style>
     body { 
-      margin: 0; padding: 0; 
-      width: 100%; max-width: none; 
+      margin: 0 !important; padding: 0 !important; 
+      width: 100% !important; max-width: none !important; 
       background: #f1f5f9;
       color: #1e293b; 
     }
 
-    .table-scroll-container {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: auto;
+    .table-container {
+      background: #fff;
+      border-radius: 0 !important;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      margin-bottom: 32px;
     }
-    .table-scroll-container::-webkit-scrollbar { width: 6px; height: 6px; }
-    .table-scroll-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .table-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
 
     .admin-table-actions {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       justify-content: center;
-    }
-
-    .col-phone { width: 45%; }
-    .col-date { width: 35%; }
-    .col-actions { width: 20%; }
-
-    .table-actions-bar {
-      display: flex;
-      justify-content: flex-start;
       align-items: center;
-      margin-bottom: 20px;
-      gap: 12px;
     }
 
-    .search-input {
-      padding: 10px 16px;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      background: #fff;
-      color: #0f172a;
-      width: 320px;
-      box-sizing: border-box;
-    }
-
-    .search-input:focus {
-      border-color: var(--primary, #475569);
-      box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.15);
-      background: #fff;
-    }
+    .col-phone { width: 40%; text-align: center; }
+    .col-date { width: 40%; text-align: center; }
+    .col-actions { width: 20%; text-align: center; }
   </style>
 </head>
 <body>
@@ -84,32 +78,29 @@
         </div>
       </header>
 
-      <!-- 회원 목록 외부 타이틀 -->
-      <div class="subpage-title-area">
-        <h2 class="page-subtitle">회원 목록</h2>
-      </div>
-
-      <!-- 검색 바 -->
-      <div class="table-actions-bar">
-        <input type="text" class="search-input" id="search-phone" placeholder="전화번호 뒷 4자리 검색" />
-      </div>
-
-      <!-- 회원 목록 카드 -->
-      <div class="admin-card">
-        <div class="table-scroll-container">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th class="col-phone">전화번호</th>
-                <th class="col-date">가입 일시</th>
-                <th class="col-actions">관리</th>
-              </tr>
-            </thead>
-            <tbody id="usersTableBody">
-              <tr><td colspan="3" class="table-placeholder">데이터를 불러오는 중입니다...</td></tr>
-            </tbody>
-          </table>
+      <!-- 상단 타이틀 및 검색 바 (가맹점 목록 스타일 통일) -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 8px; flex-wrap: wrap; gap: 12px;">
+        <h2 class="table-title">회원 목록</h2>
+        <div style="position: relative; width: 100%; max-width: 320px;">
+          <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94a3b8;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" id="search-phone" placeholder="전화번호 뒷 4자리 검색..." class="form-input" style="width: 100%; padding: 8px 12px 8px 36px; font-size: 0.85rem; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;" />
         </div>
+      </div>
+
+      <!-- 회원 목록 테이블 -->
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th class="col-phone">전화번호</th>
+              <th class="col-date">가입 일시</th>
+              <th class="col-actions">관리</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr><td colspan="3" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
+          </tbody>
+        </table>
       </div>
     </main>
   </div>

@@ -1,4 +1,4 @@
-import"./modulepreload-polyfill-B5Qt9EMX.js";/* empty css             */import{a as c,s as y,d as m}from"./api-BxOpvEgq.js";import{r as L}from"./admin-guard-xv3IhYox.js";await L();let d="pending",C=[],l=[];function M(){const t=document.getElementById("merchant-table-header");d==="rejected"?t.innerHTML=`
+import"./modulepreload-polyfill-B5Qt9EMX.js";/* empty css             */import{a as c,s as y,d as m}from"./api-BxOpvEgq.js";import{r as L}from"./admin-guard-CkaXWeUD.js";await L();let d="pending",C=[],l=[];function M(){const t=document.getElementById("merchant-table-header");d==="rejected"?t.innerHTML=`
           <th style="width: 25%; text-align: center;">상점명</th>
           <th style="width: 45%; text-align: center;">반려 사유</th>
           <th style="width: 15%; text-align: center;">신청일</th>

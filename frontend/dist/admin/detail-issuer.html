@@ -10,6 +10,20 @@
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
         document.documentElement.classList.add('sidebar-collapsed');
       }
+      var cached = sessionStorage.getItem('ongjin_sidebar_cache');
+      if (cached) {
+        var obs = new MutationObserver(function() {
+          var sb = document.querySelector('.admin-sidebar');
+          if (sb) {
+            obs.disconnect();
+            if (!sb.innerHTML.trim()) {
+              sb.innerHTML = cached;
+              sb.dataset.prehydrated = 'true';
+            }
+          }
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+      }
     })();
   </script>
   
@@ -106,11 +120,11 @@
     .admin-table td { padding: 16px 24px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; vertical-align: middle; }
     .admin-table tr:hover { background: #f8fafc; }
   </style>
-  <script type="module" crossorigin src="/assets/admin-detail-issuer-CwIWTB_L.js"></script>
+  <script type="module" crossorigin src="/assets/admin-detail-issuer-C07UpIq0.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-CkaXWeUD.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-CSqzwfnj.css">
 </head>
 <body>
   <div class="app-shell">
@@ -123,10 +137,7 @@
         <div class="header-title-area">
           <span class="header-category">Issuer Details</span>
           <h1>발행처 상세 정보</h1>
-          <p class="header-desc">발행처의 기본 정보와 배정된 쿠폰 내역 및 발행 상세 이력을 모아봅니다.</p>
-        </div>
-        <div>
-          <button class="btn btn-primary" id="btn-allocate" style="cursor: pointer; font-weight: 600;">쿠폰 배정하기</button>
+          <p class="header-desc">발행처의 기본 정보와 취급 상품 및 쿠폰 발행 현황을 확인합니다.</p>
         </div>
       </header>
 
@@ -196,21 +207,19 @@
         </table>
       </div>
 
-      <!-- 배정 이력 테이블 -->
-      <h2 class="table-title">쿠폰 배정 및 발행 상세 이력</h2>
+      <!-- 권종별 발행 현황 테이블 -->
+      <h2 class="table-title">권종별 쿠폰 발행 현황</h2>
       <div class="table-container">
         <table class="admin-table">
           <thead>
             <tr>
-              <th style="width: 25%; text-align: center;">배정 일시</th>
-              <th style="width: 20%; text-align: center;">쿠폰 금액</th>
-              <th style="width: 18%; text-align: center;">총 배정 수량</th>
-              <th style="width: 18%; text-align: center;">발행 수량</th>
-              <th style="width: 19%; text-align: center;">잔여 수량</th>
+              <th style="width: 34%; text-align: center;">쿠폰 금액</th>
+              <th style="width: 33%; text-align: center;">누적 발행 수량</th>
+              <th style="width: 33%; text-align: center;">누적 발행 금액</th>
             </tr>
           </thead>
           <tbody id="allocation-history-list">
-            <tr><td colspan="5" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
+            <tr><td colspan="3" class="text-center" style="padding: 40px; color: #64748b;">데이터를 불러오는 중입니다...</td></tr>
           </tbody>
         </table>
       </div>

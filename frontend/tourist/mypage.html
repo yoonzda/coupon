@@ -8,7 +8,7 @@
   <title>옹진 관광 쿠폰 | 모바일 지갑</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&family=Gaegu:wght@700&display=swap" rel="stylesheet" />
 
   <!-- 지도 렌더링용 Leaflet 오픈스트리트맵 CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -429,6 +429,7 @@
       max-height: calc(100dvh - var(--top-bar-offset, 102px));
       overflow: hidden;
       pointer-events: none;
+      content-visibility: hidden;
     }
 
     #coupon-list-container {
@@ -595,7 +596,34 @@
       color: var(--slate-800);
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 0.4rem;
+    }
+
+    .wallet-guide-title-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-reopen-onboarding {
+      border: 1px solid var(--slate-200);
+      background: var(--white);
+      color: var(--slate-600);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.28rem 0.62rem;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-reopen-onboarding:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
     }
 
     .wallet-guide-list {
@@ -649,7 +677,8 @@
       display: flex;
       gap: var(--chip-gap);
       overflow-x: auto;
-      padding: 0.15rem 0.15rem var(--section-gap);
+      padding: 0.2rem 0.15rem;
+      margin-bottom: var(--section-gap);
       scrollbar-width: none;
       -ms-overflow-style: none;
       flex-shrink: 0;
@@ -1135,6 +1164,8 @@
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
       transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
       cursor: pointer;
+      content-visibility: auto;
+      contain-intrinsic-size: 0 210px;
     }
 
     .store-card:hover {
@@ -1513,6 +1544,446 @@
         transform: translateY(0);
       }
     }
+
+    /* ── 회원 첫 접속 코치마크 온보딩 (투명 검은 막 + 화살표 + 귀여운 한글 폰트 + 부드러운 전환 애니메이션) ── */
+    @font-face {
+      font-family: 'Cafe24SsurroundAir';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24SsurroundAir.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    html.onboarding-lock,
+    html.onboarding-lock body {
+      overflow: hidden !important;
+      height: 100dvh !important;
+      touch-action: none !important;
+    }
+
+    html.onboarding-lock .coupon-card {
+      flex: 0 0 auto;
+    }
+
+    html.onboarding-lock .empty-coupon-box {
+      flex: 0 0 auto;
+      min-height: 210px;
+      padding: 1.75rem 1.25rem;
+    }
+
+    .onboarding-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      user-select: none;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .onboarding-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* 선택된 타겟 영역: 어두운 화면 위에 흰색 네모가 먼저 그려진 뒤 내부가 밝게(흰 배경 타겟) 채워지며 열림 */
+    .coachmark-spotlight {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 6px;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.86);
+      pointer-events: none;
+    }
+
+    .coachmark-spotlight.is-welcome .coachmark-spotlight-fill,
+    .coachmark-spotlight.is-welcome .coachmark-spotlight-svg {
+      display: none;
+    }
+
+    /* 초기에는 주변 어두운 막(0.86)과 동일하게 덮여 있다가, 네모가 그려진 직후 GPU 가속(scaleX)으로 걷히며 흰색 타겟 영역이 채워짐 */
+    .coachmark-spotlight-fill {
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.86);
+      transform-origin: right center;
+      transform: scaleX(1);
+      will-change: transform;
+      animation: coachSpotRevealWhite 0.55s 0.58s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .coachmark-spotlight-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: block;
+      overflow: visible;
+      z-index: 2;
+    }
+
+    .coachmark-spotlight-svg rect {
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2.2px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      will-change: stroke-dashoffset;
+      animation: coachSpotRectDraw 0.65s 0.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes coachSpotRectDraw {
+      from { stroke-dashoffset: 1000; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes coachSpotRevealWhite {
+      from {
+        transform: scaleX(1);
+      }
+      to {
+        transform: scaleX(0);
+      }
+    }
+
+    /* 타겟을 가리키는 흰색 화살표 + 위아래 살짝 흔들리는 애니메이션 */
+    .coachmark-arrow {
+      position: fixed;
+      width: 40px;
+      height: 44px;
+      color: #ffffff;
+      pointer-events: none;
+      z-index: 3001;
+      opacity: 1;
+      transform: translateX(-50%);
+      animation: coachArrowBobUp 1.8s ease-in-out infinite;
+    }
+
+    .coachmark-arrow.point-down {
+      animation: coachArrowBobDown 1.8s ease-in-out infinite;
+    }
+
+    .coachmark-arrow.is-hidden {
+      opacity: 0 !important;
+    }
+
+    .coachmark-arrow path {
+      stroke-dasharray: 120;
+      stroke-dashoffset: 120;
+      animation: coachArrowDraw 0.50s 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes coachArrowDraw {
+      from { stroke-dashoffset: 120; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes coachArrowBobUp {
+      0%, 100% { transform: translate(-50%, 0); }
+      50% { transform: translate(-50%, -7px); }
+    }
+
+    @keyframes coachArrowBobDown {
+      0%, 100% { transform: translate(-50%, 0) scaleY(-1); }
+      50% { transform: translate(-50%, 7px) scaleY(-1); }
+    }
+
+    /* 화살표 끝 흰 글씨 설명 (포인트 서체 통일 + 강조 단어 크기 & 형광펜 지그재그 드로잉) */
+    .coachmark-callout {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 40px);
+      max-width: 420px;
+      z-index: 3001;
+      color: #ffffff;
+      text-align: center;
+      pointer-events: none;
+      font-family: 'Cafe24SsurroundAir', 'Gowun Dodum', sans-serif;
+    }
+
+    .coachmark-callout.is-welcome {
+      top: 50% !important;
+      bottom: auto !important;
+      transform: translate(-50%, -50%);
+    }
+
+    /* 일반 단계: 타겟 영역(네모+배경)이 다 만들어진 뒤(1.15s)에 여유 있게 텍스트 등장 */
+    .coachmark-title {
+      font-family: 'Cafe24SsurroundAir', 'Gowun Dodum', sans-serif;
+      font-size: 19px;
+      font-weight: 400;
+      color: #ffffff;
+      -webkit-text-stroke: 0.35px #ffffff;
+      line-height: 1.8;
+      letter-spacing: 0.06em;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9), 0 0 4px rgba(0, 0, 0, 0.6);
+      word-break: keep-all;
+      animation: coachTextPop 0.55s 1.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* 특정 단어 강조: 같은 포인트 서체에 글씨 크기만 키우고 문구가 다 뜬 뒤 뒤쪽에 형광펜이 지그재그로 칠해짐 */
+    .coachmark-title .coach-em {
+      position: relative;
+      display: inline-block;
+      z-index: 1;
+      font-family: 'Cafe24SsurroundAir', 'Gowun Dodum', sans-serif;
+      font-size: 24px;
+      font-weight: 400;
+      color: #ffffff;
+      -webkit-text-stroke: 0.5px #ffffff;
+      letter-spacing: 0.07em;
+      line-height: 1.3;
+      padding: 0 5px 2px;
+      margin: 0 2px;
+      vertical-align: baseline;
+    }
+
+    .coachmark-title .coach-em-text {
+      position: relative;
+      z-index: 2;
+    }
+
+    .coachmark-title .coach-hl-svg {
+      position: absolute;
+      left: -4px;
+      right: -4px;
+      top: 6%;
+      bottom: -4%;
+      width: calc(100% + 8px);
+      height: 98%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .coachmark-title .coach-hl-path {
+      fill: none;
+      stroke: rgba(14, 165, 233, 0.68);
+      stroke-width: 11.5px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      will-change: stroke-dashoffset;
+      animation: coachHighlighterDraw 0.68s 1.65s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+    }
+
+    @keyframes coachHighlighterDraw {
+      from { stroke-dashoffset: 1000; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* 처음(환영)과 마지막(마무리) 화면: 한 글자씩 천천히 써진 뒤 마지막에 형광펜이 지그재그로 칠해지는 애니메이션 */
+    .coachmark-callout.is-welcome .coachmark-title {
+      font-size: 21px;
+      font-weight: 400;
+      animation: none;
+    }
+
+    .coachmark-callout.is-welcome .coachmark-title .coach-em {
+      font-size: 27px;
+      font-weight: 400;
+    }
+
+    .coachmark-callout.is-welcome .coachmark-title .coach-hl-path {
+      animation: coachHighlighterDraw 0.72s var(--em-delay, 1.35s) cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+    }
+
+    .coach-char {
+      opacity: 0;
+      animation: coachCharWrite 0.22s ease-out forwards;
+    }
+
+    @keyframes coachCharWrite {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .coachmark-welcome-sub {
+      margin-top: 16px;
+      font-family: 'Cafe24SsurroundAir', 'Gowun Dodum', sans-serif;
+      font-size: 17px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.96);
+      -webkit-text-stroke: 0.25px rgba(255, 255, 255, 0.96);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+      line-height: 1.7;
+      letter-spacing: 0.06em;
+      word-break: keep-all;
+      opacity: 0;
+      animation: coachSubFocusIn 0.55s var(--sub-delay, 1.85s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes coachSubFocusIn {
+      from {
+        opacity: 0;
+        filter: blur(4px);
+      }
+      to {
+        opacity: 1;
+        filter: blur(0);
+      }
+    }
+
+    /* 시작 화면 오른쪽 터치 영역에서 잔잔한 물방울 파동처럼 자연스럽게 번지는 물결 효과 */
+    .coachmark-touch-guide {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 3000;
+      pointer-events: none;
+      overflow: hidden;
+      opacity: 0;
+      animation: coachSubFocusIn 0.7s var(--sub-delay, 1.85s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .coachmark-touch-guide.is-visible {
+      display: block;
+    }
+
+    .touch-guide-item {
+      position: absolute;
+      top: 50%;
+      left: 76%;
+      width: 320px;
+      height: 320px;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .touch-ripple-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0) 58%,
+        rgba(255, 255, 255, 0.03) 85%,
+        rgba(255, 255, 255, 0.12) 100%
+      );
+      opacity: 0;
+      transform: scale(0.12);
+      will-change: transform, opacity;
+      animation: touchWaveRipple 3.2s cubic-bezier(0.16, 0.72, 0.32, 1) infinite;
+    }
+
+    .touch-ripple-ring.r2 {
+      animation-delay: 1.06s;
+    }
+
+    .touch-ripple-ring.r3 {
+      animation-delay: 2.12s;
+    }
+
+    @keyframes touchWaveRipple {
+      0% {
+        transform: scale(0.12);
+        opacity: 0;
+      }
+      20% {
+        opacity: 0.68;
+      }
+      75% {
+        opacity: 0.2;
+      }
+      100% {
+        transform: scale(1.15);
+        opacity: 0;
+      }
+    }
+
+    @keyframes coachTextPop {
+      from {
+        opacity: 0;
+        filter: blur(3px);
+      }
+      to {
+        opacity: 1;
+        filter: blur(0);
+      }
+    }
+
+    /* 최하단 좌우 화살표 + 점(dot) 페이저 네비게이션 */
+    .coachmark-bottom-nav {
+      position: fixed;
+      bottom: 42px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3002;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      color: #ffffff;
+    }
+
+    .btn-coach-arrow {
+      border: none;
+      background: transparent;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.18s ease;
+    }
+
+    .btn-coach-arrow svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+    }
+
+    .btn-coach-arrow:hover:not(:disabled) {
+      transform: scale(1.15);
+    }
+
+    .btn-coach-arrow:disabled {
+      opacity: 0.25;
+      cursor: default;
+    }
+
+    .coachmark-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .coachmark-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      border: none;
+      padding: 0;
+      background: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.28s ease, transform 0.2s ease;
+    }
+
+    .coachmark-dot.active {
+      width: 24px;
+      background: #ffffff;
+    }
   </style>
 </head>
 <body>
@@ -1766,6 +2237,49 @@
     </div>
   </div>
 
+  <!-- 회원 첫 접속 코치마크 온보딩 오버레이 (투명 검은 막 + 화살표 + 흰 글씨 + 하단 점 페이저) -->
+  <div class="onboarding-backdrop" id="onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+    <div class="coachmark-spotlight" id="coachmark-spotlight">
+      <div class="coachmark-spotlight-fill" id="coachmark-spotlight-fill"></div>
+      <svg class="coachmark-spotlight-svg" id="coachmark-spotlight-svg" viewBox="0 0 100 100" aria-hidden="true">
+        <rect id="coachmark-spotlight-rect" x="1.1" y="1.1" width="97.8" height="97.8" rx="6" ry="6" pathLength="1000" />
+      </svg>
+    </div>
+
+    <!-- 흰색 화살표 SVG -->
+    <svg class="coachmark-arrow" id="coachmark-arrow" viewBox="0 0 48 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 4L10 19M24 4L38 19M24 4C24 22 26 36 30 48" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <div class="coachmark-callout" id="coachmark-callout">
+      <h3 class="coachmark-title" id="onboarding-title">옹진 관광 쿠폰에 오신 것을 환영합니다</h3>
+      <p class="coachmark-welcome-sub" id="onboarding-welcome-sub" style="display:none;"></p>
+    </div>
+
+    <!-- 시작 화면 오른쪽 터치 영역에서 잔잔하게 퍼져나가는 물결 파동 가이드 -->
+    <div class="coachmark-touch-guide" id="coachmark-touch-guide" aria-hidden="true">
+      <div class="touch-guide-item">
+        <span class="touch-ripple-ring r1"></span>
+        <span class="touch-ripple-ring r2"></span>
+        <span class="touch-ripple-ring r3"></span>
+      </div>
+    </div>
+
+    <div class="coachmark-bottom-nav">
+      <button type="button" class="btn-coach-arrow" id="btn-onboarding-prev" aria-label="이전">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+      <div class="coachmark-dots" id="onboarding-dots"></div>
+      <button type="button" class="btn-coach-arrow" id="btn-onboarding-next" aria-label="다음">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 6l6 6-6 6" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
   <div id="toast-container"></div>
 
   <script type="module">
@@ -1902,29 +2416,110 @@
     let activeUseReqId = null;
     let useReqPollTimer = null;
 
-    // ── 글자 크기 조절 (어르신 맞춤형 왕큰글씨 지원 & 로고 크기 고정) ──
+    // ── 글자 크기 조절 (단일 레이아웃 패스 + GPU FLIP 애니메이션으로 버벅임 없이 전환) ──
     const fontScaleMap = {
       normal: '16px',
       large: '22px'
     };
     const fontSizeButtons = document.querySelectorAll('.font-size-btn');
-    function applyFontScale(scale) {
+
+    function applyFontScale(scale, options = {}) {
+      const { save = true, animate = false } = options;
       const validScale = fontScaleMap[scale] ? scale : 'normal';
+      const currentScale = document.documentElement.getAttribute('data-font-scale');
+
+      if (animate && currentScale && currentScale !== validScale) {
+        const vh = window.innerHeight;
+        const activePanel = document.querySelector('.tab-panel.active');
+        const flipSelector = [
+          '.nav-tabs-wrap',
+          '.wallet-account-bar',
+          '.coupon-card',
+          '.empty-coupon-box',
+          '.wallet-bottom-guide',
+          '.island-chips-scroll > .chip-btn',
+          '.map-container-box',
+          '.map-bottom-search-wrap',
+          '.category-filter-wrap > .category-btn',
+          '.store-total-badge',
+          '.store-search-box',
+          '.store-card'
+        ].join(', ');
+
+        const candidates = [
+          ...(topStickyWrap ? [topStickyWrap.querySelector('.nav-tabs-wrap')].filter(Boolean) : []),
+          ...(activePanel ? Array.from(activePanel.querySelectorAll(flipSelector)) : [])
+        ];
+
+        // 화면(뷰포트) 안에 보이는 요소만 골라 이전 위치·크기 측정
+        const beforeRects = new Map();
+        const visibleTargets = [];
+        candidates.forEach(el => {
+          const r = el.getBoundingClientRect();
+          if (r.width > 0 && r.height > 0 && r.bottom > -60 && r.top < vh + 160) {
+            beforeRects.set(el, r);
+            visibleTargets.push(el);
+          }
+        });
+
+        // 단 1회 리플로우로 최종 글자 크기 및 상단바 오프셋 즉시 반영 (중간 프레임 줄바꿈 '두두둥' 현상 원천 차단)
+        document.documentElement.style.fontSize = fontScaleMap[validScale];
+        document.documentElement.setAttribute('data-font-scale', validScale);
+        if (save) {
+          localStorage.setItem('ongjin_font_scale', validScale);
+        }
+        fontSizeButtons.forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-scale') === validScale);
+        });
+        syncTopBarOffset();
+
+        // GPU 가속 FLIP(translate3d + scale)으로 이전 크기·위치에서 새 크기·위치로 매끄럽게 보간
+        const animOpts = { duration: 360, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' };
+        visibleTargets.forEach(el => {
+          const b = beforeRects.get(el);
+          const a = el.getBoundingClientRect();
+          if (!b || !a || !a.width || !a.height) return;
+          const dx = b.left - a.left;
+          const dy = b.top - a.top;
+          const sx = b.width / a.width;
+          const sy = b.height / a.height;
+          if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5 || Math.abs(sx - 1) > 0.01 || Math.abs(sy - 1) > 0.01) {
+            el.animate(
+              [
+                { transformOrigin: '0 0', transform: `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})` },
+                { transformOrigin: '0 0', transform: 'translate3d(0, 0, 0) scale(1, 1)' }
+              ],
+              animOpts
+            );
+          }
+        });
+
+        setTimeout(() => {
+          if (leafMap) leafMap.invalidateSize();
+          if (typeof positionCoachmark === 'function') positionCoachmark();
+        }, 370);
+        return;
+      }
+
       document.documentElement.style.fontSize = fontScaleMap[validScale];
       document.documentElement.setAttribute('data-font-scale', validScale);
-      localStorage.setItem('ongjin_font_scale', validScale);
+      if (save) {
+        localStorage.setItem('ongjin_font_scale', validScale);
+      }
       fontSizeButtons.forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-scale') === validScale);
       });
+      syncTopBarOffset();
       requestAnimationFrame(() => {
         syncTopBarOffset();
         if (leafMap) leafMap.invalidateSize();
+        if (typeof positionCoachmark === 'function') positionCoachmark();
       });
     }
-    applyFontScale(localStorage.getItem('ongjin_font_scale') || 'normal');
+    applyFontScale(localStorage.getItem('ongjin_font_scale') || 'normal', { animate: false });
     fontSizeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        applyFontScale(btn.getAttribute('data-scale'));
+        applyFontScale(btn.getAttribute('data-scale'), { save: true, animate: true });
       });
     });
 
@@ -1964,6 +2559,8 @@
       });
 
       if (options.instant) {
+        if (tabIndicator) void tabIndicator.offsetWidth;
+        if (tabTrack) void tabTrack.offsetWidth;
         requestAnimationFrame(() => {
           if (tabIndicator) tabIndicator.style.transition = '';
           if (tabTrack) tabTrack.style.transition = '';
@@ -2049,10 +2646,13 @@
       const bottomGuideHtml = `
         <div class="wallet-bottom-guide">
           <div class="wallet-guide-title">
-            <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            쿠폰 이용 안내
+            <span class="wallet-guide-title-left">
+              <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              쿠폰 이용 안내
+            </span>
+            <button type="button" class="btn-reopen-onboarding" onclick="window.openOnboardingModal(true)">이용 안내 다시 보기</button>
           </div>
           <ul class="wallet-guide-list">
             <li>• 여객터미널 등 현장 발행처 QR 스캔 시 지갑에 즉시 추가 등록됩니다.</li>
@@ -2769,6 +3369,357 @@
       });
     }
 
+    // ── 4-3. 회원 첫 접속 코치마크 온보딩 제어 (환영 인트로 → 탭 소개 & 내부 기능 → 글자 크기 + 점 페이저) ──
+    const onboardingModal = document.getElementById('onboarding-modal');
+    const coachmarkSpotlight = document.getElementById('coachmark-spotlight');
+    const coachmarkArrow = document.getElementById('coachmark-arrow');
+    const coachmarkCallout = document.getElementById('coachmark-callout');
+    const onboardingDots = document.getElementById('onboarding-dots');
+    const onboardingTitle = document.getElementById('onboarding-title');
+    const onboardingWelcomeSub = document.getElementById('onboarding-welcome-sub');
+    const coachmarkTouchGuide = document.getElementById('coachmark-touch-guide');
+    const btnOnboardingPrev = document.getElementById('btn-onboarding-prev');
+    const btnOnboardingNext = document.getElementById('btn-onboarding-next');
+
+    let currentOnboardingStep = 0;
+    let activeOnboardingUserKey = 'default';
+    let onboardingInitialTabId = 'sec-coupon';
+    let onboardingSavedFontScale = 'normal';
+
+    const onboardingSteps = [
+      {
+        tab: 'sec-coupon',
+        isWelcome: true,
+        showTouchGuide: true,
+        title: '<span class="coach-em">옹진 관광 쿠폰</span>에<br>오신 것을 환영합니다!',
+        sub: '다음으로 가려면 오른쪽을 눌러주세요!'
+      },
+      {
+        tab: 'sec-coupon',
+        pad: 0,
+        getTarget: () => document.querySelector('button[data-target="sec-coupon"]'),
+        title: '먼저 <span class="coach-em">내 쿠폰</span>에서<br>보유한 쿠폰을 확인해요'
+      },
+      {
+        tab: 'sec-coupon',
+        pad: 4,
+        getTarget: () => document.querySelector('#sec-coupon .coupon-card') || document.querySelector('#sec-coupon .empty-coupon-box'),
+        title: '이곳에 받은 쿠폰이 보관되며<br><span class="coach-em">QR 결제하기</span>로 바로 사용해요'
+      },
+      {
+        tab: 'sec-map',
+        pad: 0,
+        getTarget: () => document.querySelector('button[data-target="sec-map"]'),
+        title: '<span class="coach-em">가맹점 지도</span>를 누르면<br>섬별 사용처 지도가 열려요'
+      },
+      {
+        tab: 'sec-map',
+        pad: 4,
+        getTarget: () => document.getElementById('island-chips'),
+        title: '<span class="coach-em">방문하신 섬</span>을 선택하면<br>해당 섬의 가맹점 위치를 보여줘요'
+      },
+      {
+        tab: 'sec-store',
+        pad: 0,
+        getTarget: () => document.querySelector('button[data-target="sec-store"]'),
+        title: '<span class="coach-em">가맹점 목록</span>에서 원하는 사용처를<br>빠르게 찾아볼 수 있어요'
+      },
+      {
+        tab: 'sec-store',
+        pad: 4,
+        getTarget: () => document.querySelector('#merchant-list-container .store-card .btn-use-coupon-primary') || document.querySelector('#category-filter-wrap'),
+        title: '매장의 <span class="coach-em">쿠폰 사용하기</span>를 누르면<br>사장님께 바로 승인 요청을 보내요'
+      },
+      {
+        tab: 'sec-coupon',
+        pad: 3,
+        getTarget: () => document.querySelector('.font-size-control'),
+        title: '글씨가 작게 느껴지신다면<br>여기서 <span class="coach-em">크게 모드</span>를 켜보세요'
+      },
+      {
+        tab: 'sec-coupon',
+        isWelcome: true,
+        title: '옹진군의 아름다운 섬에서<br><span class="coach-em">즐거운 여행</span> 되시길 바랍니다!'
+      }
+    ];
+
+    function buildOnboardingDots() {
+      if (!onboardingDots) return;
+      onboardingDots.innerHTML = onboardingSteps.map((_, idx) => `
+        <button type="button" class="coachmark-dot ${idx === currentOnboardingStep ? 'active' : ''}" data-step="${idx}" aria-label="${idx + 1}단계"></button>
+      `).join('');
+      onboardingDots.querySelectorAll('.coachmark-dot').forEach(dot => {
+        dot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = Number(dot.getAttribute('data-step'));
+          if (!isNaN(idx)) {
+            currentOnboardingStep = idx;
+            renderOnboardingStep();
+          }
+        });
+      });
+    }
+
+    function triggerCoachmarkAnimation() {
+      const spotRect = document.getElementById('coachmark-spotlight-rect');
+      const spotFill = document.getElementById('coachmark-spotlight-fill');
+      const arrowPath = coachmarkArrow ? coachmarkArrow.querySelector('path') : null;
+      const targets = [onboardingTitle, onboardingWelcomeSub, coachmarkTouchGuide, arrowPath, spotRect, spotFill].filter(Boolean);
+
+      targets.forEach(el => { el.style.animation = 'none'; });
+      if (onboardingModal) void onboardingModal.offsetWidth;
+      targets.forEach(el => { el.style.animation = ''; });
+    }
+
+    function positionCoachmark() {
+      if (!onboardingModal || !onboardingModal.classList.contains('active')) return;
+      const step = onboardingSteps[currentOnboardingStep] || onboardingSteps[0];
+      if (!coachmarkSpotlight || !coachmarkArrow || !coachmarkCallout) return;
+
+      if (step.isWelcome) {
+        coachmarkSpotlight.classList.add('is-welcome');
+        coachmarkSpotlight.style.top = '50%';
+        coachmarkSpotlight.style.left = '50%';
+        coachmarkSpotlight.style.width = '0px';
+        coachmarkSpotlight.style.height = '0px';
+        coachmarkArrow.classList.add('is-hidden');
+        coachmarkCallout.classList.add('is-welcome');
+        return;
+      }
+
+      coachmarkSpotlight.classList.remove('is-welcome');
+      coachmarkCallout.classList.remove('is-welcome');
+      const targetEl = step.getTarget ? step.getTarget() : null;
+      if (!targetEl) return;
+
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+
+      const rect = targetEl.getBoundingClientRect();
+      const pad = typeof step.pad === 'number' ? step.pad : 4;
+      const sTop = Math.round(Math.max(2, rect.top - pad));
+      const sLeft = Math.round(Math.max(2, rect.left - pad));
+      const sWidth = Math.round(rect.width + pad * 2);
+      const sHeight = Math.round(rect.height + pad * 2);
+
+      coachmarkSpotlight.style.top = `${sTop}px`;
+      coachmarkSpotlight.style.left = `${sLeft}px`;
+      coachmarkSpotlight.style.width = `${sWidth}px`;
+      coachmarkSpotlight.style.height = `${sHeight}px`;
+      coachmarkSpotlight.style.borderRadius = '6px';
+
+      const spotSvg = document.getElementById('coachmark-spotlight-svg');
+      const spotRect = document.getElementById('coachmark-spotlight-rect');
+      if (spotSvg && spotRect) {
+        spotSvg.setAttribute('viewBox', `0 0 ${sWidth} ${sHeight}`);
+        spotRect.setAttribute('x', '1.1');
+        spotRect.setAttribute('y', '1.1');
+        spotRect.setAttribute('width', String(Math.max(0, sWidth - 2.2)));
+        spotRect.setAttribute('height', String(Math.max(0, sHeight - 2.2)));
+      }
+
+      coachmarkArrow.classList.remove('is-hidden');
+      const targetCenterX = Math.min(vw - 36, Math.max(36, rect.left + rect.width / 2));
+      const spaceBelow = (vh - 96) - (sTop + sHeight);
+      const spaceAbove = sTop - 20;
+
+      // 아래쪽 여유 공간이 충분하면(>= 125px) 화살표와 문구를 아래에 배치, 아니면 위에 배치
+      const placeBelow = spaceBelow >= 125 || spaceBelow >= spaceAbove;
+
+      coachmarkArrow.style.left = `${targetCenterX}px`;
+
+      if (placeBelow) {
+        coachmarkArrow.classList.remove('point-down');
+        const arrowTop = Math.min(vh - 155, sTop + sHeight + 10);
+        coachmarkArrow.style.top = `${arrowTop}px`;
+        coachmarkCallout.style.top = `${arrowTop + 50}px`;
+        coachmarkCallout.style.bottom = 'auto';
+      } else {
+        coachmarkArrow.classList.add('point-down');
+        const arrowTop = Math.max(70, sTop - 52);
+        coachmarkArrow.style.top = `${arrowTop}px`;
+        coachmarkCallout.style.top = 'auto';
+        coachmarkCallout.style.bottom = `${Math.max(105, vh - arrowTop + 10)}px`;
+      }
+    }
+
+    const HIGHLIGHTER_SVG = '<svg class="coach-hl-svg" viewBox="0 0 120 36" preserveAspectRatio="none" aria-hidden="true"><path class="coach-hl-path" d="M 4 11 C 42 7, 78 9, 115 9 L 6 20 C 44 19, 80 18, 116 25" pathLength="1000" /></svg>';
+
+    function decorateCoachHighlight(html) {
+      return String(html || '').replace(
+        /<span class="coach-em">(.*?)<\/span>/gi,
+        `<span class="coach-em">${HIGHLIGHTER_SVG}<span class="coach-em-text">$1</span></span>`
+      );
+    }
+
+    function buildTypingChars(html, baseDelay = 0.10, charDelay = 0.055) {
+      let charIdx = 0;
+      const parts = String(html || '').split(/(<span class="coach-em">.*?<\/span>|<br\s*\/?>)/gi);
+      const rendered = parts.map(part => {
+        if (/^<br\s*\/?>$/i.test(part)) {
+          return '<br>';
+        }
+        const emMatch = part.match(/^<span class="coach-em">(.*?)<\/span>$/i);
+        if (emMatch) {
+          const innerChars = Array.from(emMatch[1]).map(ch => {
+            if (ch === ' ') return ' ';
+            const delay = (baseDelay + (charIdx++) * charDelay).toFixed(3);
+            return `<span class="coach-char" style="animation-delay:${delay}s">${ch}</span>`;
+          }).join('');
+          return `<span class="coach-em">${HIGHLIGHTER_SVG}<span class="coach-em-text">${innerChars}</span></span>`;
+        }
+        return Array.from(part).map(ch => {
+          if (ch === ' ') return ' ';
+          const delay = (baseDelay + (charIdx++) * charDelay).toFixed(3);
+          return `<span class="coach-char" style="animation-delay:${delay}s">${ch}</span>`;
+        }).join('');
+      }).join('');
+
+      const emDelay = (baseDelay + charIdx * charDelay + 0.16).toFixed(2);
+      const subDelay = (Number(emDelay) + 0.58).toFixed(2);
+      if (coachmarkCallout) {
+        coachmarkCallout.style.setProperty('--em-delay', `${emDelay}s`);
+        coachmarkCallout.style.setProperty('--sub-delay', `${subDelay}s`);
+      }
+      if (coachmarkTouchGuide) {
+        coachmarkTouchGuide.style.setProperty('--sub-delay', `${subDelay}s`);
+      }
+      return rendered;
+    }
+
+    function renderOnboardingStep() {
+      const step = onboardingSteps[currentOnboardingStep] || onboardingSteps[0];
+
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      targetHeaderOffset = 0;
+      currentHeaderOffset = 0;
+      if (topStickyWrap) topStickyWrap.style.transform = 'translate3d(0, 0, 0)';
+
+      if (onboardingDots) {
+        onboardingDots.querySelectorAll('.coachmark-dot').forEach((d, idx) => {
+          d.classList.toggle('active', idx === currentOnboardingStep);
+        });
+      }
+
+      if (btnOnboardingPrev) {
+        btnOnboardingPrev.disabled = currentOnboardingStep === 0;
+      }
+
+      const activePanel = document.querySelector('.tab-panel.active');
+      if (step.tab && (!activePanel || activePanel.id !== step.tab)) {
+        switchTab(step.tab, { instant: true });
+      }
+
+      if (onboardingTitle) {
+        onboardingTitle.innerHTML = step.isWelcome
+          ? buildTypingChars(step.title, 0.10, 0.055)
+          : decorateCoachHighlight(step.title);
+      }
+      if (onboardingWelcomeSub) {
+        if (step.isWelcome && step.sub) {
+          onboardingWelcomeSub.innerHTML = step.sub;
+          onboardingWelcomeSub.style.display = 'block';
+        } else {
+          onboardingWelcomeSub.innerHTML = '';
+          onboardingWelcomeSub.style.display = 'none';
+        }
+      }
+      if (coachmarkTouchGuide) {
+        coachmarkTouchGuide.classList.toggle('is-visible', Boolean(step.showTouchGuide));
+      }
+
+      positionCoachmark();
+      triggerCoachmarkAnimation();
+    }
+
+    async function completeOnboarding() {
+      document.documentElement.classList.remove('onboarding-lock');
+      if (onboardingModal) onboardingModal.classList.remove('active');
+      if (onboardingSavedFontScale && onboardingSavedFontScale !== 'normal') {
+        applyFontScale(onboardingSavedFontScale, { save: true, animate: true });
+      }
+      if (onboardingInitialTabId) {
+        switchTab(onboardingInitialTabId, { instant: true });
+      }
+      if (activeOnboardingUserKey) {
+        localStorage.setItem(`ongjin_onboarding_done_${activeOnboardingUserKey}`, '1');
+      }
+      if (localStorage.getItem('ongjin_token')) {
+        try {
+          await api.post('/auth/onboarding-complete');
+        } catch (_) {}
+      }
+    }
+
+    window.openOnboardingModal = function(isManualReopen = false, userKey = null) {
+      if (userKey) activeOnboardingUserKey = String(userKey);
+      const activePanel = document.querySelector('.tab-panel.active');
+      onboardingInitialTabId = activePanel ? activePanel.id : 'sec-coupon';
+      onboardingSavedFontScale = localStorage.getItem('ongjin_font_scale') || document.documentElement.getAttribute('data-font-scale') || 'normal';
+      if (onboardingSavedFontScale !== 'normal') {
+        applyFontScale('normal', { save: false });
+      }
+      currentOnboardingStep = 0;
+      document.documentElement.classList.add('onboarding-lock');
+      syncTopBarOffset();
+      buildOnboardingDots();
+      if (onboardingModal) onboardingModal.classList.add('active');
+      renderOnboardingStep();
+    };
+
+    if (onboardingModal) {
+      onboardingModal.addEventListener('wheel', (e) => e.preventDefault(), { passive: false });
+      onboardingModal.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    }
+
+    window.addEventListener('resize', () => {
+      if (onboardingModal && onboardingModal.classList.contains('active')) {
+        positionCoachmark();
+      }
+    });
+
+    if (btnOnboardingPrev) {
+      btnOnboardingPrev.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (currentOnboardingStep > 0) {
+          currentOnboardingStep--;
+          renderOnboardingStep();
+        }
+      });
+    }
+
+    if (btnOnboardingNext) {
+      btnOnboardingNext.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (currentOnboardingStep < onboardingSteps.length - 1) {
+          currentOnboardingStep++;
+          renderOnboardingStep();
+        } else {
+          completeOnboarding();
+        }
+      });
+    }
+
+    if (onboardingModal) {
+      onboardingModal.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        const centerX = window.innerWidth / 2;
+        if (e.clientX < centerX) {
+          if (currentOnboardingStep > 0) {
+            currentOnboardingStep--;
+            renderOnboardingStep();
+          }
+          return;
+        }
+        if (currentOnboardingStep < onboardingSteps.length - 1) {
+          currentOnboardingStep++;
+          renderOnboardingStep();
+        } else {
+          completeOnboarding();
+        }
+      });
+    }
+
     // ── 5. 데이터 로드 ──
     async function initPageData() {
       // 가맹점 목록/지도는 인증 여부와 무관하게 경량 API(?lite=1)로 즉시 렌더링
@@ -2796,6 +3747,8 @@
           api.get('/coupon/my')
         ]);
 
+        renderCoupons(couponsRes.data || []);
+
         if (meRes && meRes.user) {
           if (meRes.user.phone) {
             localStorage.setItem('ongjin_user_phone', meRes.user.phone);
@@ -2804,9 +3757,15 @@
             if (userPhoneDisplay) userPhoneDisplay.textContent = meRes.user.display_name || '번호 미연결';
             linkPhoneModal.classList.add('active');
           }
-        }
 
-        renderCoupons(couponsRes.data || []);
+          // 둘러보기(?tab=map) 진입이 아닌 회원 첫 접속 시에만 온보딩 자동 표시
+          const userKey = String(meRes.user.id || meRes.user.phone || 'default');
+          activeOnboardingUserKey = userKey;
+          const localDone = localStorage.getItem(`ongjin_onboarding_done_${userKey}`) === '1';
+          if (initialTabParam !== 'map' && !meRes.user.onboarding_done && !localDone && !meRes.user.needs_phone_link) {
+            window.openOnboardingModal(false, userKey);
+          }
+        }
 
       } catch (err) {
         if (err.status === 401 || err.status === 403 || (err.message && err.message.includes('인증'))) {

@@ -5,646 +5,338 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google" content="notranslate" />
-  <title>발행처 관리 페이지 | 옹진 관광 쿠폰</title>
+  <title>발행처 관리 페이지 | 옹진 관광 쿠폰</title>
+
+  <!-- 웹폰트: 옹진 관광 플랫폼 공통 폰트 (Pretendard + Gowun Dodum + Noto Sans KR) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
   <style>
-    * { box-sizing: border-box; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      font-family: 'Pretendard', 'Noto Sans KR', -apple-system, sans-serif;
+      letter-spacing: -0.02em;
+    }
+
     body {
-      margin: 0; padding: 0;
+      margin: 0;
+      padding: 0;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
-      background: #f4f8ff !important;
-      background-image: 
-        radial-gradient(circle at 50% 50%, #f4f8ff 0%, #eef4ff 100%) !important;
-      position: relative;
-      overflow-x: hidden;
+      background: #f8fafc !important;
+      background-image: none !important;
       color: #0f172a;
+      padding-bottom: 110px;
+      -webkit-font-smoothing: antialiased;
       word-break: keep-all;
+      overflow-x: hidden;
     }
 
-    /* Decorative blurred glow circles */
-    body::before {
-      content: '';
-      position: absolute;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
-      top: -200px; right: -200px;
-      z-index: 0;
-      pointer-events: none;
-    }
-    body::after {
-      content: '';
-      position: absolute;
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(30, 58, 138, 0.06) 0%, transparent 60%);
-      bottom: -150px; left: -150px;
-      z-index: 0;
-      pointer-events: none;
+    /* ── 상단 네비게이션 (coupon-qr.html과 통일) ── */
+    .top-nav {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    /* Layout Header & Title Group Styling */
+    .top-nav-inner {
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-brand-title {
+      font-family: 'Gowun Dodum', 'Pretendard', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* ── 페이지 헤더 (coupon-qr.html의 page-header와 통일) ── */
     .manage-header {
       width: 100%;
-      max-width: 1100px;
-      margin: 16px auto 12px auto;
-      padding: 0 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 20px 24px 20px;
     }
+
     .manage-title-group {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       gap: 6px;
     }
-    .manage-subtitle {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #475569;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
+
     .manage-title {
-      font-size: 2.2rem;
-      font-weight: 800;
+      font-family: 'Gowun Dodum', 'Pretendard', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 700;
       color: #0f172a;
-      letter-spacing: -1px;
       margin: 0;
     }
-    .manage-badge-wrap {
-      margin-top: 4px;
-    }
-    .manage-page-badge {
-      display: inline-flex;
-      align-items: center;
-      background: rgba(37, 99, 235, 0.08);
-      color: #2563eb;
-      border: 1px solid rgba(37, 99, 235, 0.15);
-      font-size: 0.78rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-      letter-spacing: -0.2px;
+
+    .manage-subtitle {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #64748b;
+      margin: 0;
     }
 
-    /* 4 columns Horizontal Navigation Tab style */
+    /* ── 4열 탭 네비게이션 (coupon-qr.html의 method-cards-grid와 통일) ── */
     .tabs-nav-container {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
       width: 100%;
-      max-width: 1100px;
-      margin: 0 auto 12px auto;
-      padding: 0 24px;
+      max-width: 900px;
+      margin: 0 auto 20px auto;
+      padding: 0 20px;
       z-index: 10;
       position: relative;
     }
-    
+
     .tab-nav-btn {
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(37, 99, 235, 0.08);
-      border-radius: 20px;
-      padding: 14px 12px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 0 !important;
+      padding: 18px 12px 16px 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 8px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.03);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      box-shadow: none;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
       outline: none;
-      color: #64748b;
+      color: #334155;
     }
+
     .tab-nav-btn:hover {
-      background: rgba(255, 255, 255, 0.9);
-      border-color: rgba(37, 99, 235, 0.25);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.1);
+      border-color: #94a3b8;
+      background: #f8fafc;
       color: #0f172a;
     }
+
     .tab-nav-btn.active {
-      background: rgba(37, 99, 235, 0.08);
-      border-color: #2563eb;
-      border-width: 1.5px;
-      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15);
-      color: #1e3a8a;
+      border: 2px solid #0f172a;
+      background: #f8fafc;
+      padding: 17px 11px 15px 11px;
+      color: #0f172a;
     }
-    
+
     .tab-icon-circle {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      border-radius: 0 !important;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.02);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      color: #64748b;
-      margin-bottom: 8px;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      color: #475569;
+      margin: 0;
+      transition: color 0.15s ease;
     }
-    .tab-nav-btn:hover .tab-icon-circle {
-      transform: scale(1.05);
-      color: #2563eb;
-      background: rgba(37, 99, 235, 0.05);
-      border-color: rgba(37, 99, 235, 0.15);
-    }
+
+    .tab-nav-btn:hover .tab-icon-circle,
     .tab-nav-btn.active .tab-icon-circle {
-      color: #ffffff;
-      background: #2563eb;
-      border-color: #2563eb;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      color: #0f172a;
     }
-    
-    /* Logout button custom color hover */
-    .tab-nav-btn.logout-tab:hover .tab-icon-circle {
-      color: #ef4444;
-      background: rgba(239, 68, 68, 0.05);
-      border-color: rgba(239, 68, 68, 0.15);
+
+    /* 로그아웃 탭 호버 스타일 */
+    .tab-nav-btn.logout-tab:hover {
+      border-color: #fca5a5;
+      background: #fef2f2;
     }
-    .tab-nav-btn.logout-tab.active .tab-icon-circle {
-      background: #ef4444;
-      border-color: #ef4444;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+
+    .tab-nav-btn.logout-tab:hover .tab-icon-circle,
+    .tab-nav-btn.logout-tab:hover .tab-label {
+      color: #dc2626;
     }
-    
+
     .tab-label {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #64748b;
-      transition: color 0.3s ease;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: #334155;
+      letter-spacing: -0.02em;
+      transition: color 0.15s ease;
     }
+
     .tab-nav-btn:hover .tab-label {
       color: #0f172a;
     }
+
     .tab-nav-btn.active .tab-label {
-      color: #2563eb;
-      font-weight: 800;
-    }
-    .tab-nav-btn.logout-tab.active .tab-label {
-      color: #ef4444;
+      color: #0f172a;
+      font-weight: 700;
     }
 
-    /* Content Area Container */
+    /* ── 본문 컨텐츠 영역 ── */
     .content-area-container {
       flex: 1;
       width: 100%;
-      max-width: 1100px;
-      margin: 0 auto 12px auto;
-      padding: 0 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px;
       z-index: 1;
       position: relative;
     }
 
     .tab-content {
       display: none;
-      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       width: 100%;
     }
+
     .tab-content.active {
       display: block;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Stats top grid */
+    /* ── 쿠폰 발급 현황 및 설정 카드 (플랫 직각 박스) ── */
     .stats-top-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 24px;
-      margin-bottom: 24px;
+      gap: 16px;
     }
 
-    /* Statistics styles */
-    .stats-card-wrap {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(37, 99, 235, 0.1);
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.05);
+    .stats-card-wrap,
+    .settings-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 0 !important;
+      padding: 24px 22px;
+      box-shadow: none;
     }
-    /* Unified Card Title Styles (No icons, clean text) */
+
     .stats-title,
     .chart-card-title,
     .settings-card-title {
+      font-family: 'Gowun Dodum', 'Pretendard', sans-serif;
       font-size: 1.25rem;
       font-weight: 700;
       color: #0f172a;
-      letter-spacing: -0.3px;
-      margin: 0 0 20px 0;
+      margin: 0 0 18px 0;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
     }
 
-    /* Coupon Status Layout */
     .coupon-status-layout {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       width: 100%;
     }
 
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+      gap: 12px;
       width: 100%;
     }
 
     .metric-card {
-      background: #ffffff;
-      border: 1px solid rgba(37, 99, 235, 0.08);
-      border-radius: 16px;
-      padding: 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 0 !important;
+      padding: 20px 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .metric-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.06);
-      border-color: rgba(37, 99, 235, 0.2);
+      gap: 8px;
+      box-shadow: none;
     }
 
     .metric-label {
-      font-size: 0.8rem;
-      font-weight: 700;
+      font-size: 0.9rem;
+      font-weight: 600;
       color: #64748b;
     }
 
     .metric-value {
-      font-size: 1.3rem;
+      font-size: 1.45rem;
       font-weight: 800;
       color: #0f172a;
+      font-feature-settings: 'tnum';
+      font-variant-numeric: tabular-nums;
     }
 
-    .metric-card.highlight-issued .metric-value {
-      color: #2563eb;
-    }
-
+    .metric-card.highlight-issued .metric-value,
     .metric-card.highlight-remaining .metric-value {
-      color: #ea580c;
-    }
-
-    /* 실시간 발급 진행 상태바 */
-    .progress-bar-container {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.04);
-      border-radius: 99px;
-      height: 24px;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-      border-radius: 99px;
-      width: 0%;
-      transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .progress-bar-text {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.78rem;
-      font-weight: 800;
       color: #0f172a;
     }
 
-    /* Insight Feed style */
-    .insight-feed-container {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      height: 100%;
-    }
-    .insight-item {
-      display: flex;
-      gap: 12px;
-      padding: 14px 16px;
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(37, 99, 235, 0.06);
-      border-radius: 14px;
-      align-items: flex-start;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.02);
-    }
-    .insight-item:hover {
-      background: #ffffff;
-      border-color: rgba(37, 99, 235, 0.15);
-      transform: translateX(4px);
-      box-shadow: 0 6px 15px rgba(37, 99, 235, 0.06);
-    }
-    .insight-icon-wrap {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .insight-icon-wrap.blue { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
-    .insight-icon-wrap.green { background: rgba(16, 185, 129, 0.1); color: #16a34a; }
-    .insight-icon-wrap.amber { background: rgba(245, 158, 11, 0.1); color: #d97706; }
-    .insight-icon-wrap.rose { background: rgba(244, 63, 94, 0.1); color: #dc2626; }
-    
-    .insight-text-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      flex: 1;
-    }
-    .insight-item-title {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #0f172a;
-    }
-    .insight-item-desc {
-      font-size: 0.8rem;
-      color: #475569;
-      line-height: 1.55;
-    }
-    .insight-loading {
-      text-align: center;
-      padding: 40px;
-      color: #64748b;
-      font-size: 0.9rem;
-    }
-
-    /* Date Picker styling */
-    .chart-date-picker-wrap {
-      display: none;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0, 0, 0, 0.03);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      padding: 6px 12px;
-      border-radius: 12px;
-    }
-
-    .chart-date-picker-wrap label {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #475569;
-      margin: 0;
-    }
-
-    .chart-date-input {
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      padding: 4px 8px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #0f172a;
-      outline: none;
-      background: rgba(255, 255, 255, 0.8);
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-
-    .chart-date-input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-    }
-
-    /* ── Statistics Analysis Card ── */
-    .chart-card {
-      margin-top: 0;
-    }
-
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .chart-title-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .chart-card-subtitle {
-      font-size: 0.8rem;
-      color: #475569;
-    }
-
-    .chart-filter-pills {
-      display: flex;
-      background: rgba(0, 0, 0, 0.04);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      padding: 4px;
-      border-radius: 12px;
-      gap: 4px;
-    }
-
-    .chart-filter-btn {
-      background: transparent;
-      border: none;
-      padding: 6px 14px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #475569;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .chart-filter-btn.active {
-      background: #2563eb;
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-    }
-
-    /* 쿠폰 목표 달성도 및 누적 발급 추이 레이아웃 */
-    .chart-split-grid {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 24px;
-      width: 100%;
-      align-items: stretch;
-    }
-    
-    @media (max-width: 992px) {
-      .chart-split-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .chart-progress-ring-card, .chart-cumulative-card {
-      background: rgba(255, 255, 255, 0.6);
-      border: 1px solid rgba(0, 0, 0, 0.03);
-      border-radius: 20px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .progress-ring-title, .cumulative-chart-title {
-      font-size: 0.95rem;
-      font-weight: 850;
-      color: #0f172a;
-    }
-
-    .progress-ring-wrapper {
-      position: relative;
-      width: 100%;
-      height: 220px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .progress-ring-wrapper canvas {
-      max-height: 100%;
-      max-width: 100%;
-    }
-
-    .progress-ring-center-text {
-      position: absolute;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .progress-percentage {
-      font-size: 2.2rem;
-      font-weight: 900;
-      color: #2563eb;
-      line-height: 1;
-    }
-
-    .progress-ratio {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #64748b;
-      margin-top: 6px;
-    }
-    .yearly-card-item {
-      flex: 1;
-      min-width: 200px;
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(37, 99, 235, 0.12);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.05);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-    .yearly-card-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 15px 35px -5px rgba(37, 99, 235, 0.1);
-    }
-    .yearly-card-label {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #64748b;
-    }
-    .yearly-card-val {
-      font-size: 2rem;
-      font-weight: 850;
-      color: #0f172a;
-      letter-spacing: -1px;
-      margin: 8px 0;
-    }
-    .yearly-card-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.78rem;
-      font-weight: 800;
-      padding: 4px 8px;
-      border-radius: 6px;
-      width: fit-content;
-    }
-    .yearly-card-badge.up {
-      background: rgba(16, 185, 129, 0.1);
-      color: #10b981;
-    }
-    .yearly-card-badge.down {
-      background: rgba(244, 63, 94, 0.1);
-      color: #f43f5e;
-    }
-    .yearly-card-badge.none {
-      background: rgba(100, 116, 139, 0.1);
-      color: #64748b;
-    }
-
-    /* Settings/Account styles */
+    /* ── 계정 정보 및 설정 폼 스타일 ── */
     .settings-grid {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 16px;
     }
-    .settings-card {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(37, 99, 235, 0.1);
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.05);
-    }
+
     .settings-card-desc {
-      font-size: 0.85rem;
+      font-size: 0.92rem;
       color: #475569;
-      margin-bottom: 24px;
+      margin: -4px 0 20px 0;
       line-height: 1.6;
     }
 
     .form-row {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
+
     .form-row label {
       display: block;
-      font-size: 0.8rem;
-      color: #475569;
+      font-size: 0.92rem;
+      color: #334155;
       font-weight: 700;
       margin-bottom: 8px;
-      letter-spacing: -0.2px;
     }
+
     .form-row input {
       width: 100%;
-      padding: 14px 16px;
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
+      height: 46px;
+      padding: 0 14px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 0 !important;
       color: #0f172a;
-      font-size: 0.95rem;
+      font-size: 0.98rem;
+      font-weight: 500;
       outline: none;
-      transition: all 0.2s;
+      transition: border-color 0.15s ease;
       font-family: inherit;
     }
+
     .form-row input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      border-color: #0f172a;
       background: #ffffff;
+      box-shadow: none;
     }
+
+    .form-row input::placeholder {
+      color: #94a3b8;
+    }
+
     input::-ms-reveal,
     input::-ms-clear {
       display: none !important;
@@ -652,67 +344,63 @@
       height: 0 !important;
     }
 
+    .form-action-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 18px;
+    }
+
     .btn-submit-action {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      color: #ffffff;
+      height: 46px;
+      min-width: 130px;
+      padding: 0 24px;
+      border-radius: 0 !important;
       border: none;
-      padding: 14px 28px;
-      font-size: 0.92rem;
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 0.98rem;
       font-weight: 700;
-      border-radius: 10px;
       cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: none;
+      transition: background-color 0.15s ease;
+      white-space: nowrap;
     }
+
     .btn-submit-action:hover {
-      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.3);
+      background: #1e293b;
+      box-shadow: none;
     }
+
     .btn-submit-action:active {
-      transform: translateY(1px);
+      background: #334155;
     }
 
     #toast-container {
-      position: fixed; bottom: 20px; right: 20px; z-index: 1100;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1100;
     }
 
-    @media (max-width: 960px) {
-      .tabs-nav-container {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-      .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-    }
-    @media (max-width: 768px) {
-      .coupon-status-layout {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-      }
-    }
-    @media (max-width: 480px) {
-      .tabs-nav-container {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Password visibility toggle styles */
+    /* 비밀번호 보기 토글 */
     .password-wrapper {
       position: relative;
       display: flex;
       align-items: center;
       width: 100%;
     }
+
     .password-wrapper input {
       width: 100%;
-      padding-right: 40px !important;
+      padding-right: 42px !important;
     }
+
     .pw-toggle-btn {
       position: absolute;
-      right: 12px;
+      right: 10px;
       background: none;
       border: none;
       cursor: pointer;
@@ -722,39 +410,97 @@
       justify-content: center;
       outline: none;
     }
+
     .pw-toggle-btn svg {
       width: 18px;
       height: 18px;
       stroke: #64748b;
       fill: none;
-      transition: stroke 0.2s;
+      transition: stroke 0.15s ease;
     }
+
     .pw-toggle-btn:hover svg {
-      stroke: #1e293b;
+      stroke: #0f172a;
+    }
+
+    /* ── 반응형 미디어 쿼리 (coupon-qr.html과 통일) ── */
+    @media (max-width: 680px) {
+      .top-nav-inner {
+        padding: 0 14px;
+      }
+      .nav-brand-title {
+        font-size: 1.05rem;
+      }
+      .manage-header {
+        padding: 20px 14px 16px 14px;
+      }
+      .manage-title {
+        font-size: 1.55rem;
+      }
+      .tabs-nav-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 0 14px;
+        margin-bottom: 16px;
+      }
+      .tab-nav-btn {
+        padding: 14px 8px 12px 8px;
+      }
+      .tab-nav-btn.active {
+        padding: 13px 7px 11px 7px;
+      }
+      .tab-label {
+        font-size: 0.95rem;
+      }
+      .content-area-container {
+        padding: 0 14px;
+      }
+      .stats-card-wrap,
+      .settings-card {
+        padding: 18px 14px;
+      }
+      .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .metric-card {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 14px 16px;
+      }
+      .metric-value {
+        font-size: 1.25rem;
+      }
+      .btn-submit-action {
+        width: 100%;
+      }
+      .ip-input-row {
+        flex-direction: column;
+        align-items: stretch !important;
+      }
     }
   </style>
-  <script type="module" crossorigin src="/assets/issuer-manage-BeM2VNtU.js"></script>
+  <script type="module" crossorigin src="/assets/issuer-manage-Dqxc7HT2.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="stylesheet" crossorigin href="/assets/main-CSqzwfnj.css">
 </head>
 <body>
 
-  <!-- Global SVG definitions for icons -->
-  <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <!-- Shared linear gradients -->
-    </defs>
-  </svg>
+  <!-- 상단 네비게이션 -->
+  <header class="top-nav">
+    <div class="top-nav-inner">
+      <div class="nav-brand">
+        <span class="nav-brand-title">옹진 관광 쿠폰 발행</span>
+      </div>
+    </div>
+  </header>
 
   <!-- 1. Header with title -->
   <header class="manage-header">
     <div class="manage-title-group">
-      <span class="manage-subtitle">옹진 관광 쿠폰</span>
       <h1 class="manage-title" id="header-issuer-name">발행처</h1>
-      <div class="manage-badge-wrap">
-        <span class="manage-page-badge">관리 페이지</span>
-      </div>
+      <p class="manage-subtitle">발행 내역 및 계정 설정</p>
     </div>
   </header>
 
@@ -763,7 +509,7 @@
     <!-- QR 화면 탭 -->
     <button class="tab-nav-btn" onclick="goToQrPage()">
       <div class="tab-icon-circle">
-        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
           <rect x="7" y="7" width="3" height="3"></rect>
           <rect x="14" y="7" width="3" height="3"></rect>
@@ -777,7 +523,7 @@
     <!-- 쿠폰 발급 현황 탭 -->
     <button class="tab-nav-btn active" id="tab-btn-stats" onclick="switchTab('stats')">
       <div class="tab-icon-circle">
-        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <line x1="18" y1="20" x2="18" y2="10"></line>
           <line x1="12" y1="20" x2="12" y2="4"></line>
           <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -789,7 +535,7 @@
     <!-- 계정 정보 탭 -->
     <button class="tab-nav-btn" id="tab-btn-account" onclick="switchTab('account')">
       <div class="tab-icon-circle">
-        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
         </svg>
@@ -800,7 +546,7 @@
     <!-- 로그아웃 탭 -->
     <button class="tab-nav-btn logout-tab" onclick="triggerLogout()">
       <div class="tab-icon-circle">
-        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <svg style="width:24px;height:24px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
           <polyline points="16 17 21 12 16 7"></polyline>
           <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -815,35 +561,29 @@
     
     <!-- ── 탭 A. 쿠폰 발급 현황 ── -->
     <section id="content-stats" class="tab-content active">
-      <div style="display: flex; flex-direction: column; gap: 24px;">
-        
-        <div class="stats-top-grid">
-          <!-- 카드 1: 쿠폰 발급 현황 -->
-          <div class="stats-card-wrap">
-            <h2 class="stats-title">쿠폰 발급 현황</h2>
-            
-            <div class="coupon-status-layout">
-              <!-- 3단 가로형 지표 카드 -->
-              <div class="metrics-grid">
-                <div class="metric-card">
-                  <span class="metric-label">총 배정 수량</span>
-                  <span class="metric-value" id="metric-total">0장</span>
-                </div>
-                <div class="metric-card highlight-issued">
-                  <span class="metric-label">누적 발급량</span>
-                  <span class="metric-value" id="metric-issued">0장</span>
-                </div>
-                <div class="metric-card highlight-remaining">
-                  <span class="metric-label">현재 잔여량</span>
-                  <span class="metric-value" id="metric-remaining">0장</span>
-                </div>
+      <div class="stats-top-grid">
+        <!-- 카드 1: 쿠폰 발급 현황 -->
+        <div class="stats-card-wrap">
+          <h2 class="stats-title">쿠폰 발급 현황</h2>
+          
+          <div class="coupon-status-layout">
+            <!-- 3단 가로형 지표 카드 -->
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <span class="metric-label">오늘 발급 수량</span>
+                <span class="metric-value" id="metric-today">0장</span>
+              </div>
+              <div class="metric-card highlight-issued">
+                <span class="metric-label">누적 발급 수량</span>
+                <span class="metric-value" id="metric-issued">0장</span>
+              </div>
+              <div class="metric-card highlight-remaining">
+                <span class="metric-label">누적 발급 금액</span>
+                <span class="metric-value" id="metric-amount">0원</span>
               </div>
             </div>
           </div>
         </div>
-
-
-
       </div>
     </section>
 
@@ -878,7 +618,7 @@
               </button>
             </div>
           </div>
-          <div class="form-row" style="margin-bottom: 24px;">
+          <div class="form-row" style="margin-bottom: 0;">
             <label for="change-new-password-confirm">새 비밀번호 확인</label>
             <div class="password-wrapper">
               <input type="password" id="change-new-password-confirm" placeholder="새 비밀번호 재입력" />
@@ -891,7 +631,9 @@
             </div>
           </div>
           
-          <button class="btn-submit-action" onclick="submitChangePassword()">변경하기</button>
+          <div class="form-action-row">
+            <button class="btn-submit-action" onclick="submitChangePassword()">변경하기</button>
+          </div>
         </div>
 
         <!-- IP Config Section -->
@@ -900,7 +642,7 @@
           <p class="settings-card-desc">
             Kiosk PC가 공유기 와이파이에서 할당받은 로컬 IP(예: 192.168.0.75) 주소로 설정해야 모바일 스캔이 원활하게 연동됩니다. (도커 컨테이너 IP 대역인 172.x.x.x는 사용이 불가능합니다.)
           </p>
-          <div class="form-row" style="display: flex; gap: 8px; margin-bottom: 0; align-items: center;">
+          <div class="form-row ip-input-row" style="display: flex; gap: 8px; margin-bottom: 0; align-items: center;">
             <input type="text" id="kiosk-host-input" style="flex: 1;" placeholder="예: http://192.168.0.75:8080" />
             <button id="btn-save-host" class="btn-submit-action">반영 및 저장</button>
           </div>
@@ -912,6 +654,6 @@
 
   <div id="toast-container"></div>
 
-
+
 </body>
 </html>

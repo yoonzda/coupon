@@ -5,151 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>쿠폰 관리 | 옹진 관광 관리자</title>
   <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>
     (function() {
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
         document.documentElement.classList.add('sidebar-collapsed');
       }
+      var cached = sessionStorage.getItem('ongjin_sidebar_cache');
+      if (cached) {
+        var obs = new MutationObserver(function() {
+          var sb = document.querySelector('.admin-sidebar');
+          if (sb) {
+            obs.disconnect();
+            if (!sb.innerHTML.trim()) {
+              sb.innerHTML = cached;
+              sb.dataset.prehydrated = 'true';
+            }
+          }
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+      }
     })();
-  </script>
+  </script>
   <style>
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
       background: #f1f5f9;
       color: #1e293b; 
-      font-family: 'Noto Sans KR', 'Inter', -apple-system, sans-serif;
     }
 
-    /* Section Headers */
-    .section-header-wrap {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 8px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-      gap: 12px;
+    .table-container {
+      background: #fff;
+      border-radius: 0 !important;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      margin-bottom: 32px;
     }
-    .section-title {
-      font-size: 1.15rem;
+    .table-title {
+      font-size: 1.1rem;
       font-weight: 700;
       color: #0f172a;
       margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
-    .section-desc {
+
+    /* Status text */
+    .status-text {
       font-size: 0.88rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .status-unregistered {
       color: #64748b;
-      margin: 0;
     }
-
-    /* Card Layouts */
-    .admin-card {
-      background: #ffffff;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      overflow: hidden;
-      margin-bottom: 36px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
+    .status-registered {
+      color: #0f172a;
     }
-
-    /* Data Table */
-    .admin-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .admin-table th {
-      background: #f8fafc;
-      padding: 13px 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #475569;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-    .admin-table td {
-      padding: 15px 20px;
-      font-size: 0.9rem;
-      border-bottom: 1px solid #f1f5f9;
-      color: #1e293b;
-      vertical-align: middle;
-    }
-    .admin-table tbody tr:hover {
-      background: #f8fafc;
-    }
-    .admin-table td.cell-issuer {
-      background: #ffffff;
-      border-right: 1px solid #f1f5f9;
-      font-weight: 600;
-    }
-    .admin-table tr:hover td.cell-issuer {
-      background: #f8fafc;
-    }
-
-    /* Badges */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 99px;
-      font-size: 0.75rem;
+    .status-used {
+      color: #2563eb;
       font-weight: 700;
-      line-height: 1.2;
-    }
-    .badge-coupon-val {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
-      font-family: 'Inter', sans-serif;
-      font-weight: 700;
-      font-size: 0.82rem;
-      padding: 3px 9px;
-      border-radius: 4px;
-      display: inline-block;
-    }
-    .badge-stage1 {
-      background: #dbeafe;
-      color: #1e40af;
-      border: 1px solid #bfdbfe;
-    }
-    .badge-stage2 {
-      background: #dcfce7;
-      color: #166534;
-      border: 1px solid #bbf7d0;
-    }
-    .badge-stage3 {
-      background: #f3e8ff;
-      color: #6b21a8;
-      border: 1px solid #e9d5ff;
-    }
-
-    /* Buttons */
-    .btn-table-action {
-      padding: 6px 12px;
-      background: #ffffff;
-      color: #334155;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-    }
-    .btn-table-action:hover {
-      background: #0f172a;
-      color: #ffffff;
-      border-color: #0f172a;
     }
 
     /* Filter dropdowns */
@@ -165,18 +79,250 @@
       cursor: pointer;
     }
 
-    /* Card Divider */
-    .section-divider {
-      height: 1px;
-      background: #e2e8f0;
-      margin: 40px 0;
+    /* Pagination */
+    .pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-top: 1px solid #e2e8f0;
+      background: #fff;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .pagination-info {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .page-btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      color: #475569;
+      font-size: 0.84rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .page-btn:hover:not(:disabled):not(.active) {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    .page-btn.active {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #fff;
+    }
+    .page-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: #f8fafc;
+    }
+
+    /* Manage Button */
+    .btn-manage-row {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #0f172a;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .btn-manage-row:hover {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #fff;
+    }
+
+    /* Coupon Detail & Manage Modal */
+    .coupon-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      padding: 20px;
+    }
+    .coupon-modal-backdrop.open {
+      display: flex;
+    }
+    .coupon-modal-box {
+      background: #fff;
+      border-radius: 0 !important;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+    .coupon-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 24px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .coupon-modal-header h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .coupon-modal-close {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      color: #64748b;
+      cursor: pointer;
+      padding: 2px;
+      line-height: 1;
+    }
+    .coupon-modal-close:hover {
+      color: #0f172a;
+    }
+    .coupon-modal-body {
+      padding: 6px 24px 18px;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+      gap: 16px;
+    }
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+    .detail-label {
+      color: #64748b;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .detail-value {
+      color: #0f172a;
+      font-weight: 600;
+      text-align: right;
+      word-break: keep-all;
+    }
+    .phone-reg-trigger {
+      font-family: inherit;
+      background: none;
+      border: none;
+      border-bottom: 1px solid #94a3b8;
+      padding: 0 0 1px 0;
+      color: #475569;
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.3;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .phone-reg-trigger:hover {
+      color: #0f172a;
+      border-bottom-color: #0f172a;
+    }
+    .phone-inline-group {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .phone-inline-group input {
+      font-family: inherit;
+      width: 102px;
+      height: 22px;
+      line-height: 22px;
+      padding: 0 0 2px 0;
+      margin: 0;
+      border: none;
+      border-bottom: 1.5px solid #0f172a;
+      border-radius: 0;
+      background: transparent;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0f172a;
+      text-align: center;
+      outline: none;
+      font-variant-numeric: tabular-nums;
+      box-sizing: border-box;
+    }
+    .phone-inline-group input::placeholder {
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+    .btn-inline-text {
+      font-family: inherit;
+      height: 22px;
+      line-height: 22px;
+      padding: 0 0 2px 0;
+      margin: 0;
+      border: none;
+      border-bottom: 1.5px solid transparent;
+      background: none;
+      color: #0f172a;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+    .btn-inline-text:hover:not(:disabled) {
+      border-bottom-color: #0f172a;
+    }
+    .modal-bottom-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 18px 0 0;
+    }
+    .btn-bottom-action {
+      width: 100%;
+      height: 42px;
+      border-radius: 0;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #0f172a;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-bottom-action:hover:not(:disabled) {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #fff;
+    }
+    .btn-bottom-action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-coupons-FEyekUA_.js"></script>
+  <script type="module" crossorigin src="/assets/admin-coupons-Ca2Iorxs.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-CkaXWeUD.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-CSqzwfnj.css">
 </head>
 <body>
   <div class="app-shell">
@@ -187,86 +333,71 @@
         <div class="header-title-area">
           <span class="header-category">Coupon Management</span>
           <h1>쿠폰 관리</h1>
-          <p class="header-desc">발행처별 등록 상품과 연계된 쿠폰 배정 설정을 관리하고, 현장 결제 이후의 실시간 3단계 유통(발급·등록·사용) 흐름을 통합 모니터링합니다.</p>
+          <p class="header-desc">발행처에서 결제 발급된 쿠폰의 실시간 등록 및 사용 내역을 확인합니다.</p>
         </div>
       </header>
 
-      <!-- ── 1. 상단 테이블: 발행처별 등록 상품 및 쿠폰 배정 설정 (사전 셋팅) ── -->
-      <div class="section-header-wrap">
-        <h2 class="section-title">발행처별 등록 상품 및 쿠폰 배정 설정</h2>
-        <button class="btn btn-neutral-outline btn-sm" style="height: 36px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;" onclick="location.href='allocate-coupon.html'">
-          쿠폰 배정하기
-        </button>
-      </div>
-
-      <div class="admin-card">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th style="width: 18%; text-align: left;">발행처</th>
-              <th style="width: 22%; text-align: left;">등록 상품</th>
-              <th style="width: 14%; text-align: right;">상품 금액</th>
-              <th style="width: 14%; text-align: center;">발급 쿠폰</th>
-              <th style="width: 11%; text-align: right;">지정 쿠폰 수</th>
-              <th style="width: 11%; text-align: right;">미발급 잔여</th>
-              <th style="width: 10%; text-align: center;">관리</th>
-            </tr>
-          </thead>
-          <tbody id="issuer-settings-list">
-            <tr><td colspan="7" class="text-center" style="padding: 36px; color:#64748b;">설정 데이터를 불러오는 중입니다...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="section-divider"></div>
-
-      <!-- ── 2. 하단 테이블: 쿠폰 실시간 발급 및 사용 내역 (구매 발생 이후 유통 흐름) ── -->
-      <div class="section-header-wrap">
-        <h2 class="section-title">쿠폰 실시간 발급 및 사용 내역</h2>
-      </div>
-
-      <!-- 필터 영역 -->
-      <div class="filter-bar" style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px; justify-content: space-between; flex-wrap: wrap;">
-        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+      <!-- 상단 타이틀 및 필터 영역 -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 8px; flex-wrap: wrap; gap: 12px;">
+        <h2 class="table-title">쿠폰 실시간 발급 및 사용 내역</h2>
+        <div class="filter-bar" style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">진행 단계 :</span>
-            <select id="filter-status" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 130px; outline: none;">
-              <option value="all">전체 단계</option>
-              <option value="stage1">1단계: 쿠폰 발급 (미등록 대기)</option>
-              <option value="stage2">2단계: 쿠폰 등록 (지갑 수령)</option>
-              <option value="stage3">3단계: 쿠폰 사용 (결제 완료)</option>
+            <span style="font-size: 0.88rem; font-weight: 600; color: #475569;">상태 :</span>
+            <select id="filter-status" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 130px; outline: none;">
+              <option value="all">전체 상태</option>
+              <option value="stage1">미등록</option>
+              <option value="stage2">등록 완료</option>
+              <option value="stage3">사용 완료</option>
             </select>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">발행처 :</span>
-            <select id="filter-issuer" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 140px; outline: none;">
+            <span style="font-size: 0.88rem; font-weight: 600; color: #475569;">발행처 :</span>
+            <select id="filter-issuer" onchange="window.filterCoupons()" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; background: #fff; color: var(--text-primary); cursor: pointer; min-width: 140px; outline: none;">
               <option value="all">전체 발행처</option>
             </select>
           </div>
         </div>
       </div>
 
-      <!-- 하단 트랜잭션 테이블 -->
-      <div class="admin-card">
+      <!-- 실시간 쿠폰 유통 내역 테이블 -->
+      <div class="table-container">
         <table class="admin-table">
           <thead>
             <tr>
-              <th style="width: 15%; text-align: left;">쿠폰 금액</th>
-              <th style="width: 20%; text-align: left;">소유자 (전화번호)</th>
-              <th style="width: 25%; text-align: left;">발행처 / 구매일시</th>
-              <th style="width: 18%; text-align: center;">진행 단계</th>
-              <th style="width: 22%; text-align: left;">사용처 / 결제일시</th>
+              <th style="width: 15%; text-align: center;">쿠폰 번호</th>
+              <th style="width: 12%; text-align: center;">상태</th>
+              <th style="width: 13%; text-align: center;">쿠폰 금액</th>
+              <th style="width: 12%; text-align: center;">소유자 번호</th>
+              <th style="width: 19%; text-align: center;">구매일시 / 발행처</th>
+              <th style="width: 19%; text-align: center;">결제일시 / 사용처</th>
+              <th style="width: 10%; text-align: center;">관리</th>
             </tr>
           </thead>
           <tbody id="coupon-status-list">
-            <tr><td colspan="5" class="text-center" style="padding: 36px; color:#64748b;">유통 내역 데이터를 불러오는 중입니다...</td></tr>
+            <tr><td colspan="7" class="text-center" style="padding: 40px; color: #64748b;">유통 내역 데이터를 불러오는 중입니다...</td></tr>
           </tbody>
         </table>
+        <div id="coupon-pagination" class="pagination-bar" style="display: none;">
+          <div id="pagination-info" class="pagination-info"></div>
+          <div id="pagination-controls" class="pagination-controls"></div>
+        </div>
       </div>
     </main>
   </div>
 
+  <!-- 쿠폰 상세 및 관리 모달 -->
+  <div id="coupon-manage-modal" class="coupon-modal-backdrop" onclick="if (event.target === this) window.closeCouponManageModal()">
+    <div class="coupon-modal-box">
+      <div class="coupon-modal-header">
+        <h3>쿠폰 상세 정보</h3>
+        <button type="button" class="coupon-modal-close" onclick="window.closeCouponManageModal()" aria-label="닫기">&times;</button>
+      </div>
+      <div class="coupon-modal-body" id="coupon-modal-body">
+      </div>
+    </div>
+  </div>
+
   <div id="toast-container"></div>
-
+
 </body>
 </html>

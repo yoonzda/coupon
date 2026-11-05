@@ -36,10 +36,10 @@
       width: 100%;
     }
     .form-group label {
-      font-size: 0.92rem; /* 크기 확대 (기존 0.82rem) */
+      font-size: 0.92rem;
       font-weight: 600;
       color: #334155;
-      margin-bottom: 10px; /* 간격 살짝 띄움 (기존 7px) */
+      margin-bottom: 10px;
       text-align: left;
       padding-left: 2px;
       display: block;
@@ -69,7 +69,7 @@
     }
     .form-group input:focus {
       border-color: #0284c7;
-      box-shadow: none !important; /* 그림자 완전 제거 */
+      box-shadow: none !important;
       outline: none;
     }
     .btn-submit {
@@ -80,7 +80,7 @@
       border: none;
       border-radius: 8px;
       font-size: 0.96rem;
-      font-weight: 500 !important; /* 굵지 않고 단정한 얇은 굵기 */
+      font-weight: 500 !important;
       cursor: pointer;
       box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2);
       transition: opacity 0.15s ease, transform 0.15s ease;
@@ -162,7 +162,6 @@
     .btn-sns-circle:active {
       transform: translateY(0);
     }
-    /* 아이콘 시각적 크기 및 비율 균형 보정 */
     .btn-kakao {
       background-color: #FEE500;
       color: #191919;
@@ -183,9 +182,9 @@
       margin-top: 10px;
     }
     .link-explore {
-      font-size: 0.8rem; /* 더 작은 글씨 */
+      font-size: 0.8rem;
       font-weight: 400;
-      color: #94a3b8; /* 더 연한 톤 */
+      color: #94a3b8;
       text-decoration: underline;
       text-underline-offset: 4px;
       text-decoration-color: #e2e8f0;
@@ -196,7 +195,6 @@
       color: #64748b;
       text-decoration-color: #94a3b8;
     }
-    /* 단계별 스텝 화면 전환 스타일 */
     .auth-step-view {
       width: 100%;
       animation: stepFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -336,10 +334,12 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { api, showToast, setTokens } from '../shared/js/api.js';
+    import { api, showToast, setTokens, clearTokens } from '../shared/js/api.js';
 
-    // 소셜 로그인 실패 시 에러 토스트 처리
+    // 소셜 로그인 실패 시 에러 토스트 처리 및 QR 스캔 파라미터 추출
     const urlParams = new URLSearchParams(window.location.search);
+    const qrToken = urlParams.get('token');
+    const kioskSessionId = urlParams.get('kioskSessionId');
     const errorParam = urlParams.get('error') || urlParams.get('notice');
     if (errorParam) {
       if (errorParam.includes('kakao') || errorParam.includes('naver') || errorParam.includes('google')) {
@@ -358,10 +358,37 @@
       });
     });
 
-    // 이미 유효한 토큰이 있다면 쿠폰함으로 이동
+    // 이미 유효한 토큰이 있다면: QR 스캔 진입 시 즉시 쿠폰 자동 등록 후 이동, 일반 진입 시 바로 쿠폰함 이동
     const token = localStorage.getItem('ongjin_token');
     if (token) {
-      window.location.href = '/tourist/mypage.html';
+      if (qrToken) {
+        (async () => {
+          try {
+            const issueRes = await api.post('/coupon/issue-by-qr', {
+              token: qrToken,
+              kioskSessionId
+            });
+            if (issueRes && issueRes.success) {
+              showToast(issueRes.message || '쿠폰이 지갑에 자동 등록되었습니다.', 'info');
+            }
+            setTimeout(() => {
+              window.location.href = '/tourist/mypage.html';
+            }, 350);
+          } catch (err) {
+            if (err.status === 401 || err.status === 403 || (err.message && err.message.includes('인증'))) {
+              // 만료된 로그인 토큰이면 비우고 현재 로그인 화면에서 인증 후 자동 등록 진행
+              clearTokens();
+            } else {
+              showToast(err.message || '이미 수령되었거나 만료된 쿠폰입니다.', 'error');
+              setTimeout(() => {
+                window.location.href = '/tourist/mypage.html';
+              }, 700);
+            }
+          }
+        })();
+      } else {
+        window.location.href = '/tourist/mypage.html';
+      }
     }
 
     const stepPhone = document.getElementById('step-phone');
@@ -568,7 +595,26 @@
           stopOtpTimer();
           setTokens(res.token, res.refresh);
           localStorage.setItem('ongjin_user_phone', phoneInput.value);
-          showToast('인증 완료! 쿠폰 지갑으로 이동합니다.', 'info');
+
+          // QR 스캔을 통해 로그인 페이지로 들어온 경우 로그인 즉시 쿠폰 자동 등록 연동
+          if (qrToken) {
+            try {
+              const issueRes = await api.post('/coupon/issue-by-qr', {
+                token: qrToken,
+                kioskSessionId
+              });
+              if (issueRes && issueRes.success) {
+                showToast(issueRes.message || '인증 및 쿠폰 등록 완료! 지갑으로 이동합니다.', 'info');
+              } else {
+                showToast('인증 완료! 쿠폰 지갑으로 이동합니다.', 'info');
+              }
+            } catch (issueErr) {
+              showToast(issueErr.message || '인증 완료! 쿠폰 지갑으로 이동합니다.', 'info');
+            }
+          } else {
+            showToast('인증 완료! 쿠폰 지갑으로 이동합니다.', 'info');
+          }
+
           setTimeout(() => {
             window.location.href = '/tourist/mypage.html';
           }, 400);

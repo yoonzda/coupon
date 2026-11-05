@@ -10,6 +10,20 @@
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
         document.documentElement.classList.add('sidebar-collapsed');
       }
+      var cached = sessionStorage.getItem('ongjin_sidebar_cache');
+      if (cached) {
+        var obs = new MutationObserver(function() {
+          var sb = document.querySelector('.admin-sidebar');
+          if (sb) {
+            obs.disconnect();
+            if (!sb.innerHTML.trim()) {
+              sb.innerHTML = cached;
+              sb.dataset.prehydrated = 'true';
+            }
+          }
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+      }
     })();
   </script>
   <style>
@@ -71,11 +85,11 @@
       pointer-events: none;
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-allocate-coupon-UrMlxlXg.js"></script>
+  <script type="module" crossorigin src="/assets/admin-allocate-coupon-BJ-_qwdR.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-CkaXWeUD.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-CSqzwfnj.css">
 </head>
 <body>
   <div class="app-shell">
@@ -86,15 +100,15 @@
     <main class="admin-content">
       <header class="dashboard-header">
         <div class="header-title-area">
-          <span class="header-category">Coupon Management</span>
-          <h1>쿠폰 관리</h1>
-          <p class="header-desc">종이 쿠폰용 난수 일괄 발행과 함께 전체 디지털/종이 쿠폰의 실시간 발급 및 사용(결제) 현황을 모니터링합니다.</p>
+          <span class="header-category">Issuer Management</span>
+          <h1>발행처 관리</h1>
+          <p class="header-desc">옹진군 관광지 발행처를 등록하고 각 발행처의 발급 쿠폰 배정 수량을 관리합니다.</p>
         </div>
       </header>
 
       <div class="subpage-title-area">
         <div class="back-link-container">
-          <a href="coupons.html" class="back-link">
+          <a href="issuers.html" class="back-link">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 16px; height: 16px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>

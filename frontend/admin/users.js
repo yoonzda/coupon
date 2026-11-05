@@ -30,7 +30,7 @@ function getMaskedPhone(nickname) {
 function renderUsers(users) {
   tbody.innerHTML = '';
   if (users.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" class="table-placeholder">등록된 회원이 없습니다.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="3" class="text-center" style="padding: 40px; color: #64748b;">등록된 회원이 없습니다.</td></tr>';
     return;
   }
 
@@ -46,11 +46,11 @@ function renderUsers(users) {
     const regDateStr = u.created_at ? new Date(u.created_at).toLocaleString('ko-KR') : '—';
 
     tr.innerHTML = `
-      <td class="user-nickname">${phoneStr}</td>
-      <td class="user-phone">${regDateStr}</td>
+      <td style="font-weight: 700; color: var(--text-primary);">${phoneStr}</td>
+      <td style="color: var(--text-secondary);">${regDateStr}</td>
       <td>
         <div class="admin-table-actions">
-          <a href="detail-user.html?id=${u.id}" class="btn-table-edit">상세 보기</a>
+          <a href="detail-user.html?id=${u.id}" class="btn-table-edit">상세보기</a>
           <button class="btn-table-delete" onclick="window.deleteUser(event, ${u.id})">탈퇴</button>
         </div>
       </td>

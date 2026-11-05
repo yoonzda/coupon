@@ -43,46 +43,6 @@ router.get('/dashboard', authenticate, authorize('admin'), async (req, res, next
   } catch (err) { next(err); }
 });
 
-// ── 대시보드 통계 (3단계 쿠폰 라이프사이클 & 예산 4대 지표) ─────────────────────────────────
-router.get('/dashboard', authenticate, authorize('admin'), async (req, res, next) => {
-  try {
-    const [[couponStats]] = await pool.execute(
-      `SELECT
-         COUNT(*) AS total_issued,
-         SUM(face_value) AS total_face_value,
-         SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END) AS total_used,
-         SUM(CASE WHEN status = 'used' THEN face_value ELSE 0 END) AS total_used_value
-       FROM coupons`
-    );
-    const [[merchantStats]] = await pool.execute(
-      `SELECT
-         COUNT(*) AS total,
-         SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
-         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending
-       FROM merchants`
-    );
-    const [dailyTrend] = await pool.execute(
-      `SELECT DATE(scanned_at) AS date, COUNT(*) AS count, SUM(amount) AS total
-       FROM coupon_transactions
-       WHERE scanned_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-       GROUP BY DATE(scanned_at)
-       ORDER BY date ASC`
-    );
-    const [fdsAlerts] = await pool.execute(
-      `SELECT * FROM fds_alerts WHERE resolved = 0 ORDER BY detected_at DESC LIMIT 10`
-    );
-
-    const recovery_rate = couponStats.total_issued > 0
-      ? ((couponStats.total_used / couponStats.total_issued) * 100).toFixed(1)
-      : 0;
-
-    res.json({
-      success: true,
-      data: { couponStats: { ...couponStats, recovery_rate }, merchantStats, dailyTrend, fdsAlerts },
-    });
-  } catch (err) { next(err); }
-});
-
 // ── 대시보드 요약 통계 (index.html용 - 3단계 라이프사이클 및 예산 4대 지표) ───────────────
 router.get('/stats/summary', authenticate, authorize('admin'), async (req, res, next) => {
   try {
@@ -107,21 +67,21 @@ router.get('/stats/summary', authenticate, authorize('admin'), async (req, res, 
       `SELECT COUNT(*) AS fdsCount FROM fds_alerts WHERE resolved = 0`
     );
 
-    // 3단계 쿠폰 카운트 집계
-    // 1단계 [쿠폰 발급]: 발행처 결제 발생으로 생성된 쿠폰 총 수량
-    // 2단계 [쿠폰 등록]: 관광객 본인인증으로 지갑 등록된 수량 (issued_to IS NOT NULL)
-    // 3단계 [쿠폰 사용]: 가맹점에서 결제 사용 완료된 수량 (status = 'used')
-    const [[{ stage1_issued }]] = await pool.execute(
-      `SELECT COALESCE(SUM(issued_count), 0) AS stage1_issued FROM issuer_allocations`
+    // 3단계 쿠폰 카운트 집계 (미등록 쿠폰 / 등록된 쿠폰 / 사용 완료 쿠폰 명확 구분)
+    const [[couponBreakdown]] = await pool.execute(
+      `SELECT
+         COUNT(*) AS total_coupons,
+         COALESCE(SUM(CASE WHEN issued_to IS NULL THEN 1 ELSE 0 END), 0) AS unregistered_count,
+         COALESCE(SUM(CASE WHEN issued_to IS NOT NULL THEN 1 ELSE 0 END), 0) AS registered_count,
+         COALESCE(SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END), 0) AS used_count
+       FROM coupons`
     );
-    const [[{ stage2_registered }]] = await pool.execute(
-      `SELECT COUNT(*) AS stage2_registered FROM coupons WHERE issued_to IS NOT NULL`
-    );
-    const [[{ stage3_used }]] = await pool.execute(
-      `SELECT COUNT(*) AS stage3_used FROM coupons WHERE status = 'used'`
-    );
+    const stage1_issued = Number(couponBreakdown.total_coupons) || 0;
+    const unregisteredCount = Number(couponBreakdown.unregistered_count) || 0;
+    const stage2_registered = Number(couponBreakdown.registered_count) || 0;
+    const stage3_used = Number(couponBreakdown.used_count) || 0;
 
-    // 예산 4대 회계 지표 계산 (기본 2,000,000원 설정)
+    // 예산 4대 회계 지표 계산 (배정 과정 제거: 총 사업 예산 / 실제 집행 예산 / 점유·예약 예산 / 잔여 예산)
     const [[settingRow]] = await pool.execute(
       `SELECT setting_value FROM system_settings WHERE setting_key = 'total_budget' LIMIT 1`
     );
@@ -131,16 +91,72 @@ router.get('/stats/summary', authenticate, authorize('admin'), async (req, res, 
     const [[{ executedBudget }]] = await pool.execute(
       `SELECT COALESCE(SUM(face_value), 0) AS executedBudget FROM coupons WHERE status = 'used'`
     );
-    // 발행처 배정 예산 (관리자가 각 발행처에 배정한 총 금액)
-    const [[{ allocatedBudget }]] = await pool.execute(
-      `SELECT COALESCE(SUM(face_value * total_count), 0) AS allocatedBudget FROM issuer_allocations`
-    );
     // 1단계 & 2단계 미사용 잠정 묶임 금액 (점유/예약 예산)
     const [[{ reservedBudget }]] = await pool.execute(
       `SELECT COALESCE(SUM(face_value), 0) AS reservedBudget FROM coupons WHERE status != 'used' AND status != 'expired'`
     );
-    // 추가 배정 가능 잔액 (집행 가능 잔여 예산)
-    const availableBudget = Math.max(0, totalBudget - Number(allocatedBudget));
+    // 잔여 예산 (총 사업 예산 - 실제 집행 예산 - 점유/예약 예산)
+    const usedOrReservedBudget = Number(executedBudget) + Number(reservedBudget);
+    const availableBudget = Math.max(0, totalBudget - usedOrReservedBudget);
+
+    // 대시보드 카드별 내역 조회 (등록된 쿠폰 / 미등록 쿠폰 분리 및 더보기 지원)
+    const [recentRegisteredCoupons] = await pool.execute(
+      `SELECT c.id, c.face_value, c.status, c.issued_at, c.issued_to,
+              i.name AS issuer_name, u.nickname AS user_phone
+       FROM coupons c
+       LEFT JOIN issuer_allocations ia ON c.issuer_allocation_id = ia.id
+       LEFT JOIN issuers i ON ia.issuer_id = i.id
+       LEFT JOIN users u ON c.issued_to = u.id
+       WHERE c.issued_to IS NOT NULL
+       ORDER BY c.issued_at DESC, c.id DESC
+       LIMIT 30`
+    );
+
+    const [recentUnregisteredCoupons] = await pool.execute(
+      `SELECT c.id, c.face_value, c.status, c.issued_at,
+              i.name AS issuer_name
+       FROM coupons c
+       LEFT JOIN issuer_allocations ia ON c.issuer_allocation_id = ia.id
+       LEFT JOIN issuers i ON ia.issuer_id = i.id
+       WHERE c.issued_to IS NULL
+       ORDER BY c.issued_at DESC, c.id DESC
+       LIMIT 30`
+    );
+
+    const [recentUsersRaw] = await pool.execute(
+      `SELECT id, social_provider, nickname, coupon_balance, created_at
+       FROM users
+       WHERE role = 'tourist'
+       ORDER BY created_at DESC, id DESC
+       LIMIT 30`
+    );
+    const recentUsers = recentUsersRaw.map(u => {
+      let phone = u.nickname || '미인증';
+      const clean = phone.replace(/[^0-9]/g, '');
+      if (clean.startsWith('010') && clean.length >= 10) {
+        phone = `${clean.substring(0, 3)}-****-${clean.substring(clean.length - 4)}`;
+      }
+      return { ...u, phone };
+    });
+
+    const [recentMerchants] = await pool.execute(
+      `SELECT id, name, category, status, applied_at
+       FROM merchants
+       ORDER BY applied_at DESC, id DESC
+       LIMIT 30`
+    );
+
+    const [[{ totalFdsCount }]] = await pool.execute(
+      `SELECT COUNT(*) AS totalFdsCount FROM fds_alerts`
+    );
+
+    const [recentFds] = await pool.execute(
+      `SELECT f.id, f.rule_id, f.detected_at, f.resolved, m.name AS merchant_name
+       FROM fds_alerts f
+       LEFT JOIN merchants m ON f.merchant_id = m.id
+       ORDER BY f.detected_at DESC
+       LIMIT 30`
+    );
 
     res.json({
       success: true,
@@ -150,19 +166,26 @@ router.get('/stats/summary', authenticate, authorize('admin'), async (req, res, 
       merchantCount,
       pendingCount,
       fdsCount,
-      // 3단계 파이프라인 수치
-      stage1_issued: Number(stage1_issued) || 0,
-      stage2_registered: Number(stage2_registered) || 0,
-      stage3_used: Number(stage3_used) || 0,
+      totalFdsCount: Number(totalFdsCount) || 0,
+      // 3단계 파이프라인 수치 (미등록 / 등록 구분)
+      stage1_issued,
+      unregisteredCount,
+      stage2_registered,
+      stage3_used,
       // 하위 호환 필드
-      couponIssued: Number(stage2_registered) || 0,
-      couponUsed: Number(stage3_used) || 0,
+      couponIssued: stage2_registered,
+      couponUsed: stage3_used,
       // 예산 지표
       totalBudget,
-      allocatedBudget: Number(allocatedBudget),
       executedBudget: Number(executedBudget),
       reservedBudget: Number(reservedBudget),
-      availableBudget
+      availableBudget,
+      // 카드 하단 최신 목록
+      recentRegisteredCoupons,
+      recentUnregisteredCoupons,
+      recentUsers,
+      recentMerchants,
+      recentFds
     });
   } catch (err) { next(err); }
 });
@@ -207,7 +230,6 @@ router.patch('/merchants/:id/status', authenticate, authorize('admin'), async (r
     }
 
     // 2. 상태 업데이트
-    // DB 스키마에 rejection_reason 필드가 있다고 가정 (없으면 에러 방지 위해 쿼리 구성 유의)
     await connection.execute(
       `UPDATE merchants SET 
         status = ?, 
@@ -220,7 +242,7 @@ router.patch('/merchants/:id/status', authenticate, authorize('admin'), async (r
 
     await connection.commit();
 
-    // 3. 알림 전송 (비동기 처리 - 응답 후 또는 별도 처리 권장되나 여기선 에러 핸들링 포함)
+    // 3. 알림 전송 (비동기 처리)
     const notificationService = require('../services/notificationService');
     notificationService.sendMerchantStatusNotification(
       merchant.phone, 
@@ -330,7 +352,7 @@ router.post('/settlements/generate', authenticate, authorize('admin'), async (re
     // 전월 쿠폰 사용 내역 집계
     const [merchants] = await connection.execute(
       `SELECT ct.merchant_id, m.name AS merchant_name,
-              SUM(ct.amount) AS total_amount, COUNT(*) AS tx_count
+               SUM(ct.amount) AS total_amount, COUNT(*) AS tx_count
        FROM coupon_transactions ct
        JOIN merchants m ON ct.merchant_id = m.id
        WHERE DATE_FORMAT(ct.scanned_at, '%Y-%m') = ?
@@ -370,35 +392,37 @@ router.get('/budget', authenticate, authorize('admin'), async (req, res, next) =
     const [settings] = await pool.execute(
       `SELECT setting_value, updated_at FROM system_settings WHERE setting_key = 'total_budget'`
     );
-    const totalBudget = settings.length > 0 ? Number(settings[0].setting_value) : 0;
+    const totalBudget = settings.length > 0 ? Number(settings[0].setting_value) : 2000000;
     const updatedAt = settings.length > 0 ? settings[0].updated_at : null;
 
-    const [allocations] = await pool.execute(
-      `SELECT SUM(face_value * total_count) AS allocated FROM issuer_allocations`
-    );
-    const allocatedBudget = allocations[0].allocated ? Number(allocations[0].allocated) : 0;
-    const remainingBudget = totalBudget - allocatedBudget;
-
-    // 실제 발행(발급) 완료된 쿠폰액 집계
+    // 실제 발행(발급) 완료된 유효 쿠폰액 집계 (만료 제외: 집행 예산 + 점유/예약 예산)
     const [issuedRes] = await pool.execute(
-      `SELECT SUM(face_value) AS issued FROM coupons`
+      `SELECT COALESCE(SUM(face_value), 0) AS issued FROM coupons WHERE status != 'expired'`
     );
     const issuedBudget = issuedRes[0].issued ? Number(issuedRes[0].issued) : 0;
 
-    // 실제 사용(결제) 완료된 쿠폰액 집계 (정산 대상 금액)
+    // 실제 사용(결제) 완료된 쿠폰액 집계 (실제 집행 예산)
     const [usedRes] = await pool.execute(
-      `SELECT SUM(face_value) AS used FROM coupons WHERE status = 'used'`
+      `SELECT COALESCE(SUM(face_value), 0) AS used FROM coupons WHERE status = 'used'`
     );
     const usedBudget = usedRes[0].used ? Number(usedRes[0].used) : 0;
+
+    // 점유/예약 예산 (발급/등록 대기 중인 쿠폰액)
+    const [reservedRes] = await pool.execute(
+      `SELECT COALESCE(SUM(face_value), 0) AS reserved FROM coupons WHERE status != 'used' AND status != 'expired'`
+    );
+    const reservedBudget = reservedRes[0].reserved ? Number(reservedRes[0].reserved) : 0;
+
+    const remainingBudget = Math.max(0, totalBudget - (usedBudget + reservedBudget));
 
     res.json({
       success: true,
       data: {
         totalBudget,
-        allocatedBudget,
         remainingBudget,
         issuedBudget,
         usedBudget,
+        reservedBudget,
         updatedAt
       }
     });
@@ -412,15 +436,15 @@ router.post('/budget', authenticate, authorize('admin'), async (req, res, next) 
     return res.status(400).json({ success: false, message: '올바른 예산 금액을 입력해주세요.' });
   }
   try {
-    const [allocations] = await pool.execute(
-      `SELECT SUM(face_value * total_count) AS allocated FROM issuer_allocations`
+    const [issuedRes] = await pool.execute(
+      `SELECT COALESCE(SUM(face_value), 0) AS active_total FROM coupons WHERE status != 'expired'`
     );
-    const allocatedBudget = allocations[0].allocated ? Number(allocations[0].allocated) : 0;
+    const activeTotal = issuedRes[0].active_total ? Number(issuedRes[0].active_total) : 0;
 
-    if (Number(totalBudget) < allocatedBudget) {
+    if (Number(totalBudget) < activeTotal) {
       return res.status(400).json({
         success: false,
-        message: `설정하려는 예산 금액(${Number(totalBudget).toLocaleString()}원)이 이미 배정된 쿠폰 예산 총액(${allocatedBudget.toLocaleString()}원)보다 작을 수 없습니다.`
+        message: `설정하려는 예산 금액(${Number(totalBudget).toLocaleString()}원)이 이미 발행된 쿠폰 총액(${activeTotal.toLocaleString()}원)보다 작을 수 없습니다.`
       });
     }
 
@@ -614,7 +638,6 @@ router.put('/managers/:id', authenticate, authorize('admin'), async (req, res, n
 // ── 관광객 회원 목록 조회 ───────────────────────────────────
 router.get('/users', authenticate, async (req, res, next) => {
   try {
-    // Both super and operator can access this route
     const [rows] = await pool.execute(
       `SELECT id, social_provider, nickname, email, phone_hash, coupon_balance, created_at 
        FROM users 
@@ -733,31 +756,15 @@ router.put('/issuance-rules', authenticate, authorize('admin'), async (req, res,
 router.get('/issuers', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const [issuers] = await pool.execute(
-      `SELECT id, username, name, phone, address, product_name, product_price, created_at FROM issuers ORDER BY created_at ASC`
+      `SELECT id, username, name, phone, address, product_name, product_price, created_at FROM issuers ORDER BY id ASC`
     );
     const [allocations] = await pool.execute(
       `SELECT id, issuer_id, face_value, total_count, issued_count, created_at 
        FROM issuer_allocations ORDER BY created_at ASC`
     );
     const [products] = await pool.execute(
-      `SELECT id, issuer_id, product_name, price, display_order FROM issuer_products ORDER BY display_order ASC, id ASC`
+      `SELECT id, issuer_id, product_name, price, off_season_price, display_order FROM issuer_products ORDER BY display_order ASC, id ASC`
     );
-    const [rules] = await pool.execute(
-      `SELECT min_amount, max_amount, face_value FROM coupon_issuance_rules ORDER BY display_order ASC`
-    );
-
-    const getCouponFaceValue = (price) => {
-      if (!rules || rules.length === 0) return null;
-      const p = Number(price);
-      for (const r of rules) {
-        const min = Number(r.min_amount);
-        const max = r.max_amount !== null && r.max_amount !== undefined ? Number(r.max_amount) : Infinity;
-        if (p >= min && p <= max) {
-          return Number(r.face_value);
-        }
-      }
-      return null;
-    };
 
     const issuersWithProducts = issuers.map(iss => {
       let issProds = products.filter(p => p.issuer_id === iss.id);
@@ -768,12 +775,13 @@ router.get('/issuers', authenticate, authorize('admin'), async (req, res, next) 
           issuer_id: iss.id,
           product_name: iss.product_name,
           price: iss.product_price || 0,
+          off_season_price: null,
           display_order: 1
         }];
       }
       const mappedProds = issProds.map(p => ({
         ...p,
-        coupon_face_value: getCouponFaceValue(p.price)
+        coupon_face_value: Number(p.price)
       }));
 
       return {
@@ -788,24 +796,34 @@ router.get('/issuers', authenticate, authorize('admin'), async (req, res, next) 
   }
 });
 
-// ── 2. 새 발행처 등록 (다중 상품 지원) ──
+// ── 2. 새 발행처 등록 (다중 상품 및 비수기 금액 지원) ──
 router.post('/issuers', authenticate, authorize('admin'), async (req, res, next) => {
   const { username, password, name, phone, address, products, productName, productPrice } = req.body;
-  if (!username || !password || !name) {
-    return res.status(400).json({ success: false, message: '아이디, 비밀번호, 기관명은 필수입니다.' });
+  const resolvedName = (name || '').trim();
+  const resolvedUsername = (username || resolvedName).trim();
+
+  if (!resolvedName || !password) {
+    return res.status(400).json({ success: false, message: '기관명과 비밀번호는 필수입니다.' });
   }
 
   // 복수 상품 목록 정규화
   let productList = [];
   if (Array.isArray(products) && products.length > 0) {
-    productList = products.map(p => ({
-      productName: (p.productName || p.product_name || '').trim(),
-      price: Number(String(p.price || 0).replace(/[^0-9]/g, ''))
-    })).filter(p => p.productName && !isNaN(p.price));
+    productList = products.map(p => {
+      const rawOff = p.offSeasonPrice !== undefined ? p.offSeasonPrice : p.off_season_price;
+      const offVal = (rawOff !== undefined && rawOff !== null && String(rawOff).trim() !== '')
+        ? Number(String(rawOff).replace(/[^0-9]/g, '')) || null
+        : null;
+      return {
+        productName: (p.productName || p.product_name || '').trim(),
+        price: Number(String(p.price || 0).replace(/[^0-9]/g, '')),
+        offSeasonPrice: offVal
+      };
+    }).filter(p => p.productName && !isNaN(p.price));
   } else if (productName && productPrice !== undefined) {
     const pPrice = Number(String(productPrice).replace(/[^0-9]/g, ''));
     if (productName.trim() && !isNaN(pPrice)) {
-      productList = [{ productName: productName.trim(), price: pPrice }];
+      productList = [{ productName: productName.trim(), price: pPrice, offSeasonPrice: null }];
     }
   }
 
@@ -820,21 +838,21 @@ router.post('/issuers', authenticate, authorize('admin'), async (req, res, next)
 
     const [result] = await pool.execute(
       `INSERT INTO issuers (username, password_hash, name, phone, address, product_name, product_price) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [username, hashedPassword, name, phone || null, address || null, firstProd.productName, firstProd.price]
+      [resolvedUsername, hashedPassword, resolvedName, phone || null, address || null, firstProd.productName, firstProd.price]
     );
     const issuerId = result.insertId;
 
     for (let i = 0; i < productList.length; i++) {
       await pool.execute(
-        `INSERT INTO issuer_products (issuer_id, product_name, price, display_order) VALUES (?, ?, ?, ?)`,
-        [issuerId, productList[i].productName, productList[i].price, i + 1]
+        `INSERT INTO issuer_products (issuer_id, product_name, price, off_season_price, display_order) VALUES (?, ?, ?, ?, ?)`,
+        [issuerId, productList[i].productName, productList[i].price, productList[i].offSeasonPrice, i + 1]
       );
     }
 
     res.json({ success: true, message: '발행처가 등록되었습니다.', data: { id: issuerId } });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
-      return res.status(400).json({ success: false, message: '이미 존재하는 발행처 아이디입니다.' });
+      return res.status(400).json({ success: false, message: '이미 존재하는 발행처입니다.' });
     }
     next(err);
   }
@@ -853,27 +871,13 @@ router.get('/issuers/:id', authenticate, authorize('admin'), async (req, res, ne
     }
 
     const [products] = await pool.execute(
-      `SELECT id, product_name, price, display_order FROM issuer_products WHERE issuer_id = ? ORDER BY display_order ASC, id ASC`,
+      `SELECT id, product_name, price, off_season_price, display_order FROM issuer_products WHERE issuer_id = ? ORDER BY display_order ASC, id ASC`,
       [id]
     );
-    const [rules] = await pool.execute(
-      `SELECT min_amount, max_amount, face_value FROM coupon_issuance_rules ORDER BY display_order ASC`
-    );
-
-    const getCouponFaceValue = (price) => {
-      if (!rules || rules.length === 0) return null;
-      const p = Number(price);
-      for (const r of rules) {
-        const min = Number(r.min_amount);
-        const max = r.max_amount !== null && r.max_amount !== undefined ? Number(r.max_amount) : Infinity;
-        if (p >= min && p <= max) return Number(r.face_value);
-      }
-      return null;
-    };
 
     let mappedProds = products.map(p => ({
       ...p,
-      coupon_face_value: getCouponFaceValue(p.price)
+      coupon_face_value: Number(p.price)
     }));
 
     if (mappedProds.length === 0 && rows[0].product_name) {
@@ -881,8 +885,9 @@ router.get('/issuers/:id', authenticate, authorize('admin'), async (req, res, ne
         id: 0,
         product_name: rows[0].product_name,
         price: rows[0].product_price || 0,
+        off_season_price: null,
         display_order: 1,
-        coupon_face_value: getCouponFaceValue(rows[0].product_price)
+        coupon_face_value: Number(rows[0].product_price || 0)
       }];
     }
 
@@ -890,16 +895,18 @@ router.get('/issuers/:id', authenticate, authorize('admin'), async (req, res, ne
   } catch (err) { next(err); }
 });
 
-// ── 2.6 발행처 정보 수정 (복수 상품 지원) ──
+// ── 2.6 발행처 정보 수정 (복수 상품 및 비수기 금액 지원) ──
 router.put('/issuers/:id', authenticate, authorize('admin'), async (req, res, next) => {
   const { id } = req.params;
-  const { name, phone, address, password, products, productName, productPrice } = req.body;
-  if (!name) {
+  const { name, username, phone, address, password, products, productName, productPrice } = req.body;
+  const resolvedName = (name || '').trim();
+  if (!resolvedName) {
     return res.status(400).json({ success: false, message: '기관명을 입력해주세요.' });
   }
   try {
-    const updateFields = ['name = ?'];
-    const updateParams = [name];
+    const resolvedUsername = (username || resolvedName).trim();
+    const updateFields = ['name = ?', 'username = ?'];
+    const updateParams = [resolvedName, resolvedUsername];
 
     if (phone !== undefined) {
       updateFields.push('phone = ?');
@@ -913,14 +920,21 @@ router.put('/issuers/:id', authenticate, authorize('admin'), async (req, res, ne
     // 복수 상품 목록 정규화
     let productList = [];
     if (Array.isArray(products)) {
-      productList = products.map(p => ({
-        productName: (p.productName || p.product_name || '').trim(),
-        price: Number(String(p.price || 0).replace(/[^0-9]/g, ''))
-      })).filter(p => p.productName && !isNaN(p.price));
+      productList = products.map(p => {
+        const rawOff = p.offSeasonPrice !== undefined ? p.offSeasonPrice : p.off_season_price;
+        const offVal = (rawOff !== undefined && rawOff !== null && String(rawOff).trim() !== '')
+          ? Number(String(rawOff).replace(/[^0-9]/g, '')) || null
+          : null;
+        return {
+          productName: (p.productName || p.product_name || '').trim(),
+          price: Number(String(p.price || 0).replace(/[^0-9]/g, '')),
+          offSeasonPrice: offVal
+        };
+      }).filter(p => p.productName && !isNaN(p.price));
     } else if (productName && productPrice !== undefined) {
       const pPrice = Number(String(productPrice).replace(/[^0-9]/g, ''));
       if (productName.trim() && !isNaN(pPrice)) {
-        productList = [{ productName: productName.trim(), price: pPrice }];
+        productList = [{ productName: productName.trim(), price: pPrice, offSeasonPrice: null }];
       }
     }
 
@@ -932,8 +946,8 @@ router.put('/issuers/:id', authenticate, authorize('admin'), async (req, res, ne
       await pool.execute(`DELETE FROM issuer_products WHERE issuer_id = ?`, [id]);
       for (let i = 0; i < productList.length; i++) {
         await pool.execute(
-          `INSERT INTO issuer_products (issuer_id, product_name, price, display_order) VALUES (?, ?, ?, ?)`,
-          [id, productList[i].productName, productList[i].price, i + 1]
+          `INSERT INTO issuer_products (issuer_id, product_name, price, off_season_price, display_order) VALUES (?, ?, ?, ?, ?)`,
+          [id, productList[i].productName, productList[i].price, productList[i].offSeasonPrice, i + 1]
         );
       }
     }
@@ -958,18 +972,21 @@ router.put('/issuers/:id', authenticate, authorize('admin'), async (req, res, ne
 router.delete('/issuers/:id', authenticate, authorize('admin'), async (req, res, next) => {
   const { id } = req.params;
   try {
-    const [allocations] = await pool.execute(
-      `SELECT id FROM issuer_allocations WHERE issuer_id = ?`,
+    const [issuedCoupons] = await pool.execute(
+      `SELECT c.id
+       FROM coupons c
+       JOIN issuer_allocations ia ON c.issuer_allocation_id = ia.id
+       WHERE ia.issuer_id = ?
+       LIMIT 1`,
       [id]
     );
-    if (allocations.length > 0) {
-      return res.status(400).json({ success: false, message: '배정된 쿠폰 내역이 존재하는 발행처는 삭제할 수 없습니다.' });
+    if (issuedCoupons.length > 0) {
+      return res.status(400).json({ success: false, message: '이미 발급된 쿠폰 내역이 존재하는 발행처는 삭제할 수 없습니다.' });
     }
-    
-    await pool.execute(
-      `DELETE FROM issuers WHERE id = ?`,
-      [id]
-    );
+
+    await pool.execute(`DELETE FROM issuer_allocations WHERE issuer_id = ?`, [id]);
+    await pool.execute(`DELETE FROM issuer_products WHERE issuer_id = ?`, [id]);
+    await pool.execute(`DELETE FROM issuers WHERE id = ?`, [id]);
     res.json({ success: true, message: '발행처가 삭제되었습니다.' });
   } catch (err) { next(err); }
 });
@@ -1029,25 +1046,11 @@ router.get('/coupons/issuer-settings', authenticate, authorize('admin'), async (
       `SELECT id, name, username, phone, address, product_name, product_price FROM issuers ORDER BY id ASC`
     );
     const [products] = await pool.execute(
-      `SELECT id, issuer_id, product_name, price, display_order FROM issuer_products ORDER BY display_order ASC, id ASC`
-    );
-    const [rules] = await pool.execute(
-      `SELECT min_amount, max_amount, face_value, rule_name FROM coupon_issuance_rules ORDER BY display_order ASC`
+      `SELECT id, issuer_id, product_name, price, off_season_price, display_order FROM issuer_products ORDER BY display_order ASC, id ASC`
     );
     const [allocations] = await pool.execute(
       `SELECT id, issuer_id, face_value, total_count, issued_count FROM issuer_allocations`
     );
-
-    const getCouponFaceValue = (price) => {
-      if (!rules || rules.length === 0) return null;
-      const p = Number(price);
-      for (const r of rules) {
-        const min = Number(r.min_amount);
-        const max = r.max_amount !== null && r.max_amount !== undefined ? Number(r.max_amount) : Infinity;
-        if (p >= min && p <= max) return Number(r.face_value);
-      }
-      return null;
-    };
 
     let totalAllocatedSum = 0;
     let totalIssuedSum = 0;
@@ -1061,16 +1064,22 @@ router.get('/coupons/issuer-settings', authenticate, authorize('admin'), async (
           issuer_id: iss.id,
           product_name: iss.product_name,
           price: iss.product_price || 0,
+          off_season_price: null,
           display_order: 1
         }];
       }
 
-      // 발행처별 상품 목록 매핑
+      // 발행처별 상품 목록 매핑 (단일 상품 기준, 비수기 금액 유무 포함)
       const prodsMapped = issProds.map(prod => {
-        const faceVal = getCouponFaceValue(prod.price);
-        const alloc = allocations.find(a => a.issuer_id === iss.id && Number(a.face_value) === Number(faceVal));
-        const totalCount = alloc ? Number(alloc.total_count) : 0;
-        const issuedCount = alloc ? Number(alloc.issued_count) : 0;
+        const faceVal = Number(prod.price);
+        const offVal = prod.off_season_price && Number(prod.off_season_price) > 0 ? Number(prod.off_season_price) : null;
+        const alloc = allocations.find(a => a.issuer_id === iss.id && Number(a.face_value) === faceVal);
+        const offAlloc = (offVal && offVal !== faceVal)
+          ? allocations.find(a => a.issuer_id === iss.id && Number(a.face_value) === offVal)
+          : null;
+
+        const totalCount = (alloc ? Number(alloc.total_count) : 0) + (offAlloc ? Number(offAlloc.total_count) : 0);
+        const issuedCount = (alloc ? Number(alloc.issued_count) : 0) + (offAlloc ? Number(offAlloc.issued_count) : 0);
         const remainingCount = Math.max(0, totalCount - issuedCount);
 
         totalAllocatedSum += totalCount;
@@ -1080,7 +1089,8 @@ router.get('/coupons/issuer-settings', authenticate, authorize('admin'), async (
         return {
           productId: prod.id,
           productName: prod.product_name,
-          productPrice: prod.price,
+          productPrice: faceVal,
+          offSeasonPrice: offVal,
           couponFaceValue: faceVal,
           allocationId: alloc ? alloc.id : null,
           totalCount,
@@ -1153,10 +1163,15 @@ router.get('/coupons/issuer-settings', authenticate, authorize('admin'), async (
 router.get('/coupons/status-list', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const [rows] = await pool.execute(
-      `SELECT c.id, c.code_hash, c.coupon_type, c.face_value, c.status, c.issued_at, c.used_at,
+      `SELECT c.id, c.code_hash, c.coupon_type, c.face_value, c.status, c.issued_to, c.issued_at, c.expires_at, c.used_at,
               COALESCE(u.nickname, u.provider_id, '- (미등록 대기)') AS tourist_phone,
               COALESCE(i.name, '발행처') AS issuer_name,
+              i.phone AS issuer_phone,
+              i.address AS issuer_address,
               COALESCE(m.name, '-') AS used_merchant_name,
+              COALESCE(m.store_phone, m.phone) AS used_merchant_phone,
+              m.address AS used_merchant_address,
+              m.category AS used_merchant_category,
               CASE
                 WHEN c.status = 'used' THEN '3단계: 쿠폰 사용'
                 WHEN c.issued_to IS NOT NULL THEN '2단계: 쿠폰 등록'
@@ -1168,10 +1183,223 @@ router.get('/coupons/status-list', authenticate, authorize('admin'), async (req,
        LEFT JOIN issuers i ON ia.issuer_id = i.id
        LEFT JOIN coupon_transactions ct ON c.id = ct.coupon_id
        LEFT JOIN merchants m ON ct.merchant_id = m.id
-       ORDER BY c.issued_at DESC LIMIT 200`
+       ORDER BY c.issued_at DESC, c.id DESC LIMIT 1000`
     );
     res.json({ success: true, data: rows });
   } catch (err) { next(err); }
+});
+
+// ── 4.1. 관리자 수동 번호 등록 (미등록 쿠폰 -> 등록 완료) ──
+router.post('/coupons/:id/register-phone', authenticate, authorize('admin'), async (req, res, next) => {
+  const couponId = req.params.id;
+  const { phone } = req.body;
+  const cleanDigits = String(phone || '').replace(/\D/g, '');
+  if (!/^01[0-9]{8,9}$/.test(cleanDigits)) {
+    return res.status(400).json({ success: false, message: '올바른 휴대폰 번호(010-XXXX-XXXX)를 입력해 주세요.' });
+  }
+
+  const formattedPhone = cleanDigits.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3');
+  const { hashPhone } = require('../utils/crypto');
+  const phoneHash = hashPhone(cleanDigits);
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [[coupon]] = await connection.execute(
+      `SELECT id, face_value, status, issued_to FROM coupons WHERE id = ? FOR UPDATE`,
+      [couponId]
+    );
+    if (!coupon) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: '해당 쿠폰을 찾을 수 없습니다.' });
+    }
+    if (coupon.status === 'used') {
+      await connection.rollback();
+      return res.status(400).json({ success: false, message: '이미 사용 완료된 쿠폰입니다.' });
+    }
+    if (coupon.issued_to !== null) {
+      await connection.rollback();
+      return res.status(400).json({ success: false, message: '이미 소유자 번호가 등록된 쿠폰입니다.' });
+    }
+
+    let [users] = await connection.execute(
+      `SELECT id, nickname FROM users WHERE (social_provider = 'phone' AND provider_id = ?) OR phone_hash = ? LIMIT 1`,
+      [formattedPhone, phoneHash]
+    );
+    let user = users[0];
+    if (!user) {
+      const [ins] = await connection.execute(
+        `INSERT INTO users (social_provider, provider_id, nickname, phone_hash, coupon_balance, role)
+         VALUES ('phone', ?, ?, ?, 0, 'tourist')`,
+        [formattedPhone, formattedPhone, phoneHash]
+      );
+      user = { id: ins.insertId, nickname: formattedPhone };
+    }
+
+    await connection.execute(
+      `UPDATE coupons SET issued_to = ? WHERE id = ?`,
+      [user.id, coupon.id]
+    );
+    await connection.execute(
+      `UPDATE users SET coupon_balance = coupon_balance + ? WHERE id = ?`,
+      [coupon.face_value, user.id]
+    );
+
+    await connection.commit();
+    res.json({
+      success: true,
+      message: `${formattedPhone} 번호로 쿠폰이 등록되었습니다.`,
+      data: { phone: formattedPhone }
+    });
+  } catch (err) {
+    await connection.rollback();
+    next(err);
+  } finally {
+    connection.release();
+  }
+});
+
+// ── 4.2. 관리자 쿠폰 발급 취소 (쿠폰 폐기 및 예산 환원) ──
+router.post('/coupons/:id/revoke', authenticate, authorize('admin'), async (req, res, next) => {
+  const couponId = req.params.id;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [[coupon]] = await connection.execute(
+      `SELECT id, face_value, status, issued_to, issuer_allocation_id FROM coupons WHERE id = ? FOR UPDATE`,
+      [couponId]
+    );
+    if (!coupon) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: '해당 쿠폰을 찾을 수 없습니다.' });
+    }
+
+    if (coupon.status === 'used') {
+      await connection.execute(`DELETE FROM coupon_transactions WHERE coupon_id = ?`, [coupon.id]);
+    } else if (coupon.issued_to) {
+      await connection.execute(
+        `UPDATE users SET coupon_balance = GREATEST(0, coupon_balance - ?) WHERE id = ?`,
+        [coupon.face_value, coupon.issued_to]
+      );
+    }
+
+    if (coupon.issuer_allocation_id) {
+      await connection.execute(
+        `UPDATE issuer_allocations SET issued_count = GREATEST(0, issued_count - 1) WHERE id = ?`,
+        [coupon.issuer_allocation_id]
+      );
+    }
+
+    await connection.execute(`DELETE FROM coupons WHERE id = ?`, [coupon.id]);
+
+    await connection.commit();
+    res.json({
+      success: true,
+      message: `쿠폰 발급이 취소되었으며 ${Number(coupon.face_value).toLocaleString()}원이 잔여 예산으로 환원되었습니다.`
+    });
+  } catch (err) {
+    await connection.rollback();
+    next(err);
+  } finally {
+    connection.release();
+  }
+});
+
+// ── 4.25. 관리자 쿠폰 수동 사용 완료 처리 ──
+router.post('/coupons/:id/mark-used', authenticate, authorize('admin'), async (req, res, next) => {
+  const couponId = req.params.id;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [[coupon]] = await connection.execute(
+      `SELECT id, face_value, status, issued_to FROM coupons WHERE id = ? FOR UPDATE`,
+      [couponId]
+    );
+    if (!coupon) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: '해당 쿠폰을 찾을 수 없습니다.' });
+    }
+    if (coupon.status === 'used') {
+      await connection.rollback();
+      return res.status(400).json({ success: false, message: '이미 사용 완료된 쿠폰입니다.' });
+    }
+
+    await connection.execute(
+      `UPDATE coupons SET status = 'used', used_at = NOW() WHERE id = ?`,
+      [coupon.id]
+    );
+
+    if (coupon.issued_to) {
+      await connection.execute(
+        `UPDATE users SET coupon_balance = GREATEST(0, coupon_balance - ?) WHERE id = ?`,
+        [coupon.face_value, coupon.issued_to]
+      );
+    }
+
+    await connection.commit();
+    res.json({
+      success: true,
+      message: '쿠폰이 사용 완료 상태로 변경되었습니다.'
+    });
+  } catch (err) {
+    await connection.rollback();
+    next(err);
+  } finally {
+    connection.release();
+  }
+});
+
+// ── 4.3. 관리자 쿠폰 사용 취소 (사용 완료 -> 등록 완료 복구) ──
+router.post('/coupons/:id/cancel-use', authenticate, authorize('admin'), async (req, res, next) => {
+  const couponId = req.params.id;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [[coupon]] = await connection.execute(
+      `SELECT id, face_value, status, issued_to FROM coupons WHERE id = ? FOR UPDATE`,
+      [couponId]
+    );
+    if (!coupon) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: '해당 쿠폰을 찾을 수 없습니다.' });
+    }
+    if (coupon.status !== 'used') {
+      await connection.rollback();
+      return res.status(400).json({ success: false, message: '사용 완료 상태인 쿠폰만 사용 취소할 수 있습니다.' });
+    }
+
+    await connection.execute(
+      `DELETE FROM coupon_transactions WHERE coupon_id = ?`,
+      [coupon.id]
+    );
+
+    await connection.execute(
+      `UPDATE coupons SET status = 'available', used_at = NULL WHERE id = ?`,
+      [coupon.id]
+    );
+
+    if (coupon.issued_to) {
+      await connection.execute(
+        `UPDATE users SET coupon_balance = coupon_balance + ? WHERE id = ?`,
+        [coupon.face_value, coupon.issued_to]
+      );
+    }
+
+    await connection.commit();
+    res.json({
+      success: true,
+      message: '쿠폰 사용이 취소되어 다시 사용 가능한 상태로 복구되었습니다.'
+    });
+  } catch (err) {
+    await connection.rollback();
+    next(err);
+  } finally {
+    connection.release();
+  }
 });
 
 // ── 통계 보고서 데이터 (statistics.html용) ─────────
@@ -1233,7 +1461,6 @@ router.get('/stats/reports', authenticate, authorize('admin'), async (req, res, 
     for (const row of regionRows) {
       const addr = row.address || '';
       const parts = addr.split(' ');
-      // '면' 또는 '구' 등으로 끝나는 단어 찾기
       const region = parts.find(p => p.endsWith('면') || p.endsWith('구') || p.endsWith('동') || p.endsWith('군') || p.endsWith('시')) || '기타';
       regionMap[region] = (regionMap[region] || 0) + row.count;
     }

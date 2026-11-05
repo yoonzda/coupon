@@ -10,6 +10,20 @@
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
         document.documentElement.classList.add('sidebar-collapsed');
       }
+      var cached = sessionStorage.getItem('ongjin_sidebar_cache');
+      if (cached) {
+        var obs = new MutationObserver(function() {
+          var sb = document.querySelector('.admin-sidebar');
+          if (sb) {
+            obs.disconnect();
+            if (!sb.innerHTML.trim()) {
+              sb.innerHTML = cached;
+              sb.dataset.prehydrated = 'true';
+            }
+          }
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+      }
     })();
   </script>
   <link rel="stylesheet" href="../shared/css/main.css" />
@@ -19,6 +33,32 @@
       width: 100% !important; max-width: none !important; 
       background: #f1f5f9;
       color: #1e293b; 
+    }
+    .form-container {
+      max-width: 680px;
+      margin: 0;
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 0;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .form-container form {
+      max-width: none;
+      margin: 0;
+    }
+    .form-container .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .form-container .form-group label {
+      margin-bottom: 0;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.3;
     }
 
     .back-link {
@@ -41,29 +81,25 @@
       transform: translateX(-4px);
     }
 
-    /* 수정 버튼 호버 효과 (떠오르지 않고 색상 변화) */
     .btn-register-submit {
-      height: 42px;
+      height: 44px;
       padding: 0 24px;
       border-radius: 6px;
       font-weight: 600;
+      font-size: 0.95rem;
       cursor: pointer;
       background: #0f172a;
       color: #fff;
       border: none;
-      transition: background-color 0.25s ease, opacity 0.25s ease, box-shadow 0.25s ease;
+      transition: background-color 0.2s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
     .btn-register-submit:hover {
       background: #1e293b;
-      opacity: 0.95;
-      box-shadow: 0 0 10px rgba(15, 23, 42, 0.15);
     }
-    .btn-register-submit:active {
-      background: #0f172a;
-    }
+
     /* input-group & input-unit 스타일 */
     .input-group {
       position: relative;
@@ -84,7 +120,55 @@
       font-weight: 600;
       pointer-events: none;
     }
-    @media (max-width: 540px) {
+
+    /* 상품 행 내부 라벨 높이 및 정렬 통일 */
+    .product-item {
+      margin-bottom: 16px;
+    }
+    .prod-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 20px;
+    }
+    .off-season-check-label {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+      margin: 0 !important;
+    }
+    .form-container .form-group .off-season-check-label input[type="checkbox"] {
+      width: 15px !important;
+      height: 15px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      accent-color: #0f172a;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .form-container .form-group .prod-off-price-input:disabled {
+      background: #f1f5f9 !important;
+      color: #94a3b8 !important;
+      border-color: #e2e8f0 !important;
+      cursor: not-allowed;
+    }
+    .btn-prod-del {
+      background: none;
+      border: none;
+      color: #e11d48;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .btn-prod-del:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
       .product-grid-row {
         grid-template-columns: 1fr !important;
         gap: 12px !important;
@@ -103,7 +187,7 @@
         <div class="header-title-area">
           <span class="header-category">Issuer Management</span>
           <h1>발행처 관리</h1>
-          <p class="header-desc">발행처 계정을 생성하고 발행처를 등록하고 관리합니다. 각 발행처의 쿠폰 현황을 확인할 수 있습니다.</p>
+          <p class="header-desc">옹진군 관광지 발행처를 등록하고 각 발행처의 취급 상품 및 발급 쿠폰을 관리합니다.</p>
         </div>
       </header>
 
@@ -120,36 +204,26 @@
       </div>
 
       <div class="form-container">
-        
         <form id="form-edit-issuer" onsubmit="updateIssuer(event)">
           <div class="form-group">
             <label for="issuer-name">기관명</label>
             <input type="text" id="issuer-name" required />
           </div>
           <div class="form-group">
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
-              <label for="issuer-username" style="margin-bottom: 0 !important;">아이디</label>
-              <span style="font-size: 0.78rem; color: #94a3b8; font-weight: 500;">아이디는 수정할 수 없습니다</span>
-            </div>
-            <input type="text" id="issuer-username" readonly style="background: #e2e8f0 !important; cursor: not-allowed;" />
+            <label for="issuer-address">위치</label>
+            <input type="text" id="issuer-address" placeholder="예: 인천광역시 옹진군 자월면 자월서로 396-35" />
           </div>
           <div class="form-group">
             <label for="issuer-phone">전화번호</label>
             <input type="text" id="issuer-phone" placeholder="예: 032-899-3810" />
           </div>
           <div class="form-group">
-            <label for="issuer-address">위치</label>
-            <input type="text" id="issuer-address" placeholder="예: 인천광역시 옹진군 자월면 소야리" />
-          </div>
-          <div class="form-group">
             <label for="issuer-password">새 비밀번호</label>
             <input type="password" id="issuer-password" placeholder="변경 시에만 입력" />
           </div>
 
-          <!-- 상품 입력 영역 (상품명, 금액 2열 배치) -->
-          <div id="product-list-container">
-            <!-- dynamic products -->
-          </div>
+          <!-- 상품 입력 영역 -->
+          <div id="product-list-container"></div>
 
           <div style="margin-top: 4px; margin-bottom: 24px;">
             <button type="button" class="btn btn-neutral-outline btn-sm" onclick="window.addProductRow()" style="height: 36px; padding: 0 16px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
@@ -176,7 +250,6 @@
 
     await requireAdminAuth();
 
-    // 쿼리 파라미터 파싱
     const urlParams = new URLSearchParams(window.location.search);
     const issuerId = urlParams.get('id');
 
@@ -187,39 +260,52 @@
 
     const productContainer = document.getElementById('product-list-container');
 
-    window.addProductRow = function(name = '', price = '') {
+    window.addProductRow = function(name = '', price = '', offSeasonPrice = null) {
       const currentCount = productContainer.querySelectorAll('.product-item').length;
       const rowId = 'prod-item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
       const itemEl = document.createElement('div');
       itemEl.className = 'product-item';
       itemEl.id = rowId;
-      itemEl.style.marginBottom = '20px';
+
+      const hasOffSeason = (offSeasonPrice !== '' && offSeasonPrice !== null && offSeasonPrice !== undefined && Number(offSeasonPrice) > 0);
+      itemEl.dataset.hasOffSeason = hasOffSeason ? 'true' : 'false';
 
       const formattedPrice = (price !== '' && price !== null && price !== undefined)
         ? Number(price).toLocaleString('ko-KR')
         : '';
-
-      if (currentCount > 0) {
-        itemEl.style.marginTop = '20px';
-        itemEl.style.paddingTop = '18px';
-        itemEl.style.borderTop = '1px dashed #cbd5e1';
-      }
+      const formattedOffPrice = hasOffSeason
+        ? Number(offSeasonPrice).toLocaleString('ko-KR')
+        : '';
 
       itemEl.innerHTML = `
-        <div class="product-grid-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div class="product-grid-row" style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px;">
           <div class="form-group" style="margin-bottom: 0;">
-            <div style="display: flex; align-items: center; margin-bottom: 3px; min-height: 20px;">
-              <label style="margin-bottom: 0;">상품명</label>
+            <div class="prod-label-row">
+              <label>상품명</label>
             </div>
-            <input type="text" class="prod-name-input" placeholder="예: 입장권" required value="${escapeHtml(name)}" />
+            <input type="text" class="prod-name-input" placeholder="예: 투영관" required value="${escapeHtml(name)}" />
           </div>
           <div class="form-group" style="margin-bottom: 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; min-height: 20px;">
-              <label style="margin-bottom: 0;">금액</label>
-              ${currentCount > 0 ? `<button type="button" onclick="window.removeProductRow('${rowId}')" style="background: none; border: none; color: #be123c; font-size: 0.82rem; font-weight: 600; cursor: pointer; padding: 0 2px;">삭제</button>` : ''}
+            <div class="prod-label-row">
+              <label>쿠폰 금액</label>
             </div>
             <div class="input-group">
               <input type="text" class="prod-price-input" placeholder="0" required autocomplete="off" value="${formattedPrice}" />
+              <span class="input-unit">원</span>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <div class="prod-label-row">
+              <label class="off-season-check-label">
+                <input type="checkbox" class="prod-off-check" ${hasOffSeason ? 'checked' : ''} onchange="window.setProductSeasonMode('${rowId}', this.checked)" />
+                <span>비수기 금액</span>
+              </label>
+              <span class="prod-del-slot">
+                ${currentCount > 0 ? `<button type="button" class="btn-prod-del" onclick="window.removeProductRow('${rowId}')">삭제</button>` : ''}
+              </span>
+            </div>
+            <div class="input-group">
+              <input type="text" class="prod-off-price-input" placeholder="${hasOffSeason ? '0' : '없음'}" ${hasOffSeason ? '' : 'disabled'} autocomplete="off" value="${formattedOffPrice}" />
               <span class="input-unit">원</span>
             </div>
           </div>
@@ -228,11 +314,31 @@
 
       productContainer.appendChild(itemEl);
 
-      const priceInput = itemEl.querySelector('.prod-price-input');
-      priceInput.addEventListener('input', (e) => {
-        const clean = e.target.value.replace(/[^0-9]/g, '');
-        e.target.value = clean ? Number(clean).toLocaleString('ko-KR') : '';
+      itemEl.querySelectorAll('.prod-price-input, .prod-off-price-input').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const clean = e.target.value.replace(/[^0-9]/g, '');
+          e.target.value = clean ? Number(clean).toLocaleString('ko-KR') : '';
+        });
       });
+    };
+
+    window.setProductSeasonMode = function(rowId, enableOffSeason) {
+      const itemEl = document.getElementById(rowId);
+      if (!itemEl) return;
+      itemEl.dataset.hasOffSeason = enableOffSeason ? 'true' : 'false';
+
+      const offInput = itemEl.querySelector('.prod-off-price-input');
+      if (!offInput) return;
+
+      if (enableOffSeason) {
+        offInput.disabled = false;
+        offInput.placeholder = '0';
+        offInput.focus();
+      } else {
+        offInput.disabled = true;
+        offInput.value = '';
+        offInput.placeholder = '없음';
+      }
     };
 
     window.removeProductRow = function(rowId) {
@@ -250,10 +356,7 @@
       const items = productContainer.querySelectorAll('.product-item');
       items.forEach((item, index) => {
         if (index === 0) {
-          item.style.marginTop = '0';
-          item.style.paddingTop = '0';
-          item.style.borderTop = 'none';
-          const delBtn = item.querySelector('button[onclick*="removeProductRow"]');
+          const delBtn = item.querySelector('.btn-prod-del');
           if (delBtn) delBtn.remove();
         }
       });
@@ -270,7 +373,6 @@
         const res = await api.get(`/admin/issuers/${issuerId}`);
         if (res.success && res.data) {
           document.getElementById('issuer-name').value = res.data.name || '';
-          document.getElementById('issuer-username').value = res.data.username || '';
           document.getElementById('issuer-phone').value = res.data.phone || '';
           document.getElementById('issuer-address').value = res.data.address || '';
           
@@ -278,10 +380,10 @@
           const prods = res.data.products || [];
           if (prods.length > 0) {
             prods.forEach(p => {
-              window.addProductRow(p.product_name, p.price);
+              window.addProductRow(p.product_name, p.price, p.off_season_price);
             });
           } else if (res.data.product_name) {
-            window.addProductRow(res.data.product_name, res.data.product_price);
+            window.addProductRow(res.data.product_name, res.data.product_price, null);
           } else {
             window.addProductRow();
           }
@@ -305,22 +407,29 @@
         return;
       }
 
-      // 상품 목록 수집
       const productItems = productContainer.querySelectorAll('.product-item');
       const products = [];
       for (const item of productItems) {
         const pName = item.querySelector('.prod-name-input').value.trim();
         const pPriceRaw = item.querySelector('.prod-price-input').value.replace(/[^0-9]/g, '');
+        const hasOff = item.dataset.hasOffSeason === 'true';
+        const pOffPriceRaw = item.querySelector('.prod-off-price-input').value.replace(/[^0-9]/g, '');
+
         if (!pName || !pPriceRaw) {
-          showToast('모든 상품명과 금액을 입력해주세요.', 'error');
+          showToast('모든 상품명과 쿠폰 금액을 입력해주세요.', 'error');
+          return;
+        }
+        if (hasOff && !pOffPriceRaw) {
+          showToast('비수기 금액을 입력해주세요.', 'error');
           return;
         }
         const pPrice = Number(pPriceRaw);
+        const pOffPrice = (hasOff && pOffPriceRaw) ? Number(pOffPriceRaw) : null;
         if (isNaN(pPrice) || pPrice < 0) {
-          showToast('올바른 상품 금액을 입력해주세요.', 'error');
+          showToast('올바른 금액을 입력해주세요.', 'error');
           return;
         }
-        products.push({ productName: pName, price: pPrice });
+        products.push({ productName: pName, price: pPrice, offSeasonPrice: pOffPrice });
       }
 
       if (products.length === 0) {
@@ -331,6 +440,7 @@
       try {
         const payload = {
           name,
+          username: name,
           phone,
           address,
           products

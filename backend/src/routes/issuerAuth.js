@@ -18,29 +18,50 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// 성수기 판별 헬퍼 (한국시간 기준 7월 15일 ~ 8월 24일)
+function isPeakSeasonKST() {
+  const kstDate = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const month = kstDate.getUTCMonth() + 1;
+  const day = kstDate.getUTCDate();
+  return (month === 7 && day >= 15) || (month === 8 && day <= 24);
+}
+
+// ── GET /api/auth/issuer/list (발행처 로그인 드롭다운용 공개 목록) ──
+router.get('/list', async (req, res, next) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT id, name, address FROM issuers ORDER BY id ASC`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ── POST /api/auth/issuer/login ──
 router.post('/login', loginLimiter, async (req, res, next) => {
-  const { username, password } = req.body;
+  const { name, username, password } = req.body;
+  const loginKey = (name || username || '').trim();
 
-  if (!username || !password) {
-    return res.status(400).json({ success: false, message: '아이디와 비밀번호를 입력해주세요.' });
+  if (!loginKey || !password) {
+    return res.status(400).json({ success: false, message: '발행처를 선택하고 비밀번호를 입력해주세요.' });
   }
 
   try {
     const [[issuer]] = await pool.execute(
-      `SELECT id, username, password_hash, name FROM issuers WHERE username = ? LIMIT 1`,
-      [username]
+      `SELECT id, username, password_hash, name FROM issuers WHERE name = ? OR username = ? LIMIT 1`,
+      [loginKey, loginKey]
     );
 
     if (!issuer) {
-      logger.warn(`[IssuerAuth] 존재하지 않는 발행처 로그인 시도: ${username} [${req.ip}]`);
-      return res.status(401).json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+      logger.warn(`[IssuerAuth] 존재하지 않는 발행처 로그인 시도: ${loginKey} [${req.ip}]`);
+      return res.status(401).json({ success: false, message: '발행처 정보 또는 비밀번호가 올바르지 않습니다.' });
     }
 
     const isMatch = await bcrypt.compare(password, issuer.password_hash);
     if (!isMatch) {
-      logger.warn(`[IssuerAuth] 비밀번호 불일치: ${username} [${req.ip}]`);
-      return res.status(401).json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+      logger.warn(`[IssuerAuth] 비밀번호 불일치: ${loginKey} [${req.ip}]`);
+      return res.status(401).json({ success: false, message: '발행처 정보 또는 비밀번호가 올바르지 않습니다.' });
     }
 
     // 토큰 발급 (role: 'issuer')
@@ -50,7 +71,7 @@ router.post('/login', loginLimiter, async (req, res, next) => {
       { expiresIn: '8h' }
     );
 
-    logger.info(`[IssuerAuth] 로그인 성공: ${username} [${req.ip}]`);
+    logger.info(`[IssuerAuth] 로그인 성공: ${issuer.name} [${req.ip}]`);
     res.json({
       success: true,
       token,
@@ -90,7 +111,7 @@ router.get('/me', authenticate, authorize('issuer'), async (req, res) => {
   }
 });
 
-// ── GET /api/auth/issuer/allocations ──
+// ── GET /api/auth/issuer/allocations (발행처 쿠폰 발급 현황 요약) ──
 router.get('/allocations', authenticate, authorize('issuer'), async (req, res, next) => {
   try {
     const [rows] = await pool.execute(
@@ -100,7 +121,27 @@ router.get('/allocations', authenticate, authorize('issuer'), async (req, res, n
        ORDER BY created_at DESC`,
       [req.user.id]
     );
-    res.json({ success: true, data: rows });
+
+    const [[stats]] = await pool.execute(
+      `SELECT
+         COUNT(c.id) AS total_issued_count,
+         COALESCE(SUM(c.face_value), 0) AS total_issued_amount,
+         COALESCE(SUM(CASE WHEN DATE(c.issued_at) = CURDATE() THEN 1 ELSE 0 END), 0) AS today_issued_count
+       FROM coupons c
+       JOIN issuer_allocations ia ON c.issuer_allocation_id = ia.id
+       WHERE ia.issuer_id = ?`,
+      [req.user.id]
+    );
+
+    res.json({
+      success: true,
+      data: rows,
+      summary: {
+        todayCount: Number(stats?.today_issued_count || 0),
+        totalIssuedCount: Number(stats?.total_issued_count || 0),
+        totalIssuedAmount: Number(stats?.total_issued_amount || 0)
+      }
+    });
   } catch (err) {
     next(err);
   }
@@ -425,7 +466,7 @@ router.get('/inventory', authenticate, authorize('issuer'), async (req, res, nex
 
     // 2. 등록된 상품 목록 (issuer_products)
     let [products] = await pool.execute(
-      `SELECT id, product_name, price, display_order 
+      `SELECT id, product_name, price, off_season_price, display_order 
        FROM issuer_products 
        WHERE issuer_id = ? 
        ORDER BY display_order ASC, id ASC`,
@@ -443,6 +484,7 @@ router.get('/inventory', authenticate, authorize('issuer'), async (req, res, nex
           id: 0,
           product_name: issuerRow.product_name,
           price: issuerRow.product_price || 0,
+          off_season_price: null,
           display_order: 1
         }];
       }
@@ -455,27 +497,24 @@ router.get('/inventory', authenticate, authorize('issuer'), async (req, res, nex
        ORDER BY display_order ASC`
     );
 
-    // 규정에 따른 상품별 쿠폰 지급 매칭 계산 함수
-    const getCouponFaceValue = (price) => {
-      if (!rules || rules.length === 0) return 0;
-      const p = Number(price);
-      for (const r of rules) {
-        const min = Number(r.min_amount);
-        const max = r.max_amount !== null && r.max_amount !== undefined ? Number(r.max_amount) : Infinity;
-        if (p >= min && p <= max) {
-          return Number(r.face_value);
-        }
-      }
-      return 0;
-    };
+    // 현재 시기에 따라 성수기/비수기 금액 자동 결정 (화면에 성수기/비수기 문구 노출 없음)
+    const peakSeason = isPeakSeasonKST();
 
     const productsWithRule = products.map(p => {
-      const matchedFaceValue = getCouponFaceValue(p.price);
+      const hasSeasonalPrice = p.off_season_price !== null && p.off_season_price !== undefined && Number(p.off_season_price) > 0;
+      const activePrice = hasSeasonalPrice
+        ? (peakSeason ? Number(p.price) : Number(p.off_season_price))
+        : Number(p.price);
+
+      const matchedFaceValue = activePrice;
       const alloc = allocations.find(a => Number(a.face_value) === matchedFaceValue);
       return {
-        ...p,
+        id: p.id,
+        product_name: p.product_name,
+        price: activePrice,
         coupon_face_value: matchedFaceValue,
-        allocation_id: alloc ? alloc.id : null
+        allocation_id: alloc ? alloc.id : null,
+        display_order: p.display_order
       };
     });
 
@@ -744,4 +783,3 @@ router.post('/issue', authenticate, authorize('issuer'), async (req, res, next) 
 });
 
 module.exports = router;
-

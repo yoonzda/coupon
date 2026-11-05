@@ -10,6 +10,20 @@
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
         document.documentElement.classList.add('sidebar-collapsed');
       }
+      var cached = sessionStorage.getItem('ongjin_sidebar_cache');
+      if (cached) {
+        var obs = new MutationObserver(function() {
+          var sb = document.querySelector('.admin-sidebar');
+          if (sb) {
+            obs.disconnect();
+            if (!sb.innerHTML.trim()) {
+              sb.innerHTML = cached;
+              sb.dataset.prehydrated = 'true';
+            }
+          }
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+      }
     })();
   </script>
   <style>
@@ -261,11 +275,11 @@
       background: #1e293b;
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-edit-rules-BedjkJQk.js"></script>
+  <script type="module" crossorigin src="/assets/admin-edit-rules-ONaAKZ3G.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-CkaXWeUD.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-CSqzwfnj.css">
 </head>
 <body>
   <div class="app-shell">

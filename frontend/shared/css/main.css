@@ -491,15 +491,17 @@ input::-ms-clear {
   color: #94a3b8;
   text-decoration: none;
   font-weight: 500;
-  transition: gap 0.3s ease, background 0.2s ease, color 0.2s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   white-space: nowrap;
   font-size: 0.95rem;
   box-sizing: border-box;
   position: relative;
   z-index: 2;
 }
+.admin-sidebar.ready .admin-nav a {
+  transition: gap 0.3s ease, background 0.15s ease, color 0.15s ease;
+}
 .admin-sidebar .admin-nav a span {
-  transition: opacity 0.3s ease, max-width 0.3s ease, margin 0.3s ease, visibility 0.3s ease;
   display: inline-block;
   max-width: 150px;
   opacity: 1;
@@ -507,27 +509,33 @@ input::-ms-clear {
   overflow: hidden;
   vertical-align: middle;
 }
+.admin-sidebar.ready .admin-nav a span {
+  transition: opacity 0.3s ease, max-width 0.3s ease, margin 0.3s ease, visibility 0.3s ease;
+}
 .admin-sidebar .admin-nav a:hover {
   color: #fff;
   background: rgba(255, 255, 255, 0.05);
 }
-.admin-sidebar .admin-nav a.active {
+.admin-sidebar .admin-nav a.active,
+.admin-sidebar .admin-nav a.active:hover {
   color: #fff;
-  background: var(--primary, #0ea5e9);
-  font-weight: 700;
-}
-.admin-sidebar .admin-nav:has(.admin-nav-indicator) a.active {
   background: transparent;
+  font-weight: 700;
 }
 .admin-nav-indicator {
   position: absolute;
+  top: 0;
   left: 0;
   width: 100%;
-  background: var(--primary, #0ea5e9);
+  background: var(--primary, #475569);
   z-index: 1;
   pointer-events: none;
   opacity: 0;
-  transition: top 0.45s cubic-bezier(0.25, 1, 0.5, 1), height 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease;
+  transform: translate3d(0, 0, 0);
+}
+.admin-nav-indicator.animating {
+  will-change: transform;
+  transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1), height 0.55s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .admin-sidebar .admin-nav a .nav-icon {
   width: 20px;
@@ -784,12 +792,22 @@ html.sidebar-collapsed .admin-sidebar #admin-sidebar-footer .admin-logout-btn .a
 }
 
 /* ── 프리미엄 데이터 테이블 카드 ── */
-.admin-card {
+.admin-card,
+.table-container {
   background: #ffffff;
-  border-radius: 0px;
+  border-radius: 0 !important;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  margin-bottom: 32px;
+}
+
+.table-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 12px;
+  margin-top: 8px;
 }
 
 /* ── 프리미엄 데이터 테이블 레이아웃 ── */

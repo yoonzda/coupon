@@ -4,84 +4,68 @@
   <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FDS 모니터링 | 옹진 관광 쿠폰</title>
+  <title>FDS 모니터링 | 옹진 관광 쿠폰</title>
+  <script>
+    (function() {
+      if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
+        document.documentElement.classList.add('sidebar-collapsed');
+      }
+      var cached = sessionStorage.getItem('ongjin_sidebar_cache');
+      if (cached) {
+        var obs = new MutationObserver(function() {
+          var sb = document.querySelector('.admin-sidebar');
+          if (sb) {
+            obs.disconnect();
+            if (!sb.innerHTML.trim()) {
+              sb.innerHTML = cached;
+              sb.dataset.prehydrated = 'true';
+            }
+          }
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+      }
+    })();
+  </script>
   <style>
-    * { box-sizing: border-box; }
     body { 
       margin: 0 !important; padding: 0 !important; 
       width: 100% !important; max-width: none !important; 
-      
       background: #f1f5f9;
-      font-family: var(--font-main); color: #1e293b; 
+      color: #1e293b; 
     }
     
-    .app-shell { 
-      display: block !important; 
-      min-height: 100vh; width: 100% !important; max-width: none !important;
+    .table-container {
+      background: #fff;
+      border-radius: 0 !important;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      margin-bottom: 32px;
     }
-    
-    .admin-sidebar { 
-      width: 240px !important; 
-      min-width: 240px;
-      height: 100vh;
-      background: #0f172a;
-      color: #fff;
-      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
+    .table-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 12px;
+      margin-top: 8px;
     }
-    .admin-content { margin-left: 240px;  
-      flex: 1 !important; 
-      padding: 40px; 
-      background: #f1f5f9; 
-      min-width: 0;
-    }
-    .bottom-nav { display: none; }
-    .admin-sidebar .logo {
-      padding: 24px; font-size: 1.1rem; font-weight: 900; 
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex; align-items: center; gap: 10px; color: #fff;
-      white-space: nowrap;
-    }
-    .admin-nav { padding: 16px 0; flex: 1; }
-    .admin-nav a {
-      display: flex; align-items: center; gap: 12px; padding: 12px 24px;
-      color: #94a3b8; text-decoration: none; font-weight: 500; transition: all 0.2s;
-      white-space: nowrap; font-size: 0.95rem;
-    }
-    .admin-nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
-    .admin-nav a.active { color: #fff; background: var(--primary); font-weight: 700; }
-
-    .admin-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
-    .admin-table { width: 100%; border-collapse: collapse; }
-    .admin-table th { background: var(--surface-2); padding: 12px 24px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
-    .admin-table td { padding: 16px 24px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
     
     .rule-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px; }
     .rule-DUPLICATE { background: #fee2e2; color: #ef4444; }
     .rule-HIGH_FREQ { background: #ffedd5; color: #f97316; }
   </style>
-  <script type="module" crossorigin src="/assets/admin-fds-Dqgr-obJ.js"></script>
+  <script type="module" crossorigin src="/assets/admin-fds-D13f04gg.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-CkaXWeUD.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-CSqzwfnj.css">
 </head>
 <body>
   <div class="app-shell">
-    <aside class="admin-sidebar">
-      <div class="logo">옹진 관광 <span>ADMIN</span></div>
-      <nav class="admin-nav">
-        <a href="/admin/index.html">대시보드</a>
-        <a href="/admin/merchants.html">가맹점 관리</a>
-        <a href="/admin/settlement.html">정산 관리</a>
-        <a href="/admin/fds.html" class="active">FDS 모니터링</a>
-        <a href="/admin/coupons.html">쿠폰 및 발행처 관리</a>
-        <a href="/admin/statistics.html">통계 및 보고서</a>
-      </nav>
-    </aside>
+    <!-- 사이드바 -->
+    <aside class="admin-sidebar"></aside>
 
+    <!-- 메인 컨텐츠 -->
     <main class="admin-content">
       <header class="dashboard-header">
         <div class="header-title-area">
@@ -91,24 +75,26 @@
         </div>
       </header>
 
-      <div class="admin-card">
+      <h2 class="table-title">이상 거래 탐지 내역</h2>
+
+      <div class="table-container">
         <table class="admin-table">
           <thead>
             <tr>
-              <th>탐지 정보</th>
-              <th>가맹점/사용자</th>
-              <th>설명</th>
-              <th>상태</th>
-              <th>조치</th>
+              <th style="width: 20%; text-align: center;">탐지 정보</th>
+              <th style="width: 20%; text-align: center;">가맹점/사용자</th>
+              <th style="width: 32%; text-align: center;">설명</th>
+              <th style="width: 14%; text-align: center;">상태</th>
+              <th style="width: 14%; text-align: center;">조치</th>
             </tr>
           </thead>
           <tbody id="fds-list">
-            <tr><td colspan="5" class="text-center" style="padding: 40px;">데이터 로드 중...</td></tr>
+            <tr><td colspan="5" class="text-center" style="padding: 40px; color: #64748b;">데이터 로드 중...</td></tr>
           </tbody>
         </table>
       </div>
     </main>
   </div>
-
+
 </body>
 </html>

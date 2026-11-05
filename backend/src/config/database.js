@@ -97,21 +97,115 @@ async function initializeDatabase(retries = 10, delay = 2000) {
             issuer_id INT UNSIGNED NOT NULL,
             product_name VARCHAR(100) NOT NULL,
             price INT UNSIGNED NOT NULL,
+            off_season_price INT UNSIGNED NULL DEFAULT NULL,
             display_order INT DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (issuer_id) REFERENCES issuers(id) ON DELETE CASCADE
           ) ENGINE=InnoDB;
         `);
-        await conn.execute(`
-          INSERT INTO issuer_products (issuer_id, product_name, price, display_order)
-          SELECT id, product_name, product_price, 1
-          FROM issuers
-          WHERE product_name IS NOT NULL AND product_name != ''
-            AND NOT EXISTS (
-              SELECT 1 FROM issuer_products WHERE issuer_products.issuer_id = issuers.id
+        try {
+          await conn.execute(`
+            ALTER TABLE issuer_products
+            ADD COLUMN off_season_price INT UNSIGNED NULL DEFAULT NULL AFTER price
+          `);
+        } catch (_) {}
+
+        // 옹진군 4대 실제 발행처 초기 마이그레이션 (구버전 더미 발행처가 남아있거나 주소가 미반영된 경우 1회 갱신)
+        const [legacyCheck] = await conn.execute(
+          `SELECT id, name, address FROM issuers WHERE name IN ('인천항 연안여객터미널 안내소', '대부도 여객선 대합실', '덕적도자연휴양림') OR (name = '소야랑' AND (address IS NULL OR address LIKE '%자월면%'))`
+        );
+        if (legacyCheck.length > 0) {
+          const bcrypt = require('bcryptjs');
+          const pwHash = await bcrypt.hash('1234', 10);
+
+          const targetIssuers = [
+            {
+              id: 1,
+              username: '자월달빛천문대',
+              name: '자월달빛천문대',
+              phone: '032-899-3300',
+              address: '인천광역시 옹진군 자월면 자월서로 396-35',
+              product_name: '투영관',
+              product_price: 2000,
+              products: [
+                { name: '투영관', price: 2000, offSeasonPrice: null, order: 1 },
+                { name: '관측실', price: 3000, offSeasonPrice: null, order: 2 }
+              ]
+            },
+            {
+              id: 2,
+              username: '장골해수욕장 야영장',
+              name: '장골해수욕장 야영장',
+              phone: '032-899-3800',
+              address: '인천광역시 옹진군 자월면 자월서로 101번길 13',
+              product_name: '야영장 이용',
+              product_price: 10000,
+              products: [
+                { name: '야영장 이용', price: 10000, offSeasonPrice: null, order: 1 }
+              ]
+            },
+            {
+              id: 3,
+              username: '소야랑',
+              name: '소야랑',
+              phone: '032-899-3810',
+              address: '인천광역시 옹진군 덕적면 소야로 188-14',
+              product_name: '시설 이용',
+              product_price: 5000,
+              products: [
+                { name: '시설 이용', price: 5000, offSeasonPrice: null, order: 1 }
+              ]
+            },
+            {
+              id: 4,
+              username: '덕적도 자연휴양림',
+              name: '덕적도 자연휴양림',
+              phone: '032-899-3600',
+              address: '인천광역시 옹진군 덕적면 덕적남로 220',
+              product_name: '휴양림 및 야영데크 이용',
+              product_price: 10000,
+              products: [
+                { name: '휴양림 및 야영데크 이용', price: 10000, offSeasonPrice: 5000, order: 1 }
+              ]
+            }
+          ];
+
+          for (const t of targetIssuers) {
+            await conn.execute(
+              `INSERT INTO issuers (id, username, password_hash, name, phone, address, product_name, product_price)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+               ON DUPLICATE KEY UPDATE
+                 username = VALUES(username),
+                 password_hash = VALUES(password_hash),
+                 name = VALUES(name),
+                 phone = VALUES(phone),
+                 address = VALUES(address),
+                 product_name = VALUES(product_name),
+                 product_price = VALUES(product_price)`,
+              [t.id, t.username, pwHash, t.name, t.phone, t.address, t.product_name, t.product_price]
             );
-        `);
-        logger.info('✅ DB 스키마 업데이트 성공 (issuer_products 테이블)');
+
+            await conn.execute(`DELETE FROM issuer_products WHERE issuer_id = ?`, [t.id]);
+            for (const p of t.products) {
+              await conn.execute(
+                `INSERT INTO issuer_products (issuer_id, product_name, price, off_season_price, display_order)
+                 VALUES (?, ?, ?, ?, ?)`,
+                [t.id, p.name, p.price, p.offSeasonPrice, p.order]
+              );
+            }
+          }
+
+          // 불필요한 미사용 배정 정리 및 4개 발행처 권종별 배정 정렬
+          await conn.execute(`DELETE FROM issuer_allocations WHERE id IN (4, 6) AND issued_count = 0`);
+          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 1, face_value = 2000, total_count = 100 WHERE id = 1`);
+          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 1, face_value = 3000, total_count = 100 WHERE id = 9`);
+          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 2, face_value = 10000, total_count = 30 WHERE id = 2`);
+          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 3, face_value = 5000, total_count = 60 WHERE id = 5`);
+          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 4, face_value = 10000, total_count = 30 WHERE id = 8`);
+          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 4, face_value = 5000, total_count = 60 WHERE id = 10`);
+
+          logger.info('✅ 옹진군 4개 발행처(자월달빛천문대, 장골해수욕장 야영장, 소야랑, 덕적도 자연휴양림) 및 초기 비밀번호(1234) 마이그레이션 완료');
+        }
       } catch (err) {
         logger.info(`ℹ️ DB 스키마 업데이트 스킵: ${err.message}`);
       }
@@ -138,6 +232,15 @@ async function initializeDatabase(retries = 10, delay = 2000) {
       } catch (reqTableErr) {
         logger.warn(`⚠️ 쿠폰 사용 요청 테이블 생성 실패: ${reqTableErr.message}`);
       }
+
+      // users 테이블에 onboarding_done 추가 (회원 첫 접속 온보딩 여부)
+      try {
+        await conn.execute(`
+          ALTER TABLE users
+          ADD COLUMN onboarding_done TINYINT(1) NOT NULL DEFAULT 0
+        `);
+        logger.info('✅ DB 스키마 업데이트 성공 (users.onboarding_done 추가)');
+      } catch (_) {}
 
       conn.release();
       return;

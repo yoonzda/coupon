@@ -5,16 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>예산 관리 | 옹진 관광 관리자</title>
   <link rel="icon" href="/assets/favicon-JK0pTB8M.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>
     (function() {
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
         document.documentElement.classList.add('sidebar-collapsed');
       }
+      var cached = sessionStorage.getItem('ongjin_sidebar_cache');
+      if (cached) {
+        var obs = new MutationObserver(function() {
+          var sb = document.querySelector('.admin-sidebar');
+          if (sb) {
+            obs.disconnect();
+            if (!sb.innerHTML.trim()) {
+              sb.innerHTML = cached;
+              sb.dataset.prehydrated = 'true';
+            }
+          }
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+      }
     })();
-  </script>
+  </script>
   <style>
     body { 
       margin: 0 !important; padding: 0 !important; 
@@ -136,11 +147,11 @@
       pointer-events: none;
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-budget-jbdTa2HU.js"></script>
+  <script type="module" crossorigin src="/assets/admin-budget-D6LEczKZ.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-CkaXWeUD.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-CSqzwfnj.css">
 </head>
 <body>
   <div class="app-shell">
@@ -165,7 +176,7 @@
         </button>
       </div>
 
-      <!-- 5개 항목 크기 및 굵기 완전 통일 카드 (너비 꽉 차게, radius 0) -->
+      <!-- 4개 항목 크기 및 굵기 완전 통일 카드 (너비 꽉 차게, radius 0) -->
       <div class="budget-clean-card">
         <div class="budget-clean-body">
           <!-- 1. 총 사업 예산 -->
@@ -174,27 +185,21 @@
             <span class="budget-value" id="display-total-budget">—</span>
           </div>
 
-          <!-- 2. 발행처 배정 예산 -->
-          <div class="budget-item-row">
-            <span class="budget-label">발행처 배정 예산</span>
-            <span class="budget-value" id="display-allocated-budget">—</span>
-          </div>
-
-          <!-- 3. 실제 집행 예산 -->
+          <!-- 2. 실제 집행 예산 -->
           <div class="budget-item-row">
             <span class="budget-label">실제 집행 예산</span>
             <span class="budget-value" id="display-executed-budget">—</span>
           </div>
 
-          <!-- 4. 점유/예약 예산 -->
+          <!-- 3. 점유/예약 예산 -->
           <div class="budget-item-row">
             <span class="budget-label">점유/예약 예산</span>
             <span class="budget-value" id="display-reserved-budget">—</span>
           </div>
 
-          <!-- 5. 추가 배정 가능 잔액 -->
+          <!-- 4. 잔여 예산 -->
           <div class="budget-item-row">
-            <span class="budget-label">추가 배정 가능 잔액</span>
+            <span class="budget-label">잔여 예산</span>
             <span class="budget-value" id="display-remaining-budget">—</span>
           </div>
         </div>

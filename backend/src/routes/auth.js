@@ -336,7 +336,7 @@ router.get('/me', authenticate, async (req, res, next) => {
     const { id, role } = req.user;
     if (role === 'tourist') {
       const [users] = await pool.execute(
-        `SELECT id, social_provider, provider_id, nickname, email, phone_hash, coupon_balance, role, created_at
+        `SELECT id, social_provider, provider_id, nickname, email, phone_hash, coupon_balance, role, onboarding_done, created_at
          FROM users WHERE id = ? LIMIT 1`,
         [id]
       );
@@ -356,11 +356,29 @@ router.get('/me', authenticate, async (req, res, next) => {
           phone,
           needs_phone_link: !phone,
           coupon_balance: u.coupon_balance ?? 0,
+          onboarding_done: Boolean(u.onboarding_done),
           role: u.role
         }
       });
     }
     return res.json({ success: true, user: req.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── 회원 첫 접속 온보딩 완료 기록 (POST /api/auth/onboarding-complete) ──
+router.post('/onboarding-complete', authenticate, async (req, res, next) => {
+  const pool = require('../config/database');
+  try {
+    const { id, role } = req.user;
+    if (role === 'tourist') {
+      await pool.execute(
+        `UPDATE users SET onboarding_done = 1 WHERE id = ?`,
+        [id]
+      );
+    }
+    return res.json({ success: true });
   } catch (err) {
     next(err);
   }

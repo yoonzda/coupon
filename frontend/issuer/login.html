@@ -64,58 +64,6 @@
       animation: fadeIn 0.5s ease-out;
     }
 
-    /* Shield tooltip style for Issuer */
-    .shield-tooltip-container {
-      position: absolute;
-      top: 24px;
-      right: 24px;
-      cursor: help;
-    }
-    .shield-icon {
-      width: 20px;
-      height: 20px;
-      stroke: #64748b;
-      fill: none;
-      transition: stroke 0.2s;
-    }
-    .shield-tooltip-container:hover .shield-icon {
-      stroke: #3b82f6;
-    }
-    .tooltip-text {
-      visibility: hidden;
-      opacity: 0;
-      white-space: nowrap;
-      background-color: #0f172a;
-      color: #fff;
-      text-align: center;
-      padding: 10px 14px;
-      position: absolute;
-      z-index: 10;
-      top: 140%;
-      right: -10px;
-      font-size: 0.75rem;
-      transition: opacity 0.3s, transform 0.3s;
-      transform: translateY(5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-      pointer-events: none;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 6px;
-    }
-    .tooltip-text::after {
-      content: "";
-      position: absolute;
-      bottom: 100%;
-      right: 16px;
-      border-width: 6px;
-      border-style: solid;
-      border-color: transparent transparent #0f172a transparent;
-    }
-    .shield-tooltip-container:hover .tooltip-text {
-      visibility: visible;
-      opacity: 1;
-      transform: translateY(0);
-    }
-
     .logo-area {
       display: flex;
       flex-direction: column;
@@ -125,7 +73,7 @@
     .logo-subtitle {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #60a5fa; /* blue point color */
+      color: #60a5fa;
       letter-spacing: 1.5px;
       margin-bottom: 8px;
       text-transform: uppercase;
@@ -143,12 +91,11 @@
     }
     label {
       display: block;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 700;
       color: #94a3b8;
       margin-bottom: 10px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
     .input-wrap {
       position: relative;
@@ -168,7 +115,7 @@
     
     input[type="text"], input[type="password"] {
       width: 100%;
-      padding: 16px 16px 16px 46px;
+      padding: 16px 44px 16px 46px;
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
@@ -177,6 +124,9 @@
       font-family: inherit;
       transition: all 0.2s;
       outline: none;
+    }
+    #username {
+      cursor: pointer;
     }
     #password {
       padding-right: 48px !important;
@@ -189,14 +139,131 @@
     }
     input[type="text"]:focus, input[type="password"]:focus {
       border-color: #3b82f6;
-      background: rgba(15, 23, 42, 0.8);
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+      background: rgba(15, 23, 42, 0.85);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
     }
     input[type="text"]:focus ~ .input-icon-svg, 
     input[type="password"]:focus ~ .input-icon-svg {
       stroke: #3b82f6;
     }
-    input::placeholder { color: #475569; }
+    input::placeholder { color: #64748b; }
+
+    /* Custom Select Chevron & Dropdown Menu */
+    .select-chevron {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+    }
+    .select-chevron svg {
+      width: 18px;
+      height: 18px;
+      stroke: #64748b;
+      fill: none;
+      transition: transform 0.2s ease, stroke 0.2s ease;
+    }
+    .input-wrap.open .select-chevron svg {
+      transform: rotate(180deg);
+      stroke: #60a5fa;
+    }
+
+    .custom-select-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      max-height: 240px;
+      overflow-y: auto;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+      z-index: 50;
+      padding: 6px;
+       display: flex;
+      flex-direction: column;
+      gap: 2px;
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .input-wrap.open .custom-select-menu {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    /* 드롭다운이 열려 있을 때 하단 로그인 버튼의 파란 밑단이 삐져나와 여백처럼 보이는 현상 방지 */
+    form:has(.input-wrap.open) .btn-login {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .custom-select-menu::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-select-menu::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-select-menu::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 999px;
+    }
+    .custom-select-option {
+      padding: 11px 14px;
+      border-radius: 6px;
+      font-size: 0.96rem;
+      font-weight: 500;
+      line-height: 1.25;
+      color: #e2e8f0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 3px;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .custom-select-option:hover {
+      background: rgba(59, 130, 246, 0.16);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .custom-select-option.selected {
+      background: rgba(59, 130, 246, 0.24);
+      color: #60a5fa;
+      font-weight: 700;
+    }
+    .custom-select-option .recent-label {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: #60a5fa;
+      line-height: 1.2;
+    }
+    .custom-select-option .option-sub {
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: #94a3b8;
+      line-height: 1.3;
+    }
+    .custom-select-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 5px 6px;
+    }
+    .custom-select-empty {
+      padding: 14px;
+      text-align: center;
+      font-size: 0.88rem;
+      color: #94a3b8;
+    }
 
     /* Password visibility toggle */
     .pw-toggle {
@@ -284,9 +351,7 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-
-
-    /* Verification Overlay (Loading state for existing token verification) */
+    /* Verification Overlay */
     .verify-overlay {
       position: absolute;
       inset: 0;
@@ -391,7 +456,7 @@
     .modal-container {
       background: #1e293b;
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 0; /* No radius */
+      border-radius: 0;
       width: 360px;
       padding: 40px 28px 32px 28px;
       position: relative;
@@ -460,7 +525,7 @@
 
     .inquiry-info-box {
       background: rgba(15, 23, 42, 0.4);
-      padding: 22px 28px;
+      padding: 22px 24px;
       margin-top: 24px;
       display: flex;
       flex-direction: column;
@@ -469,9 +534,9 @@
     }
     .inquiry-info-item {
       color: #cbd5e1;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 500;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
     }
 
     /* ── Responsive & Mobile First Styles ── */
@@ -511,7 +576,7 @@
       }
 
       input[type="text"], input[type="password"] {
-        padding: 15px 15px 15px 44px;
+        padding: 15px 42px 15px 44px;
         font-size: 0.95rem;
         background: rgba(15, 23, 42, 0.8);
       }
@@ -569,20 +634,27 @@
 
     <form id="form-issuer-login" novalidate>
       <div class="form-group">
-        <label for="username">아이디</label>
-        <div class="input-wrap">
+        <label for="username">발행처</label>
+        <div class="input-wrap" id="issuer-select-wrap">
           <input
             type="text"
             id="username"
             name="username"
-            placeholder="아이디를 입력하세요"
-            autocomplete="username"
+            placeholder="발행처를 선택하거나 검색하세요"
+            autocomplete="off"
             required
           />
           <svg class="input-icon-svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
+            <path d="M3 21h18"></path>
+            <path d="M5 21V7l8-4v18"></path>
+            <path d="M19 21V11l-6-4"></path>
           </svg>
+          <button type="button" class="select-chevron" id="select-chevron" tabindex="-1" aria-label="발행처 목록 열기">
+            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="custom-select-menu" id="custom-select-menu"></div>
         </div>
       </div>
 
@@ -638,8 +710,8 @@
       </div>
       
       <div class="inquiry-info-box">
-        <div class="inquiry-info-item">옹진군청 :</div>
-        <div class="inquiry-info-item">프로그램 관리자 :</div>
+        <div class="inquiry-info-item">옹진군청 : 032-899-2114</div>
+        <div class="inquiry-info-item">프로그램 관리자 : 070-4280-5092</div>
       </div>
     </div>
   </div>
@@ -647,9 +719,7 @@
   <!-- 우측 하단 플로팅 문의하기 버튼 -->
   <button type="button" class="floating-inquiry-btn" id="btn-inquiry" aria-label="문의하기">
     <svg class="btn-border-svg" viewBox="0 0 72 72">
-      <!-- 배경 원 (정적 테두리) -->
       <circle class="btn-border-bg" cx="36" cy="36" r="34" />
-      <!-- 호버 시 채워지는 원 (동적 테두리) -->
       <circle class="btn-border-active" cx="36" cy="36" r="34" />
     </svg>
     <span class="btn-text-q">?</span>
@@ -660,8 +730,128 @@
   <script type="module">
     import { api, showToast } from '../shared/js/api.js';
 
-    // ── 패스워드 토글 기능 ──
+    const usernameInput = document.getElementById('username');
     const pwInput = document.getElementById('password');
+    const selectWrap = document.getElementById('issuer-select-wrap');
+    const selectMenu = document.getElementById('custom-select-menu');
+    const chevronBtn = document.getElementById('select-chevron');
+
+    let issuerList = [
+      { id: 1, name: '자월달빛천문대', address: '인천광역시 옹진군 자월면 자월서로 396-35' },
+      { id: 2, name: '장골해수욕장 야영장', address: '인천광역시 옹진군 자월면 자월서로 101번길 13' },
+      { id: 3, name: '소야랑', address: '인천광역시 옹진군 덕적면 소야로 188-14' },
+      { id: 4, name: '덕적도 자연휴양림', address: '인천광역시 옹진군 덕적면 덕적남로 220' }
+    ];
+
+    function getRecentIssuers() {
+      try {
+        const raw = localStorage.getItem('ongjin_recent_issuers');
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed.slice(0, 1) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveRecentIssuer(name) {
+      if (!name) return;
+      const clean = String(name).trim();
+      if (!clean) return;
+      localStorage.setItem('ongjin_recent_issuers', JSON.stringify([clean]));
+    }
+
+    function renderOptions(filterText = '') {
+      const q = filterText.trim().toLowerCase();
+      const filtered = q
+        ? issuerList.filter((iss) => (iss.name || '').toLowerCase().includes(q) || (iss.address || '').toLowerCase().includes(q))
+        : issuerList;
+
+      if (filtered.length === 0) {
+        selectMenu.innerHTML = `<div class="custom-select-empty">일치하는 발행처가 없습니다</div>`;
+        return;
+      }
+
+      const recentNames = getRecentIssuers();
+      const recentMatches = [];
+      const otherMatches = [];
+
+      filtered.forEach((iss) => {
+        if (recentNames.includes(iss.name)) {
+          recentMatches.push(iss);
+        } else {
+          otherMatches.push(iss);
+        }
+      });
+
+      recentMatches.sort((a, b) => recentNames.indexOf(a.name) - recentNames.indexOf(b.name));
+
+      const currentVal = usernameInput.value.trim();
+      const renderItem = (iss, isRecent) => `
+        <div class="custom-select-option ${currentVal === iss.name ? 'selected' : ''}" data-name="${iss.name}">
+          ${isRecent ? '<span class="recent-label">최근 로그인</span>' : ''}
+          <span>${iss.name}</span>
+        </div>
+      `;
+
+      let html = recentMatches.map((iss) => renderItem(iss, true)).join('');
+      if (recentMatches.length > 0 && otherMatches.length > 0) {
+        html += `<div class="custom-select-divider"></div>`;
+      }
+      html += otherMatches.map((iss) => renderItem(iss, false)).join('');
+
+      selectMenu.innerHTML = html;
+
+      selectMenu.querySelectorAll('.custom-select-option').forEach((item) => {
+        item.addEventListener('click', () => {
+          usernameInput.value = item.dataset.name;
+          usernameInput.classList.remove('error');
+          selectWrap.classList.remove('open');
+          pwInput.focus();
+        });
+      });
+    }
+
+    async function loadIssuers() {
+      try {
+        const res = await api.get('/auth/issuer/list');
+        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+          issuerList = res.data;
+        }
+      } catch (e) {
+        console.error('발행처 목록 로드 실패:', e);
+      }
+      renderOptions('');
+    }
+    loadIssuers();
+
+    usernameInput.addEventListener('click', () => {
+      renderOptions('');
+      selectWrap.classList.add('open');
+    });
+
+    usernameInput.addEventListener('input', (e) => {
+      renderOptions(e.target.value);
+      selectWrap.classList.add('open');
+    });
+
+    chevronBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (selectWrap.classList.contains('open')) {
+        selectWrap.classList.remove('open');
+      } else {
+        renderOptions('');
+        selectWrap.classList.add('open');
+        usernameInput.focus();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!selectWrap.contains(e.target)) {
+        selectWrap.classList.remove('open');
+      }
+    });
+
+    // ── 패스워드 토글 기능 ──
     const pwToggleBtn = document.getElementById('pw-toggle');
     pwToggleBtn.addEventListener('click', () => {
       if (pwInput.type === 'password') {
@@ -684,7 +874,7 @@
     const existingInfo = localStorage.getItem('ongjin_issuer_info');
     if (existingToken && existingInfo) {
       document.getElementById('verify-loading').classList.add('active');
-      localStorage.setItem('ongjin_token', existingToken); // API 공통 헤더 대응
+      localStorage.setItem('ongjin_token', existingToken);
       
       api.get('/auth/issuer/me')
         .then((res) => {
@@ -696,7 +886,6 @@
           }
         })
         .catch((err) => {
-          // 서버가 에러 상태 코드를 반환한 경우에만 세션 정보 정리 (단순 네트워크 단절인 경우는 유지)
           if (err && err.status) {
             clearIssuerTokens();
           }
@@ -713,24 +902,21 @@
     // ── 로그인 제출 처리 ──
     document.getElementById('form-issuer-login').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const usernameInput = document.getElementById('username');
-      const passwordInput = document.getElementById('password');
       const btn = document.getElementById('btn-submit');
       const errEl = document.getElementById('error-msg');
       const btnText = btn.querySelector('.btn-text');
       
       const username = usernameInput.value.trim();
-      const password = passwordInput.value;
+      const password = pwInput.value;
 
-      // 입력 초기화
       errEl.classList.remove('show');
       usernameInput.classList.remove('error');
-      passwordInput.classList.remove('error');
+      pwInput.classList.remove('error');
 
       if (!username || !password) {
-        usernameInput.classList.add('error');
-        passwordInput.classList.add('error');
-        errEl.textContent = '아이디와 비밀번호를 모두 입력해 주세요.';
+        if (!username) usernameInput.classList.add('error');
+        if (!password) pwInput.classList.add('error');
+        errEl.textContent = '발행처와 비밀번호를 모두 입력해 주세요.';
         errEl.classList.add('show');
         return;
       }
@@ -739,16 +925,17 @@
       btn.classList.add('loading');
 
       try {
-        const res = await api.post('/auth/issuer/login', { username, password });
+        const res = await api.post('/auth/issuer/login', { name: username, username, password });
         if (res.success) {
           localStorage.setItem('ongjin_issuer_token', res.token);
           localStorage.setItem('ongjin_issuer_info', JSON.stringify(res.issuer));
-          localStorage.setItem('ongjin_token', res.token); // api.js 호환
+          localStorage.setItem('ongjin_token', res.token);
+          saveRecentIssuer(res.issuer.name);
           
           btnText.textContent = 'SUCCESS';
           btnText.style.display = 'block';
           btn.querySelector('.spinner').style.display = 'none';
-          btn.style.background = '#059669'; // Green success color
+          btn.style.background = '#059669';
           btn.classList.remove('loading');
 
           setTimeout(() => {
@@ -757,7 +944,7 @@
         }
       } catch (err) {
         usernameInput.classList.add('error');
-        passwordInput.classList.add('error');
+        pwInput.classList.add('error');
         errEl.textContent = err.message || '로그인에 실패했습니다.';
         errEl.classList.add('show');
         btn.disabled = false;
@@ -766,10 +953,11 @@
     });
 
     // Enter 키 지원
-    document.getElementById('username').addEventListener('keydown', (e) => {
+    usernameInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        document.getElementById('password').focus();
+        selectWrap.classList.remove('open');
+        pwInput.focus();
       }
     });
 
@@ -786,7 +974,6 @@
       inquiryModal.classList.remove('active');
     });
 
-    // 바깥 영역 클릭 시 모달 닫기
     inquiryModal.addEventListener('click', (e) => {
       if (e.target === inquiryModal) {
         inquiryModal.classList.remove('active');

@@ -10,8 +10,22 @@
       if (localStorage.getItem('ongjin_sidebar_collapsed') === 'true') {
         document.documentElement.classList.add('sidebar-collapsed');
       }
+      var cached = sessionStorage.getItem('ongjin_sidebar_cache');
+      if (cached) {
+        var obs = new MutationObserver(function() {
+          var sb = document.querySelector('.admin-sidebar');
+          if (sb) {
+            obs.disconnect();
+            if (!sb.innerHTML.trim()) {
+              sb.innerHTML = cached;
+              sb.dataset.prehydrated = 'true';
+            }
+          }
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+      }
     })();
-  </script>
+  </script>
   <style>
     body { 
       margin: 0 !important; padding: 0 !important; 
@@ -23,9 +37,9 @@
     /* 카드 그리드 스타일 - 넓고 시원한 밸런스 */
     .issuer-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(460px, 580px));
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
       gap: 24px;
-      margin-bottom: 32px;
+      margin-bottom: 36px;
     }
     .issuer-card {
       background: #ffffff;
@@ -35,7 +49,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .issuer-card:hover {
@@ -99,7 +113,7 @@
       border-color: #334155;
     }
 
-    /* 위치 & 전화번호 & 아이디 정보 */
+    /* 위치 & 전화번호 정보 */
     .issuer-meta-grid {
       display: flex;
       flex-direction: column;
@@ -128,51 +142,13 @@
       gap: 8px;
     }
 
-    /* 아이디 복사 버튼 */
-    .btn-copy-id {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 7px;
-      font-size: 0.74rem;
-      font-weight: 600;
-      color: #475569;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      cursor: pointer;
-      line-height: 1.2;
-      transition: all 0.15s ease;
-      vertical-align: middle;
-      user-select: none;
-    }
-    .btn-copy-id:hover {
-      background: #e2e8f0;
-      color: #0f172a;
-      border-color: #94a3b8;
-    }
-    .btn-copy-id:active {
-      transform: scale(0.97);
-    }
-    .btn-copy-id svg {
-      width: 12px;
-      height: 12px;
-      stroke-width: 2;
-      flex-shrink: 0;
-    }
-    .btn-copy-id.copied {
-      background: #ecfdf5;
-      color: #15803d;
-      border-color: #86efac;
-    }
-
     .issuer-card-divider {
       height: 1px;
       background: #f1f5f9;
-      margin: 12px 0;
+      margin: 14px 0;
     }
 
-    /* 상품 및 금액 목록 (동일한 폰트 크기, 괄호 없음) */
+    /* 상품 및 금액 목록 */
     .issuer-product-list {
       display: flex;
       flex-direction: column;
@@ -194,14 +170,33 @@
       color: #0f172a;
       font-size: 0.95rem;
     }
+    .issuer-product-sub {
+      font-weight: 500;
+      color: #64748b;
+      font-size: 0.88rem;
+      margin-left: 4px;
+    }
 
-    .table-title { font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0; }
+    .table-container {
+      background: #fff;
+      border-radius: 0 !important;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+    .table-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
   </style>
-  <script type="module" crossorigin src="/assets/admin-issuers-elo7C02H.js"></script>
+  <script type="module" crossorigin src="/assets/admin-issuers-k8zKIl4k.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/api-BxOpvEgq.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-guard-xv3IhYox.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-DX88ZaSx.css">
+  <link rel="modulepreload" crossorigin href="/assets/admin-guard-CkaXWeUD.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-CSqzwfnj.css">
 </head>
 <body>
   <div class="app-shell">
@@ -214,17 +209,16 @@
         <div class="header-title-area">
           <span class="header-category">Issuer Management</span>
           <h1>발행처 관리</h1>
-          <p class="header-desc">발행처 계정을 생성하고 발행처를 등록하고 관리합니다. 각 발행처의 쿠폰 현황을 확인할 수 있습니다.</p>
+          <p class="header-desc">옹진군 관광지 발행처를 등록하고 각 발행처의 취급 상품 및 발급 쿠폰을 관리합니다.</p>
         </div>
       </header>
 
-      <!-- 1. 상단 헤더 바 (배정 필요 토글 삭제, 심플한 등록 버튼) -->
-      <div style="display: flex; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 8px;">
+      <!-- 상단: 발행처 목록 (카드 그리드) -->
+      <div style="display: flex; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 12px; margin-top: 8px;">
         <h2 class="table-title">발행처 목록</h2>
-        <button class="btn btn-neutral-outline btn-sm" style="height: 34px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;" onclick="location.href='register-issuer.html'">발행처 등록</button>
+        <button class="btn btn-neutral-outline btn-sm" style="height: 36px; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;" onclick="location.href='register-issuer.html'">발행처 등록</button>
       </div>
 
-      <!-- 2. 깔끔한 카드 그리드 -->
       <div id="issuer-grid" class="issuer-grid">
         <div style="grid-column: 1 / -1; padding: 48px; text-align: center; color: #64748b;">데이터를 불러오는 중입니다...</div>
       </div>
@@ -232,6 +226,6 @@
   </div>
 
   <div id="toast-container"></div>
-
+
 </body>
 </html>
