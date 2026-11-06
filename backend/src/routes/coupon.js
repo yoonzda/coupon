@@ -62,6 +62,145 @@ router.get('/allocation-public/:token', async (req, res, next) => {
   }
 });
 
+// 인트로 페이지용 테스트 QR 쿠폰 생성/조회 API (로컬 및 모바일 스캔 테스트 지원)
+router.post('/demo-qr', async (req, res, next) => {
+  const requestedFace = Number(req.body?.faceValue) || 5000;
+  const forceNew = Boolean(req.body?.forceNew);
+
+  function getPreferredLanIp() {
+    const os = require('os');
+    const nets = os.networkInterfaces();
+    const candidates = [];
+    for (const name of Object.keys(nets)) {
+      for (const iface of nets[name] || []) {
+        if (iface.family === 'IPv4' && !iface.internal) {
+          candidates.push(iface.address);
+        }
+      }
+    }
+    return (
+      candidates.find(ip => ip.startsWith('192.168.')) ||
+      candidates.find(ip => ip.startsWith('10.')) ||
+      candidates.find(ip => !ip.startsWith('172.')) ||
+      candidates[0] ||
+      'localhost'
+    );
+  }
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 1. 기본 발행처 조회 (자월달빛천문대 등 1번 발행처)
+    const [issuers] = await connection.execute(
+      `SELECT id, name FROM issuers ORDER BY id ASC LIMIT 1`
+    );
+    const issuerId = issuers[0]?.id || 1;
+    const issuerName = issuers[0]?.name || '자월달빛천문대';
+
+    // 2. 기존 미등록 데모 쿠폰이 있으면 재사용 (새로고침 시 중복 생성 방지)
+    if (!forceNew) {
+      const [existing] = await connection.execute(
+        `SELECT c.id, c.code_hash, c.face_value, c.issuer_allocation_id, c.kiosk_session_id
+         FROM coupons c
+         WHERE c.kiosk_session_id LIKE 'demo_%'
+           AND c.status = 'available'
+           AND c.issued_to IS NULL
+           AND c.face_value = ?
+         ORDER BY c.id DESC
+         LIMIT 1`,
+        [requestedFace]
+      );
+
+      if (existing.length > 0) {
+        await connection.commit();
+        const row = existing[0];
+        const allocId = row.issuer_allocation_id || 1;
+        const secureToken = encodeSecureToken(allocId);
+        const h = String(row.code_hash || '00000000').toUpperCase();
+        const serialCode = `${h.slice(0, 4)}-${h.slice(4, 8)}`;
+        const qrUrl = `/tourist/landing.html?token=${encodeURIComponent(secureToken)}&kioskSessionId=${encodeURIComponent(row.kiosk_session_id)}`;
+        return res.json({
+          success: true,
+          data: {
+            couponId: row.id,
+            allocationId: allocId,
+            token: secureToken,
+            kioskSessionId: row.kiosk_session_id,
+            faceValue: Number(row.face_value),
+            issuerName,
+            serialCode,
+            qrUrl,
+            serverIp: getPreferredLanIp()
+          }
+        });
+      }
+    }
+
+    // 3. 해당 권종의 발행처 배정 행 확인 또는 자동 생성
+    const [allocRows] = await connection.execute(
+      `SELECT id, total_count, issued_count FROM issuer_allocations WHERE issuer_id = ? AND face_value = ? ORDER BY id ASC LIMIT 1 FOR UPDATE`,
+      [issuerId, requestedFace]
+    );
+
+    let allocId;
+    if (allocRows.length === 0) {
+      const [insAlloc] = await connection.execute(
+        `INSERT INTO issuer_allocations (issuer_id, face_value, total_count, issued_count) VALUES (?, ?, 999999, 1)`,
+        [issuerId, requestedFace]
+      );
+      allocId = insAlloc.insertId;
+    } else {
+      allocId = allocRows[0].id;
+      await connection.execute(
+        `UPDATE issuer_allocations
+         SET total_count = GREATEST(total_count, issued_count + 100),
+             issued_count = issued_count + 1
+         WHERE id = ?`,
+        [allocId]
+      );
+    }
+
+    // 4. 1단계(미등록 대기) 테스트 쿠폰 생성
+    const sessionId = `demo_${Date.now()}_${generateToken(3)}`;
+    const rawCode = `DEMO_${allocId}_${Date.now()}_${generateToken(4)}`;
+    const codeHash = hashCouponCode(rawCode);
+    const h = codeHash.toUpperCase();
+    const serialCode = `${h.slice(0, 4)}-${h.slice(4, 8)}`;
+
+    const [insCoupon] = await connection.execute(
+      `INSERT INTO coupons (code_hash, coupon_type, face_value, issued_to, status, issuer_allocation_id, kiosk_session_id, expires_at)
+       VALUES (?, 'digital', ?, NULL, 'available', ?, ?, DATE_ADD(NOW(), INTERVAL 1 YEAR))`,
+      [codeHash, requestedFace, allocId, sessionId]
+    );
+
+    await connection.commit();
+
+    const secureToken = encodeSecureToken(allocId);
+    const qrUrl = `/tourist/landing.html?token=${encodeURIComponent(secureToken)}&kioskSessionId=${encodeURIComponent(sessionId)}`;
+
+    res.json({
+      success: true,
+      data: {
+        couponId: insCoupon.insertId,
+        allocationId: allocId,
+        token: secureToken,
+        kioskSessionId: sessionId,
+        faceValue: requestedFace,
+        issuerName,
+        serialCode,
+        qrUrl,
+        serverIp: getPreferredLanIp()
+      }
+    });
+  } catch (err) {
+    await connection.rollback();
+    next(err);
+  } finally {
+    connection.release();
+  }
+});
+
 // 내 쿠폰 목록 조회 (두 라우터 별칭 모두 지원)
 const getMyCouponsHandler = async (req, res, next) => {
   try {
@@ -283,43 +422,45 @@ router.post('/issue-by-qr', authenticate, authorize('tourist'), async (req, res,
 
         const alreadyRegistered = sessionCoupons.every(c => c.issued_to !== null);
         if (alreadyRegistered) {
-          await connection.rollback();
-          const isMine = sessionCoupons[0].issued_to === req.user.id;
-          return res.status(400).json({ 
-            success: false, 
-            message: isMine ? '이미 내 지갑에 수령 완료된 쿠폰입니다.' : '이미 다른 기기에서 수령 완료되어 만료된 QR 코드입니다.' 
+          if (!String(kioskSessionId).startsWith('demo_')) {
+            await connection.rollback();
+            const isMine = sessionCoupons[0].issued_to === req.user.id;
+            return res.status(400).json({ 
+              success: false, 
+              message: isMine ? '이미 내 지갑에 수령 완료된 쿠폰입니다.' : '이미 다른 기기에서 수령 완료되어 만료된 QR 코드입니다.' 
+            });
+          }
+        } else {
+          const pendingCoupons = sessionCoupons.filter(c => c.issued_to === null && c.status === 'available');
+          const totalAmount = pendingCoupons.reduce((sum, c) => sum + Number(c.face_value), 0);
+
+          await connection.execute(
+            `UPDATE coupons SET issued_to = ? WHERE kiosk_session_id = ? AND issued_to IS NULL AND status = 'available'`,
+            [req.user.id, kioskSessionId]
+          );
+
+          const paperHashes = pendingCoupons.filter(c => c.coupon_type === 'paper' && c.code_hash).map(c => c.code_hash);
+          if (paperHashes.length > 0) {
+            const phPlaceholders = paperHashes.map(() => '?').join(',');
+            await connection.execute(
+              `UPDATE paper_coupons SET converted = 1, converted_by = ?, converted_at = NOW() WHERE random_code_hash IN (${phPlaceholders})`,
+              [req.user.id, ...paperHashes]
+            );
+          }
+
+          await connection.execute(
+            `UPDATE users SET coupon_balance = coupon_balance + ? WHERE id = ?`,
+            [totalAmount, req.user.id]
+          );
+
+          await connection.commit();
+          return res.json({ 
+            success: true, 
+            message: `${totalAmount.toLocaleString()}원 쿠폰(${pendingCoupons.length}장)이 지갑으로 성공적으로 발급되었습니다.`,
+            count: pendingCoupons.length,
+            totalAmount
           });
         }
-
-        const pendingCoupons = sessionCoupons.filter(c => c.issued_to === null && c.status === 'available');
-        const totalAmount = pendingCoupons.reduce((sum, c) => sum + Number(c.face_value), 0);
-
-        await connection.execute(
-          `UPDATE coupons SET issued_to = ? WHERE kiosk_session_id = ? AND issued_to IS NULL AND status = 'available'`,
-          [req.user.id, kioskSessionId]
-        );
-
-        const paperHashes = pendingCoupons.filter(c => c.coupon_type === 'paper' && c.code_hash).map(c => c.code_hash);
-        if (paperHashes.length > 0) {
-          const phPlaceholders = paperHashes.map(() => '?').join(',');
-          await connection.execute(
-            `UPDATE paper_coupons SET converted = 1, converted_by = ?, converted_at = NOW() WHERE random_code_hash IN (${phPlaceholders})`,
-            [req.user.id, ...paperHashes]
-          );
-        }
-
-        await connection.execute(
-          `UPDATE users SET coupon_balance = coupon_balance + ? WHERE id = ?`,
-          [totalAmount, req.user.id]
-        );
-
-        await connection.commit();
-        return res.json({ 
-          success: true, 
-          message: `${totalAmount.toLocaleString()}원 쿠폰(${pendingCoupons.length}장)이 지갑으로 성공적으로 발급되었습니다.`,
-          count: pendingCoupons.length,
-          totalAmount
-        });
       }
     }
 

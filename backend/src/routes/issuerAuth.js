@@ -527,12 +527,19 @@ router.get('/inventory', authenticate, authorize('issuer'), async (req, res, nex
       serverIp: (() => {
         const os = require('os');
         const nets = os.networkInterfaces();
+        const candidates = [];
         for (const name of Object.keys(nets)) {
           for (const iface of nets[name] || []) {
-            if (iface.family === 'IPv4' && !iface.internal) return iface.address;
+            if (iface.family === 'IPv4' && !iface.internal) candidates.push(iface.address);
           }
         }
-        return 'localhost';
+        return (
+          candidates.find(ip => ip.startsWith('192.168.')) ||
+          candidates.find(ip => ip.startsWith('10.')) ||
+          candidates.find(ip => !ip.startsWith('172.')) ||
+          candidates[0] ||
+          'localhost'
+        );
       })()
     });
   } catch (err) {

@@ -1,0 +1,1 @@
+import"./mock-backend-Cm1IoOFL.js";/* empty css             */import{r as e}from"./api-CKTZsajb.js";if(!e("/merchant/login.html"))throw new Error("not authenticated");const t=localStorage.getItem("ongjin_font_scale")||"normal";document.documentElement.style.fontSize=t==="large"?"22px":"16px";document.documentElement.setAttribute("data-font-scale",t);

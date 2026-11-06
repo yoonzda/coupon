@@ -81,6 +81,12 @@ function randomHex(len = 16) {
   return out;
 }
 
+function getOneYearLaterIso(baseDate = new Date()) {
+  const d = new Date(baseDate);
+  d.setFullYear(d.getFullYear() + 1);
+  return d.toISOString();
+}
+
 function encodeQrPayload(obj) {
   try {
     const json = JSON.stringify(obj);
@@ -638,11 +644,16 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
           : null;
         phoneIdx++;
 
+        const issuedAtIso = new Date().toISOString();
+        const expiresAtIso = getOneYearLaterIso(issuedAtIso);
+
         const tokenStr = encodeQrPayload({
           in: issuerInfo.name,
           fv,
           cnt: 1,
-          sid
+          sid,
+          iat: issuedAtIso,
+          exp: expiresAtIso
         });
 
         const newCoupon = {
@@ -652,8 +663,8 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
           face_value: fv,
           status: 'available',
           issued_to: assignedPhone ? 999 : null,
-          issued_at: new Date().toISOString(),
-          expires_at: new Date(Date.now() + 365 * 86400000).toISOString(),
+          issued_at: issuedAtIso,
+          expires_at: expiresAtIso,
           used_at: null,
           kiosk_session_id: sid,
           tourist_phone: assignedPhone || '- (미등록 대기)',
@@ -679,12 +690,16 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
 
     saveDb(db);
 
+    const bundleIssuedAt = new Date().toISOString();
+    const bundleExpiresAt = getOneYearLaterIso(bundleIssuedAt);
     const bundleToken = encodeQrPayload({
       in: issuerInfo.name,
       fv: totalAmount,
       cnt: createdCoupons.length,
       items: createdCoupons.map(c => c.faceValue),
-      sid: bundleSessionId
+      sid: bundleSessionId,
+      iat: bundleIssuedAt,
+      exp: bundleExpiresAt
     });
 
     return {
@@ -709,13 +724,88 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
   }
 
   // ── 8. 관광객 포털 (Tourist OTP, QR 수령, 내 쿠폰함) ──
+  if (pathname === '/coupon/demo-qr' && m === 'POST') {
+    const requestedFace = Number(bodyObj?.faceValue) || 5000;
+    const forceNew = Boolean(bodyObj?.forceNew);
+    const firstIssuer = db.issuers[0] || { id: 1, name: '자월달빛천문대', phone: '032-899-3300', address: '인천광역시 옹진군' };
+    const basePrefix = getBasePrefix();
+
+    let coupon = !forceNew
+      ? db.coupons.find(c => String(c.kiosk_session_id || '').startsWith('demo_') && c.status === 'available' && !c.issued_to && Number(c.face_value) === requestedFace)
+      : null;
+
+    const nowIso = new Date().toISOString();
+    const expIso = getOneYearLaterIso(nowIso);
+
+    if (!coupon) {
+      const sid = `demo_${Date.now()}_${randomHex(3)}`;
+      const newId = (db.coupons.reduce((mx, c) => Math.max(mx, Number(c.id || 0)), 0) || 0) + 1;
+      const hash = randomHex(16);
+      coupon = {
+        id: newId,
+        code_hash: hash,
+        coupon_type: 'digital',
+        face_value: requestedFace,
+        status: 'available',
+        issued_to: null,
+        issued_at: nowIso,
+        expires_at: expIso,
+        used_at: null,
+        kiosk_session_id: sid,
+        tourist_phone: '- (미등록 대기)',
+        issuer_name: firstIssuer.name,
+        issuer_phone: firstIssuer.phone,
+        issuer_address: firstIssuer.address,
+        used_merchant_name: '-'
+      };
+      db.coupons.unshift(coupon);
+      saveDb(db);
+    } else {
+      coupon.issued_at = nowIso;
+      coupon.expires_at = expIso;
+      saveDb(db);
+    }
+
+    const h = String(coupon.code_hash || '00000000').toUpperCase();
+    const serialCode = `${h.slice(0, 4)}-${h.slice(4, 8)}`;
+    const tokenStr = encodeQrPayload({
+      in: firstIssuer.name,
+      fv: Number(coupon.face_value),
+      cnt: 1,
+      sid: coupon.kiosk_session_id,
+      iat: coupon.issued_at,
+      exp: coupon.expires_at
+    });
+    const qrUrl = `${basePrefix}/tourist/landing.html?token=${encodeURIComponent(tokenStr)}&kioskSessionId=${encodeURIComponent(coupon.kiosk_session_id)}`;
+
+    return {
+      status: 200,
+      data: {
+        success: true,
+        data: {
+          couponId: coupon.id,
+          allocationId: 1,
+          token: tokenStr,
+          kioskSessionId: coupon.kiosk_session_id,
+          faceValue: Number(coupon.face_value),
+          issuerName: firstIssuer.name,
+          serialCode,
+          qrUrl,
+          serverIp: 'localhost'
+        }
+      }
+    };
+  }
+
   if (pathname === '/auth/tourist/otp/send' && m === 'POST') {
+    const generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
+    localStorage.setItem('ongjin_mock_last_otp', generatedOtp);
     return {
       status: 200,
       data: {
         success: true,
         message: '인증번호가 발송되었습니다.',
-        devOtp: '123456'
+        devOtp: generatedOtp
       }
     };
   }
@@ -779,6 +869,10 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
     const token = bodyObj?.token || bodyObj?.allocationId;
     const kioskSessionId = bodyObj?.kioskSessionId;
 
+    const decoded = decodeQrPayload(token);
+    const issuedAtIso = decoded?.iat || new Date().toISOString();
+    const expiresAtIso = decoded?.exp || getOneYearLaterIso(issuedAtIso);
+
     // 1) 같은 브라우저에서 발급된 세션 쿠폰이 있으면 귀속
     const sessionMatches = kioskSessionId
       ? db.coupons.filter(c => c.kiosk_session_id === kioskSessionId && c.status === 'available' && !c.issued_to)
@@ -789,6 +883,8 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
       sessionMatches.forEach(c => {
         c.issued_to = uid;
         c.tourist_phone = userPhone;
+        c.issued_at = issuedAtIso;
+        c.expires_at = expiresAtIso;
         sum += Number(c.face_value || 0);
       });
       saveDb(db);
@@ -804,7 +900,6 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
     }
 
     // 2) 다른 기기(스마트폰)에서 QR 스캔해 진입한 경우: 토큰 내 메타데이터를 해석해 지갑에 즉시 생성
-    const decoded = decodeQrPayload(token);
     const issuerName = decoded?.in || '자월달빛천문대';
     const faceValues = Array.isArray(decoded?.items) && decoded.items.length > 0
       ? decoded.items
@@ -820,8 +915,8 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
         face_value: Number(fv),
         status: 'available',
         issued_to: uid,
-        issued_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + 365 * 86400000).toISOString(),
+        issued_at: issuedAtIso,
+        expires_at: expiresAtIso,
         used_at: null,
         kiosk_session_id: kioskSessionId || decoded?.sid || `ks_${Date.now()}`,
         tourist_phone: userPhone,

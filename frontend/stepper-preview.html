@@ -1,0 +1,3381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="icon" href="./shared/images/favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>스탭퍼 애니메이션 시안 미리보기 (시안 1 · 2 · 3)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      word-break: keep-all;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #ffffff;
+      color: #0f172a;
+      padding: 56px 64px 120px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .preview-header {
+      margin-bottom: 48px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .preview-header h1 {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 2rem;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+
+    .preview-header p {
+      font-size: 1.02rem;
+      color: #64748b;
+    }
+
+    .variant-block {
+      margin-bottom: 76px;
+    }
+
+    .variant-label {
+      display: inline-block;
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: #0f172a;
+      background: #f1f5f9;
+      padding: 7px 16px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+    }
+
+    .variant-label.highlight {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    /* ── QR 섹션 프레임 ── */
+    .qr-section {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: clamp(40px, 5vw, 72px);
+      padding: clamp(40px, 4vw, 54px) clamp(36px, 4.2vw, 56px);
+      background-color: #f8fafc;
+      border-radius: 22px;
+    }
+
+    .qr-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .qr-img {
+      width: 196px;
+      height: 196px;
+      display: block;
+      object-fit: contain;
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 16px;
+    }
+
+    .qr-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .qr-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: clamp(1.65rem, 2.1vw, 2.05rem);
+      font-weight: 400;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+    }
+
+    .qr-desc {
+      font-size: clamp(1.06rem, 1.22vw, 1.18rem);
+      color: #475569;
+      line-height: 1.7;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       공통 스탭퍼 스타일
+    ══════════════════════════════════════════════════════════════ */
+    .stepper-stage {
+      width: 100%;
+      margin-top: 16px;
+      padding-top: 124px;
+      position: relative;
+      user-select: none;
+    }
+
+    .stepper-stage.with-buildings {
+      padding-top: 142px;
+    }
+
+    .stepper-track-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    /* 01-02, 02-03, 03-04 도트 구간 */
+    .dot-bridges {
+      position: absolute;
+      top: 17px;
+      left: 12.5%;
+      width: 75%;
+      transform: translateY(-50%);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .dot-segment {
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      padding: 0 24px;
+    }
+
+    .step-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #cbd5e1;
+      transition: background-color 0.25s ease, transform 0.25s ease;
+    }
+
+    .step-dot.lit {
+      background-color: #0f172a;
+      transform: scale(1.25);
+    }
+
+    /* 캐릭터 + 말풍선 */
+    .walker-wrap {
+      position: absolute;
+      top: -116px;
+      left: 12.5%;
+      transform: translateX(-50%);
+      z-index: 12;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+      transition: left 0.24s linear;
+    }
+
+    .walker-bubble {
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 0.96rem;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 999px;
+      white-space: nowrap;
+      margin-bottom: 10px;
+      position: relative;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: -0.01em;
+    }
+
+    .walker-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 5px 5px 0;
+      border-style: solid;
+      border-color: #0f172a transparent transparent;
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 1.5px;
+      height: 13px;
+      background: rgba(255, 255, 255, 0.8);
+      margin-left: 3px;
+      animation: blinkCursor 0.8s infinite;
+    }
+
+    @keyframes blinkCursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .walker-svg {
+      width: 62px;
+      height: 66px;
+      overflow: visible;
+    }
+
+    .walker-wrap.is-standing .char-body-group {
+      animation: idleBreathe 1.5s ease-in-out infinite alternate;
+      transform-origin: 32px 58px;
+    }
+
+    .walker-wrap.is-walking .char-body-group {
+      animation: walkBounce 0.32s ease-in-out infinite alternate;
+    }
+
+    .walker-wrap.is-walking .foot-l {
+      animation: footStepL 0.32s ease-in-out infinite alternate;
+      transform-origin: 27px 50px;
+    }
+
+    .walker-wrap.is-walking .foot-r {
+      animation: footStepR 0.32s ease-in-out infinite alternate;
+      transform-origin: 36px 50px;
+    }
+
+    .walker-wrap.is-walking .arm-swing {
+      animation: handSwing 0.32s ease-in-out infinite alternate;
+      transform-origin: 34px 36px;
+    }
+
+    /* 쿠폰 받았을 때 기뻐하며 통통 뛰는 모션 */
+    .walker-wrap.is-happy .char-body-group {
+      animation: happyJump 0.38s cubic-bezier(0.22, 1, 0.36, 1) 2 alternate;
+    }
+
+    @keyframes idleBreathe {
+      0% { transform: translateY(0px) scaleY(1); }
+      100% { transform: translateY(-2px) scaleY(1.015); }
+    }
+
+    @keyframes walkBounce {
+      0% { transform: translateY(0px) rotate(-1deg); }
+      100% { transform: translateY(-3.5px) rotate(1.5deg); }
+    }
+
+    @keyframes happyJump {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-7px); }
+    }
+
+    @keyframes footStepL {
+      0% { transform: translate(-3px, -2px) rotate(-14deg); }
+      100% { transform: translate(3px, 0px) rotate(12deg); }
+    }
+
+    @keyframes footStepR {
+      0% { transform: translate(3px, 0px) rotate(12deg); }
+      100% { transform: translate(-3px, -2px) rotate(-14deg); }
+    }
+
+    @keyframes handSwing {
+      0% { transform: rotate(-10deg); }
+      100% { transform: rotate(12deg); }
+    }
+
+    /* 노드 그리드 */
+    .stepper-nodes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .step-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .node-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #94a3b8;
+      font-variant-numeric: tabular-nums;
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .step-node.passed .node-circle {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+    }
+
+    .step-node.current .node-circle {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+      box-shadow: 0 0 0 5px rgba(15, 23, 42, 0.08);
+    }
+
+    .node-title {
+      font-size: 1.06rem;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: -0.015em;
+      transition: color 0.3s ease;
+    }
+
+    .step-node.passed .node-title,
+    .step-node.current .node-title {
+      color: #0f172a;
+    }
+
+    .node-sub {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.45;
+      transition: color 0.3s ease;
+    }
+
+    .step-node.passed .node-sub,
+    .step-node.current .node-sub {
+      color: #64748b;
+    }
+
+    /* ── 시안 2: 그린 테마 ── */
+    .theme-green .step-dot.lit {
+      background-color: #059669;
+    }
+    .theme-green .walker-bubble {
+      background: #059669;
+    }
+    .theme-green .walker-bubble::after {
+      border-color: #059669 transparent transparent;
+    }
+    .theme-green .step-node.passed .node-circle,
+    .theme-green .step-node.current .node-circle {
+      background: #059669;
+      border-color: #059669;
+    }
+    .theme-green .step-node.current .node-circle {
+      box-shadow: 0 0 0 5px rgba(5, 150, 105, 0.12);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       시안 3 전용: 건물 일러스트 + 결제/쿠폰 쏙/가맹점 할인 이펙트
+    ══════════════════════════════════════════════════════════════ */
+    /* 각 역(01~04) 뒤편에 놓이는 귀여운 미니 건물 일러스트 */
+    .station-building {
+      position: absolute;
+      top: -64px;
+      left: 50%;
+      transform: translateX(14px); /* 캐릭터가 건물 약간 왼쪽 앞에 서도록 */
+      width: 58px;
+      height: 56px;
+      z-index: 4;
+      pointer-events: none;
+      opacity: 0.55;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .step-node.passed .station-building,
+    .step-node.current .station-building {
+      opacity: 1;
+    }
+
+    .step-node.current .station-building {
+      transform: translateX(14px) scale(1.06);
+    }
+
+    /* 상황별 팝업 이펙트 (1단계 결제 완료, 2단계 쿠폰이 캐릭터로 쏙, 3단계 할인 완료, 4단계 하트) */
+    .action-fx {
+      position: absolute;
+      top: -92px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.5);
+      opacity: 0;
+      z-index: 15;
+      pointer-events: none;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 4px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+    }
+
+    .action-fx.fx-pay {
+      background: #fef08a;
+      color: #0f172a;
+      border: 1.5px solid #0f172a;
+    }
+
+    .action-fx.fx-discount {
+      background: #dcfce7;
+      color: #065f46;
+      border: 1.5px solid #059669;
+    }
+
+    .action-fx.fx-heart {
+      background: #ffe4e6;
+      color: #be123c;
+      border: 1.5px solid #f43f5e;
+    }
+
+    .action-fx.pop {
+      animation: fxPopUp 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes fxPopUp {
+      0% { opacity: 0; transform: translate(-50%, 10px) scale(0.6); }
+      25% { opacity: 1; transform: translate(-50%, -6px) scale(1.05); }
+      75% { opacity: 1; transform: translate(-50%, -10px) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -16px) scale(0.9); }
+    }
+
+    /* 2단계: 매표소/키오스크에서 캐릭터 품으로 쏙 날아들어가는 쿠폰 애니메이션 */
+    .flying-coupon {
+      position: absolute;
+      top: -54px;
+      left: 50%;
+      width: 26px;
+      height: 18px;
+      z-index: 16;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .flying-coupon.fly-in {
+      animation: couponFlyToPerson 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes couponFlyToPerson {
+      0% {
+        opacity: 0;
+        transform: translate(28px, 6px) scale(0.5) rotate(15deg);
+      }
+      30% {
+        opacity: 1;
+        transform: translate(14px, -18px) scale(1.15) rotate(-8deg);
+      }
+      75% {
+        opacity: 1;
+        transform: translate(-6px, -4px) scale(1) rotate(-12deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-12px, 8px) scale(0.3) rotate(0deg);
+      }
+    }
+
+    /* 3단계: 캐릭터 손에서 가맹점 건물로 쿠폰이 쏙 들어가는 애니메이션 */
+    .flying-coupon.fly-to-shop {
+      animation: couponFlyToShop 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes couponFlyToShop {
+      0% {
+        opacity: 1;
+        transform: translate(-10px, 6px) scale(0.9) rotate(-10deg);
+      }
+      50% {
+        opacity: 1;
+        transform: translate(10px, -14px) scale(1.1) rotate(8deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(26px, 2px) scale(0.4) rotate(20deg);
+      }
+    }
+
+    /* 캐릭터 손에 들린 쿠폰 (2단계 수령 후 ~ 3단계 사용 전까지만 표시) */
+    .held-coupon {
+      opacity: 0;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .walker-wrap.has-coupon .held-coupon {
+      opacity: 1;
+    }
+
+    @media (max-width: 960px) {
+      body {
+        padding: 32px 20px 72px;
+      }
+      .qr-section {
+        flex-direction: column;
+      }
+      .stepper-nodes {
+        gap: 8px;
+      }
+      .node-title {
+        font-size: 0.94rem;
+      }
+      .node-sub {
+        display: none;
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       모바일 전용 시안 3종 비교 섹션 (스마트폰 폭 390px 프레임)
+    ══════════════════════════════════════════════════════════════ */
+    .mobile-section-divider {
+      margin: 96px 0 36px;
+      padding-top: 48px;
+      border-top: 2px solid #0f172a;
+    }
+
+    .mobile-section-divider h2 {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 400;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .mobile-section-divider p {
+      font-size: 1rem;
+      color: #64748b;
+    }
+
+    .mobile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 36px;
+      align-items: start;
+    }
+
+    .mobile-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .mobile-col .variant-label {
+      align-self: flex-start;
+    }
+
+    /* 실제 스마트폰 화면 폭(390px) 시뮬레이션 프레임 */
+    .phone-frame {
+      width: 100%;
+      max-width: 400px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 28px;
+      padding: 24px 20px 28px;
+      box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .phone-top-qr {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .phone-top-qr img {
+      width: 68px;
+      height: 68px;
+      background: #ffffff;
+      padding: 5px;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .phone-top-qr h3 {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.08rem;
+      font-weight: 400;
+      color: #0f172a;
+      line-height: 1.35;
+      margin-bottom: 4px;
+    }
+
+    .phone-top-qr p {
+      font-size: 0.82rem;
+      color: #64748b;
+      line-height: 1.45;
+    }
+
+    /* ── [모바일 시안 A] 가로 마을 풍경 유지 + 하단 현재 단계 통합 자막 ── */
+    .m-stage-a {
+      width: 100%;
+      padding-top: 128px;
+      position: relative;
+      user-select: none;
+    }
+
+    .m-stage-a .dot-bridges {
+      top: 15px;
+      left: 12.5%;
+      width: 75%;
+    }
+
+    .m-stage-a .dot-segment {
+      padding: 0 10px;
+    }
+
+    .m-stage-a .step-dot {
+      width: 4.5px;
+      height: 4.5px;
+    }
+
+    .m-stage-a .walker-wrap {
+      top: -106px;
+    }
+
+    .m-stage-a .walker-svg {
+      width: 54px;
+      height: 58px;
+    }
+
+    .m-stage-a .walker-bubble {
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      min-height: 30px;
+      margin-bottom: 8px;
+      transition: transform 0.25s ease;
+    }
+
+    /* 양끝 역(01, 04)에서 말풍선이 휴대폰 화면 밖으로 잘리지 않도록 자동 보정 */
+    .m-stage-a .walker-wrap.edge-left .walker-bubble {
+      transform: translateX(34px);
+    }
+    .m-stage-a .walker-wrap.edge-left .walker-bubble::after {
+      left: calc(50% - 34px);
+    }
+    .m-stage-a .walker-wrap.edge-right .walker-bubble {
+      transform: translateX(-34px);
+    }
+    .m-stage-a .walker-wrap.edge-right .walker-bubble::after {
+      left: calc(50% + 34px);
+    }
+
+    .m-stage-a .station-building {
+      top: -54px;
+      width: 46px;
+      height: 44px;
+      transform: translateX(6px);
+    }
+
+    .m-stage-a .step-node.current .station-building {
+      transform: translateX(6px) scale(1.06);
+    }
+
+    .m-stage-a .node-circle {
+      width: 30px;
+      height: 30px;
+      font-size: 0.78rem;
+    }
+
+    .m-stage-a .node-short {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .m-stage-a .step-node.passed .node-short,
+    .m-stage-a .step-node.current .node-short {
+      color: #0f172a;
+    }
+
+    .m-stage-a-caption {
+      margin-top: 16px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .m-stage-a-caption-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .m-stage-a-badge {
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+
+    .m-stage-a-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .m-stage-a-sub {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    /* ── [모바일 시안 B] 위에서 아래로 총총 내려오는 세로형 스텝퍼 ── */
+    .m-stage-b {
+      position: relative;
+      padding: 12px 4px 8px 8px;
+      user-select: none;
+    }
+
+    .m-stage-b-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .m-b-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      position: relative;
+      min-height: 62px;
+    }
+
+    .m-b-station {
+      width: 96px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .m-b-building {
+      width: 44px;
+      height: 42px;
+      opacity: 0.5;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .m-b-row.passed .m-b-building,
+    .m-b-row.current .m-b-building {
+      opacity: 1;
+    }
+
+    .m-b-row.current .m-b-building {
+      transform: scale(1.07);
+    }
+
+    .m-b-info {
+      flex: 1;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 11px 14px;
+      position: relative;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .m-b-row.current .m-b-info {
+      border-color: #0f172a;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    }
+
+    .m-b-info strong {
+      display: block;
+      font-size: 0.94rem;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+
+    .m-b-info span {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    /* 세로 점선 브릿지 3구간 */
+    .m-b-vbridges {
+      position: absolute;
+      left: 23px; /* 번호 원(30px)의 정중앙(8px + 15px) */
+      top: 43px;
+      bottom: 39px;
+      width: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .m-b-vseg {
+      height: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-evenly;
+    }
+
+    /* 세로 이동 캐릭터 */
+    .m-b-walker {
+      position: absolute;
+      left: 44px;
+      top: 0px;
+      z-index: 15;
+      pointer-events: none;
+      transition: top 0.22s linear;
+      display: flex;
+      align-items: center;
+    }
+
+    .m-b-walker .walker-svg {
+      width: 52px;
+      height: 56px;
+    }
+
+    .m-b-walker .walker-bubble {
+      position: absolute;
+      left: 48px;
+      top: -12px;
+      margin-bottom: 0;
+      font-size: 0.78rem;
+      padding: 5px 11px;
+      min-height: 28px;
+    }
+
+    .m-b-walker .walker-bubble::after {
+      bottom: -5px;
+      left: 16px;
+    }
+
+    /* ── [모바일 시안 C] 2×2 두 줄 오솔길 스텝퍼 (01→02 / 03→04) ── */
+    .m-stage-c {
+      position: relative;
+      padding-top: 112px;
+      user-select: none;
+    }
+
+    .m-c-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 96px;
+      position: relative;
+    }
+
+    .m-c-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      position: relative;
+    }
+
+    .m-c-row .dot-segment {
+      position: absolute;
+      top: 15px;
+      left: 25%;
+      width: 50%;
+      transform: translateY(-50%);
+      padding: 0 22px;
+      z-index: 1;
+    }
+
+    .m-c-row .station-building {
+      top: -56px;
+      width: 50px;
+      height: 48px;
+      transform: translateX(12px);
+    }
+
+    .m-c-row .node-circle {
+      width: 30px;
+      height: 30px;
+      font-size: 0.8rem;
+    }
+
+    .m-c-row .node-title {
+      font-size: 0.92rem;
+    }
+
+    .m-c-row .node-sub {
+      display: block !important;
+      font-size: 0.78rem;
+    }
+
+    /* 02번에서 03번으로 내려가는 대각선/연결 점선 표시 */
+    .m-c-row-connector {
+      position: absolute;
+      top: 90px;
+      left: 25%;
+      width: 50%;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .m-stage-c .walker-wrap {
+      transition: left 0.22s linear, top 0.22s linear;
+    }
+    .m-stage-c .walker-svg {
+      width: 54px;
+      height: 58px;
+    }
+    .m-stage-c .walker-bubble {
+      font-size: 0.78rem;
+      padding: 5px 11px;
+      min-height: 28px;
+    }
+
+    /* ── [모바일 시안 D (4안)] 캐릭터 중앙 고정 + 뒷배경·건물·점선이 옆으로 움직이는 사이드스크롤 뷰 ── */
+    .m-stage-d {
+      position: relative;
+      width: 100%;
+      padding-top: 138px;
+      padding-bottom: 8px;
+      overflow: hidden;
+      user-select: none;
+      /* 양옆 가장자리가 부드럽게 페이드되는 카메라 뷰포트 효과 */
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 9%, #000 91%, transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0%, #000 9%, #000 91%, transparent 100%);
+    }
+
+    /* 패럴랙스 뒷배경 구름/섬 실루엣 */
+    .m-d-parallax-bg {
+      position: absolute;
+      top: 18px;
+      left: 0%;
+      width: 240%;
+      height: 70px;
+      pointer-events: none;
+      z-index: 1;
+      transition: left 0.23s linear;
+      opacity: 0.65;
+    }
+
+    /* 프레임 정중앙(50%)에 고정된 캐릭터 */
+    .m-stage-d .walker-wrap {
+      position: absolute;
+      top: 16px;
+      left: 50% !important;
+      transform: translateX(-50%);
+      z-index: 20;
+    }
+
+    .m-stage-d .walker-svg {
+      width: 58px;
+      height: 62px;
+    }
+
+    .m-stage-d .walker-bubble {
+      font-size: 0.84rem;
+      padding: 6px 14px;
+      min-height: 32px;
+      margin-bottom: 8px;
+    }
+
+    /* 뒤에서 옆으로 움직이는 월드 트랙 (건물 + 점선 + 번호 + 텍스트) */
+    .m-d-world {
+      position: relative;
+      width: 280%;
+      left: 15%; /* stage 0 일 때 1번 역(12.5% * 280% = 35%)이 정중앙(50%)에 오도록 +15% */
+      transition: left 0.23s linear;
+      z-index: 5;
+    }
+
+    .m-d-world .dot-bridges {
+      top: 17px;
+      left: 12.5%;
+      width: 75%;
+    }
+
+    .m-d-world .dot-segment {
+      padding: 0 22px;
+    }
+
+    .m-d-world .station-building {
+      top: -60px;
+      width: 54px;
+      height: 52px;
+      transform: translateX(12px);
+    }
+
+    .m-d-world .step-node.current .station-building {
+      transform: translateX(12px) scale(1.08);
+    }
+
+    .m-d-world .node-title {
+      font-size: 0.96rem;
+    }
+
+    .m-d-world .node-sub {
+      display: block !important;
+      font-size: 0.8rem;
+    }
+
+    /* 하단 미니 진행 인디케이터 (현재 몇 번째 역인지 한눈에 표시 및 탭 이동 지원) */
+    .m-d-mini-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    .m-d-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #94a3b8;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .m-d-pill.active {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       [최하단 최종 보완본] 모바일 4안 업그레이드 (땅 기준 정렬 + 이펙트 가림 해결 + 4->1 리와인드 숨김 + 여행객 캐릭터)
+    ══════════════════════════════════════════════════════════════ */
+    .final-upgrade-section {
+      margin-top: 96px;
+      padding-top: 48px;
+      border-top: 2px solid #0f172a;
+    }
+
+    .final-upgrade-section h2 {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.9rem;
+      font-weight: 400;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .final-upgrade-section p {
+      font-size: 1rem;
+      color: #64748b;
+      margin-bottom: 28px;
+    }
+
+    .final-showcase-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      align-items: flex-start;
+    }
+
+    /* 업그레이드된 사이드스크롤 스테이지 (번호 아래 2줄 말풍선 + 캐릭터 위 컬러 팝업 전용) */
+    .m-stage-v5 {
+      position: relative;
+      width: 100%;
+      padding-top: 126px; /* 캐릭터 위 컬러 팝업 + 배경 일러스트 + 전경 도로 캐릭터 공간 */
+      padding-bottom: 84px; /* 01~04 번호 원 아래에 뜨는 2줄 말풍선 공간 확보 */
+      overflow: hidden;
+      user-select: none;
+      transition: opacity 0.24s ease;
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 7%, #000 93%, transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0%, #000 7%, #000 93%, transparent 100%);
+    }
+
+    /* 4단계 -> 1단계 리셋 시 뒤로 감기는 모션이 보이지 않도록 부드럽게 페이드 */
+    .m-stage-v5.is-resetting {
+      opacity: 0;
+    }
+
+    .m-stage-v5 .m-d-parallax-bg {
+      top: 14px;
+    }
+
+    /* 배경 마을 보도블럭/언덕 기준선 (건물·섬이 놓이는 뒷길: -24px) */
+    .m-stage-v5 .m-d-world::before {
+      content: '';
+      position: absolute;
+      top: -24px;
+      left: 5%;
+      width: 90%;
+      height: 1.5px;
+      background: #e2e8f0;
+      z-index: 2;
+    }
+
+    /* 캐릭터는 머리 위 검정 말풍선 없이, 컬러 팝업만 머리 위에 뜨고 전경 도로(-2px)를 따라 걷도록 배치 */
+    .m-stage-v5 .walker-wrap {
+      position: absolute;
+      top: 60px;
+      left: 50% !important;
+      transform: translateX(-50%);
+      z-index: 20;
+    }
+
+    .m-stage-v5 .walker-svg {
+      width: 62px;
+      height: 66px;
+    }
+
+    /* 캐릭터 바로 위에 뜨는 컬러 팝업 뱃지 (말풍선이 아래로 내려갔으므로 절대 가려지지 않음!) */
+    .walker-top-fx {
+      position: absolute;
+      top: -36px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.6);
+      opacity: 0;
+      z-index: 30;
+      pointer-events: none;
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 5px 13px;
+      border-radius: 999px;
+      white-space: nowrap;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+    }
+
+    .walker-top-fx.fx-pay {
+      background: #fef08a;
+      color: #0f172a;
+      border: 1.5px solid #0f172a;
+    }
+
+    .walker-top-fx.fx-coupon {
+      background: #fef9c3;
+      color: #854d0e;
+      border: 1.5px solid #eab308;
+    }
+
+    .walker-top-fx.fx-discount {
+      background: #dcfce7;
+      color: #065f46;
+      border: 1.5px solid #059669;
+    }
+
+    .walker-top-fx.fx-heart {
+      background: #ffe4e6;
+      color: #be123c;
+      border: 1.5px solid #f43f5e;
+    }
+
+    .walker-top-fx.pop {
+      animation: fxTopPop 1.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes fxTopPop {
+      0% { opacity: 0; transform: translate(-50%, 8px) scale(0.65); }
+      18% { opacity: 1; transform: translate(-50%, -4px) scale(1.05); }
+      82% { opacity: 1; transform: translate(-50%, -6px) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -12px) scale(0.92); }
+    }
+
+    /* 건물 및 섬 일러스트: 뒷길 기준선(-24px) 위에 넉넉한 크기로 배치 */
+    .m-stage-v5 .m-d-world .station-building,
+    .pc-v5-stage .station-building {
+      top: -82px;
+      width: 68px;
+      height: 60px;
+      transform: translateX(20px);
+      z-index: 4;
+    }
+
+    .m-stage-v5 .m-d-world .step-node.current .station-building,
+    .pc-v5-stage .step-node.current .station-building {
+      transform: translateX(20px) scale(1.08);
+    }
+
+    /* 번호(01~04) 아래에 '붕~' 떠오르는 2줄 말풍선 */
+    .node-bottom-bubble {
+      position: absolute;
+      top: 44px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px) scale(0.88);
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 500;
+      line-height: 1.5;
+      padding: 10px 16px;
+      border-radius: 14px;
+      white-space: pre-line;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+      min-width: 148px;
+      min-height: 54px;
+      display: block;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.32s ease, transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 25;
+      letter-spacing: -0.01em;
+    }
+
+    .node-bottom-bubble .typing-cursor {
+      display: none;
+    }
+
+    /* 번호 원을 가리키는 위쪽 화살표 꼬리 */
+    .node-bottom-bubble::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 5px 5px;
+      border-style: solid;
+      border-color: transparent transparent #0f172a;
+    }
+
+    .step-node.show-bubble .node-bottom-bubble {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    /* PC 와이드 버전에서도 번호 아래 2줄 말풍선 공간 확보 */
+    .pc-v5-stage {
+      padding-top: 124px !important;
+      padding-bottom: 84px !important;
+      transition: opacity 0.24s ease;
+    }
+
+    .pc-v5-stage.is-resetting {
+      opacity: 0;
+    }
+
+    /* ── 캐릭터 ⇄ 건물(매표소·키오스크·카페·섬) 사이에서 주고받는 아이템 애니메이션 ── */
+    .exchange-item {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      width: 32px;
+      height: 26px;
+      z-index: 35;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* [주기] 중간에 멈추지 않고 한 번의 매끄러운 포물선으로 건물까지 쏙 들어감 */
+    .exchange-item.give-anim {
+      animation: itemGiveToStation 0.88s ease-in-out forwards;
+    }
+
+    @keyframes itemGiveToStation {
+      0% {
+        opacity: 0;
+        transform: translate(-6px, 12px) scale(0.75) rotate(-8deg);
+      }
+      15% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 1;
+        transform: translate(13px, -13px) scale(1.1) rotate(2deg);
+      }
+      85% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(32px, 2px) scale(0.7) rotate(12deg);
+      }
+    }
+
+    /* [받기] 중간에 멈추지 않고 건물에서 캐릭터 손까지 한 번의 매끄러운 포물선으로 바로 들어옴 */
+    .exchange-item.receive-anim {
+      animation: itemReceiveFromStation 0.92s ease-in-out forwards;
+    }
+
+    @keyframes itemReceiveFromStation {
+      0% {
+        opacity: 0;
+        transform: translate(32px, 2px) scale(0.7) rotate(10deg);
+      }
+      15% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 1;
+        transform: translate(13px, -14px) scale(1.14) rotate(-3deg);
+      }
+      85% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-6px, 12px) scale(0.75) rotate(-6deg);
+      }
+    }
+
+    /* 3단계 카페에서 할인 결제 후 손에 들리는 귀여운 커피컵 */
+    .held-coffee {
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .walker-wrap.has-coffee .held-coffee {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-header">
+    <h1>관광객 이동 스탭퍼 시안 비교 (1: 검정 모노톤 / 2: 초록 포인트 / 3: 건물 + 쿠폰 인터랙션)</h1>
+    <p>맨 아래 <strong>시안 3</strong>에서 관광지 결제 → 쿠폰이 사람에게 쏙 들어옴 → 쿠폰 들고 가맹점으로 이동해 할인받는 장면을 확인해 보세요!</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       시안 1: 검정 모노톤
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="variant-block">
+    <span class="variant-label">시안 1 — 검정 모노톤 기본형</span>
+
+    <section class="qr-section" id="stepper-demo-1">
+      <div class="qr-box">
+        <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=4&data=http://localhost:5180/tourist/index.html" alt="테스트 QR" />
+      </div>
+
+      <div class="qr-info">
+        <h2 class="qr-title">관광지 방문부터 가맹점 할인까지 이어지는 지역 상생 흐름</h2>
+        <p class="qr-desc">
+          고객이 관광지에 방문해 입장권 등을 결제하면 현장에서 즉시 모바일 쿠폰이 발급되고, 이를 섬 안의 식당·카페·특산물 가맹점에서 사용해 바로 할인을 받을 수 있습니다.
+        </p>
+
+        <div class="stepper-stage">
+          <div class="stepper-track-wrap">
+            <div class="dot-bridges">
+              <div class="dot-segment" data-seg="0"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="1"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="2"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+            </div>
+
+            <div class="walker-wrap is-standing has-coupon" data-role="walker">
+              <div class="walker-bubble">
+                <span data-role="bubble-text"></span><span class="typing-cursor"></span>
+              </div>
+              <svg class="walker-svg" viewBox="0 0 64 68" fill="none">
+                <ellipse cx="32" cy="62" rx="13" ry="3" fill="rgba(15, 23, 42, 0.08)" />
+                <g class="foot-l"><rect x="22" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                <g class="foot-r"><rect x="33" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                <g class="char-body-group">
+                  <rect x="11" y="30" width="12" height="17" rx="6" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                  <path d="M14 35H20" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                  <path d="M20 33C20 28 24.5 26 32 26C39.5 26 44 28 44 33L46 49C46 51.5 44 53 41 53H23C20 53 18 51.5 18 49L20 33Z" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                  <path d="M24 27.5C26.5 29.5 37.5 29.5 40 27.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                  <rect x="19" y="10" width="26" height="20" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                  <circle cx="30" cy="20" r="1.7" fill="#0f172a" />
+                  <circle cx="39" cy="20" r="1.7" fill="#0f172a" />
+                  <path d="M33.2 22.2Q34.7 23.8 36.2 22.2" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />
+                  <ellipse cx="26.5" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                  <ellipse cx="41.8" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                  <path d="M18 13C19 7.5 25 5 32.5 5C40 5 45 7.5 46 13H18Z" fill="#0f172a" />
+                  <path d="M17 13H48" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+                  <circle cx="32" cy="4" r="2" fill="#0f172a" />
+                  <g class="arm-swing">
+                    <path d="M31 35L39 40" stroke="#ffffff" stroke-width="4.2" stroke-linecap="round" />
+                    <path d="M31 35L39 40" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                    <rect class="held-coupon" x="38" y="34" width="13" height="9" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.8" transform="rotate(-10 38 34)" />
+                  </g>
+                </g>
+              </svg>
+            </div>
+
+            <div class="stepper-nodes">
+              <div class="step-node passed current" data-step="0">
+                <div class="node-circle">01</div>
+                <strong class="node-title">관광지 방문 · 결제</strong>
+                <span class="node-sub">입장권·승선권 구매</span>
+              </div>
+              <div class="step-node" data-step="1">
+                <div class="node-circle">02</div>
+                <strong class="node-title">현장 쿠폰 수령</strong>
+                <span class="node-sub">QR 스캔 후 지갑 등록</span>
+              </div>
+              <div class="step-node" data-step="2">
+                <div class="node-circle">03</div>
+                <strong class="node-title">가맹점 방문 · 사용</strong>
+                <span class="node-sub">섬 식당·카페 즉시 할인</span>
+              </div>
+              <div class="step-node" data-step="3">
+                <div class="node-circle">04</div>
+                <strong class="node-title">지역 상권 상생</strong>
+                <span class="node-sub">소상공인 매출 · 정산</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       시안 2: 초록 포인트
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="variant-block theme-green">
+    <span class="variant-label">시안 2 — 소프트 그린 포인트</span>
+
+    <section class="qr-section" id="stepper-demo-2">
+      <div class="qr-box">
+        <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=4&data=http://localhost:5180/tourist/index.html" alt="테스트 QR" />
+      </div>
+
+      <div class="qr-info">
+        <h2 class="qr-title">관광지 방문부터 가맹점 할인까지 이어지는 지역 상생 흐름</h2>
+        <p class="qr-desc">
+          고객이 관광지에 방문해 입장권 등을 결제하면 현장에서 즉시 모바일 쿠폰이 발급되고, 이를 섬 안의 식당·카페·특산물 가맹점에서 사용해 바로 할인을 받을 수 있습니다.
+        </p>
+
+        <div class="stepper-stage">
+          <div class="stepper-track-wrap">
+            <div class="dot-bridges">
+              <div class="dot-segment" data-seg="0"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="1"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="2"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+            </div>
+
+            <div class="walker-wrap is-standing has-coupon" data-role="walker">
+              <div class="walker-bubble">
+                <span data-role="bubble-text"></span><span class="typing-cursor"></span>
+              </div>
+              <svg class="walker-svg" viewBox="0 0 64 68" fill="none">
+                <ellipse cx="32" cy="62" rx="13" ry="3" fill="rgba(5, 150, 105, 0.1)" />
+                <g class="foot-l"><rect x="22" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                <g class="foot-r"><rect x="33" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                <g class="char-body-group">
+                  <rect x="11" y="30" width="12" height="17" rx="6" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                  <path d="M14 35H20" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                  <path d="M20 33C20 28 24.5 26 32 26C39.5 26 44 28 44 33L46 49C46 51.5 44 53 41 53H23C20 53 18 51.5 18 49L20 33Z" fill="#059669" stroke="#0f172a" stroke-width="2.2" />
+                  <path d="M24 27.5C26.5 29.5 37.5 29.5 40 27.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                  <rect x="19" y="10" width="26" height="20" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                  <circle cx="30" cy="20" r="1.7" fill="#0f172a" />
+                  <circle cx="39" cy="20" r="1.7" fill="#0f172a" />
+                  <path d="M33.2 22.2Q34.7 23.8 36.2 22.2" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />
+                  <ellipse cx="26.5" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                  <ellipse cx="41.8" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                  <path d="M18 13C19 7.5 25 5 32.5 5C40 5 45 7.5 46 13H18Z" fill="#0f172a" />
+                  <path d="M17 13H48" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+                  <circle cx="32" cy="4" r="2" fill="#0f172a" />
+                  <g class="arm-swing">
+                    <path d="M31 35L39 40" stroke="#ffffff" stroke-width="4.2" stroke-linecap="round" />
+                    <path d="M31 35L39 40" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                    <rect class="held-coupon" x="38" y="34" width="13" height="9" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.8" transform="rotate(-10 38 34)" />
+                  </g>
+                </g>
+              </svg>
+            </div>
+
+            <div class="stepper-nodes">
+              <div class="step-node passed current" data-step="0">
+                <div class="node-circle">01</div>
+                <strong class="node-title">관광지 방문 · 결제</strong>
+                <span class="node-sub">입장권·승선권 구매</span>
+              </div>
+              <div class="step-node" data-step="1">
+                <div class="node-circle">02</div>
+                <strong class="node-title">현장 쿠폰 수령</strong>
+                <span class="node-sub">QR 스캔 후 지갑 등록</span>
+              </div>
+              <div class="step-node" data-step="2">
+                <div class="node-circle">03</div>
+                <strong class="node-title">가맹점 방문 · 사용</strong>
+                <span class="node-sub">섬 식당·카페 즉시 할인</span>
+              </div>
+              <div class="step-node" data-step="3">
+                <div class="node-circle">04</div>
+                <strong class="node-title">지역 상권 상생</strong>
+                <span class="node-sub">소상공인 매출 · 정산</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       시안 3: 건물 일러스트 + 관광지 결제 → 쿠폰이 사람에게 쏙! → 가맹점 할인 인터랙션
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="variant-block">
+    <span class="variant-label highlight">시안 3 (신규) — 관광지·가맹점 건물 일러스트 + 결제 · 쿠폰 쏙 수령 · 가맹점 할인 모션</span>
+
+    <section class="qr-section" id="stepper-demo-3">
+      <div class="qr-box">
+        <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=4&data=http://localhost:5180/tourist/index.html" alt="테스트 QR" />
+      </div>
+
+      <div class="qr-info">
+        <h2 class="qr-title">관광지 방문부터 가맹점 할인까지 이어지는 지역 상생 흐름</h2>
+        <p class="qr-desc">
+          고객이 관광지에 방문해 입장권 등을 결제하면 현장에서 즉시 모바일 쿠폰이 발급되고, 이를 섬 안의 식당·카페·특산물 가맹점에서 사용해 바로 할인을 받을 수 있습니다. 관광객에게는 실질적인 여행 혜택을 제공하고, 소상공인 매장으로 방문을 연결해 지역 경제를 활성화합니다.
+        </p>
+
+        <div class="stepper-stage with-buildings">
+          <div class="stepper-track-wrap">
+            <!-- 3개 도트 구간 -->
+            <div class="dot-bridges">
+              <div class="dot-segment" data-seg="0"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="1"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="2"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+            </div>
+
+            <!-- 귀여운 여행객 캐릭터 (처음엔 빈손 -> 2단계에서 쿠폰이 쏙 들어오면 손에 쿠폰을 듦!) -->
+            <div class="walker-wrap is-standing" data-role="walker">
+              <div class="walker-bubble">
+                <span data-role="bubble-text"></span><span class="typing-cursor"></span>
+              </div>
+              <svg class="walker-svg" viewBox="0 0 64 68" fill="none">
+                <ellipse cx="32" cy="62" rx="13" ry="3" fill="rgba(15, 23, 42, 0.08)" />
+                <g class="foot-l"><rect x="22" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                <g class="foot-r"><rect x="33" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                <g class="char-body-group">
+                  <rect x="11" y="30" width="12" height="17" rx="6" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                  <path d="M14 35H20" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                  <path d="M20 33C20 28 24.5 26 32 26C39.5 26 44 28 44 33L46 49C46 51.5 44 53 41 53H23C20 53 18 51.5 18 49L20 33Z" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                  <path d="M24 27.5C26.5 29.5 37.5 29.5 40 27.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                  <rect x="19" y="10" width="26" height="20" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                  <circle cx="30" cy="20" r="1.7" fill="#0f172a" />
+                  <circle cx="39" cy="20" r="1.7" fill="#0f172a" />
+                  <path d="M33.2 22.2Q34.7 23.8 36.2 22.2" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />
+                  <ellipse cx="26.5" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                  <ellipse cx="41.8" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                  <path d="M18 13C19 7.5 25 5 32.5 5C40 5 45 7.5 46 13H18Z" fill="#0f172a" />
+                  <path d="M17 13H48" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+                  <circle cx="32" cy="4" r="2" fill="#0f172a" />
+                  <g class="arm-swing">
+                    <path d="M31 35L39 40" stroke="#ffffff" stroke-width="4.2" stroke-linecap="round" />
+                    <path d="M31 35L39 40" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                    <!-- 2단계에서 쿠폰을 받으면 손에 나타나는 쿠폰! -->
+                    <g class="held-coupon">
+                      <rect x="38" y="34" width="13" height="9" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.8" transform="rotate(-10 38 34)" />
+                      <line x1="42" y1="36.5" x2="47" y2="35.5" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round" />
+                    </g>
+                  </g>
+                </g>
+              </svg>
+            </div>
+
+            <!-- 01 ~ 04 단계 노드 + 각 역의 미니 건물 & 인터랙션 이펙트 -->
+            <div class="stepper-nodes">
+              <!-- [01] 관광지 매표소 / 천문대 건물 -->
+              <div class="step-node passed current" data-step="0">
+                <div class="action-fx fx-pay" data-fx="0">티켓 결제 완료!</div>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <!-- 천문대 돔 지붕 + 매표소 건물 -->
+                  <path d="M14 24C14 13 42 13 42 24H14Z" fill="#e2e8f0" stroke="#0f172a" stroke-width="2" />
+                  <line x1="28" y1="10" x2="28" y2="15" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+                  <rect x="10" y="24" width="36" height="24" rx="3" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <rect x="16" y="30" width="12" height="10" rx="2" fill="#bae6fd" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="32" y="32" width="8" height="16" rx="1.5" fill="#fde047" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">01</div>
+                <strong class="node-title">관광지 방문 · 결제</strong>
+                <span class="node-sub">매표소에서 티켓 결제</span>
+              </div>
+
+              <!-- [02] 현장 QR 키오스크 + 사람에게 날아드는 쿠폰 -->
+              <div class="step-node" data-step="1">
+                <!-- 사람에게 쏙 날아가는 쿠폰 SVG -->
+                <svg class="flying-coupon" data-coupon-fly="in" viewBox="0 0 28 20" fill="none">
+                  <rect x="2" y="2" width="24" height="16" rx="3" fill="#fde047" stroke="#0f172a" stroke-width="2" />
+                  <line x1="8" y1="7" x2="20" y2="7" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                  <line x1="8" y1="12" x2="16" y2="12" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <!-- QR 스탠드 / 키오스크 -->
+                  <rect x="16" y="12" width="24" height="28" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <rect x="21" y="17" width="14" height="14" rx="2" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="24" y="20" width="3" height="3" fill="#0f172a" />
+                  <rect x="29" y="20" width="3" height="3" fill="#0f172a" />
+                  <rect x="24" y="25" width="3" height="3" fill="#0f172a" />
+                  <rect x="29" y="25" width="3" height="3" fill="#fde047" />
+                  <path d="M24 40V48M32 40V48M18 48H38" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <div class="node-circle">02</div>
+                <strong class="node-title">현장 쿠폰 수령</strong>
+                <span class="node-sub">쿠폰이 내게 쏙 등록</span>
+              </div>
+
+              <!-- [03] 섬 가맹점 (식당·카페 어닝 건물) + 할인 완료 -->
+              <div class="step-node" data-step="2">
+                <div class="action-fx fx-discount" data-fx="2">-5,000원 즉시 할인!</div>
+                <svg class="flying-coupon" data-coupon-fly="out" viewBox="0 0 28 20" fill="none">
+                  <rect x="2" y="2" width="24" height="16" rx="3" fill="#fde047" stroke="#0f172a" stroke-width="2" />
+                  <line x1="8" y1="7" x2="20" y2="7" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <!-- 카페/식당 건물 & 줄무늬 어닝 -->
+                  <rect x="10" y="22" width="36" height="26" rx="2" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <path d="M8 22L12 13H44L48 22H8Z" fill="#fda4af" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M8 22C8 25 12 25 14 22C16 25 20 25 22 22C24 25 28 25 30 22C32 25 36 25 38 22C40 25 48 25 48 22" fill="#ffffff" stroke="#0f172a" stroke-width="1.8" />
+                  <rect x="16" y="30" width="12" height="11" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="32" y="31" width="9" height="17" rx="1.5" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">03</div>
+                <strong class="node-title">가맹점 방문 · 사용</strong>
+                <span class="node-sub">식당·카페에서 쿠폰 결제</span>
+              </div>
+
+              <!-- [04] 지역 상권 상생 (섬 마을 & 하트) -->
+              <div class="step-node" data-step="3">
+                <div class="action-fx fx-heart" data-fx="3">섬 상권 활기 가득!</div>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <!-- 아기자기한 섬 상권 집 2채 & 하트 -->
+                  <path d="M10 30L20 21L30 30V48H10V30Z" fill="#ffffff" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M26 33L36 24L46 33V48H26V33Z" fill="#f8fafc" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <rect x="17" y="36" width="6" height="12" rx="1" fill="#fde047" stroke="#0f172a" stroke-width="1.5" />
+                  <rect x="33" y="37" width="6" height="11" rx="1" fill="#a7f3d0" stroke="#0f172a" stroke-width="1.5" />
+                  <path d="M28 11C26.5 9 23.5 9.5 23.5 12C23.5 14.5 28 17 28 17C28 17 32.5 14.5 32.5 12C32.5 9.5 29.5 9 28 11Z" fill="#fda4af" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">04</div>
+                <strong class="node-title">지역 상권 상생</strong>
+                <span class="node-sub">관광객 혜택 · 매장 매출</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       하단 추가: 모바일 화면(390px) 대응 3가지 시안 비교 (캐릭터 팔·손 디테일 수정 반영)
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="mobile-section-divider">
+    <h2>모바일 화면 대응 시안 3종 비교 (캐릭터 팔·손 모양 개선 적용)</h2>
+    <p>스마트폰 가로 폭(390px)에서 어떻게 보이는지 한눈에 비교해 보세요. 아래 3개 시안의 캐릭터는 팔 소매와 둥근 손 모양을 자연스럽게 다듬었습니다.</p>
+  </div>
+
+  <div class="mobile-grid">
+    <!-- ──────────────────────────────────────────────────────────────
+         모바일 시안 A: 가로 풍경 그대로 + 하단 현재 단계 통합 자막
+    ────────────────────────────────────────────────────────────── -->
+    <div class="mobile-col">
+      <span class="variant-label highlight">모바일 1안 — 가로 마을 유지 + 하단 통합 설명</span>
+      <div class="phone-frame" id="mobile-demo-a">
+        <div class="phone-top-qr">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=http://localhost:5180/tourist/index.html" alt="QR" />
+          <div>
+            <h3>관광지부터 가맹점까지 상생 흐름</h3>
+            <p>결제 즉시 발급된 쿠폰으로 섬 가맹점에서 바로 할인받아요.</p>
+          </div>
+        </div>
+
+        <div class="m-stage-a">
+          <div class="stepper-track-wrap">
+            <div class="dot-bridges">
+              <div class="dot-segment" data-seg="0"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="1"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="2"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+            </div>
+
+            <!-- 팔·손 디테일이 개선된 귀여운 캐릭터 -->
+            <div class="walker-wrap is-standing edge-left" data-role="walker">
+              <div class="walker-bubble">
+                <span data-role="bubble-text"></span><span class="typing-cursor"></span>
+              </div>
+              <svg class="walker-svg" viewBox="0 0 64 68" fill="none">
+                <ellipse cx="32" cy="62" rx="13" ry="3" fill="rgba(15, 23, 42, 0.08)" />
+                <g class="foot-l"><rect x="22" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                <g class="foot-r"><rect x="33" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                <g class="char-body-group">
+                  <!-- 노란 배낭 -->
+                  <rect x="11" y="30" width="12" height="17" rx="6" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                  <path d="M14 35H20" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                  <!-- 반대편 살짝 보이는 귀여운 둥근 손 -->
+                  <circle cx="45.2" cy="41.5" r="2.7" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <!-- 몸통 코트 -->
+                  <path d="M20 33C20 28 24.5 26 32 26C39.5 26 44 28 44 33L46 49C46 51.5 44 53 41 53H23C20 53 18 51.5 18 49L20 33Z" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                  <!-- 하얀 카라 -->
+                  <path d="M24 27.5C26.5 29.5 37.5 29.5 40 27.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                  <!-- 얼굴 -->
+                  <rect x="19" y="10" width="26" height="20" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                  <circle cx="30" cy="20" r="1.7" fill="#0f172a" />
+                  <circle cx="39" cy="20" r="1.7" fill="#0f172a" />
+                  <path d="M33.2 22.2Q34.7 23.8 36.2 22.2" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />
+                  <ellipse cx="26.5" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                  <ellipse cx="41.8" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                  <!-- 모자 -->
+                  <path d="M18 13C19 7.5 25 5 32.5 5C40 5 45 7.5 46 13H18Z" fill="#0f172a" />
+                  <path d="M17 13H48" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+                  <circle cx="32" cy="4" r="2" fill="#0f172a" />
+                  <!-- 개선된 앞쪽 통통한 팔 소매 + 둥근 하얀 손 + 손에 쥐는 쿠폰 -->
+                  <g class="arm-swing" style="transform-origin: 25px 34px;">
+                    <rect x="22" y="32" width="7.6" height="12.5" rx="3.8" transform="rotate(-22 25 34)" fill="#334155" stroke="#0f172a" stroke-width="2" />
+                    <g class="held-coupon">
+                      <rect x="30" y="34" width="13" height="9" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.8" transform="rotate(-10 30 34)" />
+                      <line x1="33.5" y1="36.5" x2="38.5" y2="35.5" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round" />
+                    </g>
+                    <circle cx="30.2" cy="41.8" r="3" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  </g>
+                </g>
+              </svg>
+            </div>
+
+            <div class="stepper-nodes">
+              <div class="step-node passed current" data-step="0">
+                <div class="action-fx fx-pay" data-fx="0">결제 완료!</div>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <path d="M14 24C14 13 42 13 42 24H14Z" fill="#e2e8f0" stroke="#0f172a" stroke-width="2" />
+                  <line x1="28" y1="10" x2="28" y2="15" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+                  <rect x="10" y="24" width="36" height="24" rx="3" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <rect x="16" y="30" width="12" height="10" rx="2" fill="#bae6fd" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="32" y="32" width="8" height="16" rx="1.5" fill="#fde047" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">01</div>
+                <span class="node-short">관광지</span>
+              </div>
+
+              <div class="step-node" data-step="1">
+                <svg class="flying-coupon" data-coupon-fly="in" viewBox="0 0 28 20" fill="none">
+                  <rect x="2" y="2" width="24" height="16" rx="3" fill="#fde047" stroke="#0f172a" stroke-width="2" />
+                  <line x1="8" y1="7" x2="20" y2="7" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                  <line x1="8" y1="12" x2="16" y2="12" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <rect x="16" y="12" width="24" height="28" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <rect x="21" y="17" width="14" height="14" rx="2" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="24" y="20" width="3" height="3" fill="#0f172a" />
+                  <rect x="29" y="20" width="3" height="3" fill="#0f172a" />
+                  <rect x="24" y="25" width="3" height="3" fill="#0f172a" />
+                  <rect x="29" y="25" width="3" height="3" fill="#fde047" />
+                  <path d="M24 40V48M32 40V48M18 48H38" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <div class="node-circle">02</div>
+                <span class="node-short">쿠폰수령</span>
+              </div>
+
+              <div class="step-node" data-step="2">
+                <div class="action-fx fx-discount" data-fx="2">-5,000원!</div>
+                <svg class="flying-coupon" data-coupon-fly="out" viewBox="0 0 28 20" fill="none">
+                  <rect x="2" y="2" width="24" height="16" rx="3" fill="#fde047" stroke="#0f172a" stroke-width="2" />
+                  <line x1="8" y1="7" x2="20" y2="7" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <rect x="10" y="22" width="36" height="26" rx="2" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <path d="M8 22L12 13H44L48 22H8Z" fill="#fda4af" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M8 22C8 25 12 25 14 22C16 25 20 25 22 22C24 25 28 25 30 22C32 25 36 25 38 22C40 25 48 25 48 22" fill="#ffffff" stroke="#0f172a" stroke-width="1.8" />
+                  <rect x="16" y="30" width="12" height="11" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="32" y="31" width="9" height="17" rx="1.5" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">03</div>
+                <span class="node-short">가맹점</span>
+              </div>
+
+              <div class="step-node" data-step="3">
+                <div class="action-fx fx-heart" data-fx="3">상생 완료!</div>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <path d="M10 30L20 21L30 30V48H10V30Z" fill="#ffffff" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M26 33L36 24L46 33V48H26V33Z" fill="#f8fafc" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <rect x="17" y="36" width="6" height="12" rx="1" fill="#fde047" stroke="#0f172a" stroke-width="1.5" />
+                  <rect x="33" y="37" width="6" height="11" rx="1" fill="#a7f3d0" stroke="#0f172a" stroke-width="1.5" />
+                  <path d="M28 11C26.5 9 23.5 9.5 23.5 12C23.5 14.5 28 17 28 17C28 17 32.5 14.5 32.5 12C32.5 9.5 29.5 9 28 11Z" fill="#fda4af" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">04</div>
+                <span class="node-short">지역상생</span>
+              </div>
+            </div>
+
+            <!-- 하단 현재 단계 통합 자막 카드 -->
+            <div class="m-stage-a-caption">
+              <div class="m-stage-a-caption-left">
+                <span class="m-stage-a-badge" data-role="cap-num">STEP 01</span>
+                <strong class="m-stage-a-title" data-role="cap-title">관광지 방문 · 결제</strong>
+              </div>
+              <span class="m-stage-a-sub" data-role="cap-sub">매표소에서 티켓 결제</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────────────
+         모바일 시안 B: 위에서 아래로 총총 내려오는 세로형 스텝퍼
+    ────────────────────────────────────────────────────────────── -->
+    <div class="mobile-col">
+      <span class="variant-label highlight">모바일 2안 — 위에서 아래로 걷는 세로형 스텝퍼</span>
+      <div class="phone-frame" id="mobile-demo-b">
+        <div class="phone-top-qr">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=http://localhost:5180/tourist/index.html" alt="QR" />
+          <div>
+            <h3>관광지부터 가맹점까지 상생 흐름</h3>
+            <p>결제 즉시 발급된 쿠폰으로 섬 가맹점에서 바로 할인받아요.</p>
+          </div>
+        </div>
+
+        <div class="m-stage-b">
+          <!-- 세로 점선 구간 3개 -->
+          <div class="m-b-vbridges">
+            <div class="m-b-vseg" data-vseg="0"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+            <div class="m-b-vseg" data-vseg="1"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+            <div class="m-b-vseg" data-vseg="2"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+          </div>
+
+          <!-- 위에서 아래로 내려오는 귀여운 캐릭터 (팔 수정 반영) -->
+          <div class="m-b-walker walker-wrap is-standing" data-role="walker" style="left: 44px; transform: none;">
+            <div class="walker-bubble">
+              <span data-role="bubble-text"></span><span class="typing-cursor"></span>
+            </div>
+            <svg class="walker-svg" viewBox="0 0 64 68" fill="none">
+              <ellipse cx="32" cy="62" rx="13" ry="3" fill="rgba(15, 23, 42, 0.08)" />
+              <g class="foot-l"><rect x="22" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+              <g class="foot-r"><rect x="33" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+              <g class="char-body-group">
+                <rect x="11" y="30" width="12" height="17" rx="6" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                <path d="M14 35H20" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                <circle cx="45.2" cy="41.5" r="2.7" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                <path d="M20 33C20 28 24.5 26 32 26C39.5 26 44 28 44 33L46 49C46 51.5 44 53 41 53H23C20 53 18 51.5 18 49L20 33Z" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                <path d="M24 27.5C26.5 29.5 37.5 29.5 40 27.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                <rect x="19" y="10" width="26" height="20" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                <circle cx="30" cy="20" r="1.7" fill="#0f172a" />
+                <circle cx="39" cy="20" r="1.7" fill="#0f172a" />
+                <path d="M33.2 22.2Q34.7 23.8 36.2 22.2" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />
+                <ellipse cx="26.5" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                <ellipse cx="41.8" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                <path d="M18 13C19 7.5 25 5 32.5 5C40 5 45 7.5 46 13H18Z" fill="#0f172a" />
+                <path d="M17 13H48" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+                <circle cx="32" cy="4" r="2" fill="#0f172a" />
+                <g class="arm-swing" style="transform-origin: 25px 34px;">
+                  <rect x="22" y="32" width="7.6" height="12.5" rx="3.8" transform="rotate(-22 25 34)" fill="#334155" stroke="#0f172a" stroke-width="2" />
+                  <g class="held-coupon">
+                    <rect x="30" y="34" width="13" height="9" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.8" transform="rotate(-10 30 34)" />
+                    <line x1="33.5" y1="36.5" x2="38.5" y2="35.5" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round" />
+                  </g>
+                  <circle cx="30.2" cy="41.8" r="3" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                </g>
+              </g>
+            </svg>
+          </div>
+
+          <div class="m-stage-b-rows">
+            <div class="m-b-row passed current" data-vstep="0">
+              <div class="m-b-station">
+                <div class="node-circle" style="width:30px;height:30px;font-size:0.78rem;">01</div>
+                <svg class="m-b-building" viewBox="0 0 56 54" fill="none">
+                  <path d="M14 24C14 13 42 13 42 24H14Z" fill="#e2e8f0" stroke="#0f172a" stroke-width="2" />
+                  <rect x="10" y="24" width="36" height="24" rx="3" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <rect x="16" y="30" width="12" height="10" rx="2" fill="#bae6fd" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="32" y="32" width="8" height="16" rx="1.5" fill="#fde047" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+              </div>
+              <div class="m-b-info">
+                <strong>관광지 방문 · 결제</strong>
+                <span>매표소에서 티켓 결제</span>
+              </div>
+            </div>
+
+            <div class="m-b-row" data-vstep="1">
+              <div class="m-b-station">
+                <div class="node-circle" style="width:30px;height:30px;font-size:0.78rem;">02</div>
+                <svg class="m-b-building" viewBox="0 0 56 54" fill="none">
+                  <rect x="16" y="12" width="24" height="28" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <rect x="21" y="17" width="14" height="14" rx="2" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="24" y="20" width="3" height="3" fill="#0f172a" />
+                  <rect x="29" y="25" width="3" height="3" fill="#fde047" />
+                  <path d="M24 40V48M32 40V48M18 48H38" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="m-b-info">
+                <strong>현장 쿠폰 수령</strong>
+                <span>QR 스캔 후 쿠폰이 내게 쏙!</span>
+              </div>
+            </div>
+
+            <div class="m-b-row" data-vstep="2">
+              <div class="m-b-station">
+                <div class="node-circle" style="width:30px;height:30px;font-size:0.78rem;">03</div>
+                <svg class="m-b-building" viewBox="0 0 56 54" fill="none">
+                  <rect x="10" y="22" width="36" height="26" rx="2" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <path d="M8 22L12 13H44L48 22H8Z" fill="#fda4af" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <rect x="16" y="30" width="12" height="11" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="32" y="31" width="9" height="17" rx="1.5" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+              </div>
+              <div class="m-b-info">
+                <strong>가맹점 방문 · 사용</strong>
+                <span>섬 식당·카페 즉시 할인</span>
+              </div>
+            </div>
+
+            <div class="m-b-row" data-vstep="3">
+              <div class="m-b-station">
+                <div class="node-circle" style="width:30px;height:30px;font-size:0.78rem;">04</div>
+                <svg class="m-b-building" viewBox="0 0 56 54" fill="none">
+                  <path d="M10 30L20 21L30 30V48H10V30Z" fill="#ffffff" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M26 33L36 24L46 33V48H26V33Z" fill="#f8fafc" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <rect x="17" y="36" width="6" height="12" rx="1" fill="#fde047" stroke="#0f172a" stroke-width="1.5" />
+                  <path d="M28 11C26.5 9 23.5 9.5 23.5 12C23.5 14.5 28 17 28 17C28 17 32.5 14.5 32.5 12C32.5 9.5 29.5 9 28 11Z" fill="#fda4af" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+              </div>
+              <div class="m-b-info">
+                <strong>지역 상권 상생</strong>
+                <span>소상공인 매출 · 지역 활기</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────────────
+         모바일 시안 C: 2×2 두 줄 오솔길 배치 (01→02 / 03→04)
+    ────────────────────────────────────────────────────────────── -->
+    <div class="mobile-col">
+      <span class="variant-label highlight">모바일 3안 — 2×2 두 줄 오솔길 배치 (01→02 / 03→04)</span>
+      <div class="phone-frame" id="mobile-demo-c">
+        <div class="phone-top-qr">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=http://localhost:5180/tourist/index.html" alt="QR" />
+          <div>
+            <h3>관광지부터 가맹점까지 상생 흐름</h3>
+            <p>결제 즉시 발급된 쿠폰으로 섬 가맹점에서 바로 할인받아요.</p>
+          </div>
+        </div>
+
+        <div class="m-stage-c">
+          <!-- 2x2 길을 따라 걷는 귀여운 캐릭터 (팔 수정 반영) -->
+          <div class="walker-wrap is-standing" data-role="walker" style="top: 6px; left: 25%;">
+            <div class="walker-bubble">
+              <span data-role="bubble-text"></span><span class="typing-cursor"></span>
+            </div>
+            <svg class="walker-svg" viewBox="0 0 64 68" fill="none">
+              <ellipse cx="32" cy="62" rx="13" ry="3" fill="rgba(15, 23, 42, 0.08)" />
+              <g class="foot-l"><rect x="22" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+              <g class="foot-r"><rect x="33" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+              <g class="char-body-group">
+                <rect x="11" y="30" width="12" height="17" rx="6" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                <path d="M14 35H20" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                <circle cx="45.2" cy="41.5" r="2.7" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                <path d="M20 33C20 28 24.5 26 32 26C39.5 26 44 28 44 33L46 49C46 51.5 44 53 41 53H23C20 53 18 51.5 18 49L20 33Z" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                <path d="M24 27.5C26.5 29.5 37.5 29.5 40 27.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                <rect x="19" y="10" width="26" height="20" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                <circle cx="30" cy="20" r="1.7" fill="#0f172a" />
+                <circle cx="39" cy="20" r="1.7" fill="#0f172a" />
+                <path d="M33.2 22.2Q34.7 23.8 36.2 22.2" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />
+                <ellipse cx="26.5" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                <ellipse cx="41.8" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                <path d="M18 13C19 7.5 25 5 32.5 5C40 5 45 7.5 46 13H18Z" fill="#0f172a" />
+                <path d="M17 13H48" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+                <circle cx="32" cy="4" r="2" fill="#0f172a" />
+                <g class="arm-swing" style="transform-origin: 25px 34px;">
+                  <rect x="22" y="32" width="7.6" height="12.5" rx="3.8" transform="rotate(-22 25 34)" fill="#334155" stroke="#0f172a" stroke-width="2" />
+                  <g class="held-coupon">
+                    <rect x="30" y="34" width="13" height="9" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.8" transform="rotate(-10 30 34)" />
+                    <line x1="33.5" y1="36.5" x2="38.5" y2="35.5" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round" />
+                  </g>
+                  <circle cx="30.2" cy="41.8" r="3" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                </g>
+              </g>
+            </svg>
+          </div>
+
+          <div class="m-c-grid">
+            <!-- 윗줄: 01 -> 02 -->
+            <div class="m-c-row">
+              <div class="dot-segment" data-cseg="0"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="step-node passed current" data-cstep="0">
+                <div class="action-fx fx-pay" data-fx="0">티켓 결제 완료!</div>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <path d="M14 24C14 13 42 13 42 24H14Z" fill="#e2e8f0" stroke="#0f172a" stroke-width="2" />
+                  <rect x="10" y="24" width="36" height="24" rx="3" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <rect x="16" y="30" width="12" height="10" rx="2" fill="#bae6fd" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="32" y="32" width="8" height="16" rx="1.5" fill="#fde047" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">01</div>
+                <strong class="node-title">관광지 방문 · 결제</strong>
+                <span class="node-sub">매표소에서 티켓 결제</span>
+              </div>
+
+              <div class="step-node" data-cstep="1">
+                <svg class="flying-coupon" data-coupon-fly="in" viewBox="0 0 28 20" fill="none">
+                  <rect x="2" y="2" width="24" height="16" rx="3" fill="#fde047" stroke="#0f172a" stroke-width="2" />
+                  <line x1="8" y1="7" x2="20" y2="7" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <rect x="16" y="12" width="24" height="28" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <rect x="21" y="17" width="14" height="14" rx="2" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="24" y="20" width="3" height="3" fill="#0f172a" />
+                  <rect x="29" y="25" width="3" height="3" fill="#fde047" />
+                  <path d="M24 40V48M32 40V48M18 48H38" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <div class="node-circle">02</div>
+                <strong class="node-title">현장 쿠폰 수령</strong>
+                <span class="node-sub">쿠폰이 내게 쏙 등록</span>
+              </div>
+            </div>
+
+            <!-- 아랫줄: 03 -> 04 -->
+            <div class="m-c-row">
+              <div class="dot-segment" data-cseg="2"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="step-node" data-cstep="2">
+                <div class="action-fx fx-discount" data-fx="2">-5,000원 할인!</div>
+                <svg class="flying-coupon" data-coupon-fly="out" viewBox="0 0 28 20" fill="none">
+                  <rect x="2" y="2" width="24" height="16" rx="3" fill="#fde047" stroke="#0f172a" stroke-width="2" />
+                </svg>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <rect x="10" y="22" width="36" height="26" rx="2" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <path d="M8 22L12 13H44L48 22H8Z" fill="#fda4af" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <rect x="16" y="30" width="12" height="11" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="32" y="31" width="9" height="17" rx="1.5" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">03</div>
+                <strong class="node-title">가맹점 방문 · 사용</strong>
+                <span class="node-sub">식당·카페에서 쿠폰 결제</span>
+              </div>
+
+              <div class="step-node" data-cstep="3">
+                <div class="action-fx fx-heart" data-fx="3">섬 상권 활기!</div>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <path d="M10 30L20 21L30 30V48H10V30Z" fill="#ffffff" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M26 33L36 24L46 33V48H26V33Z" fill="#f8fafc" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <rect x="17" y="36" width="6" height="12" rx="1" fill="#fde047" stroke="#0f172a" stroke-width="1.5" />
+                  <path d="M28 11C26.5 9 23.5 9.5 23.5 12C23.5 14.5 28 17 28 17C28 17 32.5 14.5 32.5 12C32.5 9.5 29.5 9 28 11Z" fill="#fda4af" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">04</div>
+                <strong class="node-title">지역 상권 상생</strong>
+                <span class="node-sub">관광객 혜택 · 매장 매출</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────────────
+         모바일 시안 D (4번째 신규 아이디어): 캐릭터는 중앙 고정 + 뒷배경·건물·점선이 옆으로 움직이는 방식!
+    ────────────────────────────────────────────────────────────── -->
+    <div class="mobile-col">
+      <span class="variant-label highlight" style="background:#059669;">모바일 4안 (아이디어 반영!) — 캐릭터 중앙 고정 + 뒷배경 스크롤</span>
+      <div class="phone-frame" id="mobile-demo-d">
+        <div class="phone-top-qr">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=http://localhost:5180/tourist/index.html" alt="QR" />
+          <div>
+            <h3>관광지부터 가맹점까지 상생 흐름</h3>
+            <p>캐릭터는 중앙에서 걷고 뒤의 섬 마을 풍경이 옆으로 움직입니다.</p>
+          </div>
+        </div>
+
+        <div class="m-stage-d">
+          <!-- 패럴랙스로 천천히 흐르는 뒷배경 구름 & 섬 실루엣 -->
+          <svg class="m-d-parallax-bg" data-role="parallax-bg" viewBox="0 0 800 70" fill="none">
+            <path d="M35 26C35 20 43 18 47 22C51 16 62 17 64 24C69 24 72 28 70 32H33C30 29 32 26 35 26Z" fill="#e2e8f0" />
+            <path d="M210 18C210 13 217 11 221 15C225 9 235 10 237 16C241 16 244 20 242 24H208C205 21 207 18 210 18Z" fill="#e2e8f0" />
+            <path d="M420 28C420 22 428 20 432 24C436 18 447 19 449 26C454 26 457 30 455 34H418C415 31 417 28 420 28Z" fill="#e2e8f0" />
+            <path d="M630 19C630 14 637 12 641 16C645 10 655 11 657 17C661 17 664 21 662 25H628C625 22 627 19 630 19Z" fill="#e2e8f0" />
+          </svg>
+
+          <!-- 프레임 정중앙(50%)에 고정된 귀여운 캐릭터 (팔·손 디테일 개선) -->
+          <div class="walker-wrap is-standing" data-role="walker">
+            <div class="walker-bubble">
+              <span data-role="bubble-text"></span><span class="typing-cursor"></span>
+            </div>
+            <svg class="walker-svg" viewBox="0 0 64 68" fill="none">
+              <ellipse cx="32" cy="62" rx="13" ry="3" fill="rgba(15, 23, 42, 0.08)" />
+              <g class="foot-l"><rect x="22" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+              <g class="foot-r"><rect x="33" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+              <g class="char-body-group">
+                <rect x="11" y="30" width="12" height="17" rx="6" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                <path d="M14 35H20" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                <circle cx="45.2" cy="41.5" r="2.7" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                <path d="M20 33C20 28 24.5 26 32 26C39.5 26 44 28 44 33L46 49C46 51.5 44 53 41 53H23C20 53 18 51.5 18 49L20 33Z" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                <path d="M24 27.5C26.5 29.5 37.5 29.5 40 27.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                <rect x="19" y="10" width="26" height="20" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                <circle cx="30" cy="20" r="1.7" fill="#0f172a" />
+                <circle cx="39" cy="20" r="1.7" fill="#0f172a" />
+                <path d="M33.2 22.2Q34.7 23.8 36.2 22.2" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />
+                <ellipse cx="26.5" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                <ellipse cx="41.8" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                <path d="M18 13C19 7.5 25 5 32.5 5C40 5 45 7.5 46 13H18Z" fill="#0f172a" />
+                <path d="M17 13H48" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+                <circle cx="32" cy="4" r="2" fill="#0f172a" />
+                <!-- 개선된 팔 소매 + 둥근 하얀 손 + 손에 쥐는 노란 쿠폰 -->
+                <g class="arm-swing" style="transform-origin: 25px 34px;">
+                  <rect x="22" y="32" width="7.6" height="12.5" rx="3.8" transform="rotate(-22 25 34)" fill="#334155" stroke="#0f172a" stroke-width="2" />
+                  <g class="held-coupon">
+                    <rect x="30" y="34" width="13" height="9" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.8" transform="rotate(-10 30 34)" />
+                    <line x1="33.5" y1="36.5" x2="38.5" y2="35.5" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round" />
+                  </g>
+                  <circle cx="30.2" cy="41.8" r="3" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                </g>
+              </g>
+            </svg>
+          </div>
+
+          <!-- 뒤에서 왼쪽으로 착·착·착 이동하는 월드 트랙 -->
+          <div class="m-d-world" data-role="world-track">
+            <div class="dot-bridges">
+              <div class="dot-segment" data-seg="0"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="1"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="2"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+            </div>
+
+            <div class="stepper-nodes">
+              <!-- [01] 관광지 매표소 -->
+              <div class="step-node passed current" data-step="0">
+                <div class="action-fx fx-pay" data-fx="0">티켓 결제 완료!</div>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <path d="M14 24C14 13 42 13 42 24H14Z" fill="#e2e8f0" stroke="#0f172a" stroke-width="2" />
+                  <line x1="28" y1="10" x2="28" y2="15" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+                  <rect x="10" y="24" width="36" height="24" rx="3" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <rect x="16" y="30" width="12" height="10" rx="2" fill="#bae6fd" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="32" y="32" width="8" height="16" rx="1.5" fill="#fde047" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">01</div>
+                <strong class="node-title">관광지 방문 · 결제</strong>
+                <span class="node-sub">매표소에서 티켓 결제</span>
+              </div>
+
+              <!-- [02] 현장 쿠폰 수령 -->
+              <div class="step-node" data-step="1">
+                <svg class="flying-coupon" data-coupon-fly="in" viewBox="0 0 28 20" fill="none">
+                  <rect x="2" y="2" width="24" height="16" rx="3" fill="#fde047" stroke="#0f172a" stroke-width="2" />
+                  <line x1="8" y1="7" x2="20" y2="7" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                  <line x1="8" y1="12" x2="16" y2="12" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <rect x="16" y="12" width="24" height="28" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <rect x="21" y="17" width="14" height="14" rx="2" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="24" y="20" width="3" height="3" fill="#0f172a" />
+                  <rect x="29" y="20" width="3" height="3" fill="#0f172a" />
+                  <rect x="24" y="25" width="3" height="3" fill="#0f172a" />
+                  <rect x="29" y="25" width="3" height="3" fill="#fde047" />
+                  <path d="M24 40V48M32 40V48M18 48H38" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <div class="node-circle">02</div>
+                <strong class="node-title">현장 쿠폰 수령</strong>
+                <span class="node-sub">쿠폰이 내게 쏙 등록</span>
+              </div>
+
+              <!-- [03] 가맹점 방문 · 사용 -->
+              <div class="step-node" data-step="2">
+                <div class="action-fx fx-discount" data-fx="2">-5,000원 즉시 할인!</div>
+                <svg class="flying-coupon" data-coupon-fly="out" viewBox="0 0 28 20" fill="none">
+                  <rect x="2" y="2" width="24" height="16" rx="3" fill="#fde047" stroke="#0f172a" stroke-width="2" />
+                  <line x1="8" y1="7" x2="20" y2="7" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <rect x="10" y="22" width="36" height="26" rx="2" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <path d="M8 22L12 13H44L48 22H8Z" fill="#fda4af" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M8 22C8 25 12 25 14 22C16 25 20 25 22 22C24 25 28 25 30 22C32 25 36 25 38 22C40 25 48 25 48 22" fill="#ffffff" stroke="#0f172a" stroke-width="1.8" />
+                  <rect x="16" y="30" width="12" height="11" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.6" />
+                  <rect x="32" y="31" width="9" height="17" rx="1.5" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">03</div>
+                <strong class="node-title">가맹점 방문 · 사용</strong>
+                <span class="node-sub">식당·카페에서 쿠폰 결제</span>
+              </div>
+
+              <!-- [04] 지역 상권 상생 -->
+              <div class="step-node" data-step="3">
+                <div class="action-fx fx-heart" data-fx="3">섬 상권 활기 가득!</div>
+                <svg class="station-building" viewBox="0 0 56 54" fill="none">
+                  <path d="M10 30L20 21L30 30V48H10V30Z" fill="#ffffff" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M26 33L36 24L46 33V48H26V33Z" fill="#f8fafc" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                  <rect x="17" y="36" width="6" height="12" rx="1" fill="#fde047" stroke="#0f172a" stroke-width="1.5" />
+                  <rect x="33" y="37" width="6" height="11" rx="1" fill="#a7f3d0" stroke="#0f172a" stroke-width="1.5" />
+                  <path d="M28 11C26.5 9 23.5 9.5 23.5 12C23.5 14.5 28 17 28 17C28 17 32.5 14.5 32.5 12C32.5 9.5 29.5 9 28 11Z" fill="#fda4af" stroke="#0f172a" stroke-width="1.6" />
+                </svg>
+                <div class="node-circle">04</div>
+                <strong class="node-title">지역 상권 상생</strong>
+                <span class="node-sub">관광객 혜택 · 매장 매출</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 하단 미니 인디케이터 (클릭 시 해당 역으로 즉시 스크롤) -->
+        <div class="m-d-mini-nav">
+          <span class="m-d-pill active" data-dpill="0">01 관광지</span>
+          <span class="m-d-pill" data-dpill="1">02 쿠폰수령</span>
+          <span class="m-d-pill" data-dpill="2">03 가맹점</span>
+          <span class="m-d-pill" data-dpill="3">04 지역상생</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       최하단 추가: 번호 아래 도착 말풍선 + 캐릭터 위 컬러 팝업 전용 + 귀여운 오리지널 캐릭터(크로스백·배낭) + 카페/섬 일러스트 업그레이드
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="final-upgrade-section">
+    <h2>최하단 보완 적용본 — 번호 아래 도착 말풍선 + 캐릭터 위 컬러 팝업 + 카페·섬 풍경 일러스트</h2>
+    <p>
+      1) <strong>01~04 번호 아래 고정 설명을 없애고</strong> 캐릭터가 도착하면 번호 아래에 말풍선이 뜨며 글씨가 써지고,
+      2) <strong>캐릭터 위에는 컬러 팝업만</strong> 깔끔하게 뜨며,
+      3) 캐릭터는 처음에 좋아하셨던 귀여운 모습에 <strong>노란 배낭·지도·크로스백</strong>으로 자연스러운 여행객 포인트를 주고,
+      4) <strong>3번은 김이 모락모락 나는 커피잔 간판과 입간판이 있는 섬 카페·식당</strong>, <strong>4번은 등대·파도·갈매기가 있는 아름다운 섬 풍경</strong>으로 꾸몄습니다.
+    </p>
+
+    <div class="final-showcase-wrap">
+      <!-- [1] 모바일(390px) 사이드스크롤 완성형 -->
+      <div class="mobile-col">
+        <span class="variant-label highlight" style="background:#0f172a;">최종 보완 모바일 뷰 (390px) — 캐릭터 중앙 고정 + 뒷배경 스크롤</span>
+        <div class="phone-frame" id="mobile-demo-v5">
+          <div class="phone-top-qr">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=http://localhost:5180/tourist/index.html" alt="QR" />
+            <div>
+              <h3>관광지부터 가맹점까지 상생 흐름</h3>
+              <p>결제 즉시 발급된 쿠폰으로 섬 가맹점에서 바로 할인받아요.</p>
+            </div>
+          </div>
+
+          <div class="m-stage-v5" data-role="stage-viewport">
+            <!-- 패럴랙스 뒷배경 구름 -->
+            <svg class="m-d-parallax-bg" data-role="parallax-bg" viewBox="0 0 800 70" fill="none">
+              <path d="M35 26C35 20 43 18 47 22C51 16 62 17 64 24C69 24 72 28 70 32H33C30 29 32 26 35 26Z" fill="#e2e8f0" />
+              <path d="M210 18C210 13 217 11 221 15C225 9 235 10 237 16C241 16 244 20 242 24H208C205 21 207 18 210 18Z" fill="#e2e8f0" />
+              <path d="M420 28C420 22 428 20 432 24C436 18 447 19 449 26C454 26 457 30 455 34H418C415 31 417 28 420 28Z" fill="#e2e8f0" />
+              <path d="M630 19C630 14 637 12 641 16C645 10 655 11 657 17C661 17 664 21 662 25H628C625 22 627 19 630 19Z" fill="#e2e8f0" />
+            </svg>
+
+            <!-- 전경 도로 정중앙(50%)을 걷는 귀여운 여행객: 위에는 컬러 팝업, 옆에는 건물과 주고받는 아이템 모션! -->
+            <div class="walker-wrap is-standing" data-role="walker">
+              <div class="walker-top-fx fx-pay" data-role="top-fx">티켓 결제 완료!</div>
+              <!-- 캐릭터 -> 건물로 건네는 아이템 (결제카드 / QR스캔 / 노란쿠폰 / 반짝이) -->
+              <div class="exchange-item" data-role="exchange-give"></div>
+              <!-- 건물 -> 캐릭터에게 날아오는 아이템 (입장권티켓 / 노란쿠폰 / 카페커피잔 / 상생하트) -->
+              <div class="exchange-item" data-role="exchange-receive"></div>
+
+              <svg class="walker-svg" viewBox="0 0 64 68" fill="none">
+                <ellipse cx="32" cy="62" rx="13" ry="3" fill="rgba(15, 23, 42, 0.09)" />
+                <g class="foot-l"><rect x="22" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                <g class="foot-r"><rect x="33" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                <g class="char-body-group">
+                  <!-- 배낭 위로 살짝 꽂힌 하늘색 여행 지도 롤 -->
+                  <!-- 귀여운 노란 여행 배낭 -->
+                  <rect x="10.5" y="30" width="12.5" height="17.5" rx="6" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                  <path d="M13.5 35.5H19.5" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                  <!-- 반대편 살짝 보이는 동그란 하얀 손 -->
+                  <circle cx="45.2" cy="41.5" r="2.7" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  <!-- 몸통 코트 (옆으로 매는 가방 없이 깔끔하게) -->
+                  <path d="M20 33C20 28 24.5 26 32 26C39.5 26 44 28 44 33L46 49C46 51.5 44 53 41 53H23C20 53 18 51.5 18 49L20 33Z" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                  <!-- 하얀 카라 -->
+                  <path d="M24 27.5C26.5 29.5 37.5 29.5 40 27.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                  <!-- 제일 좋아하셨던 귀여운 동글 얼굴 + 발그레 볼 -->
+                  <rect x="19" y="10" width="26" height="20" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                  <circle cx="30" cy="20" r="1.7" fill="#0f172a" />
+                  <circle cx="39" cy="20" r="1.7" fill="#0f172a" />
+                  <path d="M33.2 22.2Q34.7 23.8 36.2 22.2" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />
+                  <ellipse cx="26.5" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                  <ellipse cx="41.8" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                  <!-- 처음에 제일 귀여워하셨던 오리지널 검정 베레모 복원 -->
+                  <path d="M18 13C19 7.5 25 5 32.5 5C40 5 45 7.5 46 13H18Z" fill="#0f172a" />
+                  <path d="M17.5 13H46.5" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+                  <circle cx="32" cy="4" r="2" fill="#0f172a" />
+                  <!-- 코트와 자연스럽게 이어지는 둥근 팔 + 하얀 동그란 손 + 손에 쥐는 쿠폰/커피 -->
+                  <g class="arm-swing" style="transform-origin: 24px 34px;">
+                    <rect x="21" y="32" width="7.2" height="12" rx="3.6" transform="rotate(-18 24 34)" fill="#1e293b" stroke="#0f172a" stroke-width="2" />
+                    <!-- 2단계에서 받은 노란 쿠폰 -->
+                    <g class="held-coupon">
+                      <rect x="28" y="34.5" width="13" height="9" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.8" transform="rotate(-10 28 34.5)" />
+                      <line x1="31.5" y1="37" x2="36.5" y2="36" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round" />
+                    </g>
+                    <!-- 3단계 카페에서 할인받고 받아든 귀여운 테이크아웃 커피컵 -->
+                    <g class="held-coffee">
+                      <path d="M29 33H37L36 42H30L29 33Z" fill="#ffffff" stroke="#0f172a" stroke-width="1.7" stroke-linejoin="round" />
+                      <rect x="29.3" y="36" width="7.4" height="3.2" fill="#fda4af" />
+                      <rect x="28" y="31.2" width="9" height="2.2" rx="1" fill="#0f172a" />
+                    </g>
+                    <circle cx="28" cy="41.8" r="2.9" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                  </g>
+                </g>
+              </svg>
+            </div>
+
+            <!-- 뒤에서 왼쪽으로 착·착·착 스크롤되는 섬 마을 월드 트랙 -->
+            <div class="m-d-world" data-role="world-track">
+              <div class="dot-bridges">
+                <div class="dot-segment" data-seg="0"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+                <div class="dot-segment" data-seg="1"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+                <div class="dot-segment" data-seg="2"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              </div>
+
+              <div class="stepper-nodes">
+                <!-- [01] 관광지 매표소 -->
+                <div class="step-node passed current show-bubble" data-step="0">
+                  <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                    <rect x="14" y="20" width="36" height="32" rx="5" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                    <rect x="10" y="15" width="44" height="7" rx="3.5" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                    <rect x="21" y="6" width="22" height="10" rx="3" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                    <line x1="27" y1="11" x2="37" y2="11" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+                    <path d="M23 42V32C23 26.5 41 26.5 41 32V42H23Z" fill="#bae6fd" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                    <rect x="19" y="41" width="26" height="5" rx="2.5" fill="#fde047" stroke="#0f172a" stroke-width="2" />
+                  </svg>
+                  <div class="node-circle">01</div>
+                  <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+                </div>
+
+                <!-- [02] 현장 QR 키오스크 -->
+                <div class="step-node" data-step="1">
+                  <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                    <rect x="18" y="10" width="28" height="36" rx="6" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                    <rect x="23" y="15" width="18" height="18" rx="3.5" fill="#f8fafc" stroke="#0f172a" stroke-width="2" />
+                    <rect x="26.5" y="18.5" width="4.5" height="4.5" rx="1" fill="#0f172a" />
+                    <rect x="33" y="18.5" width="4.5" height="4.5" rx="1" fill="#0f172a" />
+                    <rect x="26.5" y="25" width="4.5" height="4.5" rx="1" fill="#0f172a" />
+                    <rect x="33" y="25" width="4.5" height="4.5" rx="1" fill="#fde047" stroke="#0f172a" stroke-width="1.5" />
+                    <rect x="26" y="38" width="12" height="3.5" rx="1.75" fill="#fde047" stroke="#0f172a" stroke-width="1.8" />
+                    <path d="M27 46V52M37 46V52M20 52H44" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                  </svg>
+                  <div class="node-circle">02</div>
+                  <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+                </div>
+
+                <!-- [03] 섬 카페 · 식당 -->
+                <div class="step-node" data-step="2">
+                  <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                    <path d="M25 6H37V12.5C37 15.8 34.3 18 31 18C27.7 18 25 15.8 25 12.5V6Z" fill="#fde047" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                    <path d="M37 8H39.5C41.2 8 42.2 9 42.2 10.8C42.2 12.5 41.2 13.5 39.5 13.5H37" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                    <rect x="12" y="22" width="40" height="30" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                    <path d="M10 18H54V23C54 26 51.5 28 48.5 28C45.5 28 43 26 43 23C43 26 40.5 28 37.5 28C34.5 28 32 26 32 23C32 26 29.5 28 26.5 28C23.5 28 21 26 21 23C21 26 18.5 28 15.5 28C12.5 28 10 26 10 23V18Z" fill="#fda4af" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                    <rect x="17" y="33" width="15" height="12" rx="2.5" fill="#fef08a" stroke="#0f172a" stroke-width="2" />
+                    <path d="M36 52V36.5C36 34 38 32.5 40.5 32.5C43 32.5 45 34 45 36.5V52H36Z" fill="#e2e8f0" stroke="#0f172a" stroke-width="2" />
+                  </svg>
+                  <div class="node-circle">03</div>
+                  <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+                </div>
+
+                <!-- [04] 파라솔 없이 뒤쪽에 큼직한 반원 해가 떠오르는 심플한 섬 풍경 -->
+                <div class="step-node" data-step="3">
+                  <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                    <!-- 햇살 포인트 -->
+                    <path d="M32 12V15.5M13 20L15.5 22.5M51 20L48.5 22.5" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                    <!-- 섬 뒤로 크게 떠오르는 노란 반원 해 -->
+                    <path d="M9 47C9 20.5 55 20.5 55 47H9Z" fill="#fde047" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                    <!-- 앞쪽의 심플하고 둥근 초록 섬 -->
+                    <path d="M18 47C21.5 33.5 42.5 33.5 46 47H18Z" fill="#86efac" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                    <!-- 깔끔한 하늘색 바다 수평선 베이스 -->
+                    <rect x="6" y="46.5" width="52" height="5" rx="2.5" fill="#bae6fd" stroke="#0f172a" stroke-width="2.2" />
+                  </svg>
+                  <div class="node-circle">04</div>
+                  <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-d-mini-nav">
+            <span class="m-d-pill active" data-dpill="0">01 관광지</span>
+            <span class="m-d-pill" data-dpill="1">02 쿠폰수령</span>
+            <span class="m-d-pill" data-dpill="2">03 카페·식당</span>
+            <span class="m-d-pill" data-dpill="3">04 섬 여행</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- [2] 같은 구성이 적용된 PC 와이드 버전 미리보기 -->
+      <div style="flex: 1; min-width: 580px;">
+        <span class="variant-label highlight" style="background:#0f172a;">최종 보완 PC 와이드 뷰 — 2줄 말풍선 붕 팝업 + 매끄러운 주고받기 + 오리지널 모자 + 큰 반원 해와 섬</span>
+        <section class="qr-section" id="pc-demo-v5">
+          <div class="qr-box">
+            <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=4&data=http://localhost:5180/tourist/index.html" alt="테스트 QR" />
+          </div>
+          <div class="qr-info">
+            <h2 class="qr-title">관광지 방문부터 가맹점 할인까지 이어지는 지역 상생 흐름</h2>
+            <p class="qr-desc">
+              고객이 관광지에 방문해 입장권 등을 결제하면 현장에서 즉시 모바일 쿠폰이 발급되고, 이를 섬 안의 식당·카페·특산물 가맹점에서 사용해 바로 할인을 받을 수 있습니다.
+            </p>
+            <div class="stepper-stage with-buildings pc-v5-stage" data-role="stage-viewport">
+              <div class="stepper-track-wrap">
+                <div class="dot-bridges">
+                  <div class="dot-segment" data-seg="0"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+                  <div class="dot-segment" data-seg="1"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+                  <div class="dot-segment" data-seg="2"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+                </div>
+
+                <!-- 귀여운 여행객 캐릭터 + 주고받는 아이템 모션 -->
+                <div class="walker-wrap is-standing" data-role="walker" style="top: -66px;">
+                  <div class="walker-top-fx fx-pay" data-role="top-fx">티켓 결제 완료!</div>
+                  <div class="exchange-item" data-role="exchange-give"></div>
+                  <div class="exchange-item" data-role="exchange-receive"></div>
+
+                  <svg class="walker-svg" viewBox="0 0 64 68" fill="none">
+                    <ellipse cx="32" cy="62" rx="13" ry="3" fill="rgba(15, 23, 42, 0.09)" />
+                    <g class="foot-l"><rect x="22" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                    <g class="foot-r"><rect x="33" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+                    <g class="char-body-group">
+                      <rect x="10.5" y="30" width="12.5" height="17.5" rx="6" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                      <path d="M13.5 35.5H19.5" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                      <circle cx="45.2" cy="41.5" r="2.7" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                      <path d="M20 33C20 28 24.5 26 32 26C39.5 26 44 28 44 33L46 49C46 51.5 44 53 41 53H23C20 53 18 51.5 18 49L20 33Z" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                      <path d="M24 27.5C26.5 29.5 37.5 29.5 40 27.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                      <rect x="19" y="10" width="26" height="20" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                      <circle cx="30" cy="20" r="1.7" fill="#0f172a" />
+                      <circle cx="39" cy="20" r="1.7" fill="#0f172a" />
+                      <path d="M33.2 22.2Q34.7 23.8 36.2 22.2" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />
+                      <ellipse cx="26.5" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                      <ellipse cx="41.8" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                      <path d="M18 13C19 7.5 25 5 32.5 5C40 5 45 7.5 46 13H18Z" fill="#0f172a" />
+                      <path d="M17.5 13H46.5" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+                      <circle cx="32" cy="4" r="2" fill="#0f172a" />
+                      <g class="arm-swing" style="transform-origin: 24px 34px;">
+                        <rect x="21" y="32" width="7.2" height="12" rx="3.6" transform="rotate(-18 24 34)" fill="#1e293b" stroke="#0f172a" stroke-width="2" />
+                        <g class="held-coupon">
+                          <rect x="28" y="34.5" width="13" height="9" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.8" transform="rotate(-10 28 34.5)" />
+                          <line x1="31.5" y1="37" x2="36.5" y2="36" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round" />
+                        </g>
+                        <g class="held-coffee">
+                          <path d="M29 33H37L36 42H30L29 33Z" fill="#ffffff" stroke="#0f172a" stroke-width="1.7" stroke-linejoin="round" />
+                          <rect x="29.3" y="36" width="7.4" height="3.2" fill="#fda4af" />
+                          <rect x="28" y="31.2" width="9" height="2.2" rx="1" fill="#0f172a" />
+                        </g>
+                        <circle cx="28" cy="41.8" r="2.9" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+
+                <div class="stepper-nodes">
+                  <!-- [01] 관광지 매표소 -->
+                  <div class="step-node passed current show-bubble" data-step="0">
+                    <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                      <rect x="14" y="20" width="36" height="32" rx="5" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                      <rect x="10" y="15" width="44" height="7" rx="3.5" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                      <rect x="21" y="6" width="22" height="10" rx="3" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                      <line x1="27" y1="11" x2="37" y2="11" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+                      <path d="M23 42V32C23 26.5 41 26.5 41 32V42H23Z" fill="#bae6fd" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                      <rect x="19" y="41" width="26" height="5" rx="2.5" fill="#fde047" stroke="#0f172a" stroke-width="2" />
+                    </svg>
+                    <div class="node-circle">01</div>
+                    <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+                  </div>
+
+                  <!-- [02] 현장 QR 키오스크 -->
+                  <div class="step-node" data-step="1">
+                    <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                      <rect x="18" y="10" width="28" height="36" rx="6" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                      <rect x="23" y="15" width="18" height="18" rx="3.5" fill="#f8fafc" stroke="#0f172a" stroke-width="2" />
+                      <rect x="26.5" y="18.5" width="4.5" height="4.5" rx="1" fill="#0f172a" />
+                      <rect x="33" y="18.5" width="4.5" height="4.5" rx="1" fill="#0f172a" />
+                      <rect x="26.5" y="25" width="4.5" height="4.5" rx="1" fill="#0f172a" />
+                      <rect x="33" y="25" width="4.5" height="4.5" rx="1" fill="#fde047" stroke="#0f172a" stroke-width="1.5" />
+                      <rect x="26" y="38" width="12" height="3.5" rx="1.75" fill="#fde047" stroke="#0f172a" stroke-width="1.8" />
+                      <path d="M27 46V52M37 46V52M20 52H44" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                    </svg>
+                    <div class="node-circle">02</div>
+                    <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+                  </div>
+
+                  <!-- [03] 섬 카페 & 식당 -->
+                  <div class="step-node" data-step="2">
+                    <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                      <path d="M25 6H37V12.5C37 15.8 34.3 18 31 18C27.7 18 25 15.8 25 12.5V6Z" fill="#fde047" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                      <path d="M37 8H39.5C41.2 8 42.2 9 42.2 10.8C42.2 12.5 41.2 13.5 39.5 13.5H37" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                      <rect x="12" y="22" width="40" height="30" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                      <path d="M10 18H54V23C54 26 51.5 28 48.5 28C45.5 28 43 26 43 23C43 26 40.5 28 37.5 28C34.5 28 32 26 32 23C32 26 29.5 28 26.5 28C23.5 28 21 26 21 23C21 26 18.5 28 15.5 28C12.5 28 10 26 10 23V18Z" fill="#fda4af" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                      <rect x="17" y="33" width="15" height="12" rx="2.5" fill="#fef08a" stroke="#0f172a" stroke-width="2" />
+                      <path d="M36 52V36.5C36 34 38 32.5 40.5 32.5C43 32.5 45 34 45 36.5V52H36Z" fill="#e2e8f0" stroke="#0f172a" stroke-width="2" />
+                    </svg>
+                    <div class="node-circle">03</div>
+                    <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+                  </div>
+
+                  <!-- [04] 파라솔 없이 뒤쪽에 큼직한 반원 해가 떠오르는 심플한 섬 풍경 -->
+                  <div class="step-node" data-step="3">
+                    <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                      <path d="M32 12V15.5M13 20L15.5 22.5M51 20L48.5 22.5" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                      <path d="M9 47C9 20.5 55 20.5 55 47H9Z" fill="#fde047" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                      <path d="M18 47C21.5 33.5 42.5 33.5 46 47H18Z" fill="#86efac" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                      <rect x="6" y="46.5" width="52" height="5" rx="2.5" fill="#bae6fd" stroke="#0f172a" stroke-width="2.2" />
+                    </svg>
+                    <div class="node-circle">04</div>
+                    <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setupStepper(containerId, options = {}) {
+      const root = document.getElementById(containerId);
+      const walkerEl = root.querySelector('[data-role="walker"]');
+      const bubbleTextEl = root.querySelector('[data-role="bubble-text"]');
+      const nodes = Array.from(root.querySelectorAll('.step-node'));
+      const segments = [
+        Array.from(root.querySelectorAll('[data-seg="0"] .step-dot')),
+        Array.from(root.querySelectorAll('[data-seg="1"] .step-dot')),
+        Array.from(root.querySelectorAll('[data-seg="2"] .step-dot'))
+      ];
+
+      const couponFlyIn = root.querySelector('[data-coupon-fly="in"]');
+      const couponFlyOut = root.querySelector('[data-coupon-fly="out"]');
+      const fxPay = root.querySelector('[data-fx="0"]');
+      const fxCoupon = root.querySelector('[data-fx="1"]');
+      const fxDiscount = root.querySelector('[data-fx="2"]');
+      const fxHeart = root.querySelector('[data-fx="3"]');
+
+      const capNumEl = root.querySelector('[data-role="cap-num"]');
+      const capTitleEl = root.querySelector('[data-role="cap-title"]');
+      const capSubEl = root.querySelector('[data-role="cap-sub"]');
+
+      const stageMessages = options.messages || [
+        '관광지에서 티켓을 결제해요!',
+        '현장 QR로 5,000원 쿠폰 쏙!',
+        '섬 식당·카페에서 바로 할인!',
+        '여행객도 즐겁고 섬 상권도 활짝!'
+      ];
+
+      const captionData = [
+        { num: 'STEP 01', title: '관광지 방문 · 결제', sub: '매표소에서 티켓 결제' },
+        { num: 'STEP 02', title: '현장 쿠폰 수령', sub: '쿠폰이 내게 쏙 등록' },
+        { num: 'STEP 03', title: '가맹점 방문 · 사용', sub: '식당·카페 즉시 할인' },
+        { num: 'STEP 04', title: '지역 상권 상생', sub: '관광객 혜택 · 매장 매출' }
+      ];
+
+      const nodePositions = [12.5, 37.5, 62.5, 87.5];
+      let runToken = 0;
+
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+      function triggerPopup(el, cls = 'pop') {
+        if (!el) return;
+        el.classList.remove(cls);
+        void el.offsetWidth;
+        el.classList.add(cls);
+      }
+
+      async function typeMessage(text, token) {
+        bubbleTextEl.textContent = '';
+        for (let i = 1; i <= text.length; i++) {
+          if (token !== runToken) return;
+          bubbleTextEl.textContent = text.slice(0, i);
+          await sleep(70);
+        }
+      }
+
+      function updateNodes(activeIdx) {
+        nodes.forEach((node, i) => {
+          node.classList.toggle('passed', i <= activeIdx);
+          node.classList.toggle('current', i === activeIdx);
+        });
+        if (capNumEl && captionData[activeIdx]) {
+          capNumEl.textContent = captionData[activeIdx].num;
+          capTitleEl.textContent = captionData[activeIdx].title;
+          capSubEl.textContent = captionData[activeIdx].sub;
+        }
+        if (options.clampBubbleEdges) {
+          walkerEl.classList.toggle('edge-left', activeIdx === 0);
+          walkerEl.classList.toggle('edge-right', activeIdx === 3);
+        }
+      }
+
+      function resetAllDots(upToSegIdx) {
+        segments.forEach((segDots, sIdx) => {
+          segDots.forEach((d) => {
+            d.classList.toggle('lit', sIdx < upToSegIdx);
+          });
+        });
+      }
+
+      async function runLoop(startStage = 0) {
+        const token = ++runToken;
+        let stage = startStage;
+
+        while (token === runToken) {
+          resetAllDots(stage);
+
+          // 1) 해당 역에 멈춰 서기
+          walkerEl.classList.remove('is-walking', 'is-happy');
+          walkerEl.classList.add('is-standing');
+          walkerEl.style.left = nodePositions[stage] + '%';
+          updateNodes(stage);
+
+          // 시안 3 전용: 단계별 상황 연출
+          if (options.interactiveProps) {
+            if (stage === 0) {
+              walkerEl.classList.remove('has-coupon');
+              triggerPopup(fxPay, 'pop');
+            } else if (stage === 1) {
+              walkerEl.classList.remove('has-coupon');
+              triggerPopup(couponFlyIn, 'fly-in');
+              setTimeout(() => {
+                if (token !== runToken) return;
+                triggerPopup(fxCoupon, 'pop');
+                walkerEl.classList.add('has-coupon', 'is-happy');
+              }, 560);
+            } else if (stage === 2) {
+              triggerPopup(couponFlyOut, 'fly-to-shop');
+              setTimeout(() => {
+                if (token !== runToken) return;
+                walkerEl.classList.remove('has-coupon');
+                triggerPopup(fxDiscount, 'pop');
+                walkerEl.classList.add('is-happy');
+              }, 450);
+            } else if (stage === 3) {
+              walkerEl.classList.remove('has-coupon');
+              triggerPopup(fxHeart, 'pop');
+              walkerEl.classList.add('is-happy');
+            }
+          }
+
+          // 2) 말풍선 자연스럽게 타이핑
+          await typeMessage(stageMessages[stage], token);
+          if (token !== runToken) return;
+          await sleep(1150);
+          if (token !== runToken) return;
+
+          // 3) 다음 역으로 점선이 착·착·착 차오르며 이동
+          if (stage < 3) {
+            walkerEl.classList.remove('is-standing', 'is-happy', 'edge-left', 'edge-right');
+            walkerEl.classList.add('is-walking');
+
+            const segDots = segments[stage];
+            const startX = nodePositions[stage];
+            const endX = nodePositions[stage + 1];
+            const totalSteps = segDots.length;
+
+            for (let dIdx = 0; dIdx < totalSteps; dIdx++) {
+              if (token !== runToken) return;
+              segDots[dIdx].classList.add('lit');
+              const stepRatio = (dIdx + 1) / (totalSteps + 1);
+              walkerEl.style.left = (startX + (endX - startX) * stepRatio) + '%';
+              await sleep(230);
+            }
+
+            if (token !== runToken) return;
+            walkerEl.style.left = endX + '%';
+            await sleep(220);
+            stage++;
+          } else {
+            await sleep(1400);
+            if (token !== runToken) return;
+            // 4번에서 1번으로 돌아갈 때 뒤로 후진하는 움직임이 보이지 않도록 트랜지션 잠시 끄고 즉시 리셋
+            walkerEl.style.transition = 'opacity 0.2s ease';
+            walkerEl.style.opacity = '0';
+            await sleep(200);
+            if (token !== runToken) return;
+            walkerEl.style.transition = 'none';
+            walkerEl.style.left = nodePositions[0] + '%';
+            resetAllDots(0);
+            updateNodes(0);
+            bubbleTextEl.textContent = '';
+            void walkerEl.offsetWidth;
+            walkerEl.style.transition = 'left 0.24s linear, opacity 0.2s ease';
+            walkerEl.style.opacity = '1';
+            await sleep(160);
+            stage = 0;
+          }
+        }
+      }
+
+      nodes.forEach((node, idx) => {
+        node.addEventListener('click', () => {
+          runLoop(idx);
+        });
+      });
+
+      runLoop(0);
+    }
+
+    // ── 모바일 2안 (세로형 스텝퍼) 컨트롤러 ──
+    function setupVerticalStepper(containerId) {
+      const root = document.getElementById(containerId);
+      const walkerEl = root.querySelector('[data-role="walker"]');
+      const bubbleTextEl = root.querySelector('[data-role="bubble-text"]');
+      const rows = Array.from(root.querySelectorAll('[data-vstep]'));
+      const vSegments = [
+        Array.from(root.querySelectorAll('[data-vseg="0"] .step-dot')),
+        Array.from(root.querySelectorAll('[data-vseg="1"] .step-dot')),
+        Array.from(root.querySelectorAll('[data-vseg="2"] .step-dot'))
+      ];
+      const rowY = [4, 94, 184, 274];
+      const msgs = [
+        '매표소에서 티켓 결제!',
+        '쿠폰이 내게 쏙 들어왔어요!',
+        '식당·카페 5,000원 할인!',
+        '섬 상권도 활짝 웃어요!'
+      ];
+      let runToken = 0;
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+      async function typeMessage(text, token) {
+        bubbleTextEl.textContent = '';
+        for (let i = 1; i <= text.length; i++) {
+          if (token !== runToken) return;
+          bubbleTextEl.textContent = text.slice(0, i);
+          await sleep(65);
+        }
+      }
+
+      async function runLoop(startStage = 0) {
+        const token = ++runToken;
+        let stage = startStage;
+        while (token === runToken) {
+          vSegments.forEach((seg, sIdx) => seg.forEach((d) => d.classList.toggle('lit', sIdx < stage)));
+          rows.forEach((r, i) => {
+            r.classList.toggle('passed', i <= stage);
+            r.classList.toggle('current', i === stage);
+            const c = r.querySelector('.node-circle');
+            if (c) {
+              c.style.background = i <= stage ? '#0f172a' : '#ffffff';
+              c.style.borderColor = i <= stage ? '#0f172a' : '#cbd5e1';
+              c.style.color = i <= stage ? '#ffffff' : '#94a3b8';
+            }
+          });
+
+          walkerEl.classList.remove('is-walking', 'is-happy');
+          walkerEl.classList.add('is-standing');
+          walkerEl.style.top = rowY[stage] + 'px';
+
+          if (stage === 0) walkerEl.classList.remove('has-coupon');
+          if (stage === 1) walkerEl.classList.add('has-coupon', 'is-happy');
+          if (stage === 2) { walkerEl.classList.remove('has-coupon'); walkerEl.classList.add('is-happy'); }
+          if (stage === 3) walkerEl.classList.add('is-happy');
+
+          await typeMessage(msgs[stage], token);
+          if (token !== runToken) return;
+          await sleep(1100);
+          if (token !== runToken) return;
+
+          if (stage < 3) {
+            walkerEl.classList.remove('is-standing', 'is-happy');
+            walkerEl.classList.add('is-walking');
+            const seg = vSegments[stage];
+            const startY = rowY[stage];
+            const endY = rowY[stage + 1];
+            for (let d = 0; d < seg.length; d++) {
+              if (token !== runToken) return;
+              seg[d].classList.add('lit');
+              walkerEl.style.top = (startY + (endY - startY) * ((d + 1) / (seg.length + 1))) + 'px';
+              await sleep(230);
+            }
+            walkerEl.style.top = endY + 'px';
+            await sleep(200);
+            stage++;
+          } else {
+            await sleep(1400);
+            stage = 0;
+          }
+        }
+      }
+
+      rows.forEach((r, idx) => r.addEventListener('click', () => runLoop(idx)));
+      runLoop(0);
+    }
+
+    // ── 모바일 3안 (2x2 두 줄 스텝퍼) 컨트롤러 ──
+    function setupGrid2x2Stepper(containerId) {
+      const root = document.getElementById(containerId);
+      const walkerEl = root.querySelector('[data-role="walker"]');
+      const bubbleTextEl = root.querySelector('[data-role="bubble-text"]');
+      const nodes = Array.from(root.querySelectorAll('[data-cstep]'));
+      const seg0 = Array.from(root.querySelectorAll('[data-cseg="0"] .step-dot'));
+      const seg2 = Array.from(root.querySelectorAll('[data-cseg="2"] .step-dot'));
+      const couponFlyIn = root.querySelector('[data-coupon-fly="in"]');
+      const couponFlyOut = root.querySelector('[data-coupon-fly="out"]');
+      const fxPay = root.querySelector('[data-fx="0"]');
+      const fxCoupon = root.querySelector('[data-fx="1"]');
+      const fxDiscount = root.querySelector('[data-fx="2"]');
+      const fxHeart = root.querySelector('[data-fx="3"]');
+
+      const coords = [
+        { left: 25, top: 6 },
+        { left: 75, top: 6 },
+        { left: 25, top: 196 },
+        { left: 75, top: 196 }
+      ];
+      const msgs = [
+        '매표소에서 티켓 결제!',
+        '쿠폰이 내게 쏙 들어왔어요!',
+        '가맹점에서 5,000원 할인!',
+        '섬 상권도 활짝 웃어요!'
+      ];
+      let runToken = 0;
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+      function triggerPopup(el, cls = 'pop') {
+        if (!el) return;
+        el.classList.remove(cls);
+        void el.offsetWidth;
+        el.classList.add(cls);
+      }
+
+      async function typeMessage(text, token) {
+        bubbleTextEl.textContent = '';
+        for (let i = 1; i <= text.length; i++) {
+          if (token !== runToken) return;
+          bubbleTextEl.textContent = text.slice(0, i);
+          await sleep(65);
+        }
+      }
+
+      async function runLoop(startStage = 0) {
+        const token = ++runToken;
+        let stage = startStage;
+        while (token === runToken) {
+          seg0.forEach((d) => d.classList.toggle('lit', stage >= 1));
+          seg2.forEach((d) => d.classList.toggle('lit', stage >= 3));
+          nodes.forEach((n, i) => {
+            n.classList.toggle('passed', i <= stage);
+            n.classList.toggle('current', i === stage);
+          });
+
+          walkerEl.classList.remove('is-walking', 'is-happy');
+          walkerEl.classList.add('is-standing');
+          walkerEl.style.left = coords[stage].left + '%';
+          walkerEl.style.top = coords[stage].top + 'px';
+
+          if (stage === 0) {
+            walkerEl.classList.remove('has-coupon');
+            triggerPopup(fxPay, 'pop');
+          } else if (stage === 1) {
+            walkerEl.classList.remove('has-coupon');
+            triggerPopup(couponFlyIn, 'fly-in');
+            setTimeout(() => { if (token === runToken) walkerEl.classList.add('has-coupon', 'is-happy'); }, 520);
+          } else if (stage === 2) {
+            triggerPopup(couponFlyOut, 'fly-to-shop');
+            setTimeout(() => {
+              if (token === runToken) {
+                walkerEl.classList.remove('has-coupon');
+                triggerPopup(fxDiscount, 'pop');
+                walkerEl.classList.add('is-happy');
+              }
+            }, 420);
+          } else if (stage === 3) {
+            walkerEl.classList.remove('has-coupon');
+            triggerPopup(fxHeart, 'pop');
+            walkerEl.classList.add('is-happy');
+          }
+
+          await typeMessage(msgs[stage], token);
+          if (token !== runToken) return;
+          await sleep(1100);
+          if (token !== runToken) return;
+
+          if (stage < 3) {
+            walkerEl.classList.remove('is-standing', 'is-happy');
+            walkerEl.classList.add('is-walking');
+            const start = coords[stage];
+            const end = coords[stage + 1];
+            const activeSeg = stage === 0 ? seg0 : stage === 2 ? seg2 : null;
+            const steps = 5;
+            for (let s = 0; s < steps; s++) {
+              if (token !== runToken) return;
+              if (activeSeg && activeSeg[s]) activeSeg[s].classList.add('lit');
+              const ratio = (s + 1) / (steps + 1);
+              walkerEl.style.left = (start.left + (end.left - start.left) * ratio) + '%';
+              walkerEl.style.top = (start.top + (end.top - start.top) * ratio) + 'px';
+              await sleep(220);
+            }
+            walkerEl.style.left = end.left + '%';
+            walkerEl.style.top = end.top + 'px';
+            await sleep(200);
+            stage++;
+          } else {
+            await sleep(1400);
+            stage = 0;
+          }
+        }
+      }
+
+      nodes.forEach((n, idx) => n.addEventListener('click', () => runLoop(idx)));
+      runLoop(0);
+    }
+
+    // ── 모바일 4안 (캐릭터는 정중앙 50% 고정 + 뒷배경 월드 트랙이 옆으로 스크롤!) 컨트롤러 ──
+    function setupCameraFollowStepper(containerId) {
+      const root = document.getElementById(containerId);
+      const walkerEl = root.querySelector('[data-role="walker"]');
+      const bubbleTextEl = root.querySelector('[data-role="bubble-text"]');
+      const worldTrack = root.querySelector('[data-role="world-track"]');
+      const parallaxBg = root.querySelector('[data-role="parallax-bg"]');
+      const nodes = Array.from(root.querySelectorAll('.step-node'));
+      const pills = Array.from(root.querySelectorAll('[data-dpill]'));
+      const segments = [
+        Array.from(root.querySelectorAll('[data-seg="0"] .step-dot')),
+        Array.from(root.querySelectorAll('[data-seg="1"] .step-dot')),
+        Array.from(root.querySelectorAll('[data-seg="2"] .step-dot'))
+      ];
+
+      const couponFlyIn = root.querySelector('[data-coupon-fly="in"]');
+      const couponFlyOut = root.querySelector('[data-coupon-fly="out"]');
+      const fxPay = root.querySelector('[data-fx="0"]');
+      const fxCoupon = root.querySelector('[data-fx="1"]');
+      const fxDiscount = root.querySelector('[data-fx="2"]');
+      const fxHeart = root.querySelector('[data-fx="3"]');
+
+      // 월드 트랙(width: 280%)에서 각 역(12.5%, 37.5%, 62.5%, 87.5%)이 정중앙(50%)에 오기 위한 left(%) 좌표
+      const worldLeftPositions = [15, -55, -125, -195];
+      const parallaxLeftPositions = [0, -25, -50, -75];
+
+      const stageMessages = [
+        '관광지 매표소에서 티켓 결제!',
+        '현장 등록하니 쿠폰이 내게 쏙!',
+        '쿠폰 들고 가맹점 5,000원 할인!',
+        '여행객도 즐겁고 섬 상권도 활짝!'
+      ];
+
+      let runToken = 0;
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+      function triggerPopup(el, cls = 'pop') {
+        if (!el) return;
+        el.classList.remove(cls);
+        void el.offsetWidth;
+        el.classList.add(cls);
+      }
+
+      async function typeMessage(text, token) {
+        bubbleTextEl.textContent = '';
+        for (let i = 1; i <= text.length; i++) {
+          if (token !== runToken) return;
+          bubbleTextEl.textContent = text.slice(0, i);
+          await sleep(68);
+        }
+      }
+
+      function updateNodes(activeIdx) {
+        nodes.forEach((node, i) => {
+          node.classList.toggle('passed', i <= activeIdx);
+          node.classList.toggle('current', i === activeIdx);
+        });
+        pills.forEach((pill, i) => {
+          pill.classList.toggle('active', i === activeIdx);
+        });
+      }
+
+      function resetAllDots(upToSegIdx) {
+        segments.forEach((segDots, sIdx) => {
+          segDots.forEach((d) => {
+            d.classList.toggle('lit', sIdx < upToSegIdx);
+          });
+        });
+      }
+
+      async function runLoop(startStage = 0) {
+        const token = ++runToken;
+        let stage = startStage;
+
+        while (token === runToken) {
+          resetAllDots(stage);
+
+          // 1) 캐릭터는 중앙에 서고, 월드 트랙이 해당 역 위치로 정렬
+          walkerEl.classList.remove('is-walking', 'is-happy');
+          walkerEl.classList.add('is-standing');
+          worldTrack.style.left = worldLeftPositions[stage] + '%';
+          if (parallaxBg) parallaxBg.style.left = parallaxLeftPositions[stage] + '%';
+          updateNodes(stage);
+
+          if (stage === 0) {
+            walkerEl.classList.remove('has-coupon');
+            triggerPopup(fxPay, 'pop');
+          } else if (stage === 1) {
+            walkerEl.classList.remove('has-coupon');
+            triggerPopup(couponFlyIn, 'fly-in');
+            setTimeout(() => {
+              if (token !== runToken) return;
+              triggerPopup(fxCoupon, 'pop');
+              walkerEl.classList.add('has-coupon', 'is-happy');
+            }, 560);
+          } else if (stage === 2) {
+            triggerPopup(couponFlyOut, 'fly-to-shop');
+            setTimeout(() => {
+              if (token !== runToken) return;
+              walkerEl.classList.remove('has-coupon');
+              triggerPopup(fxDiscount, 'pop');
+              walkerEl.classList.add('is-happy');
+            }, 450);
+          } else if (stage === 3) {
+            walkerEl.classList.remove('has-coupon');
+            triggerPopup(fxHeart, 'pop');
+            walkerEl.classList.add('is-happy');
+          }
+
+          // 2) 말풍선 자연스럽게 타이핑
+          await typeMessage(stageMessages[stage], token);
+          if (token !== runToken) return;
+          await sleep(1150);
+          if (token !== runToken) return;
+
+          // 3) 캐릭터는 중앙에서 총총 걷고, 뒷배경(월드 트랙 & 구름)이 왼쪽으로 착·착·착 이동!
+          if (stage < 3) {
+            walkerEl.classList.remove('is-standing', 'is-happy');
+            walkerEl.classList.add('is-walking');
+
+            const segDots = segments[stage];
+            const startW = worldLeftPositions[stage];
+            const endW = worldLeftPositions[stage + 1];
+            const startP = parallaxLeftPositions[stage];
+            const endP = parallaxLeftPositions[stage + 1];
+            const totalSteps = segDots.length;
+
+            for (let dIdx = 0; dIdx < totalSteps; dIdx++) {
+              if (token !== runToken) return;
+              segDots[dIdx].classList.add('lit');
+              const stepRatio = (dIdx + 1) / (totalSteps + 1);
+              worldTrack.style.left = (startW + (endW - startW) * stepRatio) + '%';
+              if (parallaxBg) {
+                parallaxBg.style.left = (startP + (endP - startP) * stepRatio) + '%';
+              }
+              await sleep(230);
+            }
+
+            if (token !== runToken) return;
+            worldTrack.style.left = endW + '%';
+            if (parallaxBg) parallaxBg.style.left = endP + '%';
+            await sleep(220);
+            stage++;
+          } else {
+            await sleep(1400);
+            if (token !== runToken) return;
+            // 4번에서 끝나고 1번으로 돌아갈 때 뒤로 감기는 움직임이 절대 보이지 않도록 페이드 후 즉시 리셋!
+            const stageViewport = root.querySelector('[data-role="stage-viewport"]');
+            if (stageViewport) {
+              stageViewport.classList.add('is-resetting');
+              await sleep(240);
+              if (token !== runToken) return;
+            }
+            worldTrack.style.transition = 'none';
+            if (parallaxBg) parallaxBg.style.transition = 'none';
+            worldTrack.style.left = worldLeftPositions[0] + '%';
+            if (parallaxBg) parallaxBg.style.left = parallaxLeftPositions[0] + '%';
+            resetAllDots(0);
+            updateNodes(0);
+            walkerEl.classList.remove('has-coupon', 'is-walking', 'is-happy');
+            walkerEl.classList.add('is-standing');
+            bubbleTextEl.textContent = '';
+            void worldTrack.offsetWidth;
+            worldTrack.style.transition = '';
+            if (parallaxBg) parallaxBg.style.transition = '';
+            if (stageViewport) {
+              stageViewport.classList.remove('is-resetting');
+              await sleep(160);
+            }
+            stage = 0;
+          }
+        }
+      }
+
+      nodes.forEach((node, idx) => node.addEventListener('click', () => runLoop(idx)));
+      pills.forEach((pill, idx) => pill.addEventListener('click', () => runLoop(idx)));
+      runLoop(0);
+    }
+
+    // 상단 PC 3개 시안 (기존 그대로 유지)
+    setupStepper('stepper-demo-1');
+    setupStepper('stepper-demo-2');
+    setupStepper('stepper-demo-3', {
+      interactiveProps: true,
+      messages: [
+        '관광지 매표소에서 티켓을 결제해요!',
+        '현장 등록하니 쿠폰이 내게 쏙 들어왔어요!',
+        '쿠폰 들고 가맹점에 와서 5,000원 할인!',
+        '여행객도 알뜰하고 섬 상권도 활짝 웃어요!'
+      ]
+    });
+
+    // 하단 모바일 4개 시안 구동
+    setupStepper('mobile-demo-a', {
+      interactiveProps: true,
+      clampBubbleEdges: true,
+      messages: [
+        '관광지 매표소에서 티켓 결제!',
+        '현장 등록하니 쿠폰이 내게 쏙!',
+        '쿠폰 들고 가맹점 5,000원 할인!',
+        '여행객도 즐겁고 섬 상권도 활짝!'
+      ]
+    });
+    setupVerticalStepper('mobile-demo-b');
+    setupGrid2x2Stepper('mobile-demo-c');
+    setupCameraFollowStepper('mobile-demo-d');
+
+    // 최하단 최종 보완본 전용 컨트롤러 (번호 아래 도착 말풍선 타이핑 + 캐릭터 위 컬러 팝업 + 매표소·키오스크·카페·섬 주고받기 모션)
+    function setupV5Stepper(containerId, options = {}) {
+      const root = document.getElementById(containerId);
+      const walkerEl = root.querySelector('[data-role="walker"]');
+      const topFxEl = root.querySelector('[data-role="top-fx"]');
+      const exchangeGiveEl = root.querySelector('[data-role="exchange-give"]');
+      const exchangeReceiveEl = root.querySelector('[data-role="exchange-receive"]');
+      const worldTrack = root.querySelector('[data-role="world-track"]');
+      const parallaxBg = root.querySelector('[data-role="parallax-bg"]');
+      const stageViewport = root.querySelector('[data-role="stage-viewport"]');
+      const nodes = Array.from(root.querySelectorAll('.step-node'));
+      const nodeMsgEls = nodes.map((n) => n.querySelector('[data-role="node-msg"]'));
+      const pills = Array.from(root.querySelectorAll('[data-dpill]'));
+      const segments = [
+        Array.from(root.querySelectorAll('[data-seg="0"] .step-dot')),
+        Array.from(root.querySelectorAll('[data-seg="1"] .step-dot')),
+        Array.from(root.querySelectorAll('[data-seg="2"] .step-dot'))
+      ];
+
+      const isCamera = !!options.isCameraFollow;
+      const nodePositions = [12.5, 37.5, 62.5, 87.5];
+      const worldLeftPositions = [15, -55, -125, -195];
+      const parallaxLeftPositions = [0, -25, -50, -75];
+
+      const stageMessages = [
+        '관광지 매표소에서\n티켓을 결제해요!',
+        '현장 QR로 등록해\n쿠폰이 내게 쏙!',
+        '섬 카페·식당에서\n5,000원 즉시 할인!',
+        '여행객도 알뜰하고\n섬 상권도 활짝!'
+      ];
+
+      const topFxConfig = [
+        { text: '티켓 결제 완료!', cls: 'fx-pay' },
+        { text: '+5,000원 쿠폰 쏙!', cls: 'fx-coupon' },
+        { text: '-5,000원 즉시 할인!', cls: 'fx-discount' },
+        { text: '섬 상권 활기 가득!', cls: 'fx-heart' }
+      ];
+
+      // 각 역(01~04)에서 캐릭터와 건물이 주고받는 아이템 SVG
+      const exchangeItemsSvg = [
+        {
+          // 01 매표소: [주기] 파란 결제 카드 -> [받기] 노란 입장 티켓
+          give: `<svg viewBox="0 0 28 22"><rect x="2" y="3" width="24" height="16" rx="3" fill="#3b82f6" stroke="#1e293b" stroke-width="1.8"/><line x1="2" y1="8" x2="26" y2="8" stroke="#1e293b" stroke-width="2.2"/><rect x="5" y="12" width="6" height="4" rx="1" fill="#fde047"/></svg>`,
+          receive: `<svg viewBox="0 0 28 22"><rect x="2" y="4" width="24" height="14" rx="2.5" fill="#fef08a" stroke="#1e293b" stroke-width="1.8"/><line x1="19" y1="4" x2="19" y2="18" stroke="#1e293b" stroke-width="1.4" stroke-dasharray="2 2"/><circle cx="10.5" cy="11" r="3" fill="#f97316"/></svg>`
+        },
+        {
+          // 02 쿠폰부스: [주기] 휴대폰 QR 스캔 -> [받기] 5,000원 노란 쿠폰
+          give: `<svg viewBox="0 0 28 22"><rect x="6" y="1" width="14" height="20" rx="2.5" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/><rect x="9" y="5" width="8" height="8" rx="1" fill="#10b981"/><path d="M22 6 L26 4 M22 11 L27 11" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+          receive: `<svg viewBox="0 0 28 22"><rect x="1" y="3" width="26" height="16" rx="3" fill="#facc15" stroke="#1e293b" stroke-width="1.8"/><line x1="19" y1="3" x2="19" y2="19" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="2 2"/><text x="10" y="14" text-anchor="middle" font-size="8.5" font-weight="900" fill="#1e293b">₩</text></svg>`
+        },
+        {
+          // 03 카페·식당: [주기] 노란 쿠폰 제시 -> [받기] 따뜻한 테이크아웃 커피컵
+          give: `<svg viewBox="0 0 28 22"><rect x="1" y="3" width="26" height="16" rx="3" fill="#facc15" stroke="#1e293b" stroke-width="1.8"/><line x1="19" y1="3" x2="19" y2="19" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="2 2"/><text x="10" y="14" text-anchor="middle" font-size="8.5" font-weight="900" fill="#1e293b">₩</text></svg>`,
+          receive: `<svg viewBox="0 0 28 22"><path d="M7 6 L21 6 L19 20 L9 20 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.8" stroke-linejoin="round"/><rect x="8" y="10" width="12" height="5" fill="#d97706" stroke="#1e293b" stroke-width="1.4"/><rect x="5.5" y="3" width="17" height="3.5" rx="1.5" fill="#f97316" stroke="#1e293b" stroke-width="1.6"/></svg>`
+        },
+        {
+          // 04 섬 마을: [주기] 반짝이는 온기 -> [받기] 핑크빛 상생 하트
+          give: `<svg viewBox="0 0 28 22"><circle cx="14" cy="11" r="7.5" fill="#facc15" stroke="#1e293b" stroke-width="1.8"/><text x="14" y="14" text-anchor="middle" font-size="8.5" font-weight="900" fill="#1e293b">★</text></svg>`,
+          receive: `<svg viewBox="0 0 28 22"><path d="M14 19 C14 19 4 13 4 7.5 C4 4.5 6.8 2.5 9.5 2.5 C11.6 2.5 13.2 3.8 14 5.2 C14.8 3.8 16.4 2.5 18.5 2.5 C21.2 2.5 24 4.5 24 7.5 C24 13 14 19 14 19 Z" fill="#fb7185" stroke="#1e293b" stroke-width="1.8" stroke-linejoin="round"/></svg>`
+        }
+      ];
+
+      let runToken = 0;
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+      function clearExchangeAnims() {
+        if (exchangeGiveEl) {
+          exchangeGiveEl.classList.remove('give-anim');
+          exchangeGiveEl.innerHTML = '';
+        }
+        if (exchangeReceiveEl) {
+          exchangeReceiveEl.classList.remove('receive-anim');
+          exchangeReceiveEl.innerHTML = '';
+        }
+      }
+
+      function playExchangeGive(stageIdx) {
+        if (!exchangeGiveEl) return;
+        exchangeGiveEl.classList.remove('give-anim');
+        exchangeGiveEl.innerHTML = exchangeItemsSvg[stageIdx].give;
+        void exchangeGiveEl.offsetWidth;
+        exchangeGiveEl.classList.add('give-anim');
+      }
+
+      function playExchangeReceive(stageIdx) {
+        if (!exchangeReceiveEl) return;
+        exchangeReceiveEl.classList.remove('receive-anim');
+        exchangeReceiveEl.innerHTML = exchangeItemsSvg[stageIdx].receive;
+        void exchangeReceiveEl.offsetWidth;
+        exchangeReceiveEl.classList.add('receive-anim');
+      }
+
+      function showTopFx(stageIdx) {
+        if (!topFxEl) return;
+        const cfg = topFxConfig[stageIdx];
+        topFxEl.className = 'walker-top-fx ' + cfg.cls;
+        topFxEl.textContent = cfg.text;
+        void topFxEl.offsetWidth;
+        topFxEl.classList.add('pop');
+      }
+
+      function showNodeBubble(stageIdx) {
+        const msgEl = nodeMsgEls[stageIdx];
+        if (msgEl) {
+          msgEl.textContent = stageMessages[stageIdx];
+        }
+        nodes.forEach((n, i) => n.classList.toggle('show-bubble', i === stageIdx));
+      }
+
+      function updateNodes(activeIdx, showBubble = true) {
+        nodes.forEach((node, i) => {
+          node.classList.toggle('passed', i <= activeIdx);
+          node.classList.toggle('current', i === activeIdx);
+          if (!showBubble) node.classList.remove('show-bubble');
+        });
+        pills.forEach((pill, i) => {
+          pill.classList.toggle('active', i === activeIdx);
+        });
+      }
+
+      function resetAllDots(upToSegIdx) {
+        segments.forEach((segDots, sIdx) => {
+          segDots.forEach((d) => {
+            d.classList.toggle('lit', sIdx < upToSegIdx);
+          });
+        });
+      }
+
+      async function runLoop(startStage = 0) {
+        const token = ++runToken;
+        let stage = startStage;
+
+        while (token === runToken) {
+          resetAllDots(stage);
+          clearExchangeAnims();
+          if (topFxEl) topFxEl.className = 'walker-top-fx';
+
+          walkerEl.classList.remove('is-walking', 'is-happy');
+          walkerEl.classList.add('is-standing');
+
+          if (isCamera) {
+            worldTrack.style.left = worldLeftPositions[stage] + '%';
+            if (parallaxBg) parallaxBg.style.left = parallaxLeftPositions[stage] + '%';
+          } else {
+            walkerEl.style.left = nodePositions[stage] + '%';
+          }
+
+          // 1) 역 도착과 동시에 2줄 말풍선이 붕 떠오르고, 멈칫거림 없이 바로 [주기] 시작!
+          updateNodes(stage, true);
+          showNodeBubble(stage);
+
+          if (stage === 0 || stage === 1 || stage === 2) {
+            walkerEl.classList.remove('has-coupon', 'has-coffee');
+          }
+          playExchangeGive(stage);
+          await sleep(820);
+          if (token !== runToken) return;
+
+          // 2) [주기]가 건물에 닿자마자 멈추지 않고 바로 이어서 [받기] 출발!
+          playExchangeReceive(stage);
+          await sleep(820);
+          if (token !== runToken) return;
+
+          // 3) 캐릭터 손에 도착하는 순간 바로 손에 쥐고 머리 위 컬러 배지 팝업!
+          if (stage === 1) {
+            walkerEl.classList.add('has-coupon');
+          } else if (stage === 2) {
+            walkerEl.classList.add('has-coffee');
+          }
+          walkerEl.classList.add('is-happy');
+          showTopFx(stage);
+
+          // 확인 후 바로 다음 역으로 경쾌하게 이동
+          await sleep(1050);
+          if (token !== runToken) return;
+
+          // 다음 역으로 이동할 때는 번호 아래 말풍선과 머리 위 배지를 닫고 착·착·착 이동
+          nodes.forEach((n) => n.classList.remove('show-bubble'));
+          if (topFxEl) topFxEl.className = 'walker-top-fx';
+          clearExchangeAnims();
+
+          if (stage < 3) {
+            walkerEl.classList.remove('is-standing', 'is-happy');
+            walkerEl.classList.add('is-walking');
+
+            const segDots = segments[stage];
+            const totalSteps = segDots.length;
+
+            for (let dIdx = 0; dIdx < totalSteps; dIdx++) {
+              if (token !== runToken) return;
+              segDots[dIdx].classList.add('lit');
+              const stepRatio = (dIdx + 1) / (totalSteps + 1);
+
+              if (isCamera) {
+                const startW = worldLeftPositions[stage];
+                const endW = worldLeftPositions[stage + 1];
+                const startP = parallaxLeftPositions[stage];
+                const endP = parallaxLeftPositions[stage + 1];
+                worldTrack.style.left = (startW + (endW - startW) * stepRatio) + '%';
+                if (parallaxBg) parallaxBg.style.left = (startP + (endP - startP) * stepRatio) + '%';
+              } else {
+                const startX = nodePositions[stage];
+                const endX = nodePositions[stage + 1];
+                walkerEl.style.left = (startX + (endX - startX) * stepRatio) + '%';
+              }
+              await sleep(220);
+            }
+
+            if (token !== runToken) return;
+            if (isCamera) {
+              worldTrack.style.left = worldLeftPositions[stage + 1] + '%';
+              if (parallaxBg) parallaxBg.style.left = parallaxLeftPositions[stage + 1] + '%';
+            } else {
+              walkerEl.style.left = nodePositions[stage + 1] + '%';
+            }
+            await sleep(200);
+            stage++;
+          } else {
+            await sleep(1300);
+            if (token !== runToken) return;
+            // 4번에서 끝나고 1번으로 돌아갈 때 뒤로 감기는 움직임이 안 보이도록 페이드 리셋
+            if (stageViewport) {
+              stageViewport.classList.add('is-resetting');
+              await sleep(240);
+              if (token !== runToken) return;
+            }
+            if (isCamera) {
+              worldTrack.style.transition = 'none';
+              if (parallaxBg) parallaxBg.style.transition = 'none';
+              worldTrack.style.left = worldLeftPositions[0] + '%';
+              if (parallaxBg) parallaxBg.style.left = parallaxLeftPositions[0] + '%';
+            } else {
+              walkerEl.style.transition = 'none';
+              walkerEl.style.left = nodePositions[0] + '%';
+            }
+            resetAllDots(0);
+            updateNodes(0, false);
+            walkerEl.classList.remove('has-coupon', 'has-coffee', 'is-walking', 'is-happy');
+            walkerEl.classList.add('is-standing');
+            if (topFxEl) topFxEl.className = 'walker-top-fx';
+            void root.offsetWidth;
+            if (isCamera) {
+              worldTrack.style.transition = '';
+              if (parallaxBg) parallaxBg.style.transition = '';
+            } else {
+              walkerEl.style.transition = '';
+            }
+            if (stageViewport) {
+              stageViewport.classList.remove('is-resetting');
+              await sleep(160);
+            }
+            stage = 0;
+          }
+        }
+      }
+
+      nodes.forEach((node, idx) => node.addEventListener('click', () => runLoop(idx)));
+      pills.forEach((pill, idx) => pill.addEventListener('click', () => runLoop(idx)));
+      runLoop(0);
+    }
+
+    // 최하단 최종 보완본 구동 (모바일 사이드스크롤 + PC 와이드)
+    setupV5Stepper('mobile-demo-v5', { isCameraFollow: true });
+    setupV5Stepper('pc-demo-v5', { isCameraFollow: false });
+  </script>
+</body>
+</html>

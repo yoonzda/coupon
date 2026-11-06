@@ -1,14 +1,1350 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>옹진관광쿠폰</title>
-  <meta http-equiv="refresh" content="0; url=./tourist/index.html" />
+  <link rel="icon" href="./shared/images/favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>옹진 관광 쿠폰 플랫폼</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      word-break: keep-all;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #ffffff;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
+      padding: clamp(52px, 5.5vw, 88px) clamp(28px, 6vw, 96px) clamp(80px, 7vw, 120px);
+    }
+
+    .page-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(44px, 4.5vw, 60px);
+    }
+
+    /* ── 1. 상단 프로젝트 소개 ── */
+    .hero-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .hero-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: clamp(2.6rem, 4.2vw, 3.8rem);
+      font-weight: 400;
+      color: #0f172a;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+
+    .hero-lead {
+      font-size: clamp(1.18rem, 1.45vw, 1.4rem);
+      font-weight: 400;
+      color: #334155;
+      line-height: 1.75;
+    }
+
+    .hero-lead strong {
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    /* ── 2. 서비스 적용 흐름 스탭퍼 + 하단 QR 직접 체험 영역 ── */
+    .qr-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 28px;
+      padding: clamp(32px, 3.8vw, 48px) clamp(28px, 4vw, 52px);
+      background-color: #f8fafc;
+      border-radius: 18px;
+    }
+
+    .qr-info {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .qr-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: clamp(1.55rem, 2vw, 1.95rem);
+      font-weight: 400;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+    }
+
+    .qr-desc {
+      font-size: clamp(1.06rem, 1.22vw, 1.18rem);
+      color: #475569;
+      line-height: 1.68;
+    }
+
+    /* 스탭퍼 아래쪽 QR 직접 체험 바 */
+    .qr-try-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: clamp(24px, 3vw, 36px);
+      padding-top: clamp(24px, 2.8vw, 32px);
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .qr-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .qr-img {
+      width: 136px;
+      height: 136px;
+      display: block;
+      object-fit: contain;
+      background: #ffffff;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .qr-try-text {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .qr-try-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: clamp(1.32rem, 1.65vw, 1.55rem);
+      font-weight: 400;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+    }
+
+    .qr-try-desc {
+      font-size: clamp(1rem, 1.14vw, 1.1rem);
+      color: #475569;
+      line-height: 1.65;
+    }
+
+    /* ── 관광객 이동 애니메이션 스탭퍼 (PC 와이드 & 모바일 카메라 팔로우 겸용) ── */
+    .journey-stepper {
+      position: relative;
+      width: 100%;
+      margin-top: 16px;
+      padding-top: 98px;
+      padding-bottom: 84px;
+      user-select: none;
+    }
+
+    .m-d-parallax-bg {
+      display: none;
+      position: absolute;
+      top: 6px;
+      left: 0;
+      width: 200%;
+      height: 44px;
+      pointer-events: none;
+      z-index: 1;
+      transition: left 0.23s linear;
+      opacity: 0.65;
+    }
+
+    .journey-world {
+      position: relative;
+      width: 100%;
+      left: 0;
+      z-index: 5;
+      transition: left 0.23s linear;
+    }
+
+    .dot-bridges {
+      position: absolute;
+      top: 17px;
+      left: 12.5%;
+      width: 75%;
+      transform: translateY(-50%);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .dot-segment {
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      padding: 0 24px;
+    }
+
+    .step-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #cbd5e1;
+      transition: background-color 0.25s ease, transform 0.25s ease;
+    }
+
+    .step-dot.lit {
+      background-color: #0f172a;
+      transform: scale(1.25);
+    }
+
+    .walker-wrap {
+      position: absolute;
+      top: 32px;
+      left: 12.5%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+      transition: left 0.24s linear, opacity 0.24s ease;
+    }
+
+    .walker-wrap.is-resetting {
+      opacity: 0;
+    }
+
+    .walker-svg {
+      width: 62px;
+      height: 66px;
+      overflow: visible;
+    }
+
+    .walker-wrap.is-standing .char-body-group {
+      animation: idleBreathe 1.5s ease-in-out infinite alternate;
+      transform-origin: 32px 58px;
+    }
+
+    .walker-wrap.is-walking .char-body-group {
+      animation: walkBounce 0.32s ease-in-out infinite alternate;
+    }
+
+    .walker-wrap.is-walking .foot-l {
+      animation: footStepL 0.32s ease-in-out infinite alternate;
+      transform-origin: 27px 50px;
+    }
+
+    .walker-wrap.is-walking .foot-r {
+      animation: footStepR 0.32s ease-in-out infinite alternate;
+      transform-origin: 36px 50px;
+    }
+
+    .walker-wrap.is-walking .arm-swing {
+      animation: handSwing 0.32s ease-in-out infinite alternate;
+      transform-origin: 24px 34px;
+    }
+
+    .walker-wrap.is-happy .char-body-group {
+      animation: happyJump 0.38s cubic-bezier(0.22, 1, 0.36, 1) 2 alternate;
+    }
+
+    @keyframes idleBreathe {
+      0% { transform: translateY(0px) scaleY(1); }
+      100% { transform: translateY(-2px) scaleY(1.015); }
+    }
+
+    @keyframes walkBounce {
+      0% { transform: translateY(0px) rotate(-1deg); }
+      100% { transform: translateY(-3.5px) rotate(1.5deg); }
+    }
+
+    @keyframes happyJump {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-7px); }
+    }
+
+    @keyframes footStepL {
+      0% { transform: translate(-3px, -2px) rotate(-14deg); }
+      100% { transform: translate(3px, 0px) rotate(12deg); }
+    }
+
+    @keyframes footStepR {
+      0% { transform: translate(3px, 0px) rotate(12deg); }
+      100% { transform: translate(-3px, -2px) rotate(-14deg); }
+    }
+
+    @keyframes handSwing {
+      0% { transform: rotate(-10deg); }
+      100% { transform: rotate(12deg); }
+    }
+
+    .held-coupon,
+    .held-coffee {
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .walker-wrap.has-coupon .held-coupon {
+      opacity: 1;
+    }
+
+    .walker-wrap.has-coffee .held-coffee {
+      opacity: 1;
+    }
+
+    .exchange-item {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      width: 32px;
+      height: 26px;
+      z-index: 35;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .exchange-item.give-anim {
+      animation: itemGiveToStation 0.88s ease-in-out forwards;
+    }
+
+    @keyframes itemGiveToStation {
+      0% {
+        opacity: 0;
+        transform: translate(-6px, 12px) scale(0.75) rotate(-8deg);
+      }
+      15% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 1;
+        transform: translate(13px, -13px) scale(1.1) rotate(2deg);
+      }
+      85% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(32px, 2px) scale(0.7) rotate(12deg);
+      }
+    }
+
+    .exchange-item.receive-anim {
+      animation: itemReceiveFromStation 0.92s ease-in-out forwards;
+    }
+
+    @keyframes itemReceiveFromStation {
+      0% {
+        opacity: 0;
+        transform: translate(32px, 2px) scale(0.7) rotate(10deg);
+      }
+      15% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 1;
+        transform: translate(13px, -14px) scale(1.14) rotate(-3deg);
+      }
+      85% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-6px, 12px) scale(0.75) rotate(-6deg);
+      }
+    }
+
+    .stepper-nodes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .step-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .station-building {
+      position: absolute;
+      top: -82px;
+      width: 68px;
+      height: 60px;
+      transform: translateX(20px);
+      z-index: 4;
+      opacity: 0.48;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .step-node.passed .station-building,
+    .step-node.current .station-building {
+      opacity: 1;
+    }
+
+    .step-node.current .station-building {
+      transform: translateX(20px) scale(1.08);
+    }
+
+    .node-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #94a3b8;
+      font-variant-numeric: tabular-nums;
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .step-node.passed .node-circle {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+    }
+
+    .step-node.current .node-circle {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+      box-shadow: 0 0 0 5px rgba(15, 23, 42, 0.08);
+    }
+
+    .node-bottom-bubble {
+      position: absolute;
+      top: 44px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px) scale(0.88);
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 500;
+      line-height: 1.5;
+      padding: 8px 14px;
+      border-radius: 14px;
+      white-space: pre;
+      width: max-content;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+      display: block;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 25;
+      letter-spacing: -0.01em;
+    }
+
+    .node-bottom-bubble::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 5px 5px;
+      border-style: solid;
+      border-color: transparent transparent #0f172a;
+    }
+
+    .step-node.show-bubble .node-bottom-bubble {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 0.92em;
+      background-color: #fde047;
+      margin-left: 2px;
+      vertical-align: -2px;
+      animation: cursorBlink 0.7s step-end infinite;
+    }
+
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .m-d-mini-nav {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+      padding-top: 12px;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    .m-d-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #94a3b8;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .m-d-pill.active {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+    }
+
+    /* ── 3. 역할별 진행 순서 및 바로가기 리스트 ── */
+    .nav-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid #cbd5e1;
+    }
+
+    .nav-row {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(170px, 215px) 1fr auto;
+      align-items: center;
+      gap: clamp(24px, 3.5vw, 52px);
+      padding: clamp(38px, 4vw, 52px) 8px;
+      border-bottom: 1px solid #e2e8f0;
+      text-decoration: none;
+      color: #0f172a;
+    }
+
+    .nav-row-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: clamp(1.75rem, 2.25vw, 2.15rem);
+      font-weight: 400;
+      color: #475569;
+      letter-spacing: -0.025em;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .nav-row:hover .nav-row-title {
+      color: #0f172a;
+      transform: translateX(4px);
+    }
+
+    .nav-row-center {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .flow-plain-title {
+      font-size: clamp(1.12rem, 1.3vw, 1.26rem);
+      font-weight: 600;
+      color: #0f172a;
+      line-height: 1.48;
+      letter-spacing: -0.015em;
+    }
+
+    .flow-sub {
+      font-size: clamp(0.98rem, 1.1vw, 1.08rem);
+      font-weight: 400;
+      color: #64748b;
+      line-height: 1.55;
+    }
+
+    /* ── 제목 아래 세로 1px 실선으로만 나눈 3열 (상단 라인 없음) ── */
+    .hairline-3col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding-top: 2px;
+    }
+
+    .hairline-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 26px;
+    }
+
+    .hairline-col + .hairline-col {
+      border-left: 1px solid #e2e8f0;
+      padding-left: 26px;
+    }
+
+    .hairline-col:last-child {
+      padding-right: 0;
+    }
+
+    .hairline-col strong {
+      font-size: clamp(1.02rem, 1.12vw, 1.08rem);
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.4;
+      letter-spacing: -0.015em;
+    }
+
+    .hairline-col p {
+      font-size: clamp(0.95rem, 1.04vw, 1.02rem);
+      font-weight: 400;
+      color: #64748b;
+      line-height: 1.58;
+      letter-spacing: -0.01em;
+    }
+
+    .nav-row-right {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      flex-shrink: 0;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .nav-row-right svg {
+      width: 32px;
+      height: 32px;
+      stroke-width: 1.5;
+    }
+
+    .nav-row:hover .nav-row-right {
+      color: #0f172a;
+      transform: translateX(4px);
+    }
+
+    /* ── 태블릿 이하 반응형 ── */
+    @media (max-width: 1080px) {
+      .nav-row {
+        grid-template-columns: 1fr auto;
+        gap: 14px 20px;
+      }
+
+      .nav-row-title {
+        grid-column: 1 / 2;
+        grid-row: 1 / 2;
+      }
+
+      .nav-row-right {
+        grid-column: 2 / 3;
+        grid-row: 1 / 2;
+      }
+
+      .nav-row-center {
+        grid-column: 1 / 3;
+        grid-row: 2 / 3;
+      }
+    }
+
+    /* ── 모바일 최적화 ── */
+    @media (max-width: 720px) {
+      body {
+        padding: 36px 20px 64px;
+      }
+
+      .hero-title {
+        font-size: 2.1rem;
+      }
+
+      .hero-lead {
+        font-size: 1.04rem;
+        line-height: 1.68;
+      }
+
+      .qr-section {
+        padding: 26px 22px;
+        gap: 22px;
+      }
+
+      .qr-try-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px 18px;
+        gap: 16px;
+      }
+
+      .qr-box {
+        align-self: center;
+      }
+
+      .qr-info {
+        width: 100%;
+      }
+
+      /* 모바일(720px 이하)에서는 캐릭터가 정중앙(50%)에 고정되고 배경 월드가 옆으로 스크롤되는 카메라 팔로우 모드 동작 */
+      .journey-stepper {
+        padding-top: 98px;
+        padding-bottom: 84px;
+        overflow: hidden;
+        -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 7%, #000 93%, transparent 100%);
+        mask-image: linear-gradient(to right, transparent 0%, #000 7%, #000 93%, transparent 100%);
+      }
+
+      .m-d-parallax-bg {
+        display: block;
+      }
+
+      .journey-world {
+        width: 280%;
+        left: 15%;
+      }
+
+      .journey-world::before {
+        content: '';
+        position: absolute;
+        top: -24px;
+        left: 5%;
+        width: 90%;
+        height: 1.5px;
+        background: #e2e8f0;
+        z-index: 2;
+      }
+
+      .journey-world .dot-segment {
+        padding: 0 22px;
+      }
+
+      .walker-wrap {
+        top: 34px;
+        left: 50% !important;
+      }
+
+      .m-d-mini-nav {
+        display: flex;
+      }
+
+      .nav-row {
+        padding: 44px 2px;
+        gap: 10px 16px;
+        border-bottom: 1px solid #cbd5e1;
+      }
+
+      .nav-row-title {
+        font-size: 1.65rem;
+      }
+
+      .nav-row-center {
+        gap: 26px;
+      }
+
+      .flow-plain-title {
+        font-size: 1.08rem;
+        line-height: 1.52;
+      }
+
+      .nav-row-right svg {
+        width: 26px;
+        height: 26px;
+      }
+
+      .hairline-3col {
+        grid-template-columns: 1fr;
+        gap: 22px;
+        padding-top: 0;
+      }
+
+      .hairline-col,
+      .hairline-col + .hairline-col {
+        padding: 0;
+        margin: 0;
+        border: none;
+        gap: 4px;
+      }
+
+      .hairline-col strong {
+        font-size: 1rem;
+        color: #1e293b;
+      }
+
+      .hairline-col p {
+        font-size: 0.94rem;
+        line-height: 1.58;
+      }
+
+      .flow-sub {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-top: -12px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <script>
-    window.location.replace('./tourist/index.html' + window.location.search);
+  <main class="page-wrap">
+    <!-- 1. 프로젝트 소개 -->
+    <header class="hero-section">
+      <h1 class="hero-title">옹진 관광 쿠폰 플랫폼</h1>
+      <p class="hero-lead">
+        옹진군 섬 관광지에서 티켓을 구매하면 <strong>모바일 할인 쿠폰</strong>을 돌려주고, 섬 안의 식당·카페·특산물 가맹점에서 <strong>현금처럼 바로 사용하는</strong> 지역 상생 쿠폰 서비스입니다.
+        기획부터 실제 화면·서버 개발까지 모두 구현되어 있어, 아래 QR 스캔과 역할별 바로가기를 통해 전체 동작을 바로 확인하실 수 있습니다.
+      </p>
+    </header>
+
+    <!-- 2. 서비스 적용 흐름 스탭퍼 & 하단 QR 직접 체험 -->
+    <section class="qr-section">
+      <div class="qr-info">
+        <h2 class="qr-title">관광지 방문부터 가맹점 할인까지 이어지는 지역 상생 흐름</h2>
+        <p class="qr-desc">
+          고객이 관광지에 방문해 입장권 등을 결제하면 현장에서 즉시 모바일 쿠폰이 발급되고, 이를 섬 안의 식당·카페·특산물 가맹점에서 사용해 바로 할인을 받을 수 있습니다. 관광객에게는 실질적인 여행 혜택을 제공하고, 관광지 방문객의 발걸음을 주변 소상공인 매장으로 자연스럽게 연결해 지역 경제를 활성화합니다.
+        </p>
+
+        <!-- 관광객 이동 애니메이션 스탭퍼 (PC 와이드 & 모바일 카메라 팔로우 자동 전환) -->
+        <div class="journey-stepper" id="intro-journey-stepper" data-role="stage-viewport">
+          <!-- 모바일 카메라 팔로우 시 하늘 구름 패럴랙스 배경 -->
+          <svg class="m-d-parallax-bg" data-role="parallax-bg" viewBox="0 0 800 50" fill="none">
+            <path d="M50 25C50 20 56 18 60 21C64 16 74 17 76 23C80 23 83 27 81 30H48C46 28 47 25 50 25Z" fill="#e2e8f0" />
+            <path d="M210 16C210 11 216 9 220 12C224 7 234 8 236 14C240 14 243 18 241 21H208C206 19 207 16 210 16Z" fill="#e2e8f0" />
+            <path d="M420 28C420 22 428 20 432 24C436 18 447 19 449 26C454 26 457 30 455 34H418C415 31 417 28 420 28Z" fill="#e2e8f0" />
+            <path d="M630 19C630 14 637 12 641 16C645 10 655 11 657 17C661 17 664 21 662 25H628C625 22 627 19 630 19Z" fill="#e2e8f0" />
+          </svg>
+
+          <!-- 귀여운 여행객 캐릭터 + 주고받는 아이템 모션 -->
+          <div class="walker-wrap is-standing" data-role="walker">
+            <div class="exchange-item" data-role="exchange-give"></div>
+            <div class="exchange-item" data-role="exchange-receive"></div>
+
+            <svg class="walker-svg" viewBox="0 0 64 68" fill="none">
+              <ellipse cx="32" cy="62" rx="13" ry="3" fill="rgba(15, 23, 42, 0.09)" />
+              <g class="foot-l"><rect x="22" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+              <g class="foot-r"><rect x="33" y="51" width="9" height="9" rx="4.5" fill="#0f172a" /></g>
+              <g class="char-body-group">
+                <rect x="10.5" y="30" width="12.5" height="17.5" rx="6" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                <path d="M13.5 35.5H19.5" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" />
+                <circle cx="45.2" cy="41.5" r="2.7" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                <path d="M20 33C20 28 24.5 26 32 26C39.5 26 44 28 44 33L46 49C46 51.5 44 53 41 53H23C20 53 18 51.5 18 49L20 33Z" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                <path d="M24 27.5C26.5 29.5 37.5 29.5 40 27.5" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                <rect x="19" y="10" width="26" height="20" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                <circle cx="30" cy="20" r="1.7" fill="#0f172a" />
+                <circle cx="39" cy="20" r="1.7" fill="#0f172a" />
+                <path d="M33.2 22.2Q34.7 23.8 36.2 22.2" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round" />
+                <ellipse cx="26.5" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                <ellipse cx="41.8" cy="22" rx="2.4" ry="1.4" fill="#fda4af" />
+                <path d="M18 13C19 7.5 25 5 32.5 5C40 5 45 7.5 46 13H18Z" fill="#0f172a" />
+                <path d="M17.5 13H46.5" stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" />
+                <circle cx="32" cy="4" r="2" fill="#0f172a" />
+                <g class="arm-swing" style="transform-origin: 24px 34px;">
+                  <rect x="21" y="32" width="7.2" height="12" rx="3.6" transform="rotate(-18 24 34)" fill="#1e293b" stroke="#0f172a" stroke-width="2" />
+                  <g class="held-coupon">
+                    <rect x="28" y="34.5" width="13" height="9" rx="2" fill="#fef08a" stroke="#0f172a" stroke-width="1.8" transform="rotate(-10 28 34.5)" />
+                    <line x1="31.5" y1="37" x2="36.5" y2="36" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round" />
+                  </g>
+                  <g class="held-coffee">
+                    <path d="M29 33H37L36 42H30L29 33Z" fill="#ffffff" stroke="#0f172a" stroke-width="1.7" stroke-linejoin="round" />
+                    <rect x="29.3" y="36" width="7.4" height="3.2" fill="#fda4af" />
+                    <rect x="28" y="31.2" width="9" height="2.2" rx="1" fill="#0f172a" />
+                  </g>
+                  <circle cx="28" cy="41.8" r="2.9" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                </g>
+              </g>
+            </svg>
+          </div>
+
+          <div class="journey-world" data-role="world-track">
+            <div class="dot-bridges">
+              <div class="dot-segment" data-seg="0"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="1"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+              <div class="dot-segment" data-seg="2"><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span><span class="step-dot"></span></div>
+            </div>
+
+            <div class="stepper-nodes">
+              <!-- [01] 관광지 매표소 -->
+              <div class="step-node passed current show-bubble" data-step="0">
+                <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                  <rect x="14" y="20" width="36" height="32" rx="5" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                  <rect x="10" y="15" width="44" height="7" rx="3.5" fill="#1e293b" stroke="#0f172a" stroke-width="2.2" />
+                  <rect x="21" y="6" width="22" height="10" rx="3" fill="#fde047" stroke="#0f172a" stroke-width="2.2" />
+                  <line x1="27" y1="11" x2="37" y2="11" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+                  <path d="M23 42V32C23 26.5 41 26.5 41 32V42H23Z" fill="#bae6fd" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                  <rect x="19" y="41" width="26" height="5" rx="2.5" fill="#fde047" stroke="#0f172a" stroke-width="2" />
+                </svg>
+                <div class="node-circle">01</div>
+                <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+              </div>
+
+              <!-- [02] 현장 QR 키오스크 -->
+              <div class="step-node" data-step="1">
+                <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                  <rect x="18" y="10" width="28" height="36" rx="6" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                  <rect x="23" y="15" width="18" height="18" rx="3.5" fill="#f8fafc" stroke="#0f172a" stroke-width="2" />
+                  <rect x="26.5" y="18.5" width="4.5" height="4.5" rx="1" fill="#0f172a" />
+                  <rect x="33" y="18.5" width="4.5" height="4.5" rx="1" fill="#0f172a" />
+                  <rect x="26.5" y="25" width="4.5" height="4.5" rx="1" fill="#0f172a" />
+                  <rect x="33" y="25" width="4.5" height="4.5" rx="1" fill="#fde047" stroke="#0f172a" stroke-width="1.5" />
+                  <rect x="26" y="38" width="12" height="3.5" rx="1.75" fill="#fde047" stroke="#0f172a" stroke-width="1.8" />
+                  <path d="M27 46V52M37 46V52M20 52H44" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                </svg>
+                <div class="node-circle">02</div>
+                <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+              </div>
+
+              <!-- [03] 섬 카페 & 식당 -->
+              <div class="step-node" data-step="2">
+                <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                  <path d="M25 6H37V12.5C37 15.8 34.3 18 31 18C27.7 18 25 15.8 25 12.5V6Z" fill="#fde047" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                  <path d="M37 8H39.5C41.2 8 42.2 9 42.2 10.8C42.2 12.5 41.2 13.5 39.5 13.5H37" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                  <rect x="12" y="22" width="40" height="30" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="2.2" />
+                  <path d="M10 18H54V23C54 26 51.5 28 48.5 28C45.5 28 43 26 43 23C43 26 40.5 28 37.5 28C34.5 28 32 26 32 23C32 26 29.5 28 26.5 28C23.5 28 21 26 21 23C21 26 18.5 28 15.5 28C12.5 28 10 26 10 23V18Z" fill="#fda4af" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                  <rect x="17" y="33" width="15" height="12" rx="2.5" fill="#fef08a" stroke="#0f172a" stroke-width="2" />
+                  <path d="M36 52V36.5C36 34 38 32.5 40.5 32.5C43 32.5 45 34 45 36.5V52H36Z" fill="#e2e8f0" stroke="#0f172a" stroke-width="2" />
+                </svg>
+                <div class="node-circle">03</div>
+                <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+              </div>
+
+              <!-- [04] 뒤쪽에 큼직한 반원 해가 떠오르는 심플한 섬 풍경 -->
+              <div class="step-node" data-step="3">
+                <svg class="station-building" viewBox="0 0 64 58" fill="none">
+                  <path d="M32 12V15.5M13 20L15.5 22.5M51 20L48.5 22.5" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+                  <path d="M9 47C9 20.5 55 20.5 55 47H9Z" fill="#fde047" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                  <path d="M18 47C21.5 33.5 42.5 33.5 46 47H18Z" fill="#86efac" stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" />
+                  <rect x="6" y="46.5" width="52" height="5" rx="2.5" fill="#bae6fd" stroke="#0f172a" stroke-width="2.2" />
+                </svg>
+                <div class="node-circle">04</div>
+                <div class="node-bottom-bubble"><span data-role="node-msg"></span><span class="typing-cursor"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 모바일 전용 하단 탭 인디케이터 -->
+        <div class="m-d-mini-nav" id="intro-journey-pills">
+          <span class="m-d-pill active" data-dpill="0">01 관광지</span>
+          <span class="m-d-pill" data-dpill="1">02 쿠폰수령</span>
+          <span class="m-d-pill" data-dpill="2">03 섬 가맹점</span>
+          <span class="m-d-pill" data-dpill="3">04 섬 여행</span>
+        </div>
+
+        <!-- 스탭퍼 아래쪽: QR 스캔 및 직접 체험 영역 -->
+        <div class="qr-try-bar">
+          <a class="qr-box" id="qr-card-link" href="./tourist/index.html" title="클릭 또는 휴대폰 카메라 스캔">
+            <img id="qr-image" class="qr-img" alt="쿠폰 등록 테스트 QR" />
+          </a>
+          <div class="qr-try-text">
+            <strong class="qr-try-title">QR을 스캔해 직접 확인해 보세요</strong>
+            <p class="qr-try-desc">
+              휴대폰 카메라로 QR을 스캔하거나 클릭하면, 위 흐름처럼 관광객이 현장에서 모바일 쿠폰을 수령해 섬 가맹점에서 사용하는 과정을 바로 체험하실 수 있습니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 역할별 진행 순서 및 바로가기 리스트 -->
+    <nav class="nav-list">
+      <!-- 기획서 -->
+      <a class="nav-row" id="notion-link" href="#" target="_blank" rel="noopener noreferrer">
+        <span class="nav-row-title">기획서</span>
+        <div class="nav-row-center">
+          <p class="flow-plain-title">옹진군 섬 관광 소비 순환을 위한 쿠폰 플랫폼 전체 기획 및 정책 설계 문서</p>
+          <p class="flow-sub">기획 배경과 목표, 쿠폰 3단계(발급·등록·사용) 라이프사이클 규칙, 예산 회계 공식 및 화면별 상세 설계 내용을 노션(Notion)에서 확인합니다.</p>
+        </div>
+        <span class="nav-row-right">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </span>
+      </a>
+
+      <!-- 관광객 -->
+      <a class="nav-row" href="./tourist/index.html">
+        <span class="nav-row-title">관광객</span>
+        <div class="nav-row-center">
+          <p class="flow-plain-title">앱 설치나 회원가입 없이 휴대폰 인증만으로 이용하는 모바일 쿠폰함 및 가맹점 지도</p>
+          <div class="hairline-3col">
+            <div class="hairline-col">
+              <strong>무제한 수령 · 합산 사용</strong>
+              <p>보유 중인 쿠폰이 있어도 추가 수령이 가능하며, 여러 장을 묶어 한 번에 결제합니다.</p>
+            </div>
+            <div class="hairline-col">
+              <strong>섬 · 업종별 가맹점 지도</strong>
+              <p>식당·카페·특산물 등 주변 가맹점 위치와 매장 정보를 지도에서 바로 찾아봅니다.</p>
+            </div>
+            <div class="hairline-col">
+              <strong>스캔 및 실시간 사용 요청</strong>
+              <p>매장 QR을 직접 스캔하거나, 사용할 쿠폰을 골라 매장으로 실시간 승인 요청을 보냅니다.</p>
+            </div>
+          </div>
+        </div>
+        <span class="nav-row-right">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </span>
+      </a>
+
+      <!-- 발행처 -->
+      <a class="nav-row" href="./issuer/login.html">
+        <span class="nav-row-title">발행처</span>
+        <div class="nav-row-center">
+          <p class="flow-plain-title">사전 수량 배정 없이 현장 결제에 맞춰 즉시 쿠폰을 발급하는 관광지 전용 화면</p>
+          <div class="hairline-3col">
+            <div class="hairline-col">
+              <strong>무배정 즉시 발급 구조</strong>
+              <p>사전 물량 할당 없이 지자체 잔여 예산 내에서 등록 상품 기준으로 즉시 쿠폰을 발행합니다.</p>
+            </div>
+            <div class="hairline-col">
+              <strong>관광지 자율 상품 설정</strong>
+              <p>각 관광지에서 입장권·체험 상품과 쿠폰 지급 금액을 직접 등록하고 관리합니다.</p>
+            </div>
+            <div class="hairline-col">
+              <strong>실시간 수령 감지 · 보안 QR</strong>
+              <p>손님이 스캔을 마치면 화면이 실시간 완료 전환되며, 1회성 세션으로 부정 수령을 막습니다.</p>
+            </div>
+          </div>
+        </div>
+        <span class="nav-row-right">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </span>
+      </a>
+
+      <!-- 가맹점 -->
+      <a class="nav-row" href="./merchant/login.html">
+        <span class="nav-row-title">가맹점</span>
+        <div class="nav-row-center">
+          <p class="flow-plain-title">현장 점주 편의를 고려해 카메라 스캔과 실시간 알림 승인을 모두 지원하는 매장 화면</p>
+          <div class="hairline-3col">
+            <div class="hairline-col">
+              <strong>즉시 카메라 스캔</strong>
+              <p>스캔 버튼 터치 시 중간 단계 없이 바로 카메라가 켜져 손님의 쿠폰 QR을 빠르게 인식합니다.</p>
+            </div>
+            <div class="hairline-col">
+              <strong>실시간 요청 승인</strong>
+              <p>스캔이 어려운 상황에서는 손님이 보낸 모바일 사용 요청 알림을 터치 한 번으로 즉시 승인합니다.</p>
+            </div>
+            <div class="hairline-col">
+              <strong>고령층 맞춤 큰 글씨 UI</strong>
+              <p>어르신 점주도 쉽게 조작할 수 있는 글자 확대(보통/크게) 모드와 온라인 입점 신청·정산 조회를 제공합니다.</p>
+            </div>
+          </div>
+        </div>
+        <span class="nav-row-right">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </span>
+      </a>
+
+      <!-- 관리자 -->
+      <a class="nav-row" href="./admin/login.html">
+        <span class="nav-row-title">관리자</span>
+        <div class="nav-row-center">
+          <p class="flow-plain-title">4대 예산 회계 분리 정산과 가맹점 심사, 이상거래 탐지를 총괄하는 군청 통합 관제 콘솔</p>
+          <div class="hairline-3col">
+            <div class="hairline-col">
+              <strong>4대 예산 회계 실시간 분리 정산</strong>
+              <p>미사용 대기 금액(점유 예산)과 가맹점 결제 완료 금액(실제 집행 예산), 잔여 예산을 실시간 분리 계산해 초과 발행을 원천 차단합니다.</p>
+            </div>
+            <div class="hairline-col">
+              <strong>관광지 등록 및 가맹점 심사·정산</strong>
+              <p>신규 발행처 등록, 가맹점 온라인 입점 신청에 대한 승인·반려 심사, 매장별 실제 사용 건수 및 정산 금액 자동 집계를 처리합니다.</p>
+            </div>
+            <div class="hairline-col">
+              <strong>FDS(이상거래 탐지) 모니터링</strong>
+              <p>비정상적인 반복 수령이나 의심 거래 징후를 자동 감지해 대시보드에서 실시간으로 확인하고 대응할 수 있습니다.</p>
+            </div>
+          </div>
+        </div>
+        <span class="nav-row-right">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </span>
+      </a>
+    </nav>
+  </main>
+
+  <script type="module">
+    import { api } from './shared/js/api.js';
+
+    const qrImgEl = document.getElementById('qr-image');
+    const qrLinkEl = document.getElementById('qr-card-link');
+
+    function buildScanUrl(qrUrlPath, serverIp) {
+      let hostOrigin = window.location.origin;
+      const isLoopback = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (isLoopback && serverIp && serverIp !== 'localhost' && serverIp !== '127.0.0.1') {
+        const portPart = window.location.port ? `:${window.location.port}` : '';
+        hostOrigin = `${window.location.protocol}//${serverIp}${portPart}`;
+      }
+      if (qrUrlPath.startsWith('http://') || qrUrlPath.startsWith('https://')) {
+        return qrUrlPath;
+      }
+      return `${hostOrigin}${qrUrlPath.startsWith('/') ? '' : '/'}${qrUrlPath}`;
+    }
+
+    async function loadDemoQr() {
+      try {
+        const res = await api.post('/coupon/demo-qr', { faceValue: 5000 });
+        if (res && res.success && res.data) {
+          const fullUrl = buildScanUrl(res.data.qrUrl, res.data.serverIp);
+          qrImgEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=4&data=${encodeURIComponent(fullUrl)}`;
+          qrLinkEl.href = fullUrl;
+        }
+      } catch (e) {
+        const fallbackUrl = `${window.location.origin}/tourist/index.html`;
+        qrImgEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=4&data=${encodeURIComponent(fallbackUrl)}`;
+        qrLinkEl.href = fallbackUrl;
+      }
+    }
+
+    loadDemoQr();
+
+    // 관광객 이동 스탭퍼 구동 (PC 와이드 뷰 & 모바일 카메라 팔로우 자동 대응)
+    (function initIntroJourneyStepper() {
+      const stageViewport = document.getElementById('intro-journey-stepper');
+      const pillsWrap = document.getElementById('intro-journey-pills');
+      if (!stageViewport) return;
+
+      const walkerEl = stageViewport.querySelector('[data-role="walker"]');
+      const exchangeGiveEl = stageViewport.querySelector('[data-role="exchange-give"]');
+      const exchangeReceiveEl = stageViewport.querySelector('[data-role="exchange-receive"]');
+      const worldTrack = stageViewport.querySelector('[data-role="world-track"]');
+      const parallaxBg = stageViewport.querySelector('[data-role="parallax-bg"]');
+      const nodes = Array.from(stageViewport.querySelectorAll('.step-node'));
+      const nodeMsgEls = nodes.map((n) => n.querySelector('[data-role="node-msg"]'));
+      const pills = pillsWrap ? Array.from(pillsWrap.querySelectorAll('[data-dpill]')) : [];
+      const segments = [
+        Array.from(stageViewport.querySelectorAll('[data-seg="0"] .step-dot')),
+        Array.from(stageViewport.querySelectorAll('[data-seg="1"] .step-dot')),
+        Array.from(stageViewport.querySelectorAll('[data-seg="2"] .step-dot'))
+      ];
+
+      const isMobileCamera = () => window.matchMedia('(max-width: 720px)').matches;
+      const nodePositions = [12.5, 37.5, 62.5, 87.5];
+      const worldLeftPositions = [15, -55, -125, -195];
+      const parallaxLeftPositions = [0, -25, -50, -75];
+
+      const stageMessages = [
+        '관광지에 방문해서\n즐거운 여행을 시작해요!',
+        '현장 QR을 찍으면\n쿠폰이 내게 쏙!',
+        '다양한 섬 가맹점에서\n현금처럼 즉시 할인!',
+        '여행객은 기분 좋고\n섬 가맹점도 미소 활짝!'
+      ];
+
+      const exchangeItemsSvg = [
+        {
+          give: `<svg viewBox="0 0 28 22"><rect x="2" y="3" width="24" height="16" rx="3" fill="#3b82f6" stroke="#1e293b" stroke-width="1.8"/><line x1="2" y1="8" x2="26" y2="8" stroke="#1e293b" stroke-width="2.2"/><rect x="5" y="12" width="6" height="4" rx="1" fill="#fde047"/></svg>`,
+          receive: `<svg viewBox="0 0 28 22"><rect x="2" y="4" width="24" height="14" rx="2.5" fill="#fef08a" stroke="#1e293b" stroke-width="1.8"/><line x1="19" y1="4" x2="19" y2="18" stroke="#1e293b" stroke-width="1.4" stroke-dasharray="2 2"/><circle cx="10.5" cy="11" r="3" fill="#f97316"/></svg>`
+        },
+        {
+          give: `<svg viewBox="0 0 28 22"><rect x="6" y="1" width="14" height="20" rx="2.5" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/><rect x="9" y="5" width="8" height="8" rx="1" fill="#10b981"/><path d="M22 6 L26 4 M22 11 L27 11" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+          receive: `<svg viewBox="0 0 28 22"><rect x="1" y="3" width="26" height="16" rx="3" fill="#facc15" stroke="#1e293b" stroke-width="1.8"/><line x1="19" y1="3" x2="19" y2="19" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="2 2"/><text x="10" y="14" text-anchor="middle" font-size="8.5" font-weight="900" fill="#1e293b">₩</text></svg>`
+        },
+        {
+          give: `<svg viewBox="0 0 28 22"><rect x="1" y="3" width="26" height="16" rx="3" fill="#facc15" stroke="#1e293b" stroke-width="1.8"/><line x1="19" y1="3" x2="19" y2="19" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="2 2"/><text x="10" y="14" text-anchor="middle" font-size="8.5" font-weight="900" fill="#1e293b">₩</text></svg>`,
+          receive: `<svg viewBox="0 0 28 22"><path d="M7 6 L21 6 L19 20 L9 20 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.8" stroke-linejoin="round"/><rect x="8" y="10" width="12" height="5" fill="#d97706" stroke="#1e293b" stroke-width="1.4"/><rect x="5.5" y="3" width="17" height="3.5" rx="1.5" fill="#f97316" stroke="#1e293b" stroke-width="1.6"/></svg>`
+        },
+        {
+          give: `<svg viewBox="0 0 28 22"><circle cx="14" cy="11" r="7.5" fill="#facc15" stroke="#1e293b" stroke-width="1.8"/><text x="14" y="14" text-anchor="middle" font-size="8.5" font-weight="900" fill="#1e293b">★</text></svg>`,
+          receive: `<svg viewBox="0 0 28 22"><path d="M14 19 C14 19 4 13 4 7.5 C4 4.5 6.8 2.5 9.5 2.5 C11.6 2.5 13.2 3.8 14 5.2 C14.8 3.8 16.4 2.5 18.5 2.5 C21.2 2.5 24 4.5 24 7.5 C24 13 14 19 14 19 Z" fill="#fb7185" stroke="#1e293b" stroke-width="1.8" stroke-linejoin="round"/></svg>`
+        }
+      ];
+
+      let runToken = 0;
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+      function clearExchangeAnims() {
+        if (exchangeGiveEl) {
+          exchangeGiveEl.classList.remove('give-anim');
+          exchangeGiveEl.innerHTML = '';
+        }
+        if (exchangeReceiveEl) {
+          exchangeReceiveEl.classList.remove('receive-anim');
+          exchangeReceiveEl.innerHTML = '';
+        }
+      }
+
+      function playExchangeGive(stageIdx) {
+        if (!exchangeGiveEl) return;
+        exchangeGiveEl.classList.remove('give-anim');
+        exchangeGiveEl.innerHTML = exchangeItemsSvg[stageIdx].give;
+        void exchangeGiveEl.offsetWidth;
+        exchangeGiveEl.classList.add('give-anim');
+      }
+
+      function playExchangeReceive(stageIdx) {
+        if (!exchangeReceiveEl) return;
+        exchangeReceiveEl.classList.remove('receive-anim');
+        exchangeReceiveEl.innerHTML = exchangeItemsSvg[stageIdx].receive;
+        void exchangeReceiveEl.offsetWidth;
+        exchangeReceiveEl.classList.add('receive-anim');
+      }
+
+      async function typeNodeBubble(stageIdx, token) {
+        const msgEl = nodeMsgEls[stageIdx];
+        if (!msgEl) return;
+        const chars = Array.from(stageMessages[stageIdx]);
+        let current = '';
+        msgEl.textContent = '';
+
+        for (let i = 0; i < chars.length; i++) {
+          if (token !== runToken) return;
+          const ch = chars[i];
+          if (ch === '\n') {
+            current += '\n';
+            continue;
+          }
+          current += ch;
+          msgEl.textContent = current;
+          if (i === 0) {
+            nodes.forEach((n, idx) => n.classList.toggle('show-bubble', idx === stageIdx));
+          }
+          await sleep(52);
+        }
+      }
+
+      function updateNodes(activeIdx, showBubble = true) {
+        nodes.forEach((node, i) => {
+          node.classList.toggle('passed', i <= activeIdx);
+          node.classList.toggle('current', i === activeIdx);
+          if (!showBubble) node.classList.remove('show-bubble');
+        });
+        pills.forEach((pill, i) => {
+          pill.classList.toggle('active', i === activeIdx);
+        });
+      }
+
+      function resetAllDots(upToSegIdx) {
+        segments.forEach((segDots, sIdx) => {
+          segDots.forEach((d) => {
+            d.classList.toggle('lit', sIdx < upToSegIdx);
+          });
+        });
+      }
+
+      function applyStagePosition(stageIdx, stepRatio = 0) {
+        const isCam = isMobileCamera();
+        if (isCam) {
+          walkerEl.style.left = '50%';
+          const startW = worldLeftPositions[stageIdx];
+          const endW = stageIdx < 3 ? worldLeftPositions[stageIdx + 1] : startW;
+          const startP = parallaxLeftPositions[stageIdx];
+          const endP = stageIdx < 3 ? parallaxLeftPositions[stageIdx + 1] : startP;
+          worldTrack.style.left = (startW + (endW - startW) * stepRatio) + '%';
+          if (parallaxBg) parallaxBg.style.left = (startP + (endP - startP) * stepRatio) + '%';
+        } else {
+          worldTrack.style.left = '0%';
+          if (parallaxBg) parallaxBg.style.left = '0%';
+          const startX = nodePositions[stageIdx];
+          const endX = stageIdx < 3 ? nodePositions[stageIdx + 1] : startX;
+          walkerEl.style.left = (startX + (endX - startX) * stepRatio) + '%';
+        }
+      }
+
+      async function runLoop(startStage = 0) {
+        const token = ++runToken;
+        let stage = startStage;
+
+        while (token === runToken) {
+          resetAllDots(stage);
+          clearExchangeAnims();
+
+          walkerEl.classList.remove('is-walking', 'is-happy', 'is-resetting');
+          walkerEl.classList.add('is-standing');
+
+          applyStagePosition(stage, 0);
+
+          updateNodes(stage, true);
+          const typingPromise = typeNodeBubble(stage, token);
+
+          if (stage === 0 || stage === 1 || stage === 2) {
+            walkerEl.classList.remove('has-coupon', 'has-coffee');
+          }
+          playExchangeGive(stage);
+          await sleep(820);
+          if (token !== runToken) return;
+
+          playExchangeReceive(stage);
+          await sleep(820);
+          if (token !== runToken) return;
+
+          await typingPromise;
+          if (token !== runToken) return;
+
+          if (stage === 1) {
+            walkerEl.classList.add('has-coupon');
+          } else if (stage === 2) {
+            walkerEl.classList.add('has-coffee');
+          }
+          walkerEl.classList.add('is-happy');
+
+          await sleep(1050);
+          if (token !== runToken) return;
+
+          nodes.forEach((n) => n.classList.remove('show-bubble'));
+          clearExchangeAnims();
+
+          if (stage < 3) {
+            walkerEl.classList.remove('is-standing', 'is-happy');
+            walkerEl.classList.add('is-walking');
+
+            const segDots = segments[stage];
+            const totalSteps = segDots.length;
+
+            for (let dIdx = 0; dIdx < totalSteps; dIdx++) {
+              if (token !== runToken) return;
+              segDots[dIdx].classList.add('lit');
+              const stepRatio = (dIdx + 1) / (totalSteps + 1);
+              applyStagePosition(stage, stepRatio);
+              await sleep(220);
+            }
+
+            if (token !== runToken) return;
+            applyStagePosition(stage + 1, 0);
+            await sleep(200);
+            stage++;
+          } else {
+            await sleep(1300);
+            if (token !== runToken) return;
+            walkerEl.classList.add('is-resetting');
+            await sleep(240);
+            if (token !== runToken) return;
+
+            worldTrack.style.transition = 'none';
+            walkerEl.style.transition = 'opacity 0.24s ease';
+            if (parallaxBg) parallaxBg.style.transition = 'none';
+            applyStagePosition(0, 0);
+            resetAllDots(0);
+            updateNodes(0, false);
+            walkerEl.classList.remove('has-coupon', 'has-coffee', 'is-walking', 'is-happy');
+            walkerEl.classList.add('is-standing');
+            void walkerEl.offsetWidth;
+
+            worldTrack.style.transition = '';
+            walkerEl.style.transition = '';
+            if (parallaxBg) parallaxBg.style.transition = '';
+            walkerEl.classList.remove('is-resetting');
+            await sleep(200);
+            stage = 0;
+          }
+        }
+      }
+
+      nodes.forEach((node, idx) => node.addEventListener('click', () => runLoop(idx)));
+      pills.forEach((pill, idx) => pill.addEventListener('click', () => runLoop(idx)));
+      window.addEventListener('resize', () => applyStagePosition(0, 0));
+      runLoop(0);
+    })();
   </script>
 </body>
 </html>

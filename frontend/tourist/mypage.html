@@ -254,60 +254,91 @@
       color: var(--primary);
     }
 
-    /* 내 쿠폰 탭 내부 계정/로그아웃 바 (번호 + 로그아웃만 깔끔하게 배치) */
+    /* 내 쿠폰 탭 내부 계정/로그아웃 바 (박스 없는 정교한 미니멀 헤더 디테일) */
     .wallet-account-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      background: var(--slate-50);
-      border: 1px solid var(--slate-200);
-      border-radius: 0.8rem;
-      padding: 0.75rem 1rem;
-      margin-bottom: var(--section-gap);
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--slate-200);
+      border-radius: 0;
+      padding: 0.15rem 0.15rem 0.78rem;
+      margin-bottom: 1.05rem;
       gap: 0.5rem;
       flex-shrink: 0;
     }
 
     .wallet-account-info {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.42rem;
       flex-wrap: wrap;
       min-width: 0;
+      line-height: 1;
+    }
+
+    .wallet-account-icon {
+      width: 1.02rem;
+      height: 1.02rem;
+      color: var(--slate-500);
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .wallet-account-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--slate-500);
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+
+    .wallet-account-divider {
+      width: 1px;
+      height: 0.76rem;
+      background: var(--slate-300, #cbd5e1);
+      display: inline-block;
+      flex-shrink: 0;
     }
 
     .user-phone-tag {
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
-      font-size: 0.94rem;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 0.96rem;
       color: var(--slate-800);
       font-weight: 700;
-      background: var(--white);
-      border: 1px solid var(--slate-200);
-      padding: 0.35rem 0.78rem;
-      border-radius: 99px;
-      letter-spacing: 0.2px;
+      background: transparent;
+      border: none;
+      padding: 0;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
     }
 
     .btn-logout {
-      font-size: 0.88rem;
+      font-size: 0.82rem;
       color: var(--slate-600);
       background: var(--white);
       border: 1px solid var(--slate-200);
       text-decoration: none;
-      font-weight: 700;
-      padding: 0.42rem 0.82rem;
-      border-radius: 0.55rem;
+      font-weight: 600;
+      padding: 0.36rem 0.82rem;
+      border-radius: 999px;
       cursor: pointer;
       transition: all 0.15s ease;
       white-space: nowrap;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .btn-logout:hover {
-      color: var(--slate-900);
-      background: var(--slate-100);
+      color: var(--slate-800);
+      background: var(--slate-50);
       border-color: var(--slate-300);
     }
 
@@ -457,193 +488,548 @@
       margin-left: auto;
     }
 
-    /* ── [쿠폰 카드] 티켓 스타일 (화면 비율에 맞춰 여유로운 구성) ── */
+    /* ── [쿠폰 카드] 테스트 페이지(coupon-preview.html) 17·18번 / 23·24번 / 29·30번과 100% 동일한 규격 ── */
+    .coupon-card.theme-yellow {
+      --card-bg: #fdf5cf;
+      --ink-strong: #3a3530;
+      --ink-title: #57534e;
+      --ink-muted: #78716c;
+    }
+
+    .coupon-card.theme-sky {
+      --card-bg: #e5f2fc;
+      --ink-strong: #273449;
+      --ink-title: #475569;
+      --ink-muted: #64748b;
+    }
+
     .coupon-card {
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      border-radius: var(--radius-md);
-      color: var(--white);
-      padding: 1.5rem 1.4rem;
-      min-height: 220px;
-      flex: 1 0 auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
       position: relative;
+      background: var(--card-bg, #fdf5cf);
+      border: none;
+      border-radius: 18px;
+      flex: 0 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 22px 154px;
+      align-items: stretch;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.28);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      transition: transform 0.18s ease;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .coupon-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 28px rgba(2, 132, 199, 0.35);
-    }
-
-    .coupon-card::before,
-    .coupon-card::after {
-      content: '';
-      position: absolute;
-      top: 52%;
-      width: 1.15rem;
-      height: 1.15rem;
-      background-color: var(--white);
-      border-radius: 50%;
-      transform: translateY(-50%);
-    }
-
-    .coupon-card::before { left: -0.58rem; }
-    .coupon-card::after { right: -0.58rem; }
-
-    .coupon-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 0.45rem;
-      margin-bottom: 0.85rem;
-    }
-
-    .coupon-label {
-      font-size: 0.88rem;
-      font-weight: 600;
-      background: rgba(255, 255, 255, 0.2);
-      padding: 0.28rem 0.7rem;
-      border-radius: 99px;
-      backdrop-filter: blur(4px);
-      letter-spacing: 0.2px;
-    }
-
-    .coupon-dday {
-      font-size: 0.88rem;
-      font-weight: 700;
-      background: #f59e0b;
-      color: #78350f;
-      padding: 0.28rem 0.65rem;
-      border-radius: 0.4rem;
-    }
-
-    .coupon-body {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding-bottom: 1.15rem;
-      border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
-      margin-bottom: 1rem;
-    }
-
-    .coupon-amount {
-      font-size: 2.05rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-bottom: 0.25rem;
-    }
-
-    .coupon-desc {
-      font-size: 0.92rem;
-      opacity: 0.92;
-      line-height: 1.4;
-    }
-
-    .coupon-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.65rem;
-    }
-
-    .coupon-expiry {
-      font-size: 0.88rem;
-      opacity: 0.92;
-    }
-
-    .btn-coupon-qr {
-      background: var(--white);
-      color: var(--primary-dark);
-      border: none;
-      padding: 0.65rem 1.15rem;
-      border-radius: 0.55rem;
-      font-size: 0.94rem;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      transition: all 0.15s ease;
-    }
-
-    .btn-coupon-qr:hover {
-      background: #f0f9ff;
       transform: translateY(-1px);
     }
 
-    /* 내 쿠폰 하단 안내 박스 (100dvh 화면 균형 배분) */
-    .wallet-bottom-guide {
-      margin-top: auto;
-      background: var(--slate-50);
-      border: 1px solid var(--slate-200);
-      border-radius: var(--radius-md);
-      padding: var(--card-pad);
+    .coupon-left-main {
+      padding: 24px 12px 24px 26px;
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
+      justify-content: center;
+      gap: 16px;
+      min-width: 0;
     }
 
-    .wallet-guide-title {
-      font-size: 0.94rem;
-      font-weight: 700;
-      color: var(--slate-800);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.4rem;
+    .coupon-info-group {
+      display: block;
     }
 
-    .wallet-guide-title-left {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .btn-reopen-onboarding {
-      border: 1px solid var(--slate-200);
-      background: var(--white);
-      color: var(--slate-600);
-      font-family: inherit;
-      font-size: 0.78rem;
-      font-weight: 700;
-      padding: 0.28rem 0.62rem;
-      border-radius: 99px;
-      cursor: pointer;
-      transition: all 0.15s ease;
+    .coupon-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 16.64px;
+      font-weight: 400;
+      color: var(--ink-title);
+      line-height: 1.25;
       white-space: nowrap;
     }
 
-    .btn-reopen-onboarding:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: var(--primary-light);
+    .coupon-amount {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 40px;
+      font-weight: 400;
+      color: var(--ink-strong);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
     }
 
-    .wallet-guide-list {
-      list-style: none;
+    .coupon-expiry {
+      font-size: 13.44px;
+      color: var(--ink-muted);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.25;
+      margin-top: 14px;
+      white-space: nowrap;
+    }
+
+    /* 세로 다이컷 펀칭 절취선 (coupon-preview.html 17·18번 .v-punch-line 동일) */
+    .coupon-punch-line {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      padding: 18px 0;
+    }
+
+    .coupon-punch-line::before,
+    .coupon-punch-line::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      background: var(--white);
+      border-radius: 50%;
+      transform: translateX(-50%);
+    }
+
+    .coupon-punch-line::before { top: -12px; }
+    .coupon-punch-line::after { bottom: -12px; }
+
+    .coupon-punch-dots {
+      width: 6px;
+      height: 100%;
+      background-image: radial-gradient(circle, var(--white) 2.8px, transparent 3.2px);
+      background-size: 6px 13px;
+      background-repeat: repeat-y;
+      background-position: center;
+    }
+
+    /* 우측 스텁 (coupon-preview.html 17·18번 .right-stub 동일) */
+    .coupon-right-stub {
+      padding: 20px 22px 18px 14px;
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
-      font-size: 0.86rem;
-      color: var(--slate-600);
-      line-height: 1.5;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
     }
 
-    /* 쿠폰 없음 빈 상태 (100dvh 비율에 맞춰 넉넉하게 채움) */
+    .coupon-qr-img {
+      width: 88px;
+      height: 88px;
+      display: block;
+      flex-shrink: 0;
+      opacity: 0.58;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+
+    .btn-coupon-qr {
+      background: transparent;
+      color: var(--ink-title);
+      border: none;
+      padding: 2px 0;
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 15.2px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .btn-coupon-qr::after {
+      content: '';
+      display: inline-block;
+      width: 0.42em;
+      height: 0.42em;
+      border-top: 1.3px solid currentColor;
+      border-right: 1.3px solid currentColor;
+      transform: rotate(45deg);
+      margin-top: 1px;
+      opacity: 0.8;
+      flex-shrink: 0;
+    }
+
+    /* ── [크게 모드 - 가로 공간이 충분한 화면(> 460px)]
+       17·18번 스타일과 상하·좌우 비율을 그대로 유지하면서 coupon-preview.html [크게] 규격(21.5px / 46px / 17px / 96px / 20px) 적용 ── */
+    html[data-font-scale="large"] .coupon-card {
+      grid-template-columns: 1fr 22px 168px;
+    }
+
+    html[data-font-scale="large"] .coupon-left-main {
+      padding: 24px 12px 24px 26px;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    html[data-font-scale="large"] .coupon-title {
+      font-size: 21.5px;
+    }
+
+    html[data-font-scale="large"] .coupon-amount {
+      font-size: 46px;
+    }
+
+    html[data-font-scale="large"] .coupon-expiry {
+      font-size: 17px;
+      margin-top: 16px;
+    }
+
+    html[data-font-scale="large"] .coupon-right-stub {
+      padding: 22px 22px 20px 14px;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    html[data-font-scale="large"] .coupon-qr-img {
+      width: 96px;
+      height: 96px;
+    }
+
+    html[data-font-scale="large"] .btn-coupon-qr {
+      width: auto;
+      padding: 2px 0;
+      font-size: 20px;
+      gap: 6px;
+    }
+
+    /* ── [모바일 좁은 폭(<= 420px) + 보통 모드]
+       coupon-preview.html 23·24번(.c-punch-set1.qr-ver.m-normal)과 100% 동일 ── */
+    @media (max-width: 420px) {
+      .coupon-card {
+        grid-template-columns: 1fr 18px 114px;
+      }
+
+      .coupon-left-main {
+        padding: 20px 6px 20px 20px;
+        gap: 12px;
+      }
+
+      .coupon-title {
+        font-size: 15.5px;
+      }
+
+      .coupon-amount {
+        font-size: 35px;
+        letter-spacing: -0.03em;
+      }
+
+      .coupon-expiry {
+        font-size: 13px;
+        margin-top: 10px;
+        letter-spacing: -0.02em;
+      }
+
+      .coupon-right-stub {
+        padding: 16px 14px 14px 8px;
+        gap: 8px;
+      }
+
+      .coupon-qr-img {
+        width: 72px;
+        height: 72px;
+      }
+
+      .btn-coupon-qr {
+        font-size: 14.5px;
+        gap: 4px;
+      }
+    }
+
+    /* ── [모바일 화면(<= 460px) + 크게 모드]
+       coupon-preview.html 29·30번(.c-punch-set2.qr-ver.m-large-qr-drop + 상단 중앙 정렬)과 100% 동일 ── */
+    @media (max-width: 460px) {
+      html[data-font-scale="large"] .coupon-card {
+        display: flex;
+        flex-direction: column;
+      }
+
+      html[data-font-scale="large"] .coupon-left-main {
+        padding: 22px 22px 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      html[data-font-scale="large"] .coupon-info-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+
+      html[data-font-scale="large"] .coupon-title {
+        font-size: 21.5px;
+        line-height: 1.2;
+      }
+
+      html[data-font-scale="large"] .coupon-amount {
+        font-size: 46px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+
+      html[data-font-scale="large"] .coupon-expiry {
+        font-size: 17px;
+        margin-top: 0;
+      }
+
+      html[data-font-scale="large"] .coupon-punch-line {
+        height: 22px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      html[data-font-scale="large"] .coupon-punch-line::before,
+      html[data-font-scale="large"] .coupon-punch-line::after {
+        top: 50%;
+        bottom: auto;
+        transform: translateY(-50%);
+      }
+
+      html[data-font-scale="large"] .coupon-punch-line::before {
+        left: -12px;
+        right: auto;
+      }
+
+      html[data-font-scale="large"] .coupon-punch-line::after {
+        right: -12px;
+        left: auto;
+      }
+
+      html[data-font-scale="large"] .coupon-punch-dots {
+        width: 100%;
+        height: 6px;
+        background-size: 13px 6px;
+        background-repeat: repeat-x;
+        background-position: center;
+      }
+
+      html[data-font-scale="large"] .coupon-right-stub {
+        padding: 14px 22px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      html[data-font-scale="large"] .coupon-qr-img {
+        width: 96px;
+        height: 96px;
+      }
+
+      html[data-font-scale="large"] .btn-coupon-qr {
+        font-size: 20px;
+        gap: 6px;
+      }
+    }
+
+    @media (max-width: 345px) {
+      .coupon-card {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .coupon-left-main {
+        padding: 20px 20px 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .coupon-info-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .coupon-expiry {
+        margin-top: 0;
+      }
+
+      .coupon-punch-line {
+        height: 22px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .coupon-punch-line::before,
+      .coupon-punch-line::after {
+        top: 50%;
+        bottom: auto;
+        transform: translateY(-50%);
+      }
+
+      .coupon-punch-line::before {
+        left: -12px;
+        right: auto;
+      }
+
+      .coupon-punch-line::after {
+        right: -12px;
+        left: auto;
+      }
+
+      .coupon-punch-dots {
+        width: 100%;
+        height: 6px;
+        background-size: 13px 6px;
+        background-repeat: repeat-x;
+        background-position: center;
+      }
+
+      .coupon-right-stub {
+        padding: 14px 20px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+    }
+
+    /* 내 쿠폰 하단 쿠폰 이용 안내 (박스·뱃지 없는 정교한 미니멀 타이포그래피) */
+    .wallet-bottom-guide {
+      margin-top: 1.4rem;
+      padding-top: 0.2rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wallet-guide-header {
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 0.42rem;
+    }
+
+    .wallet-guide-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.24rem;
+      font-weight: 400;
+      color: var(--slate-900);
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+    }
+
+    /* 쿠폰 이용 안내 옆 물음표 원형 버튼 (이용 안내 다시 보기) */
+    .btn-guide-help-circle {
+      position: relative;
+      width: 1.36rem;
+      height: 1.36rem;
+      border-radius: 50%;
+      border: 1.4px solid var(--slate-400);
+      background: var(--white);
+      color: var(--slate-500);
+      font-family: 'Pretendard', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      transition: all 0.18s ease;
+    }
+
+    .btn-guide-help-circle:hover {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    .btn-guide-help-circle::after {
+      content: '이용 안내 다시 보기';
+      position: absolute;
+      left: calc(100% + 8px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-4px);
+      background: var(--slate-900);
+      color: var(--white);
+      font-size: 0.76rem;
+      font-weight: 500;
+      padding: 0.28rem 0.58rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .btn-guide-help-circle:hover::after {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+
+    .wallet-guide-steps {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .guide-step-item {
+      padding: 1.15rem 0.1rem;
+      border-bottom: 1px solid var(--slate-200);
+      display: grid;
+      grid-template-columns: 1.6rem 1fr;
+      align-items: baseline;
+      gap: 0.35rem;
+    }
+
+    .guide-step-item:last-child {
+      border-bottom: none;
+    }
+
+    .guide-step-num {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--slate-400);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+
+    .guide-step-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.32rem;
+      min-width: 0;
+    }
+
+    .guide-step-head {
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: var(--slate-800);
+      line-height: 1.42;
+      letter-spacing: -0.018em;
+    }
+
+    .guide-step-desc {
+      font-size: 0.94rem;
+      font-weight: 400;
+      color: var(--slate-500);
+      line-height: 1.62;
+      letter-spacing: -0.01em;
+    }
+
+    /* 쿠폰 없음 빈 상태 */
     .empty-coupon-box {
-      flex: 1;
-      min-height: clamp(280px, 54dvh, 520px);
+      flex: 0 0 auto;
+      min-height: 220px;
       background: var(--slate-50);
       border: 1.5px dashed var(--slate-300, #cbd5e1);
       border-radius: var(--radius-md);
-      padding: 2.5rem 1.5rem;
+      padding: 2.2rem 1.5rem;
       text-align: center;
       display: flex;
       flex-direction: column;
@@ -1267,10 +1653,6 @@
       min-height: 3.25rem;
     }
 
-    html[data-font-scale="large"] .wallet-account-bar {
-      padding: 0.85rem 1rem;
-    }
-
     html[data-font-scale="large"] .user-phone-tag,
     html[data-font-scale="large"] .btn-logout {
       font-size: 0.98rem;
@@ -1283,33 +1665,6 @@
     html[data-font-scale="large"] .empty-desc {
       font-size: 1.02rem;
       line-height: 1.6;
-    }
-
-    html[data-font-scale="large"] .coupon-label,
-    html[data-font-scale="large"] .coupon-dday,
-    html[data-font-scale="large"] .coupon-expiry {
-      font-size: 0.96rem;
-    }
-
-    html[data-font-scale="large"] .coupon-desc {
-      font-size: 1rem;
-    }
-
-    html[data-font-scale="large"] .coupon-amount {
-      font-size: 2.15rem;
-    }
-
-    html[data-font-scale="large"] .coupon-footer {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0.75rem;
-    }
-
-    html[data-font-scale="large"] .btn-coupon-qr {
-      width: 100%;
-      justify-content: center;
-      padding: 0.78rem 1rem;
-      font-size: 1.04rem;
     }
 
     html[data-font-scale="large"] .chip-btn,
@@ -1398,9 +1753,6 @@
       .tab-panel {
         padding: 0.9rem 0.75rem 3rem;
       }
-      .wallet-account-bar {
-        padding: 0.65rem 0.65rem;
-      }
       .store-filter-bar {
         flex-wrap: wrap;
       }
@@ -1465,21 +1817,21 @@
     }
 
     .qr-image-wrap {
-      width: 200px;
-      height: 200px;
-      margin: 16px auto;
+      width: min(310px, calc(100vw - 64px));
+      height: min(310px, calc(100vw - 64px));
+      margin: 20px auto 18px;
       border: 2px solid var(--primary-border);
-      padding: 10px;
+      padding: 16px;
       background: var(--white);
-      border-radius: 14px;
+      border-radius: 18px;
       box-shadow: var(--shadow-md);
     }
 
     .qr-timer {
-      font-size: 1.8rem;
+      font-size: 1.85rem;
       font-weight: 700;
       color: var(--primary);
-      margin-bottom: 20px;
+      margin-bottom: 4px;
       font-variant-numeric: tabular-nums;
     }
 
@@ -1657,8 +2009,8 @@
     /* 타겟을 가리키는 흰색 화살표 + 위아래 살짝 흔들리는 애니메이션 */
     .coachmark-arrow {
       position: fixed;
-      width: 40px;
-      height: 44px;
+      width: 120px;
+      height: 48px;
       color: #ffffff;
       pointer-events: none;
       z-index: 3001;
@@ -1699,10 +2051,10 @@
     /* 화살표 끝 흰 글씨 설명 (포인트 서체 통일 + 강조 단어 크기 & 형광펜 지그재그 드로잉) */
     .coachmark-callout {
       position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 40px);
-      max-width: 420px;
+      left: 0;
+      transform: none;
+      width: max-content;
+      max-width: min(460px, calc(100vw - 36px));
       z-index: 3001;
       color: #ffffff;
       text-align: center;
@@ -1711,9 +2063,19 @@
     }
 
     .coachmark-callout.is-welcome {
+      left: 50% !important;
       top: 50% !important;
       bottom: auto !important;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%) !important;
+    }
+
+    @media (max-width: 420px) {
+      .coachmark-title {
+        font-size: 17px !important;
+      }
+      .coachmark-title .coach-em {
+        font-size: 21px !important;
+      }
     }
 
     /* 일반 단계: 타겟 영역(네모+배경)이 다 만들어진 뒤(1.15s)에 여유 있게 텍스트 등장 */
@@ -2029,7 +2391,12 @@
       <section class="tab-panel active" id="sec-coupon">
         <div class="wallet-account-bar">
           <div class="wallet-account-info">
-            <span class="user-phone-tag" id="user-phone-display">010-0000-0000</span>
+            <svg class="wallet-account-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            <span class="wallet-account-label" id="user-phone-label">등록 번호</span>
+            <span class="wallet-account-divider" id="user-phone-divider" aria-hidden="true"></span>
+            <span class="user-phone-tag" id="user-phone-display">****</span>
           </div>
           <button type="button" id="nav-logout" class="btn-logout">로그아웃</button>
         </div>
@@ -2190,18 +2557,16 @@
   </div>
 
   <!-- QR 코드 사용 모달 바텀시트 -->
-  <div class="qr-modal-backdrop" id="use-qr-modal">
+  <div class="qr-modal-backdrop" id="use-qr-modal" onclick="if (event.target === this) window.closeUseModal()">
     <div class="qr-modal-sheet">
-      <div class="qr-drag-handle"></div>
+      <div class="qr-drag-handle" onclick="window.closeUseModal()" style="cursor: pointer;"></div>
       <h3 style="font-family:'Gowun Dodum',sans-serif; font-size:1.45rem; color:var(--slate-900); margin-bottom:4px;">가맹점 결제용 QR 코드</h3>
-      <p style="font-size:0.85rem; color:var(--slate-500); margin-bottom:14px;">가맹점 대표님께 화면을 보여주세요.</p>
 
       <div id="use-modal-qr-container">
         <div class="qr-image-wrap">
           <img id="use-modal-qr-img" src="" alt="결제 QR 코드" style="width:100%;height:100%;object-fit:contain;" />
         </div>
         <div class="qr-timer" id="use-modal-timer">03:00</div>
-        <button type="button" class="btn-modal-close" onclick="window.closeUseModal()">닫기</button>
       </div>
 
       <div id="use-modal-expired-container" style="display: none; padding: 20px 0;">
@@ -2247,8 +2612,8 @@
     </div>
 
     <!-- 흰색 화살표 SVG -->
-    <svg class="coachmark-arrow" id="coachmark-arrow" viewBox="0 0 48 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M24 4L10 19M24 4L38 19M24 4C24 22 26 36 30 48" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg class="coachmark-arrow" id="coachmark-arrow" viewBox="0 0 120 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M60 4L46 19M60 4L74 19M60 4C60 22 61 36 62 48" pathLength="120" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
 
     <div class="coachmark-callout" id="coachmark-callout">
@@ -2290,15 +2655,30 @@
     const urlParams = new URLSearchParams(window.location.search);
     const initialTabParam = urlParams.get('tab');
 
-    // 휴대폰 번호 표기 및 로그인/로그아웃 버튼
+    // 휴대폰 번호 뒷번호 4자리 표기 및 로그인/로그아웃 버튼
     const userPhoneDisplay = document.getElementById('user-phone-display');
+    const userPhoneLabel = document.getElementById('user-phone-label');
+    const userPhoneDivider = document.getElementById('user-phone-divider');
     const navLogoutBtn = document.getElementById('nav-logout');
 
+    function formatDisplayPhone(rawPhone) {
+      if (!rawPhone) return '****';
+      const digits = String(rawPhone).replace(/[^0-9]/g, '');
+      if (digits.length >= 4) {
+        return digits.slice(-4);
+      }
+      return String(rawPhone);
+    }
+
     if (token) {
-      const storedPhone = localStorage.getItem('ongjin_user_phone') || '010-****-****';
-      if (userPhoneDisplay) userPhoneDisplay.textContent = storedPhone;
+      const storedPhone = localStorage.getItem('ongjin_user_phone') || '';
+      if (userPhoneLabel) userPhoneLabel.style.display = '';
+      if (userPhoneDivider) userPhoneDivider.style.display = '';
+      if (userPhoneDisplay) userPhoneDisplay.textContent = formatDisplayPhone(storedPhone);
       if (navLogoutBtn) navLogoutBtn.textContent = '로그아웃';
     } else {
+      if (userPhoneLabel) userPhoneLabel.style.display = 'none';
+      if (userPhoneDivider) userPhoneDivider.style.display = 'none';
       if (userPhoneDisplay) userPhoneDisplay.textContent = '비회원 둘러보기';
       if (navLogoutBtn) navLogoutBtn.textContent = '로그인';
     }
@@ -2645,20 +3025,26 @@
 
       const bottomGuideHtml = `
         <div class="wallet-bottom-guide">
-          <div class="wallet-guide-title">
-            <span class="wallet-guide-title-left">
-              <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              쿠폰 이용 안내
-            </span>
-            <button type="button" class="btn-reopen-onboarding" onclick="window.openOnboardingModal(true)">이용 안내 다시 보기</button>
+          <div class="wallet-guide-header">
+            <h4 class="wallet-guide-title">쿠폰 이용 안내</h4>
+            <button type="button" class="btn-guide-help-circle" onclick="window.openOnboardingModal(true)" aria-label="이용 안내 다시 보기" title="이용 안내 다시 보기">?</button>
           </div>
-          <ul class="wallet-guide-list">
-            <li>• 여객터미널 등 현장 발행처 QR 스캔 시 지갑에 즉시 추가 등록됩니다.</li>
-            <li>• 가맹점 결제 시 [QR 결제하기]를 눌러 사장님께 화면을 제시해 주세요.</li>
-            <li>• 유효기간은 발급일로부터 1년간 유효합니다.</li>
-          </ul>
+          <div class="wallet-guide-steps">
+            <div class="guide-step-item">
+              <span class="guide-step-num">01</span>
+              <div class="guide-step-body">
+                <strong class="guide-step-head">QR 코드 직접 제시</strong>
+                <p class="guide-step-desc">내 쿠폰 카드의 사용하기를 눌러 화면에 표시된 코드를 사장님께 보여주면 스캔 즉시 결제됩니다.</p>
+              </div>
+            </div>
+            <div class="guide-step-item">
+              <span class="guide-step-num">02</span>
+              <div class="guide-step-body">
+                <strong class="guide-step-head">가맹점 선택 후 사용 승인 요청</strong>
+                <p class="guide-step-desc">가맹점 지도나 목록에서 방문한 매장의 쿠폰 사용하기를 누르면 사장님께 실시간 승인 요청이 전송됩니다.</p>
+              </div>
+            </div>
+          </div>
         </div>
       `;
 
@@ -2678,32 +3064,31 @@
         return;
       }
 
-      const cardsHtml = activeCoupons.map(c => {
+      const cardsHtml = activeCoupons.map((c, idx) => {
         const couponId = c.id;
         const faceValue = fmtMoney(c.face_value || 10000);
         const expireDateStr = getActualExpireDate(c.expires_at, c.issued_at);
-        const ddayStr = getDDayStr(c.expires_at, c.issued_at);
+        const isYellow = idx % 2 === 0;
+        const themeClass = isYellow ? 'theme-yellow' : 'theme-sky';
+        const qrColor = isYellow ? '57534e' : '475569';
+        const qrBg = isYellow ? 'fdf5cf' : 'e5f2fc';
+        const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&ecc=L&color=${qrColor}&bgcolor=${qrBg}&data=ONGJIN-COUPON-${idx + 1}`;
 
         return `
-          <div class="coupon-card">
-            <div class="coupon-top">
-              <span class="coupon-label">옹진 섬 관광 특별 쿠폰</span>
-              <span class="coupon-dday">${ddayStr}</span>
-            </div>
-            <div class="coupon-body">
-              <div>
+          <div class="coupon-card ${themeClass}" onclick="window.openUseModal('${couponId}')">
+            <div class="coupon-left-main">
+              <div class="coupon-title">옹진 관광 쿠폰</div>
+              <div class="coupon-info-group">
                 <div class="coupon-amount">${faceValue}</div>
-                <div class="coupon-desc">옹진군 전역 공식 가맹점 사용 가능</div>
+                <div class="coupon-expiry">유효기간 ~ ${expireDateStr}</div>
               </div>
             </div>
-            <div class="coupon-footer">
-              <span class="coupon-expiry">유효기간: ~ ${expireDateStr}</span>
-              <button type="button" class="btn-coupon-qr" onclick="window.openUseModal('${couponId}')">
-                <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                </svg>
-                QR 결제하기
-              </button>
+            <div class="coupon-punch-line" aria-hidden="true">
+              <div class="coupon-punch-dots"></div>
+            </div>
+            <div class="coupon-right-stub">
+              <img class="coupon-qr-img" src="${qrSrc}" alt="쿠폰 QR 코드" loading="lazy" />
+              <button type="button" class="btn-coupon-qr" onclick="event.stopPropagation(); window.openUseModal('${couponId}')">사용하기</button>
             </div>
           </div>
         `;
@@ -3062,7 +3447,7 @@
         const res = await api.post(`/coupon/${couponId}/use-qr`);
         if (res.success && res.qrToken) {
           const img = document.getElementById('use-modal-qr-img');
-          img.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(res.qrToken)}`;
+          img.src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=0&data=${encodeURIComponent(res.qrToken)}`;
         }
       } catch (e) {
         showToast(e.message || 'QR 코드 생성 실패', 'error');
@@ -3355,7 +3740,7 @@
           if (res.success) {
             const formatted = res.data?.phone || linkPhoneInput.value;
             localStorage.setItem('ongjin_user_phone', formatted);
-            if (userPhoneDisplay) userPhoneDisplay.textContent = formatted;
+            if (userPhoneDisplay) userPhoneDisplay.textContent = formatDisplayPhone(formatted);
             linkPhoneModal.classList.remove('active');
             showToast('휴대폰 번호 연결 및 쿠폰 지갑 통합이 완료되었습니다.', 'info');
             await initPageData();
@@ -3404,7 +3789,7 @@
         tab: 'sec-coupon',
         pad: 4,
         getTarget: () => document.querySelector('#sec-coupon .coupon-card') || document.querySelector('#sec-coupon .empty-coupon-box'),
-        title: '이곳에 받은 쿠폰이 보관되며<br><span class="coach-em">QR 결제하기</span>로 바로 사용해요'
+        title: '이곳에 받은 쿠폰이 보관되며<br><span class="coach-em">사용하기</span>로 바로 사용해요'
       },
       {
         tab: 'sec-map',
@@ -3484,6 +3869,8 @@
         coachmarkSpotlight.style.height = '0px';
         coachmarkArrow.classList.add('is-hidden');
         coachmarkCallout.classList.add('is-welcome');
+        coachmarkCallout.style.left = '';
+        coachmarkCallout.style.transform = '';
         return;
       }
 
@@ -3494,6 +3881,9 @@
 
       const vh = window.innerHeight;
       const vw = window.innerWidth;
+      const appShellEl = document.querySelector('.app-shell');
+      const shellRect = appShellEl ? appShellEl.getBoundingClientRect() : { left: 0, right: vw, width: vw };
+      const shellCenterX = shellRect.left + shellRect.width / 2;
 
       const rect = targetEl.getBoundingClientRect();
       const pad = typeof step.pad === 'number' ? step.pad : 4;
@@ -3519,7 +3909,41 @@
       }
 
       coachmarkArrow.classList.remove('is-hidden');
-      const targetCenterX = Math.min(vw - 36, Math.max(36, rect.left + rect.width / 2));
+      const targetCenterX = Math.min(vw - 28, Math.max(28, rect.left + rect.width / 2));
+      const relX = targetCenterX - shellCenterX;
+      const arrowPathEl = coachmarkArrow.querySelector('path');
+
+      // 문구 박스는 앱 컨테이너(.app-shell) 및 모바일 화면 안쪽 여백(20px) 내에 안전하게 배치하여 절대 잘리지 않도록 고정
+      coachmarkCallout.style.left = '0px';
+      coachmarkCallout.style.transform = 'none';
+      const calloutWidth = coachmarkCallout.offsetWidth || 240;
+
+      const safePad = vw <= 420 ? 18 : 22;
+      const minLeft = Math.max(safePad, Math.round(shellRect.left + safePad));
+      const maxRight = Math.min(vw - safePad, Math.round(shellRect.right - safePad));
+      const desiredCenterX = shellCenterX + relX * 0.32;
+      const desiredLeft = Math.round(desiredCenterX - calloutWidth / 2);
+      const clampedLeft = Math.min(Math.max(minLeft, maxRight - calloutWidth), Math.max(minLeft, desiredLeft));
+      coachmarkCallout.style.left = `${clampedLeft}px`;
+
+      const calloutCenterX = clampedLeft + calloutWidth / 2;
+      const dx = calloutCenterX - targetCenterX;
+
+      // 화살표 끝(60, 4)은 타겟 정중앙을 가리키고, 꼬리는 실제 문구 중앙(calloutCenterX)을 향해 자연스러운 곡선으로 연결
+      if (arrowPathEl) {
+        if (dx > 14) {
+          const endX = Math.min(104, Math.round(60 + dx * 0.68));
+          const midX = Math.round(60 + (endX - 60) * 0.42);
+          arrowPathEl.setAttribute('d', `M60 4L47 20M60 4L75 16M60 4C62 22 ${midX} 36 ${endX} 48`);
+        } else if (dx < -14) {
+          const endX = Math.max(16, Math.round(60 + dx * 0.68));
+          const midX = Math.round(60 + (endX - 60) * 0.42);
+          arrowPathEl.setAttribute('d', `M60 4L45 16M60 4L73 20M60 4C58 22 ${midX} 36 ${endX} 48`);
+        } else {
+          arrowPathEl.setAttribute('d', 'M60 4L46 19M60 4L74 19M60 4C60 22 61 36 62 48');
+        }
+      }
+
       const spaceBelow = (vh - 96) - (sTop + sHeight);
       const spaceAbove = sTop - 20;
 
@@ -3752,7 +4176,7 @@
         if (meRes && meRes.user) {
           if (meRes.user.phone) {
             localStorage.setItem('ongjin_user_phone', meRes.user.phone);
-            if (userPhoneDisplay) userPhoneDisplay.textContent = meRes.user.phone;
+            if (userPhoneDisplay) userPhoneDisplay.textContent = formatDisplayPhone(meRes.user.phone);
           } else if (meRes.user.needs_phone_link && linkPhoneModal) {
             if (userPhoneDisplay) userPhoneDisplay.textContent = meRes.user.display_name || '번호 미연결';
             linkPhoneModal.classList.add('active');
