@@ -63,6 +63,7 @@ initPassport();
 app.use(passport.initialize());
 
 // ── 정적 파일 (Nginx에서 처리하지만 개발 편의용) ───
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/uploads', express.static(path.join(__dirname, '../storage/uploads')));
 app.use('/shared', express.static(path.join(__dirname, '../../frontend/shared')));
 app.use('/tourist', express.static(path.join(__dirname, '../../frontend/tourist')));

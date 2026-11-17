@@ -60,6 +60,7 @@ async function initializeDatabase(retries = 10, delay = 2000) {
       const columnsToAdd = [
         { name: 'owner_name', type: 'VARCHAR(100) NULL' },
         { name: 'store_phone', type: 'VARCHAR(20) NULL' },
+        { name: 'description', type: 'TEXT NULL' },
         { name: 'images', type: 'MEDIUMTEXT NULL' },
         { name: 'business_hours', type: 'VARCHAR(100) NULL' },
         { name: 'business_cert_image', type: 'MEDIUMTEXT NULL' },
@@ -110,11 +111,12 @@ async function initializeDatabase(retries = 10, delay = 2000) {
           `);
         } catch (_) {}
 
-        // 옹진군 4대 실제 발행처 초기 마이그레이션 (구버전 더미 발행처가 남아있거나 주소가 미반영된 경우 1회 갱신)
+        // 옹진군 4대 실제 발행처 초기 마이그레이션 (비어있거나 구버전 더미 발행처가 남아있거나 주소가 미반영된 경우 갱신)
         const [legacyCheck] = await conn.execute(
           `SELECT id, name, address FROM issuers WHERE name IN ('인천항 연안여객터미널 안내소', '대부도 여객선 대합실', '덕적도자연휴양림') OR (name = '소야랑' AND (address IS NULL OR address LIKE '%자월면%'))`
         );
-        if (legacyCheck.length > 0) {
+        const [issuerCountRows] = await conn.execute(`SELECT COUNT(*) AS cnt FROM issuers`);
+        if (legacyCheck.length > 0 || Number(issuerCountRows[0]?.cnt || 0) === 0) {
           const bcrypt = require('bcryptjs');
           const pwHash = await bcrypt.hash('1234', 10);
 
@@ -195,19 +197,97 @@ async function initializeDatabase(retries = 10, delay = 2000) {
             }
           }
 
-          // 불필요한 미사용 배정 정리 및 4개 발행처 권종별 배정 정렬
+          // 불필요한 미사용 배정 정리 및 4개 발행처 권종별 배정 생성/정렬
           await conn.execute(`DELETE FROM issuer_allocations WHERE id IN (4, 6) AND issued_count = 0`);
-          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 1, face_value = 2000, total_count = 100 WHERE id = 1`);
-          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 1, face_value = 3000, total_count = 100 WHERE id = 9`);
-          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 2, face_value = 10000, total_count = 30 WHERE id = 2`);
-          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 3, face_value = 5000, total_count = 60 WHERE id = 5`);
-          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 4, face_value = 10000, total_count = 30 WHERE id = 8`);
-          await conn.execute(`UPDATE issuer_allocations SET issuer_id = 4, face_value = 5000, total_count = 60 WHERE id = 10`);
+          const targetAllocations = [
+            { id: 1, issuerId: 1, faceValue: 2000, totalCount: 100 },
+            { id: 9, issuerId: 1, faceValue: 3000, totalCount: 100 },
+            { id: 2, issuerId: 2, faceValue: 10000, totalCount: 30 },
+            { id: 5, issuerId: 3, faceValue: 5000, totalCount: 60 },
+            { id: 8, issuerId: 4, faceValue: 10000, totalCount: 30 },
+            { id: 10, issuerId: 4, faceValue: 5000, totalCount: 60 }
+          ];
+          for (const a of targetAllocations) {
+            await conn.execute(
+              `INSERT INTO issuer_allocations (id, issuer_id, face_value, total_count, issued_count)
+               VALUES (?, ?, ?, ?, 0)
+               ON DUPLICATE KEY UPDATE
+                 issuer_id = VALUES(issuer_id),
+                 face_value = VALUES(face_value),
+                 total_count = GREATEST(total_count, VALUES(total_count))`,
+              [a.id, a.issuerId, a.faceValue, a.totalCount]
+            );
+          }
 
           logger.info('✅ 옹진군 4개 발행처(자월달빛천문대, 장골해수욕장 야영장, 소야랑, 덕적도 자연휴양림) 및 초기 비밀번호(1234) 마이그레이션 완료');
         }
       } catch (err) {
         logger.info(`ℹ️ DB 스키마 업데이트 스킵: ${err.message}`);
+      }
+
+      // 옹진군 가맹점 및 사용자·쿠폰 초기 시드 데이터 자동 보완
+      try {
+        const seedData = require('./seedData.json');
+        const seedMerchants = seedData.merchants || [];
+        const [merchantCountRows] = await conn.execute(`SELECT COUNT(*) AS cnt FROM merchants`);
+        if (Number(merchantCountRows[0]?.cnt || 0) === 0 && seedMerchants.length > 0) {
+          try {
+            await conn.execute(`ALTER TABLE merchants DROP INDEX phone_hash`);
+          } catch (_) {}
+
+          const bcrypt = require('bcryptjs');
+          const { hashPhone } = require('../utils/crypto');
+          const defaultPwHash = await bcrypt.hash('1234', 10);
+          const usedHashes = new Set();
+
+          for (const m of seedMerchants) {
+            const rawDigits = String(m.phone || '').replace(/\D/g, '') || String(m.id);
+            let pHash = hashPhone(rawDigits);
+            if (usedHashes.has(pHash)) {
+              pHash = hashPhone(`${rawDigits}_${m.id}`);
+            }
+            usedHashes.add(pHash);
+
+            await conn.execute(
+              `INSERT INTO merchants
+               (id, name, owner_name, phone, phone_hash, store_phone, username, password_hash, category, address, images, business_hours, business_no, bank_name, account_no, status, rejection_reason, lat, lng)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               ON DUPLICATE KEY UPDATE
+                 name = VALUES(name),
+                 address = VALUES(address),
+                 category = VALUES(category),
+                 images = VALUES(images),
+                 business_hours = VALUES(business_hours),
+                 status = VALUES(status),
+                 lat = VALUES(lat),
+                 lng = VALUES(lng)`,
+              [
+                m.id,
+                m.name,
+                m.owner_name || `${m.name} 대표`,
+                m.phone || null,
+                pHash,
+                m.store_phone || null,
+                m.username || `merchant_${m.id}`,
+                defaultPwHash,
+                m.category || '음식점',
+                m.address || '',
+                m.images || null,
+                m.business_hours || null,
+                m.business_no || null,
+                m.bank_name || null,
+                m.account_no || null,
+                m.status || 'approved',
+                m.rejection_reason || null,
+                m.lat ? Number(m.lat) : null,
+                m.lng ? Number(m.lng) : null
+              ]
+            );
+          }
+          logger.info(`✅ 옹진군 초기 가맹점 ${seedMerchants.length}곳 자동 시드 완료`);
+        }
+      } catch (seedMerchantErr) {
+        logger.warn(`⚠️ 가맹점 초기 시드 실패: ${seedMerchantErr.message}`);
       }
 
       // 관광객 → 가맹점 사장님 쿠폰 사용 요청 테이블

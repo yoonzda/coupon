@@ -897,7 +897,7 @@
       }
     }
 
-    /* 내 쿠폰 하단 쿠폰 이용 안내 (박스·뱃지 없는 정교한 미니멀 타이포그래피) */
+    /* 내 쿠폰 하단 쿠폰 이용 안내 (아코디언 형태) */
     .wallet-bottom-guide {
       margin-top: 1.4rem;
       padding-top: 0.2rem;
@@ -906,11 +906,19 @@
     }
 
     .wallet-guide-header {
-      padding-bottom: 0.85rem;
+      width: 100%;
+      padding: 0.2rem 0 0.85rem;
+      background: transparent;
+      border: none;
       border-bottom: 1px solid #cbd5e1;
       display: flex;
       align-items: center;
-      gap: 0.42rem;
+      justify-content: space-between;
+      gap: 0.5rem;
+      cursor: pointer;
+      text-align: left;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .wallet-guide-title {
@@ -922,60 +930,26 @@
       line-height: 1.2;
     }
 
-    /* 쿠폰 이용 안내 옆 물음표 원형 버튼 (이용 안내 다시 보기) */
-    .btn-guide-help-circle {
-      position: relative;
-      width: 1.36rem;
-      height: 1.36rem;
-      border-radius: 50%;
-      border: 1.4px solid var(--slate-400);
-      background: var(--white);
-      color: var(--slate-500);
-      font-family: 'Pretendard', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 700;
-      line-height: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      padding: 0;
+    .wallet-guide-chevron {
+      width: 1.2rem;
+      height: 1.2rem;
+      color: var(--slate-400);
       flex-shrink: 0;
-      transition: all 0.18s ease;
+      transition: transform 0.22s ease, color 0.18s ease;
     }
 
-    .btn-guide-help-circle:hover {
-      border-color: var(--primary);
-      background: var(--primary);
-      color: var(--white);
-    }
-
-    .btn-guide-help-circle::after {
-      content: '이용 안내 다시 보기';
-      position: absolute;
-      left: calc(100% + 8px);
-      top: 50%;
-      transform: translateY(-50%) translateX(-4px);
-      background: var(--slate-900);
-      color: var(--white);
-      font-size: 0.76rem;
-      font-weight: 500;
-      padding: 0.28rem 0.58rem;
-      border-radius: 6px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.18s ease, transform 0.18s ease;
-    }
-
-    .btn-guide-help-circle:hover::after {
-      opacity: 1;
-      transform: translateY(-50%) translateX(0);
+    .wallet-bottom-guide.is-open .wallet-guide-chevron {
+      transform: rotate(180deg);
+      color: var(--slate-700);
     }
 
     .wallet-guide-steps {
-      display: flex;
+      display: none;
       flex-direction: column;
+    }
+
+    .wallet-bottom-guide.is-open .wallet-guide-steps {
+      display: flex;
     }
 
     .guide-step-item {
@@ -987,8 +961,26 @@
       gap: 0.35rem;
     }
 
-    .guide-step-item:last-child {
-      border-bottom: none;
+    .btn-guide-reopen {
+      width: 100%;
+      margin-top: 0.85rem;
+      padding: 0.78rem 1rem;
+      border-radius: 0.65rem;
+      border: 1px solid var(--slate-200);
+      background: var(--slate-50);
+      color: var(--slate-700);
+      font-family: inherit;
+      font-size: 0.94rem;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .btn-guide-reopen:hover {
+      background: var(--slate-100);
+      border-color: var(--slate-300, #cbd5e1);
+      color: var(--slate-900);
     }
 
     .guide-step-num {
@@ -1022,10 +1014,339 @@
       letter-spacing: -0.01em;
     }
 
+    /* ── 내 쿠폰 탭: 옹진군의 관광지를 소개합니다! (홈페이지 타이포그래피 · 원형 편의시설 아이콘 · 정돈된 액션 버튼) ── */
+    .issuer-spot-section {
+      margin-top: 2.8rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .issuer-spot-head-wrap {
+      padding-bottom: 0.4rem;
+      border-bottom: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .issuer-spot-section-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.56rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      letter-spacing: -0.025em;
+      line-height: 1.3;
+    }
+
+    .issuer-spot-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .issuer-spot-item {
+      padding: 2.1rem 0.1rem 2.25rem;
+      border-bottom: 1px solid var(--slate-200);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .issuer-spot-item:last-child {
+      border-bottom: none;
+    }
+
+    .issuer-spot-title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+
+    .issuer-spot-name {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.42rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+    }
+
+    .issuer-spot-island-label {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: -0.01em;
+      flex-shrink: 0;
+    }
+
+    .issuer-photo-strip {
+      display: flex;
+      gap: 0.6rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      margin-right: calc(-1 * var(--panel-pad-x));
+      padding-right: var(--panel-pad-x);
+      cursor: grab;
+      user-select: none;
+    }
+
+    .issuer-photo-strip.is-dragging {
+      cursor: grabbing;
+    }
+
+    .issuer-photo-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .issuer-photo-item {
+      width: 68%;
+      min-width: 15.5rem;
+      height: 10.8rem;
+      border-radius: 0;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+    }
+
+    .issuer-photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+      -webkit-user-drag: none;
+    }
+
+    .issuer-spot-desc {
+      font-size: 0.96rem;
+      font-weight: 400;
+      color: var(--slate-600);
+      line-height: 1.72;
+      letter-spacing: -0.01em;
+      word-break: keep-all;
+    }
+
+    .issuer-spot-desc strong {
+      font-weight: 700;
+      color: var(--slate-900);
+    }
+
+    /* 원형 아이콘 편의시설/특징 리스트 */
+    .issuer-facility-list {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem 0.4rem;
+      padding: 0.35rem 0 0.2rem;
+    }
+
+    .issuer-facility-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.42rem;
+      text-align: center;
+    }
+
+    .issuer-facility-circle {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      border: 1px solid var(--slate-200);
+      background: var(--slate-50);
+      color: var(--slate-700);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .issuer-facility-circle svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      stroke-width: 1.6;
+    }
+
+    .issuer-facility-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--slate-600);
+      letter-spacing: -0.015em;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    /* 이런 분께 추천해요 (박스 없는 미니멀 라인 + 체크 아이콘 스타일) */
+    .issuer-recommend-wrap {
+      padding: 0.95rem 0;
+      border-top: 1px dashed var(--slate-200);
+      border-bottom: 1px dashed var(--slate-200);
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .issuer-recommend-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.02rem;
+      font-weight: 400;
+      color: var(--slate-900);
+      letter-spacing: -0.02em;
+    }
+
+    .issuer-recommend-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.42rem;
+      margin: 0;
+      padding: 0;
+    }
+
+    .issuer-recommend-list li {
+      font-size: 0.91rem;
+      color: var(--slate-600);
+      line-height: 1.52;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.45rem;
+    }
+
+    .issuer-recommend-list li svg {
+      width: 1.02rem;
+      height: 1.02rem;
+      color: var(--primary);
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+    }
+
+    /* 주소 / 전화번호 / 홈페이지 정보 행 */
+    .issuer-spot-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .issuer-meta-row {
+      font-size: 0.92rem;
+      color: var(--slate-700);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.48rem;
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+
+    .issuer-meta-row .ui-icon {
+      color: var(--slate-400);
+      flex-shrink: 0;
+      width: 1.12rem;
+      height: 1.12rem;
+    }
+
+    .issuer-meta-link {
+      color: var(--slate-700);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .issuer-meta-link:hover {
+      color: var(--primary);
+    }
+
+    /* 하단 액션 버튼 영역 (주소 복사 · 전화걸기 · 홈페이지 · 네이버 길찾기) */
+    .issuer-actions-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.15rem;
+    }
+
+    .issuer-sub-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .btn-issuer-action {
+      min-height: 2.75rem;
+      padding: 0.62rem 0.5rem;
+      border-radius: 0;
+      border: 1px solid var(--slate-200);
+      background: var(--white);
+      color: var(--slate-700);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .btn-issuer-action svg {
+      width: 1rem;
+      height: 1rem;
+      color: var(--slate-500);
+      flex-shrink: 0;
+    }
+
+    .btn-issuer-action:hover {
+      background: var(--slate-50);
+      border-color: var(--slate-400);
+      color: var(--slate-900);
+    }
+
+    .btn-issuer-naver-route {
+      width: 100%;
+      min-height: 2.95rem;
+      padding: 0.72rem 1rem;
+      border-radius: 0;
+      border: 1px solid var(--primary-border);
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-family: inherit;
+      font-size: 0.93rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      text-align: center;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.42rem;
+      cursor: pointer;
+      transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+    }
+
+    .btn-issuer-naver-route svg {
+      width: 1.08rem;
+      height: 1.08rem;
+      flex-shrink: 0;
+    }
+
+    .btn-issuer-naver-route:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--white);
+    }
+
+    /* 지도 위 관광지(발행처) 전용 구분 핀 */
+    .issuer-pin-wrapper {
+      background: transparent;
+      border: none;
+    }
+
     /* 쿠폰 없음 빈 상태 */
     .empty-coupon-box {
       flex: 0 0 auto;
-      min-height: 220px;
+      min-height: 180px;
       background: var(--slate-50);
       border: 1.5px dashed var(--slate-300, #cbd5e1);
       border-radius: var(--radius-md);
@@ -1035,38 +1356,46 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .empty-icon {
-      width: 3.2rem;
-      height: 3.2rem;
-      margin: 0 auto 0.4rem;
-      color: var(--slate-400);
+      gap: 1rem;
     }
 
     .empty-title {
-      font-size: 1.18rem;
+      font-size: 1.12rem;
       font-weight: 700;
       color: var(--slate-800);
     }
 
-    .empty-desc {
-      font-size: 0.94rem;
-      color: var(--slate-500);
-      line-height: 1.6;
-      max-width: 24rem;
+    .btn-empty-go-map {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.68rem 1.35rem;
+      border-radius: 999px;
+      border: 1px solid var(--primary);
+      background: var(--primary);
+      color: var(--white);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+    }
+
+    .btn-empty-go-map:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+
+    .btn-empty-go-map:active {
+      transform: scale(0.99);
     }
 
     /* ── [가맹점 지도 섹션 - 분리형 & 100dvh 비율 레이아웃] ── */
     .island-chips-scroll {
       display: flex;
+      flex-wrap: wrap;
       gap: var(--chip-gap);
-      overflow-x: auto;
-      padding: 0.2rem 0.15rem;
       margin-bottom: var(--section-gap);
-      scrollbar-width: none;
-      -ms-overflow-style: none;
       flex-shrink: 0;
     }
 
@@ -1076,11 +1405,11 @@
 
     .chip-btn {
       flex-shrink: 0;
-      padding: 0.52rem 0.98rem;
+      padding: 0.48rem 0.92rem;
       border-radius: 99px;
       border: 1.5px solid var(--slate-200);
       background: var(--white);
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: var(--slate-600);
       cursor: pointer;
@@ -1159,7 +1488,22 @@
       width: 100%;
     }
 
-    /* 지도 핀 클릭 시 올라오는 네이티브형 가맹점 바텀시트 (지도 가림/블러 없음) */
+    /* 지도 핀 클릭 시 올라오는 네이티브형 가맹점 바텀시트 및 반투명 검은 배경 막 */
+    .store-sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 1490;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .store-sheet-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     .store-bottom-sheet {
       position: fixed;
       bottom: 0;
@@ -1170,9 +1514,9 @@
       max-width: 520px;
       background: var(--white);
       border-top: 1px solid var(--slate-200);
-      border-radius: 1.35rem 1.35rem 0 0;
-      padding: 0.85rem var(--panel-pad-x) 1.5rem;
-      box-shadow: 0 -10px 32px rgba(15, 23, 42, 0.12);
+      border-radius: 0;
+      padding: 0.9rem var(--panel-pad-x) 1.5rem;
+      box-shadow: 0 -10px 32px rgba(15, 23, 42, 0.14);
       z-index: 1500;
       transform: translate3d(0, 105%, 0);
       transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
@@ -1186,47 +1530,54 @@
 
     .store-sheet-handle {
       width: 2.25rem;
-      height: 0.25rem;
+      height: 0.22rem;
       background: var(--slate-200);
       border-radius: 99px;
-      margin: 0 auto 0.85rem;
+      margin: 0 auto 0.9rem;
     }
 
     .store-sheet-header {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 0.75rem;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.65rem;
       text-align: left;
     }
 
     .store-sheet-title {
-      font-size: 1.22rem;
-      font-weight: 800;
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.52rem;
+      font-weight: 700;
       color: var(--slate-900);
-      letter-spacing: -0.02em;
-      line-height: 1.35;
+      letter-spacing: -0.025em;
+      line-height: 1.3;
       word-break: keep-all;
     }
 
     .store-sheet-close-icon {
-      width: 1.9rem;
-      height: 1.9rem;
-      border-radius: 99px;
+      width: 2.1rem;
+      height: 2.1rem;
+      margin-right: -0.35rem;
+      border-radius: 0;
       border: none;
-      background: var(--slate-100);
-      color: var(--slate-500);
+      background: transparent;
+      color: var(--slate-400);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       flex-shrink: 0;
-      transition: background 0.15s ease, color 0.15s ease;
+      transition: color 0.15s ease;
+    }
+
+    .store-sheet-close-icon svg {
+      width: 1.4rem;
+      height: 1.4rem;
+      display: block;
     }
 
     .store-sheet-close-icon:hover {
-      background: var(--slate-200);
       color: var(--slate-900);
     }
 
@@ -1234,43 +1585,52 @@
       text-align: left;
       display: flex;
       flex-direction: column;
-      gap: 0.32rem;
-      margin-bottom: 1rem;
+      gap: 0.45rem;
+      margin-bottom: 1.1rem;
     }
 
-    .store-sheet-address {
+    .store-sheet-desc {
       font-size: 0.92rem;
-      color: var(--slate-500);
-      line-height: 1.45;
+      color: var(--slate-600);
+      line-height: 1.6;
+      margin-bottom: 0.15rem;
       word-break: keep-all;
     }
 
-    .store-sheet-hours {
-      font-size: 0.88rem;
-      color: var(--slate-500);
-      line-height: 1.45;
-    }
-
-    .store-sheet-phone {
+    .store-sheet-meta-row {
       font-size: 0.92rem;
-      font-weight: 600;
       color: var(--slate-700);
-      text-decoration: none;
-      display: inline-flex;
+      font-weight: 500;
+      line-height: 1.45;
+      display: flex;
       align-items: center;
-      gap: 0.35rem;
-      margin-top: 0.12rem;
+      gap: 0.48rem;
+      word-break: keep-all;
     }
 
-    /* 가맹점 사진 가로 스크롤 갤러리 */
+    .store-sheet-meta-row .ui-icon {
+      width: 1.1rem;
+      height: 1.1rem;
+      color: var(--slate-400);
+      flex-shrink: 0;
+    }
+
+    /* 가맹점 사진 가로 스크롤 갤러리 (오른쪽 영역 끝까지 이어져 잘려 보이도록 구성) */
     .store-photo-strip {
       display: flex;
       gap: 0.55rem;
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
-      margin: 0.35rem 0 0.15rem;
+      margin: 0.2rem calc(-1 * var(--panel-pad-x)) 0.45rem 0;
+      padding-right: var(--panel-pad-x);
       padding-bottom: 0.1rem;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .store-photo-strip.is-dragging {
+      cursor: grabbing;
     }
 
     .store-photo-strip::-webkit-scrollbar {
@@ -1278,13 +1638,30 @@
     }
 
     .store-photo-item {
-      width: 6.8rem;
-      height: 5.1rem;
-      border-radius: 0.6rem;
+      width: 68%;
+      min-width: 15.5rem;
+      height: 10.6rem;
+      border-radius: 0;
       overflow: hidden;
       flex-shrink: 0;
       background: var(--slate-100);
       border: 1px solid var(--slate-200);
+    }
+
+    .store-bottom-sheet .store-photo-item {
+      width: 68%;
+      min-width: 14.8rem;
+      height: 9.8rem;
+    }
+
+    .store-photo-strip.is-single {
+      margin-right: 0;
+      padding-right: 0;
+      cursor: default;
+    }
+
+    .store-photo-strip.is-single .store-photo-item {
+      width: 100%;
     }
 
     .store-photo-item img {
@@ -1292,6 +1669,8 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      pointer-events: none;
+      -webkit-user-drag: none;
     }
 
     .store-sheet-actions {
@@ -1302,43 +1681,58 @@
     }
 
     .btn-sheet-call {
-      padding: 0.68rem 0.85rem;
+      min-height: 2.8rem;
+      padding: 0.65rem 0.85rem;
       border: 1px solid var(--slate-200);
-      border-radius: 0.6rem;
-      background: var(--slate-50);
+      border-radius: 0;
+      background: var(--white);
       color: var(--slate-700);
       font-family: inherit;
-      font-size: 0.92rem;
-      font-weight: 700;
+      font-size: 0.91rem;
+      font-weight: 600;
       white-space: nowrap;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 0.38rem;
       cursor: pointer;
       transition: all 0.15s ease;
     }
 
+    .btn-sheet-call svg,
+    .btn-sheet-route svg {
+      width: 1rem;
+      height: 1rem;
+      flex-shrink: 0;
+    }
+
+    .btn-sheet-call svg {
+      color: var(--slate-500);
+    }
+
     .btn-sheet-call:hover {
-      background: var(--slate-100);
-      border-color: var(--slate-300, #cbd5e1);
+      background: var(--slate-50);
+      border-color: var(--slate-400);
       color: var(--slate-900);
     }
 
     .btn-sheet-route {
-      padding: 0.68rem 0.85rem;
+      min-height: 2.8rem;
+      padding: 0.65rem 0.85rem;
       border: 1px solid var(--primary-border);
-      border-radius: 0.6rem;
+      border-radius: 0;
       background: var(--primary-light);
       color: var(--primary-dark);
       font-family: inherit;
-      font-size: 0.92rem;
+      font-size: 0.91rem;
       font-weight: 700;
       white-space: nowrap;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 0.38rem;
       cursor: pointer;
       transition: all 0.15s ease;
     }
@@ -1351,28 +1745,27 @@
 
     .btn-use-coupon-primary {
       grid-column: 1 / -1;
-      padding: 0.75rem 1rem;
+      min-height: 2.95rem;
+      padding: 0.72rem 1rem;
       border: 1px solid var(--primary);
-      border-radius: 0.6rem;
+      border-radius: 0;
       background: var(--primary);
       color: var(--white);
       font-family: inherit;
-      font-size: 0.96rem;
-      font-weight: 800;
+      font-size: 0.95rem;
+      font-weight: 700;
       letter-spacing: -0.01em;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 3px 10px rgba(2, 132, 199, 0.2);
-      transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
     }
 
     .btn-use-coupon-primary:hover {
       background: var(--primary-dark);
       border-color: var(--primary-dark);
-      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
     }
 
     .btn-use-coupon-primary:active {
@@ -1470,11 +1863,11 @@
 
     .category-btn {
       flex-shrink: 0;
-      padding: 0.48rem 0.9rem;
+      padding: 0.48rem 0.92rem;
       border-radius: 99px;
-      background: var(--slate-100);
-      border: 1px solid var(--slate-200);
-      font-size: 0.88rem;
+      background: var(--white);
+      border: 1.5px solid var(--slate-200);
+      font-size: 0.9rem;
       font-weight: 700;
       color: var(--slate-600);
       cursor: pointer;
@@ -1483,14 +1876,15 @@
     }
 
     .category-btn:hover {
-      background: var(--slate-200);
-      color: var(--slate-800);
+      border-color: var(--primary);
+      color: var(--primary);
     }
 
     .category-btn.active {
-      background: var(--slate-900);
-      border-color: var(--slate-900);
+      background: var(--primary);
+      border-color: var(--primary);
       color: var(--white);
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
     }
 
     /* 검색 인풋 */
@@ -1530,67 +1924,67 @@
       pointer-events: none;
     }
 
-    /* 세련되고 정돈된 가맹점 카드 리스트 */
+    /* 가맹점 목록 (박스형 카드 대신 상하 구분선 중심의 오픈 리스트 스타일) */
     .store-list-container {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: var(--card-gap);
+      border-top: 1px solid var(--slate-200);
     }
 
     .store-card {
-      background: var(--white);
-      border: 1px solid var(--slate-200);
-      border-radius: 1rem;
-      padding: var(--card-pad);
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--slate-200);
+      border-radius: 0;
+      padding: 1.75rem 0.1rem 1.85rem;
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 0.9rem;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+      gap: 1rem;
+      box-shadow: none;
       cursor: pointer;
-      content-visibility: auto;
-      contain-intrinsic-size: 0 210px;
     }
 
-    .store-card:hover {
-      border-color: var(--primary-border);
-      box-shadow: var(--shadow-md);
-      transform: translateY(-1px);
+    .store-card:last-child {
+      border-bottom: none;
     }
 
     .store-info {
       min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 0.32rem;
+      gap: 0.45rem;
     }
 
     .store-name {
-      font-size: 1.15rem;
-      font-weight: 800;
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.38rem;
+      font-weight: 700;
       color: var(--slate-900);
-      letter-spacing: -0.02em;
+      letter-spacing: -0.025em;
       line-height: 1.35;
       word-break: keep-all;
     }
 
-    .store-address {
-      font-size: 0.92rem;
-      color: var(--slate-500);
-      line-height: 1.45;
-      word-break: keep-all;
-    }
-
+    .store-address,
     .store-phone {
       font-size: 0.92rem;
       color: var(--slate-700);
-      font-weight: 600;
-      display: inline-flex;
+      font-weight: 500;
+      line-height: 1.45;
+      display: flex;
       align-items: center;
-      gap: 0.35rem;
-      margin-top: 0.12rem;
+      gap: 0.45rem;
+      word-break: keep-all;
+    }
+
+    .store-address .ui-icon,
+    .store-phone .ui-icon {
+      width: 1.1rem;
+      height: 1.1rem;
+      color: var(--slate-400);
+      flex-shrink: 0;
     }
 
     .store-card-actions {
@@ -1601,14 +1995,15 @@
     }
 
     .btn-view-map {
-      padding: 0.66rem 0.85rem;
+      min-height: 2.75rem;
+      padding: 0.64rem 0.85rem;
       border: 1px solid var(--slate-200);
-      border-radius: 0.6rem;
-      background: var(--slate-50);
+      border-radius: 0;
+      background: var(--white);
       color: var(--slate-700);
       font-family: inherit;
-      font-size: 0.92rem;
-      font-weight: 700;
+      font-size: 0.91rem;
+      font-weight: 600;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
@@ -1618,19 +2013,20 @@
     }
 
     .btn-view-map:hover {
-      background: var(--slate-100);
-      border-color: var(--slate-300, #cbd5e1);
+      background: var(--slate-50);
+      border-color: var(--slate-400);
       color: var(--slate-900);
     }
 
     .btn-store-route {
-      padding: 0.66rem 0.85rem;
+      min-height: 2.75rem;
+      padding: 0.64rem 0.85rem;
       border: 1px solid var(--primary-border);
-      border-radius: 0.6rem;
+      border-radius: 0;
       background: var(--primary-light);
       color: var(--primary-dark);
       font-family: inherit;
-      font-size: 0.92rem;
+      font-size: 0.91rem;
       font-weight: 700;
       white-space: nowrap;
       display: inline-flex;
@@ -2009,7 +2405,7 @@
     /* 타겟을 가리키는 흰색 화살표 + 위아래 살짝 흔들리는 애니메이션 */
     .coachmark-arrow {
       position: fixed;
-      width: 120px;
+      width: 48px;
       height: 48px;
       color: #ffffff;
       pointer-events: none;
@@ -2135,13 +2531,23 @@
       stroke-linejoin: round;
       stroke-dasharray: 1000;
       stroke-dashoffset: 1000;
-      will-change: stroke-dashoffset;
+      opacity: 0;
+      will-change: stroke-dashoffset, opacity;
       animation: coachHighlighterDraw 0.68s 1.65s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
     }
 
     @keyframes coachHighlighterDraw {
-      from { stroke-dashoffset: 1000; }
-      to { stroke-dashoffset: 0; }
+      0% {
+        stroke-dashoffset: 1000;
+        opacity: 0;
+      }
+      1% {
+        opacity: 1;
+      }
+      100% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+      }
     }
 
     /* 처음(환영)과 마지막(마무리) 화면: 한 글자씩 천천히 써진 뒤 마지막에 형광펜이 지그재그로 칠해지는 애니메이션 */
@@ -2281,17 +2687,44 @@
       }
     }
 
-    /* 최하단 좌우 화살표 + 점(dot) 페이저 네비게이션 */
+    /* 최하단 좌우 화살표 + 점(dot) 페이저 네비게이션 + 건너뛰기 */
     .coachmark-bottom-nav {
       position: fixed;
-      bottom: 42px;
+      bottom: 28px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 3002;
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #ffffff;
+    }
+
+    .coachmark-pager-row {
+      display: flex;
       align-items: center;
       justify-content: center;
       gap: 20px;
+    }
+
+    .btn-coach-skip {
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.72);
+      font-family: 'Pretendard', sans-serif;
+      font-size: 13.5px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      padding: 4px 12px;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.18s ease;
+    }
+
+    .btn-coach-skip:hover {
       color: #ffffff;
     }
 
@@ -2347,9 +2780,9 @@
       background: #ffffff;
     }
   </style>
-  <script type="module" crossorigin src="/assets/tourist-mypage-CxFP9vKE.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/mock-backend-Cm1IoOFL.js">
-  <link rel="modulepreload" crossorigin href="/assets/api-CKTZsajb.js">
+  <script type="module" crossorigin src="/assets/tourist-mypage-mtlxzAAM.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/mock-backend-BFHlQfJP.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-mHqVFver.js">
 </head>
 <body>
   <div class="app-shell">
@@ -2397,8 +2830,6 @@
             <svg class="wallet-account-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
-            <span class="wallet-account-label" id="user-phone-label">등록 번호</span>
-            <span class="wallet-account-divider" id="user-phone-divider" aria-hidden="true"></span>
             <span class="user-phone-tag" id="user-phone-display">****</span>
           </div>
           <button type="button" id="nav-logout" class="btn-logout">로그아웃</button>
@@ -2411,7 +2842,15 @@
 
       <!-- ── 2. 가맹점 지도 탭 ── -->
       <section class="tab-panel" id="sec-map">
-        <!-- 1) 상단 섬 선택 칩 (지도 밖 독립 배치) -->
+        <!-- 1) 가맹점 검색창 -->
+        <div class="store-search-box">
+          <svg class="store-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" id="map-search-input" class="store-search-input" placeholder="지도에서 찾을 가맹점 이름·주소 검색" />
+        </div>
+
+        <!-- 2) 섬 선택 칩 -->
         <div class="island-chips-scroll" id="island-chips">
           <button type="button" class="chip-btn active" data-island="all">전체</button>
           <button type="button" class="chip-btn" data-island="자월면" data-lat="37.2511" data-lng="126.3107">자월도</button>
@@ -2422,24 +2861,22 @@
           <button type="button" class="chip-btn" data-island="연평면" data-lat="37.6704" data-lng="125.6870">연평도</button>
         </div>
 
-        <!-- 2) 순수 지도 영역 -->
+        <!-- 3) 순수 지도 영역 -->
         <div class="map-container-box">
           <div class="interactive-map-frame" id="real-map"></div>
-        </div>
-
-        <!-- 3) 지도 하단 가맹점 검색창 -->
-        <div class="map-bottom-search-wrap">
-          <div class="map-search-bar">
-            <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input type="text" id="map-search-input" placeholder="지도에서 찾을 가맹점 이름·주소 검색" />
-          </div>
         </div>
       </section>
 
       <!-- ── 3. 가맹점 목록 탭 ── -->
       <section class="tab-panel" id="sec-store">
+        <!-- 가맹점 검색창 -->
+        <div class="store-search-box">
+          <svg class="store-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" id="store-search-input" class="store-search-input" placeholder="가맹점 이름 또는 지역을 검색해보세요" />
+        </div>
+
         <!-- 업종 필터 칩 + 총 개수 -->
         <div class="store-filter-bar">
           <div class="category-filter-wrap" id="category-filter-wrap">
@@ -2452,14 +2889,6 @@
           <span class="store-total-badge" id="merchant-total-count">총 0곳</span>
         </div>
 
-        <!-- 가맹점 검색창 -->
-        <div class="store-search-box">
-          <svg class="store-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input type="text" id="store-search-input" class="store-search-input" placeholder="가맹점 이름 또는 지역을 검색해보세요" />
-        </div>
-
         <!-- 가맹점 목록 리스트 -->
         <div class="store-list-container" id="merchant-list-container">
           <div style="padding: 30px; text-align: center; color: var(--slate-400);">가맹점 목록을 불러오는 중...</div>
@@ -2470,31 +2899,55 @@
     </main>
   </div>
 
-  <!-- 지도 핀 클릭 시 올라오는 네이티브형 가맹점 상세 바텀시트 (지도 가림 없음) -->
+  <!-- 지도 핀 클릭 시 올라오는 네이티브형 가맹점 상세 바텀시트 및 반투명 배경 막 -->
+  <div class="store-sheet-backdrop" id="store-sheet-backdrop" onclick="window.closeStoreSheet()"></div>
   <div class="store-bottom-sheet" id="store-detail-modal">
     <div class="store-sheet-handle"></div>
     <div class="store-sheet-header">
       <div class="store-sheet-title" id="sheet-store-name">가맹점명</div>
       <button type="button" class="store-sheet-close-icon" onclick="window.closeStoreSheet()" aria-label="닫기">
-        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 19L19 5M5 5l14 14" />
         </svg>
       </button>
     </div>
     <div class="store-sheet-body">
       <div class="store-photo-strip" id="sheet-store-photos" style="display:none;"></div>
-      <div class="store-sheet-address" id="sheet-store-address">주소</div>
-      <div class="store-sheet-hours" id="sheet-store-hours" style="display:none;"></div>
-      <div class="store-sheet-phone">
-        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <p class="store-sheet-desc" id="sheet-store-desc" style="display:none;"></p>
+      <div class="store-sheet-meta-row">
+        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span id="sheet-store-address">주소</span>
+      </div>
+      <div class="store-sheet-meta-row" id="sheet-store-hours-row" style="display:none;">
+        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span id="sheet-store-hours">영업시간</span>
+      </div>
+      <div class="store-sheet-meta-row">
+        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
         </svg>
         <span id="sheet-store-phone-text">032-000-0000</span>
       </div>
     </div>
     <div class="store-sheet-actions">
-      <a href="#" class="btn-sheet-call" id="sheet-store-phone">전화걸기</a>
-      <a href="#" target="_blank" rel="noopener noreferrer" class="btn-sheet-route" id="sheet-route-kakao">길찾기</a>
+      <a href="#" class="btn-sheet-call" id="sheet-store-phone">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+        </svg>
+        <span>전화걸기</span>
+      </a>
+      <a href="#" target="_blank" rel="noopener noreferrer" class="btn-sheet-route" id="sheet-route-kakao">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span>길찾기</span>
+      </a>
       <button type="button" class="btn-use-coupon-primary" id="sheet-btn-use-coupon">쿠폰 사용하기</button>
     </div>
   </div>
@@ -2615,8 +3068,8 @@
     </div>
 
     <!-- 흰색 화살표 SVG -->
-    <svg class="coachmark-arrow" id="coachmark-arrow" viewBox="0 0 120 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M60 4L46 19M60 4L74 19M60 4C60 22 61 36 62 48" pathLength="120" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg class="coachmark-arrow" id="coachmark-arrow" viewBox="0 0 48 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 4L10 19M24 4L38 19M24 4C24 22 26 36 30 48" pathLength="120" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
 
     <div class="coachmark-callout" id="coachmark-callout">
@@ -2634,21 +3087,24 @@
     </div>
 
     <div class="coachmark-bottom-nav">
-      <button type="button" class="btn-coach-arrow" id="btn-onboarding-prev" aria-label="이전">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-      </button>
-      <div class="coachmark-dots" id="onboarding-dots"></div>
-      <button type="button" class="btn-coach-arrow" id="btn-onboarding-next" aria-label="다음">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 6l6 6-6 6" />
-        </svg>
-      </button>
+      <div class="coachmark-pager-row">
+        <button type="button" class="btn-coach-arrow" id="btn-onboarding-prev" aria-label="이전">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <div class="coachmark-dots" id="onboarding-dots"></div>
+        <button type="button" class="btn-coach-arrow" id="btn-onboarding-next" aria-label="다음">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+        </button>
+      </div>
+      <button type="button" class="btn-coach-skip" id="btn-onboarding-skip">건너뛰기</button>
     </div>
   </div>
 
   <div id="toast-container"></div>
-
+
 </body>
 </html>

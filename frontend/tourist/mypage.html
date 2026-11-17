@@ -897,7 +897,7 @@
       }
     }
 
-    /* 내 쿠폰 하단 쿠폰 이용 안내 (박스·뱃지 없는 정교한 미니멀 타이포그래피) */
+    /* 내 쿠폰 하단 쿠폰 이용 안내 (아코디언 형태) */
     .wallet-bottom-guide {
       margin-top: 1.4rem;
       padding-top: 0.2rem;
@@ -906,11 +906,19 @@
     }
 
     .wallet-guide-header {
-      padding-bottom: 0.85rem;
+      width: 100%;
+      padding: 0.2rem 0 0.85rem;
+      background: transparent;
+      border: none;
       border-bottom: 1px solid #cbd5e1;
       display: flex;
       align-items: center;
-      gap: 0.42rem;
+      justify-content: space-between;
+      gap: 0.5rem;
+      cursor: pointer;
+      text-align: left;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .wallet-guide-title {
@@ -922,60 +930,26 @@
       line-height: 1.2;
     }
 
-    /* 쿠폰 이용 안내 옆 물음표 원형 버튼 (이용 안내 다시 보기) */
-    .btn-guide-help-circle {
-      position: relative;
-      width: 1.36rem;
-      height: 1.36rem;
-      border-radius: 50%;
-      border: 1.4px solid var(--slate-400);
-      background: var(--white);
-      color: var(--slate-500);
-      font-family: 'Pretendard', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 700;
-      line-height: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      padding: 0;
+    .wallet-guide-chevron {
+      width: 1.2rem;
+      height: 1.2rem;
+      color: var(--slate-400);
       flex-shrink: 0;
-      transition: all 0.18s ease;
+      transition: transform 0.22s ease, color 0.18s ease;
     }
 
-    .btn-guide-help-circle:hover {
-      border-color: var(--primary);
-      background: var(--primary);
-      color: var(--white);
-    }
-
-    .btn-guide-help-circle::after {
-      content: '이용 안내 다시 보기';
-      position: absolute;
-      left: calc(100% + 8px);
-      top: 50%;
-      transform: translateY(-50%) translateX(-4px);
-      background: var(--slate-900);
-      color: var(--white);
-      font-size: 0.76rem;
-      font-weight: 500;
-      padding: 0.28rem 0.58rem;
-      border-radius: 6px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.18s ease, transform 0.18s ease;
-    }
-
-    .btn-guide-help-circle:hover::after {
-      opacity: 1;
-      transform: translateY(-50%) translateX(0);
+    .wallet-bottom-guide.is-open .wallet-guide-chevron {
+      transform: rotate(180deg);
+      color: var(--slate-700);
     }
 
     .wallet-guide-steps {
-      display: flex;
+      display: none;
       flex-direction: column;
+    }
+
+    .wallet-bottom-guide.is-open .wallet-guide-steps {
+      display: flex;
     }
 
     .guide-step-item {
@@ -987,8 +961,26 @@
       gap: 0.35rem;
     }
 
-    .guide-step-item:last-child {
-      border-bottom: none;
+    .btn-guide-reopen {
+      width: 100%;
+      margin-top: 0.85rem;
+      padding: 0.78rem 1rem;
+      border-radius: 0.65rem;
+      border: 1px solid var(--slate-200);
+      background: var(--slate-50);
+      color: var(--slate-700);
+      font-family: inherit;
+      font-size: 0.94rem;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .btn-guide-reopen:hover {
+      background: var(--slate-100);
+      border-color: var(--slate-300, #cbd5e1);
+      color: var(--slate-900);
     }
 
     .guide-step-num {
@@ -1022,10 +1014,339 @@
       letter-spacing: -0.01em;
     }
 
+    /* ── 내 쿠폰 탭: 옹진군의 관광지를 소개합니다! (홈페이지 타이포그래피 · 원형 편의시설 아이콘 · 정돈된 액션 버튼) ── */
+    .issuer-spot-section {
+      margin-top: 2.8rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .issuer-spot-head-wrap {
+      padding-bottom: 0.4rem;
+      border-bottom: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .issuer-spot-section-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.56rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      letter-spacing: -0.025em;
+      line-height: 1.3;
+    }
+
+    .issuer-spot-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .issuer-spot-item {
+      padding: 2.1rem 0.1rem 2.25rem;
+      border-bottom: 1px solid var(--slate-200);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .issuer-spot-item:last-child {
+      border-bottom: none;
+    }
+
+    .issuer-spot-title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+
+    .issuer-spot-name {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.42rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+    }
+
+    .issuer-spot-island-label {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: -0.01em;
+      flex-shrink: 0;
+    }
+
+    .issuer-photo-strip {
+      display: flex;
+      gap: 0.6rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      margin-right: calc(-1 * var(--panel-pad-x));
+      padding-right: var(--panel-pad-x);
+      cursor: grab;
+      user-select: none;
+    }
+
+    .issuer-photo-strip.is-dragging {
+      cursor: grabbing;
+    }
+
+    .issuer-photo-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .issuer-photo-item {
+      width: 68%;
+      min-width: 15.5rem;
+      height: 10.8rem;
+      border-radius: 0;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+    }
+
+    .issuer-photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+      -webkit-user-drag: none;
+    }
+
+    .issuer-spot-desc {
+      font-size: 0.96rem;
+      font-weight: 400;
+      color: var(--slate-600);
+      line-height: 1.72;
+      letter-spacing: -0.01em;
+      word-break: keep-all;
+    }
+
+    .issuer-spot-desc strong {
+      font-weight: 700;
+      color: var(--slate-900);
+    }
+
+    /* 원형 아이콘 편의시설/특징 리스트 */
+    .issuer-facility-list {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem 0.4rem;
+      padding: 0.35rem 0 0.2rem;
+    }
+
+    .issuer-facility-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.42rem;
+      text-align: center;
+    }
+
+    .issuer-facility-circle {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      border: 1px solid var(--slate-200);
+      background: var(--slate-50);
+      color: var(--slate-700);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .issuer-facility-circle svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      stroke-width: 1.6;
+    }
+
+    .issuer-facility-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--slate-600);
+      letter-spacing: -0.015em;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    /* 이런 분께 추천해요 (박스 없는 미니멀 라인 + 체크 아이콘 스타일) */
+    .issuer-recommend-wrap {
+      padding: 0.95rem 0;
+      border-top: 1px dashed var(--slate-200);
+      border-bottom: 1px dashed var(--slate-200);
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .issuer-recommend-title {
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.02rem;
+      font-weight: 400;
+      color: var(--slate-900);
+      letter-spacing: -0.02em;
+    }
+
+    .issuer-recommend-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.42rem;
+      margin: 0;
+      padding: 0;
+    }
+
+    .issuer-recommend-list li {
+      font-size: 0.91rem;
+      color: var(--slate-600);
+      line-height: 1.52;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.45rem;
+    }
+
+    .issuer-recommend-list li svg {
+      width: 1.02rem;
+      height: 1.02rem;
+      color: var(--primary);
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+    }
+
+    /* 주소 / 전화번호 / 홈페이지 정보 행 */
+    .issuer-spot-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .issuer-meta-row {
+      font-size: 0.92rem;
+      color: var(--slate-700);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.48rem;
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+
+    .issuer-meta-row .ui-icon {
+      color: var(--slate-400);
+      flex-shrink: 0;
+      width: 1.12rem;
+      height: 1.12rem;
+    }
+
+    .issuer-meta-link {
+      color: var(--slate-700);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .issuer-meta-link:hover {
+      color: var(--primary);
+    }
+
+    /* 하단 액션 버튼 영역 (주소 복사 · 전화걸기 · 홈페이지 · 네이버 길찾기) */
+    .issuer-actions-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.15rem;
+    }
+
+    .issuer-sub-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .btn-issuer-action {
+      min-height: 2.75rem;
+      padding: 0.62rem 0.5rem;
+      border-radius: 0;
+      border: 1px solid var(--slate-200);
+      background: var(--white);
+      color: var(--slate-700);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .btn-issuer-action svg {
+      width: 1rem;
+      height: 1rem;
+      color: var(--slate-500);
+      flex-shrink: 0;
+    }
+
+    .btn-issuer-action:hover {
+      background: var(--slate-50);
+      border-color: var(--slate-400);
+      color: var(--slate-900);
+    }
+
+    .btn-issuer-naver-route {
+      width: 100%;
+      min-height: 2.95rem;
+      padding: 0.72rem 1rem;
+      border-radius: 0;
+      border: 1px solid var(--primary-border);
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-family: inherit;
+      font-size: 0.93rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      text-align: center;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.42rem;
+      cursor: pointer;
+      transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+    }
+
+    .btn-issuer-naver-route svg {
+      width: 1.08rem;
+      height: 1.08rem;
+      flex-shrink: 0;
+    }
+
+    .btn-issuer-naver-route:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--white);
+    }
+
+    /* 지도 위 관광지(발행처) 전용 구분 핀 */
+    .issuer-pin-wrapper {
+      background: transparent;
+      border: none;
+    }
+
     /* 쿠폰 없음 빈 상태 */
     .empty-coupon-box {
       flex: 0 0 auto;
-      min-height: 220px;
+      min-height: 180px;
       background: var(--slate-50);
       border: 1.5px dashed var(--slate-300, #cbd5e1);
       border-radius: var(--radius-md);
@@ -1035,38 +1356,46 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .empty-icon {
-      width: 3.2rem;
-      height: 3.2rem;
-      margin: 0 auto 0.4rem;
-      color: var(--slate-400);
+      gap: 1rem;
     }
 
     .empty-title {
-      font-size: 1.18rem;
+      font-size: 1.12rem;
       font-weight: 700;
       color: var(--slate-800);
     }
 
-    .empty-desc {
-      font-size: 0.94rem;
-      color: var(--slate-500);
-      line-height: 1.6;
-      max-width: 24rem;
+    .btn-empty-go-map {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.68rem 1.35rem;
+      border-radius: 999px;
+      border: 1px solid var(--primary);
+      background: var(--primary);
+      color: var(--white);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+    }
+
+    .btn-empty-go-map:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+
+    .btn-empty-go-map:active {
+      transform: scale(0.99);
     }
 
     /* ── [가맹점 지도 섹션 - 분리형 & 100dvh 비율 레이아웃] ── */
     .island-chips-scroll {
       display: flex;
+      flex-wrap: wrap;
       gap: var(--chip-gap);
-      overflow-x: auto;
-      padding: 0.2rem 0.15rem;
       margin-bottom: var(--section-gap);
-      scrollbar-width: none;
-      -ms-overflow-style: none;
       flex-shrink: 0;
     }
 
@@ -1076,11 +1405,11 @@
 
     .chip-btn {
       flex-shrink: 0;
-      padding: 0.52rem 0.98rem;
+      padding: 0.48rem 0.92rem;
       border-radius: 99px;
       border: 1.5px solid var(--slate-200);
       background: var(--white);
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: var(--slate-600);
       cursor: pointer;
@@ -1159,7 +1488,22 @@
       width: 100%;
     }
 
-    /* 지도 핀 클릭 시 올라오는 네이티브형 가맹점 바텀시트 (지도 가림/블러 없음) */
+    /* 지도 핀 클릭 시 올라오는 네이티브형 가맹점 바텀시트 및 반투명 검은 배경 막 */
+    .store-sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 1490;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .store-sheet-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     .store-bottom-sheet {
       position: fixed;
       bottom: 0;
@@ -1170,9 +1514,9 @@
       max-width: 520px;
       background: var(--white);
       border-top: 1px solid var(--slate-200);
-      border-radius: 1.35rem 1.35rem 0 0;
-      padding: 0.85rem var(--panel-pad-x) 1.5rem;
-      box-shadow: 0 -10px 32px rgba(15, 23, 42, 0.12);
+      border-radius: 0;
+      padding: 0.9rem var(--panel-pad-x) 1.5rem;
+      box-shadow: 0 -10px 32px rgba(15, 23, 42, 0.14);
       z-index: 1500;
       transform: translate3d(0, 105%, 0);
       transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
@@ -1186,47 +1530,54 @@
 
     .store-sheet-handle {
       width: 2.25rem;
-      height: 0.25rem;
+      height: 0.22rem;
       background: var(--slate-200);
       border-radius: 99px;
-      margin: 0 auto 0.85rem;
+      margin: 0 auto 0.9rem;
     }
 
     .store-sheet-header {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 0.75rem;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.65rem;
       text-align: left;
     }
 
     .store-sheet-title {
-      font-size: 1.22rem;
-      font-weight: 800;
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.52rem;
+      font-weight: 700;
       color: var(--slate-900);
-      letter-spacing: -0.02em;
-      line-height: 1.35;
+      letter-spacing: -0.025em;
+      line-height: 1.3;
       word-break: keep-all;
     }
 
     .store-sheet-close-icon {
-      width: 1.9rem;
-      height: 1.9rem;
-      border-radius: 99px;
+      width: 2.1rem;
+      height: 2.1rem;
+      margin-right: -0.35rem;
+      border-radius: 0;
       border: none;
-      background: var(--slate-100);
-      color: var(--slate-500);
+      background: transparent;
+      color: var(--slate-400);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       flex-shrink: 0;
-      transition: background 0.15s ease, color 0.15s ease;
+      transition: color 0.15s ease;
+    }
+
+    .store-sheet-close-icon svg {
+      width: 1.4rem;
+      height: 1.4rem;
+      display: block;
     }
 
     .store-sheet-close-icon:hover {
-      background: var(--slate-200);
       color: var(--slate-900);
     }
 
@@ -1234,43 +1585,52 @@
       text-align: left;
       display: flex;
       flex-direction: column;
-      gap: 0.32rem;
-      margin-bottom: 1rem;
+      gap: 0.45rem;
+      margin-bottom: 1.1rem;
     }
 
-    .store-sheet-address {
+    .store-sheet-desc {
       font-size: 0.92rem;
-      color: var(--slate-500);
-      line-height: 1.45;
+      color: var(--slate-600);
+      line-height: 1.6;
+      margin-bottom: 0.15rem;
       word-break: keep-all;
     }
 
-    .store-sheet-hours {
-      font-size: 0.88rem;
-      color: var(--slate-500);
-      line-height: 1.45;
-    }
-
-    .store-sheet-phone {
+    .store-sheet-meta-row {
       font-size: 0.92rem;
-      font-weight: 600;
       color: var(--slate-700);
-      text-decoration: none;
-      display: inline-flex;
+      font-weight: 500;
+      line-height: 1.45;
+      display: flex;
       align-items: center;
-      gap: 0.35rem;
-      margin-top: 0.12rem;
+      gap: 0.48rem;
+      word-break: keep-all;
     }
 
-    /* 가맹점 사진 가로 스크롤 갤러리 */
+    .store-sheet-meta-row .ui-icon {
+      width: 1.1rem;
+      height: 1.1rem;
+      color: var(--slate-400);
+      flex-shrink: 0;
+    }
+
+    /* 가맹점 사진 가로 스크롤 갤러리 (오른쪽 영역 끝까지 이어져 잘려 보이도록 구성) */
     .store-photo-strip {
       display: flex;
       gap: 0.55rem;
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
-      margin: 0.35rem 0 0.15rem;
+      margin: 0.2rem calc(-1 * var(--panel-pad-x)) 0.45rem 0;
+      padding-right: var(--panel-pad-x);
       padding-bottom: 0.1rem;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .store-photo-strip.is-dragging {
+      cursor: grabbing;
     }
 
     .store-photo-strip::-webkit-scrollbar {
@@ -1278,13 +1638,30 @@
     }
 
     .store-photo-item {
-      width: 6.8rem;
-      height: 5.1rem;
-      border-radius: 0.6rem;
+      width: 68%;
+      min-width: 15.5rem;
+      height: 10.6rem;
+      border-radius: 0;
       overflow: hidden;
       flex-shrink: 0;
       background: var(--slate-100);
       border: 1px solid var(--slate-200);
+    }
+
+    .store-bottom-sheet .store-photo-item {
+      width: 68%;
+      min-width: 14.8rem;
+      height: 9.8rem;
+    }
+
+    .store-photo-strip.is-single {
+      margin-right: 0;
+      padding-right: 0;
+      cursor: default;
+    }
+
+    .store-photo-strip.is-single .store-photo-item {
+      width: 100%;
     }
 
     .store-photo-item img {
@@ -1292,6 +1669,8 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      pointer-events: none;
+      -webkit-user-drag: none;
     }
 
     .store-sheet-actions {
@@ -1302,43 +1681,58 @@
     }
 
     .btn-sheet-call {
-      padding: 0.68rem 0.85rem;
+      min-height: 2.8rem;
+      padding: 0.65rem 0.85rem;
       border: 1px solid var(--slate-200);
-      border-radius: 0.6rem;
-      background: var(--slate-50);
+      border-radius: 0;
+      background: var(--white);
       color: var(--slate-700);
       font-family: inherit;
-      font-size: 0.92rem;
-      font-weight: 700;
+      font-size: 0.91rem;
+      font-weight: 600;
       white-space: nowrap;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 0.38rem;
       cursor: pointer;
       transition: all 0.15s ease;
     }
 
+    .btn-sheet-call svg,
+    .btn-sheet-route svg {
+      width: 1rem;
+      height: 1rem;
+      flex-shrink: 0;
+    }
+
+    .btn-sheet-call svg {
+      color: var(--slate-500);
+    }
+
     .btn-sheet-call:hover {
-      background: var(--slate-100);
-      border-color: var(--slate-300, #cbd5e1);
+      background: var(--slate-50);
+      border-color: var(--slate-400);
       color: var(--slate-900);
     }
 
     .btn-sheet-route {
-      padding: 0.68rem 0.85rem;
+      min-height: 2.8rem;
+      padding: 0.65rem 0.85rem;
       border: 1px solid var(--primary-border);
-      border-radius: 0.6rem;
+      border-radius: 0;
       background: var(--primary-light);
       color: var(--primary-dark);
       font-family: inherit;
-      font-size: 0.92rem;
+      font-size: 0.91rem;
       font-weight: 700;
       white-space: nowrap;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 0.38rem;
       cursor: pointer;
       transition: all 0.15s ease;
     }
@@ -1351,28 +1745,27 @@
 
     .btn-use-coupon-primary {
       grid-column: 1 / -1;
-      padding: 0.75rem 1rem;
+      min-height: 2.95rem;
+      padding: 0.72rem 1rem;
       border: 1px solid var(--primary);
-      border-radius: 0.6rem;
+      border-radius: 0;
       background: var(--primary);
       color: var(--white);
       font-family: inherit;
-      font-size: 0.96rem;
-      font-weight: 800;
+      font-size: 0.95rem;
+      font-weight: 700;
       letter-spacing: -0.01em;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 3px 10px rgba(2, 132, 199, 0.2);
-      transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
     }
 
     .btn-use-coupon-primary:hover {
       background: var(--primary-dark);
       border-color: var(--primary-dark);
-      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
     }
 
     .btn-use-coupon-primary:active {
@@ -1470,11 +1863,11 @@
 
     .category-btn {
       flex-shrink: 0;
-      padding: 0.48rem 0.9rem;
+      padding: 0.48rem 0.92rem;
       border-radius: 99px;
-      background: var(--slate-100);
-      border: 1px solid var(--slate-200);
-      font-size: 0.88rem;
+      background: var(--white);
+      border: 1.5px solid var(--slate-200);
+      font-size: 0.9rem;
       font-weight: 700;
       color: var(--slate-600);
       cursor: pointer;
@@ -1483,14 +1876,15 @@
     }
 
     .category-btn:hover {
-      background: var(--slate-200);
-      color: var(--slate-800);
+      border-color: var(--primary);
+      color: var(--primary);
     }
 
     .category-btn.active {
-      background: var(--slate-900);
-      border-color: var(--slate-900);
+      background: var(--primary);
+      border-color: var(--primary);
       color: var(--white);
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
     }
 
     /* 검색 인풋 */
@@ -1530,67 +1924,67 @@
       pointer-events: none;
     }
 
-    /* 세련되고 정돈된 가맹점 카드 리스트 */
+    /* 가맹점 목록 (박스형 카드 대신 상하 구분선 중심의 오픈 리스트 스타일) */
     .store-list-container {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: var(--card-gap);
+      border-top: 1px solid var(--slate-200);
     }
 
     .store-card {
-      background: var(--white);
-      border: 1px solid var(--slate-200);
-      border-radius: 1rem;
-      padding: var(--card-pad);
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--slate-200);
+      border-radius: 0;
+      padding: 1.75rem 0.1rem 1.85rem;
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 0.9rem;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+      gap: 1rem;
+      box-shadow: none;
       cursor: pointer;
-      content-visibility: auto;
-      contain-intrinsic-size: 0 210px;
     }
 
-    .store-card:hover {
-      border-color: var(--primary-border);
-      box-shadow: var(--shadow-md);
-      transform: translateY(-1px);
+    .store-card:last-child {
+      border-bottom: none;
     }
 
     .store-info {
       min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 0.32rem;
+      gap: 0.45rem;
     }
 
     .store-name {
-      font-size: 1.15rem;
-      font-weight: 800;
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.38rem;
+      font-weight: 700;
       color: var(--slate-900);
-      letter-spacing: -0.02em;
+      letter-spacing: -0.025em;
       line-height: 1.35;
       word-break: keep-all;
     }
 
-    .store-address {
-      font-size: 0.92rem;
-      color: var(--slate-500);
-      line-height: 1.45;
-      word-break: keep-all;
-    }
-
+    .store-address,
     .store-phone {
       font-size: 0.92rem;
       color: var(--slate-700);
-      font-weight: 600;
-      display: inline-flex;
+      font-weight: 500;
+      line-height: 1.45;
+      display: flex;
       align-items: center;
-      gap: 0.35rem;
-      margin-top: 0.12rem;
+      gap: 0.45rem;
+      word-break: keep-all;
+    }
+
+    .store-address .ui-icon,
+    .store-phone .ui-icon {
+      width: 1.1rem;
+      height: 1.1rem;
+      color: var(--slate-400);
+      flex-shrink: 0;
     }
 
     .store-card-actions {
@@ -1601,14 +1995,15 @@
     }
 
     .btn-view-map {
-      padding: 0.66rem 0.85rem;
+      min-height: 2.75rem;
+      padding: 0.64rem 0.85rem;
       border: 1px solid var(--slate-200);
-      border-radius: 0.6rem;
-      background: var(--slate-50);
+      border-radius: 0;
+      background: var(--white);
       color: var(--slate-700);
       font-family: inherit;
-      font-size: 0.92rem;
-      font-weight: 700;
+      font-size: 0.91rem;
+      font-weight: 600;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
@@ -1618,19 +2013,20 @@
     }
 
     .btn-view-map:hover {
-      background: var(--slate-100);
-      border-color: var(--slate-300, #cbd5e1);
+      background: var(--slate-50);
+      border-color: var(--slate-400);
       color: var(--slate-900);
     }
 
     .btn-store-route {
-      padding: 0.66rem 0.85rem;
+      min-height: 2.75rem;
+      padding: 0.64rem 0.85rem;
       border: 1px solid var(--primary-border);
-      border-radius: 0.6rem;
+      border-radius: 0;
       background: var(--primary-light);
       color: var(--primary-dark);
       font-family: inherit;
-      font-size: 0.92rem;
+      font-size: 0.91rem;
       font-weight: 700;
       white-space: nowrap;
       display: inline-flex;
@@ -2009,7 +2405,7 @@
     /* 타겟을 가리키는 흰색 화살표 + 위아래 살짝 흔들리는 애니메이션 */
     .coachmark-arrow {
       position: fixed;
-      width: 120px;
+      width: 48px;
       height: 48px;
       color: #ffffff;
       pointer-events: none;
@@ -2135,13 +2531,23 @@
       stroke-linejoin: round;
       stroke-dasharray: 1000;
       stroke-dashoffset: 1000;
-      will-change: stroke-dashoffset;
+      opacity: 0;
+      will-change: stroke-dashoffset, opacity;
       animation: coachHighlighterDraw 0.68s 1.65s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
     }
 
     @keyframes coachHighlighterDraw {
-      from { stroke-dashoffset: 1000; }
-      to { stroke-dashoffset: 0; }
+      0% {
+        stroke-dashoffset: 1000;
+        opacity: 0;
+      }
+      1% {
+        opacity: 1;
+      }
+      100% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+      }
     }
 
     /* 처음(환영)과 마지막(마무리) 화면: 한 글자씩 천천히 써진 뒤 마지막에 형광펜이 지그재그로 칠해지는 애니메이션 */
@@ -2281,17 +2687,44 @@
       }
     }
 
-    /* 최하단 좌우 화살표 + 점(dot) 페이저 네비게이션 */
+    /* 최하단 좌우 화살표 + 점(dot) 페이저 네비게이션 + 건너뛰기 */
     .coachmark-bottom-nav {
       position: fixed;
-      bottom: 42px;
+      bottom: 28px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 3002;
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #ffffff;
+    }
+
+    .coachmark-pager-row {
+      display: flex;
       align-items: center;
       justify-content: center;
       gap: 20px;
+    }
+
+    .btn-coach-skip {
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.72);
+      font-family: 'Pretendard', sans-serif;
+      font-size: 13.5px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      padding: 4px 12px;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.18s ease;
+    }
+
+    .btn-coach-skip:hover {
       color: #ffffff;
     }
 
@@ -2394,8 +2827,6 @@
             <svg class="wallet-account-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
-            <span class="wallet-account-label" id="user-phone-label">등록 번호</span>
-            <span class="wallet-account-divider" id="user-phone-divider" aria-hidden="true"></span>
             <span class="user-phone-tag" id="user-phone-display">****</span>
           </div>
           <button type="button" id="nav-logout" class="btn-logout">로그아웃</button>
@@ -2408,7 +2839,15 @@
 
       <!-- ── 2. 가맹점 지도 탭 ── -->
       <section class="tab-panel" id="sec-map">
-        <!-- 1) 상단 섬 선택 칩 (지도 밖 독립 배치) -->
+        <!-- 1) 가맹점 검색창 -->
+        <div class="store-search-box">
+          <svg class="store-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" id="map-search-input" class="store-search-input" placeholder="지도에서 찾을 가맹점 이름·주소 검색" />
+        </div>
+
+        <!-- 2) 섬 선택 칩 -->
         <div class="island-chips-scroll" id="island-chips">
           <button type="button" class="chip-btn active" data-island="all">전체</button>
           <button type="button" class="chip-btn" data-island="자월면" data-lat="37.2511" data-lng="126.3107">자월도</button>
@@ -2419,24 +2858,22 @@
           <button type="button" class="chip-btn" data-island="연평면" data-lat="37.6704" data-lng="125.6870">연평도</button>
         </div>
 
-        <!-- 2) 순수 지도 영역 -->
+        <!-- 3) 순수 지도 영역 -->
         <div class="map-container-box">
           <div class="interactive-map-frame" id="real-map"></div>
-        </div>
-
-        <!-- 3) 지도 하단 가맹점 검색창 -->
-        <div class="map-bottom-search-wrap">
-          <div class="map-search-bar">
-            <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input type="text" id="map-search-input" placeholder="지도에서 찾을 가맹점 이름·주소 검색" />
-          </div>
         </div>
       </section>
 
       <!-- ── 3. 가맹점 목록 탭 ── -->
       <section class="tab-panel" id="sec-store">
+        <!-- 가맹점 검색창 -->
+        <div class="store-search-box">
+          <svg class="store-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" id="store-search-input" class="store-search-input" placeholder="가맹점 이름 또는 지역을 검색해보세요" />
+        </div>
+
         <!-- 업종 필터 칩 + 총 개수 -->
         <div class="store-filter-bar">
           <div class="category-filter-wrap" id="category-filter-wrap">
@@ -2449,14 +2886,6 @@
           <span class="store-total-badge" id="merchant-total-count">총 0곳</span>
         </div>
 
-        <!-- 가맹점 검색창 -->
-        <div class="store-search-box">
-          <svg class="store-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input type="text" id="store-search-input" class="store-search-input" placeholder="가맹점 이름 또는 지역을 검색해보세요" />
-        </div>
-
         <!-- 가맹점 목록 리스트 -->
         <div class="store-list-container" id="merchant-list-container">
           <div style="padding: 30px; text-align: center; color: var(--slate-400);">가맹점 목록을 불러오는 중...</div>
@@ -2467,31 +2896,55 @@
     </main>
   </div>
 
-  <!-- 지도 핀 클릭 시 올라오는 네이티브형 가맹점 상세 바텀시트 (지도 가림 없음) -->
+  <!-- 지도 핀 클릭 시 올라오는 네이티브형 가맹점 상세 바텀시트 및 반투명 배경 막 -->
+  <div class="store-sheet-backdrop" id="store-sheet-backdrop" onclick="window.closeStoreSheet()"></div>
   <div class="store-bottom-sheet" id="store-detail-modal">
     <div class="store-sheet-handle"></div>
     <div class="store-sheet-header">
       <div class="store-sheet-title" id="sheet-store-name">가맹점명</div>
       <button type="button" class="store-sheet-close-icon" onclick="window.closeStoreSheet()" aria-label="닫기">
-        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 19L19 5M5 5l14 14" />
         </svg>
       </button>
     </div>
     <div class="store-sheet-body">
       <div class="store-photo-strip" id="sheet-store-photos" style="display:none;"></div>
-      <div class="store-sheet-address" id="sheet-store-address">주소</div>
-      <div class="store-sheet-hours" id="sheet-store-hours" style="display:none;"></div>
-      <div class="store-sheet-phone">
-        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <p class="store-sheet-desc" id="sheet-store-desc" style="display:none;"></p>
+      <div class="store-sheet-meta-row">
+        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span id="sheet-store-address">주소</span>
+      </div>
+      <div class="store-sheet-meta-row" id="sheet-store-hours-row" style="display:none;">
+        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span id="sheet-store-hours">영업시간</span>
+      </div>
+      <div class="store-sheet-meta-row">
+        <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
         </svg>
         <span id="sheet-store-phone-text">032-000-0000</span>
       </div>
     </div>
     <div class="store-sheet-actions">
-      <a href="#" class="btn-sheet-call" id="sheet-store-phone">전화걸기</a>
-      <a href="#" target="_blank" rel="noopener noreferrer" class="btn-sheet-route" id="sheet-route-kakao">길찾기</a>
+      <a href="#" class="btn-sheet-call" id="sheet-store-phone">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+        </svg>
+        <span>전화걸기</span>
+      </a>
+      <a href="#" target="_blank" rel="noopener noreferrer" class="btn-sheet-route" id="sheet-route-kakao">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span>길찾기</span>
+      </a>
       <button type="button" class="btn-use-coupon-primary" id="sheet-btn-use-coupon">쿠폰 사용하기</button>
     </div>
   </div>
@@ -2612,8 +3065,8 @@
     </div>
 
     <!-- 흰색 화살표 SVG -->
-    <svg class="coachmark-arrow" id="coachmark-arrow" viewBox="0 0 120 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M60 4L46 19M60 4L74 19M60 4C60 22 61 36 62 48" pathLength="120" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg class="coachmark-arrow" id="coachmark-arrow" viewBox="0 0 48 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 4L10 19M24 4L38 19M24 4C24 22 26 36 30 48" pathLength="120" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
 
     <div class="coachmark-callout" id="coachmark-callout">
@@ -2631,17 +3084,20 @@
     </div>
 
     <div class="coachmark-bottom-nav">
-      <button type="button" class="btn-coach-arrow" id="btn-onboarding-prev" aria-label="이전">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-      </button>
-      <div class="coachmark-dots" id="onboarding-dots"></div>
-      <button type="button" class="btn-coach-arrow" id="btn-onboarding-next" aria-label="다음">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 6l6 6-6 6" />
-        </svg>
-      </button>
+      <div class="coachmark-pager-row">
+        <button type="button" class="btn-coach-arrow" id="btn-onboarding-prev" aria-label="이전">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <div class="coachmark-dots" id="onboarding-dots"></div>
+        <button type="button" class="btn-coach-arrow" id="btn-onboarding-next" aria-label="다음">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+        </button>
+      </div>
+      <button type="button" class="btn-coach-skip" id="btn-onboarding-skip">건너뛰기</button>
     </div>
   </div>
 
@@ -2784,11 +3240,149 @@
     let myAvailableCoupons = [];
     let currentCategory = 'all';
     let currentIsland = 'all';
+    let currentIssuerIsland = '자월면';
     let searchQuery = '';
     let mapSearchQuery = '';
     let selectedMapMerchantId = null;
     let leafMap = null;
     let leafMarkers = [];
+    let issuerMarkers = [];
+
+    const FACILITY_ICONS = {
+      parking: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.5 16V8h3.2a2.4 2.4 0 010 4.8H9.5"/></svg>`,
+      wifi: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>`,
+      star: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>`,
+      dome: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 18h18M5 18v-3a7 7 0 0114 0v3M12 8V5m4.5 4.5l2-2"/></svg>`,
+      tent: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 19h18M4.5 19L12 5l7.5 14M12 5v14"/></svg>`,
+      shower: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 13a8 8 0 0116 0H4zm8-8v2m-4 9v3m4-3v4m4-4v3"/></svg>`,
+      wave: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15c2.4 0 2.4-2 4.8-2s2.4 2 4.8 2 2.4-2 4.8-2 2.4 2 3.6 2M3 19c2.4 0 2.4-2 4.8-2s2.4 2 4.8 2 2.4-2 4.8-2 2.4 2 3.6 2"/></svg>`,
+      craft: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10M9 21v-4a3 3 0 016 0v4M6 7h12l-1.5 7.5a4.5 4.5 0 01-9 0L6 7z"/></svg>`,
+      cafe: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8h1a4 4 0 110 8h-1M3 8h14v7a4 4 0 01-4 4H7a4 4 0 01-4-4V8zm3 12h10"/></svg>`,
+      tree: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l6 8h-3.5l4.5 6H5l4.5-6H6l6-8zm0 14v4"/></svg>`,
+      cabin: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1v-9z"/></svg>`
+    };
+
+    const ISSUER_SPOTS = [
+      {
+        id: 'issuer_1',
+        name: '자월달빛천문대',
+        island: '자월면',
+        islandLabel: '자월도',
+        images: [
+          '../shared/images/issuers/issuer_1_1.jpg',
+          '../shared/images/issuers/issuer_1_2.jpg',
+          '../shared/images/issuers/issuer_1_3.jpg'
+        ],
+        descHtml: '도심의 불빛이 닿지 않는 자월도 밤하늘 아래에서 <strong>쏟아지는 별자리와 은하수</strong>를 만날 수 있는 천문 과학관입니다. 돔 스크린을 가득 채우는 <strong>천체투영관 우주 영상</strong>을 감상하고, <strong>대형 천체망원경으로 달의 분화구와 계절별 별자리</strong>를 직접 관측하는 특별한 밤을 경험해 보세요.',
+        desc: '도심의 불빛이 닿지 않는 자월도 밤하늘 아래에서 쏟아지는 별자리와 은하수를 만날 수 있는 천문 과학관입니다.',
+        facilities: [
+          { icon: 'dome', label: '천체투영관' },
+          { icon: 'star', label: '망원경관측' },
+          { icon: 'parking', label: '무료주차' },
+          { icon: 'wifi', label: '와이파이' }
+        ],
+        recommends: [
+          '아이와 함께 우주·별자리 관측 체험을 즐기고 싶은 가족 여행객',
+          '도심에서 보기 힘든 쏟아지는 은하수와 섬 밤하늘을 만나고 싶은 분'
+        ],
+        address: '인천광역시 옹진군 자월면 자월서로 396-35',
+        phone: '032-899-3300',
+        homepage: 'https://jawolspace.kr',
+        homepageLabel: 'jawolspace.kr',
+        lat: 37.2608,
+        lng: 126.2932,
+        isIssuer: true
+      },
+      {
+        id: 'issuer_2',
+        name: '장골해수욕장 야영장',
+        island: '자월면',
+        islandLabel: '자월도',
+        images: [
+          '../shared/images/issuers/issuer_1_3.jpg',
+          '../shared/images/issuers/issuer_2_1.jpg'
+        ],
+        descHtml: '고운 모래가 펼쳐진 완만한 해변과 <strong>울창한 해송 숲이 맞닿은 바다 앞 캠핑장</strong>입니다. 솔향기 가득한 그늘 아래 텐트를 치고 낮에는 탁 트인 서해 바다에서 <strong>해수욕과 갯벌 체험</strong>을 즐기고, 해 질 녘에는 <strong>바다를 붉게 물들이는 낙조와 파도 소리</strong>를 감상해 보세요.',
+        desc: '고운 모래가 펼쳐진 완만한 해변과 울창한 숲이 맞닿아 있는 자월도 대표 해변 캠핑장입니다.',
+        facilities: [
+          { icon: 'tent', label: '해송야영장' },
+          { icon: 'shower', label: '샤워·급수대' },
+          { icon: 'wave', label: '갯벌·해수욕' },
+          { icon: 'parking', label: '무료주차' }
+        ],
+        recommends: [
+          '파도 소리가 들리는 해변 숲그늘 아래에서 캠핑·백패킹을 즐기고 싶은 분',
+          '완만한 백사장에서 해수욕과 갯벌 체험, 서해 일몰을 함께 만끽하고 싶은 분'
+        ],
+        address: '인천광역시 옹진군 자월면 자월서로 101번길 13',
+        phone: '032-899-3800',
+        homepage: 'https://www.gocamping.or.kr/bsite/camp/info/read.do?c_no=102295',
+        homepageLabel: '고캠핑 공식 안내 페이지',
+        lat: 37.2496,
+        lng: 126.3118,
+        isIssuer: true
+      },
+      {
+        id: 'issuer_3',
+        name: '소야랑',
+        island: '덕적면',
+        islandLabel: '소야도',
+        images: [
+          '../shared/images/merchants/store_33_1793164825485_dfe41b7835a6.jpg',
+          '../shared/images/merchants/store_33_1793164683462_a718b9149904.jpg',
+          '../shared/images/merchants/store_33_1793164723894_39db401ec547.jpg'
+        ],
+        descHtml: '아름다운 섬 소야도의 옛 분교 터를 단장해 만든 <strong>바다 전망 감성 문화 체험 공간</strong>입니다. 탁 트인 야외 테라스에서 여유롭게 차를 마시며 쉬어가고, <strong>도자기·공예 원데이 클래스</strong>를 통해 섬 여행의 특별한 추억을 직접 빚어보세요.',
+        desc: '아름다운 섬 소야도의 옛 분교 터를 단장해 만든 감성 문화 체험 공간입니다.',
+        facilities: [
+          { icon: 'craft', label: '도자기체험' },
+          { icon: 'cafe', label: '오션뷰카페' },
+          { icon: 'parking', label: '무료주차' },
+          { icon: 'wifi', label: '와이파이' }
+        ],
+        recommends: [
+          '바다가 내려다보이는 감성 테라스에서 여유로운 티타임과 휴식을 원하시는 분',
+          '도자기·공예 원데이 클래스로 섬 여행만의 특별한 기념품을 직접 만들고 싶은 분'
+        ],
+        address: '인천광역시 옹진군 덕적면 소야로 188-14',
+        phone: '032-899-3810',
+        homepage: 'https://map.naver.com/p/search/%EC%86%8C%EC%95%BC%EB%9E%91',
+        homepageLabel: '네이버 플레이스 안내',
+        lat: 37.2161,
+        lng: 126.1774,
+        isIssuer: true
+      },
+      {
+        id: 'issuer_4',
+        name: '덕적도 자연휴양림',
+        island: '덕적면',
+        islandLabel: '덕적도',
+        images: [
+          '../shared/images/issuers/issuer_4_2.jpg',
+          '../shared/images/issuers/issuer_4_1.jpg',
+          '../shared/images/issuers/issuer_4_3.jpg'
+        ],
+        descHtml: '수백 년 된 울창한 해송 숲과 <strong>에메랄드빛 밧지름해변이 어우러진 도서형 산림 휴양지</strong>입니다. 피톤치드 가득한 <strong>해송 숲 산책로에서 삼림욕</strong>을 즐기고, 파도 소리가 들리는 <strong>숲속 숙소와 야영데크</strong>에서 온전한 휴식을 만끽해 보세요.',
+        desc: '수백 년 된 울창한 해송 숲과 에메랄드빛 밧지름해변이 한눈에 어우러진 도서형 산림 휴양지입니다.',
+        facilities: [
+          { icon: 'cabin', label: '숲속숙소' },
+          { icon: 'tent', label: '야영데크' },
+          { icon: 'tree', label: '해송산책로' },
+          { icon: 'parking', label: '무료주차' }
+        ],
+        recommends: [
+          '울창한 해송 숲 산책로를 걸으며 조용히 피톤치드 삼림욕을 즐기고 싶은 분',
+          '바다 전망이 펼쳐지는 쾌적한 숲속 숙소와 야영데크에서 머물고 싶은 분'
+        ],
+        address: '인천광역시 옹진군 덕적면 덕적남로 220',
+        phone: '032-899-3600',
+        homepage: 'https://www.foresttrip.go.kr/pot/rm/ri/selectRcrfrIntrdDtlView.do?hmpgId=ID02030127&menuId=002001',
+        homepageLabel: '숲나들e 공식 예약·안내',
+        lat: 37.2175,
+        lng: 126.1432,
+        isIssuer: true
+      }
+    ];
     let qrTimerInterval = null;
     let activeCouponId = null;
     let currentTabIndex = 0;
@@ -2975,6 +3569,192 @@
       });
     });
 
+    window.openIssuerGuide = function() {
+      const guideEl = document.getElementById('wallet-issuer-section');
+      if (guideEl) {
+        guideEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
+    window.filterIssuerByIsland = function(islandKey) {
+      currentIssuerIsland = islandKey || 'all';
+      document.querySelectorAll('#issuer-island-tabs .chip-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-issuer-island') === currentIssuerIsland);
+      });
+      renderIssuerSpotList();
+    };
+
+    window.openNaverRoute = function(spotId, event) {
+      if (event) event.stopPropagation();
+      const spot = ISSUER_SPOTS.find(s => s.id === spotId) || allMerchants.find(m => String(m.id) === String(spotId));
+      if (!spot) return;
+
+      const lat = parseFloat(spot.lat || spot.latitude || 37.255);
+      const lng = parseFloat(spot.lng || spot.longitude || 126.310);
+      const name = spot.name || '옹진관광지';
+      const dname = encodeURIComponent(name);
+      const webUrl = `https://map.naver.com/index.nhn?elng=${lng}&elat=${lat}&etext=${dname}&menu=route&pathType=1`;
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+
+      if (isMobile) {
+        const appUrl = `nmap://route/public?dlat=${lat}&dlng=${lng}&dname=${dname}&appname=${encodeURIComponent(window.location.origin)}`;
+        const clickedAt = Date.now();
+        window.location.href = appUrl;
+        setTimeout(() => {
+          if (Date.now() - clickedAt < 1800 && !document.hidden) {
+            window.open(webUrl, '_blank', 'noopener,noreferrer');
+          }
+        }, 1200);
+      } else {
+        window.open(webUrl, '_blank', 'noopener,noreferrer');
+      }
+    };
+
+    window.copyIssuerText = async function(text, label, event) {
+      if (event) event.stopPropagation();
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        showToast(`${label}가 복사되었습니다.`, 'info');
+      } catch (_) {
+        showToast('복사에 실패했습니다.', 'error');
+      }
+    };
+
+    function renderIssuerSpotList() {
+      const listEl = document.getElementById('issuer-spot-list');
+      if (!listEl) return;
+      listEl.innerHTML = ISSUER_SPOTS.map(spot => {
+        const photosHtml = (spot.images || []).map(src => `
+          <div class="issuer-photo-item">
+            <img src="${src}" alt="${spot.name} 사진" loading="lazy" />
+          </div>
+        `).join('');
+
+        const facilitiesHtml = (spot.facilities || []).map(f => `
+          <div class="issuer-facility-item">
+            <span class="issuer-facility-circle">${FACILITY_ICONS[f.icon] || ''}</span>
+            <span class="issuer-facility-label">${f.label}</span>
+          </div>
+        `).join('');
+
+        const recommendsHtml = (spot.recommends || []).map(r => `
+          <li>
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>${r}</span>
+          </li>
+        `).join('');
+
+        return `
+          <div class="issuer-spot-item">
+            <div class="issuer-spot-title-row">
+              <h5 class="issuer-spot-name">${spot.name}</h5>
+              <span class="issuer-spot-island-label">${spot.islandLabel}</span>
+            </div>
+            <div class="issuer-photo-strip">
+              ${photosHtml}
+            </div>
+            <p class="issuer-spot-desc">${spot.descHtml || spot.desc}</p>
+            <div class="issuer-facility-list">
+              ${facilitiesHtml}
+            </div>
+            <div class="issuer-recommend-wrap">
+              <strong class="issuer-recommend-title">이런 분께 추천해요</strong>
+              <ul class="issuer-recommend-list">
+                ${recommendsHtml}
+              </ul>
+            </div>
+            <div class="issuer-spot-meta">
+              <div class="issuer-meta-row">
+                <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>${spot.address}</span>
+              </div>
+              <div class="issuer-meta-row">
+                <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <a href="tel:${spot.phone}" class="issuer-meta-link">${spot.phone}</a>
+              </div>
+              <div class="issuer-meta-row">
+                <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+                <a href="${spot.homepage}" target="_blank" rel="noopener noreferrer" class="issuer-meta-link">${spot.homepageLabel}</a>
+              </div>
+            </div>
+            <div class="issuer-actions-wrap">
+              <div class="issuer-sub-actions">
+                <button type="button" class="btn-issuer-action" onclick="window.copyIssuerText('${spot.address}', '주소', event)">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  <span>주소 복사</span>
+                </button>
+                <a href="tel:${spot.phone}" class="btn-issuer-action">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <span>전화걸기</span>
+                </a>
+                <a href="${spot.homepage}" target="_blank" rel="noopener noreferrer" class="btn-issuer-action">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  <span>홈페이지</span>
+                </a>
+              </div>
+              <button type="button" class="btn-issuer-naver-route" onclick="window.openNaverRoute('${spot.id}', event)">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>네이버 지도 길찾기</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.focusIssuerOnMap = function(issuerId) {
+      const spot = ISSUER_SPOTS.find(s => s.id === issuerId);
+      if (!spot) return;
+
+      if (currentIsland !== 'all' && currentIsland !== spot.island) {
+        currentIsland = 'all';
+        document.querySelectorAll('#island-chips .chip-btn').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-island') === 'all');
+        });
+        renderStoreList();
+        updateMapMarkers();
+      }
+
+      switchTab('sec-map');
+
+      setTimeout(() => {
+        if (leafMap) {
+          leafMap.invalidateSize();
+          leafMap.flyTo([spot.lat, spot.lng], 14, { duration: 0.7 });
+          window.openStoreSheet(spot);
+        }
+      }, 150);
+    };
+
     // ── 날짜 계산 헬퍼 ──
     function getActualExpireDate(expiresAtStr, issuedAtStr) {
       let targetDate;
@@ -3024,11 +3804,20 @@
       if (countBadge) countBadge.textContent = activeCoupons.length;
 
       const bottomGuideHtml = `
-        <div class="wallet-bottom-guide">
-          <div class="wallet-guide-header">
-            <h4 class="wallet-guide-title">쿠폰 이용 안내</h4>
-            <button type="button" class="btn-guide-help-circle" onclick="window.openOnboardingModal(true)" aria-label="이용 안내 다시 보기" title="이용 안내 다시 보기">?</button>
+        <div class="issuer-spot-section" id="wallet-issuer-section">
+          <div class="issuer-spot-head-wrap">
+            <h4 class="issuer-spot-section-title">옹진군의 관광지를 소개합니다!</h4>
           </div>
+          <div class="issuer-spot-list" id="issuer-spot-list"></div>
+        </div>
+
+        <div class="wallet-bottom-guide" id="wallet-bottom-guide">
+          <button type="button" class="wallet-guide-header" onclick="this.closest('.wallet-bottom-guide').classList.toggle('is-open')" aria-expanded="false">
+            <h4 class="wallet-guide-title">쿠폰 이용 안내</h4>
+            <svg class="wallet-guide-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
           <div class="wallet-guide-steps">
             <div class="guide-step-item">
               <span class="guide-step-num">01</span>
@@ -3044,6 +3833,7 @@
                 <p class="guide-step-desc">가맹점 지도나 목록에서 방문한 매장의 쿠폰 사용하기를 누르면 사장님께 실시간 승인 요청이 전송됩니다.</p>
               </div>
             </div>
+            <button type="button" class="btn-guide-reopen" onclick="window.openOnboardingModal(true)">이용 안내 다시 보기</button>
           </div>
         </div>
       `;
@@ -3051,16 +3841,13 @@
       if (activeCoupons.length === 0) {
         container.innerHTML = `
           <div class="empty-coupon-box">
-            <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5zM5 15a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2H5z" />
-            </svg>
             <div class="empty-title">보유 중인 쿠폰이 없습니다</div>
-            <div class="empty-desc">
-              여객터미널 등 옹진군 현장 발행처에서 발급받은 QR을 스캔하시면<br>이곳 지갑에 즉시 쿠폰이 등록됩니다.
-            </div>
+            <button type="button" class="btn-empty-go-map" onclick="window.openIssuerGuide()">관광지 둘러보기</button>
           </div>
           ${bottomGuideHtml}
         `;
+        renderIssuerSpotList();
+        if (allMerchants.length > 0) renderStoreList();
         return;
       }
 
@@ -3095,6 +3882,8 @@
       }).join('');
 
       container.innerHTML = `${cardsHtml}${bottomGuideHtml}`;
+      renderIssuerSpotList();
+      if (allMerchants.length > 0) renderStoreList();
     }
 
     // ── 길찾기 URL 생성 헬퍼 (카카오맵 / 네이버지도 연동) ──
@@ -3173,12 +3962,19 @@
       }
     }
 
+    function resolveImgSrc(src) {
+      return String(src || '').replace(/^\/uploads\/(merchants|issuers)\//, '../shared/images/$1/');
+    }
+
     // 가맹점 상세 바텀시트 열기 / 닫기
     const storeDetailModal = document.getElementById('store-detail-modal');
+    const storeSheetBackdrop = document.getElementById('store-sheet-backdrop');
     window.openStoreSheet = function(m) {
       if (!m || !storeDetailModal) return;
       const nameEl = document.getElementById('sheet-store-name');
       const addrEl = document.getElementById('sheet-store-address');
+      const descEl = document.getElementById('sheet-store-desc');
+      const hoursRowEl = document.getElementById('sheet-store-hours-row');
       const hoursEl = document.getElementById('sheet-store-hours');
       const phoneEl = document.getElementById('sheet-store-phone');
       const phoneTextEl = document.getElementById('sheet-store-phone-text');
@@ -3190,54 +3986,122 @@
       if (photosEl) {
         const imgs = Array.isArray(m.images) ? m.images.filter(Boolean) : [];
         if (imgs.length > 0) {
+          photosEl.classList.toggle('is-single', imgs.length === 1);
           photosEl.innerHTML = imgs.map(src => `
             <div class="store-photo-item">
-              <img src="${src}" alt="${m.name || '가맹점'} 사진" loading="lazy" onerror="const item=this.closest('.store-photo-item'); const strip=this.closest('.store-photo-strip'); if(item) item.remove(); if(strip && !strip.children.length) strip.style.display='none';" />
+              <img src="${resolveImgSrc(src)}" alt="${m.name || '가맹점'} 사진" loading="lazy" onerror="const item=this.closest('.store-photo-item'); const strip=this.closest('.store-photo-strip'); if(item) item.remove(); if(strip){ strip.classList.toggle('is-single', strip.children.length === 1); if(!strip.children.length) strip.style.display='none'; }" />
             </div>
           `).join('');
           photosEl.style.display = 'flex';
+          photosEl.scrollLeft = 0;
         } else {
+          photosEl.classList.remove('is-single');
           photosEl.innerHTML = '';
           photosEl.style.display = 'none';
         }
       }
-      if (hoursEl) {
-        if (m.business_hours) {
-          hoursEl.textContent = `영업시간: ${m.business_hours}`;
-          hoursEl.style.display = 'block';
+      if (descEl) {
+        if (m.isIssuer && m.desc) {
+          descEl.textContent = m.desc;
+          descEl.style.display = 'block';
         } else {
-          hoursEl.style.display = 'none';
+          descEl.textContent = '';
+          descEl.style.display = 'none';
+        }
+      }
+      if (hoursRowEl && hoursEl) {
+        if (m.business_hours) {
+          hoursEl.textContent = m.business_hours;
+          hoursRowEl.style.display = 'flex';
+        } else {
+          hoursEl.textContent = '';
+          hoursRowEl.style.display = 'none';
         }
       }
       if (phoneEl) phoneEl.href = `tel:${m.phone || ''}`;
       if (phoneTextEl) phoneTextEl.textContent = m.phone || '연락처 준비중';
-      if (kakaoEl) kakaoEl.href = getKakaoRouteUrl(m);
-      const useBtnEl = document.getElementById('sheet-btn-use-coupon');
-      if (useBtnEl) {
-        useBtnEl.onclick = () => {
-          window.closeStoreSheet();
-          window.openUseRequestModal(m.id);
+      if (kakaoEl) {
+        kakaoEl.href = '#';
+        kakaoEl.onclick = (e) => {
+          e.preventDefault();
+          window.openNaverRoute(m.id, e);
         };
       }
+      const useBtnEl = document.getElementById('sheet-btn-use-coupon');
+      if (useBtnEl) {
+        const hasCoupon = Array.isArray(myAvailableCoupons) && myAvailableCoupons.length > 0;
+        if (m.isIssuer || !hasCoupon) {
+          useBtnEl.style.display = 'none';
+        } else {
+          useBtnEl.style.display = 'inline-flex';
+          useBtnEl.onclick = () => {
+            window.closeStoreSheet();
+            window.openUseRequestModal(m.id);
+          };
+        }
+      }
 
+      if (storeSheetBackdrop) storeSheetBackdrop.classList.add('active');
       storeDetailModal.classList.add('active');
     };
 
     window.closeStoreSheet = function() {
+      if (storeSheetBackdrop) {
+        storeSheetBackdrop.classList.remove('active');
+      }
       if (storeDetailModal) {
         storeDetailModal.classList.remove('active');
       }
     };
 
-    // 지도 마커 갱신 (말풍선 팝업 대신 핀 클릭 시 바텀시트 호출)
+    function createPointPinIcon() {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="25" height="41" viewBox="0 0 25 41">
+        <defs>
+          <linearGradient id="pinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#f05262"/>
+            <stop offset="100%" stop-color="#d63346"/>
+          </linearGradient>
+        </defs>
+        <path d="M12.5 0.5C5.873 0.5 0.5 5.873 0.5 12.5C0.5 19.85 12.5 40.2 12.5 40.2C12.5 40.2 24.5 19.85 24.5 12.5C24.5 5.873 19.127 0.5 12.5 0.5Z" fill="url(#pinGrad)" stroke="#a61e2e" stroke-width="1"/>
+        <path d="M12.5 1.5C6.425 1.5 1.5 6.425 1.5 12.5C1.5 18.8 11.1 35.8 12.5 38.2C13.9 35.8 23.5 18.8 23.5 12.5C23.5 6.425 18.575 1.5 12.5 1.5Z" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="0.8"/>
+        <circle cx="12.5" cy="12.5" r="4.5" fill="#ffffff" stroke="#a61e2e" stroke-width="0.6" stroke-opacity="0.45"/>
+      </svg>`;
+      return L.icon({
+        iconUrl: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+        shadowAnchor: [12, 41]
+      });
+    }
+
+    // 지도 마커 갱신 (말풍선 팝업 대신 핀 클릭 시 바텀시트 호출 + 관광지 전용 포인트 핀 함께 표출)
     function updateMapMarkers() {
       if (!leafMap) return;
 
       // 기존 마커 제거
       leafMarkers.forEach(m => m.marker.remove());
       leafMarkers = [];
+      issuerMarkers.forEach(im => im.remove());
+      issuerMarkers = [];
 
-      // 필터링된 가맹점 표출
+      // 1) 관광지(발행처) 전용 구분 포인트 핀 표출 (가맹점 기본 핀과 동일한 규격·질감에 포인트 색상만 구분)
+      const pointPinIcon = createPointPinIcon();
+      const visibleIssuers = ISSUER_SPOTS.filter(s => currentIsland === 'all' || s.island === currentIsland);
+      visibleIssuers.forEach(spot => {
+        const marker = L.marker([spot.lat, spot.lng], { icon: pointPinIcon, zIndexOffset: 500 }).addTo(leafMap);
+        marker.on('click', () => {
+          if (leafMap) {
+            leafMap.flyTo([spot.lat, spot.lng], 14, { duration: 0.6 });
+          }
+          window.openStoreSheet(spot);
+        });
+        issuerMarkers.push(marker);
+      });
+
+      // 2) 필터링된 가맹점 표출
       const filtered = getFilteredMerchants();
 
       filtered.forEach(m => {
@@ -3331,41 +4195,78 @@
         return;
       }
 
+      const showUseBtn = (Array.isArray(myAvailableCoupons) && myAvailableCoupons.length > 0) || document.documentElement.classList.contains('onboarding-lock');
+
       container.innerHTML = filtered.map(m => {
-        const kakaoUrl = getKakaoRouteUrl(m);
         const imgs = Array.isArray(m.images) ? m.images.filter(Boolean) : [];
+        const singleClass = imgs.length === 1 ? ' is-single' : '';
         const photosHtml = imgs.length > 0 ? `
-          <div class="store-photo-strip">
+          <div class="store-photo-strip${singleClass}">
             ${imgs.map(src => `
               <div class="store-photo-item">
-                <img src="${src}" alt="${m.name} 사진" loading="lazy" onerror="const item=this.closest('.store-photo-item'); const strip=this.closest('.store-photo-strip'); if(item) item.remove(); if(strip && !strip.children.length) strip.style.display='none';" />
+                <img src="${resolveImgSrc(src)}" alt="${m.name} 사진" loading="lazy" onerror="const item=this.closest('.store-photo-item'); const strip=this.closest('.store-photo-strip'); if(item) item.remove(); if(strip){ strip.classList.toggle('is-single', strip.children.length === 1); if(!strip.children.length) strip.style.display='none'; }" />
               </div>
             `).join('')}
           </div>
         ` : '';
 
         return `
-          <div class="store-card" onclick="window.focusStoreOnMap('${m.id}')">
+          <div class="store-card">
             <div class="store-info">
               <div class="store-name">${m.name}</div>
               ${photosHtml}
-              <div class="store-address">${m.address || '인천광역시 옹진군'}</div>
+              <div class="store-address">
+                <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>${m.address || '인천광역시 옹진군'}</span>
+              </div>
               <div class="store-phone">
-                <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg class="ui-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
-                ${m.phone || '연락처 준비중'}
+                <span>${m.phone || '연락처 준비중'}</span>
               </div>
             </div>
             <div class="store-card-actions">
-              <button type="button" class="btn-view-map" onclick="event.stopPropagation(); window.focusStoreOnMap('${m.id}')">지도위치</button>
-              <a href="${kakaoUrl}" target="_blank" rel="noopener noreferrer" class="btn-store-route" onclick="event.stopPropagation();">길찾기</a>
-              <button type="button" class="btn-use-coupon-primary" onclick="event.stopPropagation(); window.openUseRequestModal('${m.id}')">쿠폰 사용하기</button>
+              <button type="button" class="btn-view-map" onclick="window.focusStoreOnMap('${m.id}')">지도에서 보기</button>
+              <button type="button" class="btn-store-route" onclick="window.openNaverRoute('${m.id}', event)">길찾기</button>
+              ${showUseBtn ? `<button type="button" class="btn-use-coupon-primary" onclick="window.openUseRequestModal('${m.id}')">쿠폰 사용하기</button>` : ''}
             </div>
           </div>
         `;
       }).join('');
     }
+
+    // PC 마우스 드래그로 가로 사진 갤러리(.store-photo-strip, .issuer-photo-strip) 스크롤 지원
+    (function enablePhotoStripDragScroll() {
+      let activeStrip = null;
+      let startX = 0;
+      let startScrollLeft = 0;
+
+      document.addEventListener('mousedown', (e) => {
+        const strip = e.target.closest('.store-photo-strip, .issuer-photo-strip');
+        if (!strip || strip.classList.contains('is-single')) return;
+        activeStrip = strip;
+        startX = e.pageX;
+        startScrollLeft = strip.scrollLeft;
+        strip.classList.add('is-dragging');
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!activeStrip) return;
+        e.preventDefault();
+        const dx = e.pageX - startX;
+        activeStrip.scrollLeft = startScrollLeft - dx;
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (!activeStrip) return;
+        activeStrip.classList.remove('is-dragging');
+        activeStrip = null;
+      });
+    })();
 
     // 업종 필터 이벤트
     const categoryButtons = document.querySelectorAll('#category-filter-wrap .category-btn');
@@ -3765,6 +4666,7 @@
     const coachmarkTouchGuide = document.getElementById('coachmark-touch-guide');
     const btnOnboardingPrev = document.getElementById('btn-onboarding-prev');
     const btnOnboardingNext = document.getElementById('btn-onboarding-next');
+    const btnOnboardingSkip = document.getElementById('btn-onboarding-skip');
 
     let currentOnboardingStep = 0;
     let activeOnboardingUserKey = 'default';
@@ -3782,42 +4684,49 @@
       {
         tab: 'sec-coupon',
         pad: 0,
+        align: 'left',
         getTarget: () => document.querySelector('button[data-target="sec-coupon"]'),
         title: '먼저 <span class="coach-em">내 쿠폰</span>에서<br>보유한 쿠폰을 확인해요'
       },
       {
         tab: 'sec-coupon',
         pad: 4,
+        align: 'center',
         getTarget: () => document.querySelector('#sec-coupon .coupon-card') || document.querySelector('#sec-coupon .empty-coupon-box'),
         title: '이곳에 받은 쿠폰이 보관되며<br><span class="coach-em">사용하기</span>로 바로 사용해요'
       },
       {
         tab: 'sec-map',
         pad: 0,
+        align: 'center',
         getTarget: () => document.querySelector('button[data-target="sec-map"]'),
         title: '<span class="coach-em">가맹점 지도</span>를 누르면<br>섬별 사용처 지도가 열려요'
       },
       {
         tab: 'sec-map',
         pad: 4,
+        align: 'center',
         getTarget: () => document.getElementById('island-chips'),
         title: '<span class="coach-em">방문하신 섬</span>을 선택하면<br>해당 섬의 가맹점 위치를 보여줘요'
       },
       {
         tab: 'sec-store',
         pad: 0,
+        align: 'right',
         getTarget: () => document.querySelector('button[data-target="sec-store"]'),
         title: '<span class="coach-em">가맹점 목록</span>에서 원하는 사용처를<br>빠르게 찾아볼 수 있어요'
       },
       {
         tab: 'sec-store',
         pad: 4,
+        align: 'center',
         getTarget: () => document.querySelector('#merchant-list-container .store-card .btn-use-coupon-primary') || document.querySelector('#category-filter-wrap'),
         title: '매장의 <span class="coach-em">쿠폰 사용하기</span>를 누르면<br>사장님께 바로 승인 요청을 보내요'
       },
       {
         tab: 'sec-coupon',
         pad: 3,
+        align: 'right',
         getTarget: () => document.querySelector('.font-size-control'),
         title: '글씨가 작게 느껴지신다면<br>여기서 <span class="coach-em">크게 모드</span>를 켜보세요'
       },
@@ -3869,6 +4778,7 @@
         coachmarkSpotlight.style.height = '0px';
         coachmarkArrow.classList.add('is-hidden');
         coachmarkCallout.classList.add('is-welcome');
+        coachmarkCallout.style.textAlign = 'center';
         coachmarkCallout.style.left = '';
         coachmarkCallout.style.transform = '';
         return;
@@ -3911,9 +4821,9 @@
       coachmarkArrow.classList.remove('is-hidden');
       const targetCenterX = Math.min(vw - 28, Math.max(28, rect.left + rect.width / 2));
       const relX = targetCenterX - shellCenterX;
-      const arrowPathEl = coachmarkArrow.querySelector('path');
+      const align = step.align || (relX < -45 ? 'left' : relX > 45 ? 'right' : 'center');
 
-      // 문구 박스는 앱 컨테이너(.app-shell) 및 모바일 화면 안쪽 여백(20px) 내에 안전하게 배치하여 절대 잘리지 않도록 고정
+      coachmarkCallout.style.textAlign = align;
       coachmarkCallout.style.left = '0px';
       coachmarkCallout.style.transform = 'none';
       const calloutWidth = coachmarkCallout.offsetWidth || 240;
@@ -3921,28 +4831,18 @@
       const safePad = vw <= 420 ? 18 : 22;
       const minLeft = Math.max(safePad, Math.round(shellRect.left + safePad));
       const maxRight = Math.min(vw - safePad, Math.round(shellRect.right - safePad));
-      const desiredCenterX = shellCenterX + relX * 0.32;
-      const desiredLeft = Math.round(desiredCenterX - calloutWidth / 2);
+
+      let desiredLeft;
+      if (align === 'left') {
+        desiredLeft = Math.round(targetCenterX - 14);
+      } else if (align === 'right') {
+        desiredLeft = Math.round(targetCenterX + 20 - calloutWidth);
+      } else {
+        desiredLeft = Math.round(targetCenterX - calloutWidth / 2);
+      }
+
       const clampedLeft = Math.min(Math.max(minLeft, maxRight - calloutWidth), Math.max(minLeft, desiredLeft));
       coachmarkCallout.style.left = `${clampedLeft}px`;
-
-      const calloutCenterX = clampedLeft + calloutWidth / 2;
-      const dx = calloutCenterX - targetCenterX;
-
-      // 화살표 끝(60, 4)은 타겟 정중앙을 가리키고, 꼬리는 실제 문구 중앙(calloutCenterX)을 향해 자연스러운 곡선으로 연결
-      if (arrowPathEl) {
-        if (dx > 14) {
-          const endX = Math.min(104, Math.round(60 + dx * 0.68));
-          const midX = Math.round(60 + (endX - 60) * 0.42);
-          arrowPathEl.setAttribute('d', `M60 4L47 20M60 4L75 16M60 4C62 22 ${midX} 36 ${endX} 48`);
-        } else if (dx < -14) {
-          const endX = Math.max(16, Math.round(60 + dx * 0.68));
-          const midX = Math.round(60 + (endX - 60) * 0.42);
-          arrowPathEl.setAttribute('d', `M60 4L45 16M60 4L73 20M60 4C58 22 ${midX} 36 ${endX} 48`);
-        } else {
-          arrowPathEl.setAttribute('d', 'M60 4L46 19M60 4L74 19M60 4C60 22 61 36 62 48');
-        }
-      }
 
       const spaceBelow = (vh - 96) - (sTop + sHeight);
       const spaceAbove = sTop - 20;
@@ -4059,6 +4959,7 @@
     async function completeOnboarding() {
       document.documentElement.classList.remove('onboarding-lock');
       if (onboardingModal) onboardingModal.classList.remove('active');
+      if (allMerchants.length > 0) renderStoreList();
       if (onboardingSavedFontScale && onboardingSavedFontScale !== 'normal') {
         applyFontScale(onboardingSavedFontScale, { save: true, animate: true });
       }
@@ -4068,6 +4969,7 @@
       if (activeOnboardingUserKey) {
         localStorage.setItem(`ongjin_onboarding_done_${activeOnboardingUserKey}`, '1');
       }
+      localStorage.removeItem('ongjin_onboarding_done');
       if (localStorage.getItem('ongjin_token')) {
         try {
           await api.post('/auth/onboarding-complete');
@@ -4077,6 +4979,15 @@
 
     window.openOnboardingModal = function(isManualReopen = false, userKey = null) {
       if (userKey) activeOnboardingUserKey = String(userKey);
+      if (!isManualReopen) {
+        if (activeOnboardingUserKey) {
+          localStorage.setItem(`ongjin_onboarding_done_${activeOnboardingUserKey}`, '1');
+        }
+        localStorage.removeItem('ongjin_onboarding_done');
+        if (localStorage.getItem('ongjin_token')) {
+          api.post('/auth/onboarding-complete').catch(() => {});
+        }
+      }
       const activePanel = document.querySelector('.tab-panel.active');
       onboardingInitialTabId = activePanel ? activePanel.id : 'sec-coupon';
       onboardingSavedFontScale = localStorage.getItem('ongjin_font_scale') || document.documentElement.getAttribute('data-font-scale') || 'normal';
@@ -4085,6 +4996,7 @@
       }
       currentOnboardingStep = 0;
       document.documentElement.classList.add('onboarding-lock');
+      if (allMerchants.length > 0) renderStoreList();
       syncTopBarOffset();
       buildOnboardingDots();
       if (onboardingModal) onboardingModal.classList.add('active');
@@ -4121,6 +5033,13 @@
         } else {
           completeOnboarding();
         }
+      });
+    }
+
+    if (btnOnboardingSkip) {
+      btnOnboardingSkip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        completeOnboarding();
       });
     }
 
@@ -4182,10 +5101,11 @@
             linkPhoneModal.classList.add('active');
           }
 
-          // 둘러보기(?tab=map) 진입이 아닌 회원 첫 접속 시에만 온보딩 자동 표시
-          const userKey = String(meRes.user.id || meRes.user.phone || 'default');
+          // 둘러보기(?tab=map) 진입이 아닌 회원(전화번호)별 첫 접속 시에만 온보딩 자동 표시
+          localStorage.removeItem('ongjin_onboarding_done');
+          const userKey = String(meRes.user.phone || meRes.user.id || 'default');
           activeOnboardingUserKey = userKey;
-          const localDone = localStorage.getItem(`ongjin_onboarding_done_${userKey}`) === '1';
+          const localDone = localStorage.getItem(`ongjin_onboarding_done_${userKey}`) === '1' || localStorage.getItem(`ongjin_onboarding_done_${meRes.user.id}`) === '1';
           if (initialTabParam !== 'map' && !meRes.user.onboarding_done && !localDone && !meRes.user.needs_phone_link) {
             window.openOnboardingModal(false, userKey);
           }

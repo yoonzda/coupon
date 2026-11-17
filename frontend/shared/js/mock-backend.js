@@ -6,7 +6,7 @@
 
 import { INITIAL_MOCK_DB } from './mock-data.js';
 
-const STORAGE_KEY = 'ongjin_mock_db_v1';
+const STORAGE_KEY = 'ongjin_mock_db_v2';
 
 export function isStaticDemoEnv() {
   if (typeof window === 'undefined') return false;
@@ -726,70 +726,41 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
   // ── 8. 관광객 포털 (Tourist OTP, QR 수령, 내 쿠폰함) ──
   if (pathname === '/coupon/demo-qr' && m === 'POST') {
     const requestedFace = Number(bodyObj?.faceValue) || 5000;
-    const forceNew = Boolean(bodyObj?.forceNew);
     const firstIssuer = db.issuers[0] || { id: 1, name: '자월달빛천문대', phone: '032-899-3300', address: '인천광역시 옹진군' };
     const basePrefix = getBasePrefix();
 
-    let coupon = !forceNew
-      ? db.coupons.find(c => String(c.kiosk_session_id || '').startsWith('demo_') && c.status === 'available' && !c.issued_to && Number(c.face_value) === requestedFace)
-      : null;
-
-    const nowIso = new Date().toISOString();
-    const expIso = getOneYearLaterIso(nowIso);
-
-    if (!coupon) {
-      const sid = `demo_${Date.now()}_${randomHex(3)}`;
-      const newId = (db.coupons.reduce((mx, c) => Math.max(mx, Number(c.id || 0)), 0) || 0) + 1;
-      const hash = randomHex(16);
-      coupon = {
-        id: newId,
-        code_hash: hash,
-        coupon_type: 'digital',
-        face_value: requestedFace,
-        status: 'available',
-        issued_to: null,
-        issued_at: nowIso,
-        expires_at: expIso,
-        used_at: null,
-        kiosk_session_id: sid,
-        tourist_phone: '- (미등록 대기)',
-        issuer_name: firstIssuer.name,
-        issuer_phone: firstIssuer.phone,
-        issuer_address: firstIssuer.address,
-        used_merchant_name: '-'
-      };
-      db.coupons.unshift(coupon);
-      saveDb(db);
-    } else {
-      coupon.issued_at = nowIso;
-      coupon.expires_at = expIso;
+    // 인트로 페이지 접속만으로는 미등록 쿠폰을 미리 생성하지 않고, 기존 미등록 demo_ 잔여분도 정리
+    const beforeLen = db.coupons.length;
+    db.coupons = db.coupons.filter(c => !(String(c.kiosk_session_id || '').startsWith('demo_') && !c.issued_to));
+    if (db.coupons.length !== beforeLen) {
       saveDb(db);
     }
 
-    const h = String(coupon.code_hash || '00000000').toUpperCase();
-    const serialCode = `${h.slice(0, 4)}-${h.slice(4, 8)}`;
+    const nowIso = new Date().toISOString();
+    const expIso = getOneYearLaterIso(nowIso);
+    const sessionId = 'intro_demo';
     const tokenStr = encodeQrPayload({
       in: firstIssuer.name,
-      fv: Number(coupon.face_value),
+      fv: requestedFace,
       cnt: 1,
-      sid: coupon.kiosk_session_id,
-      iat: coupon.issued_at,
-      exp: coupon.expires_at
+      sid: sessionId,
+      iat: nowIso,
+      exp: expIso
     });
-    const qrUrl = `${basePrefix}/tourist/landing.html?token=${encodeURIComponent(tokenStr)}&kioskSessionId=${encodeURIComponent(coupon.kiosk_session_id)}`;
+    const qrUrl = `${basePrefix}/tourist/landing.html?token=${encodeURIComponent(tokenStr)}&kioskSessionId=${encodeURIComponent(sessionId)}`;
 
     return {
       status: 200,
       data: {
         success: true,
         data: {
-          couponId: coupon.id,
+          couponId: null,
           allocationId: 1,
           token: tokenStr,
-          kioskSessionId: coupon.kiosk_session_id,
-          faceValue: Number(coupon.face_value),
+          kioskSessionId: sessionId,
+          faceValue: requestedFace,
           issuerName: firstIssuer.name,
-          serialCode,
+          serialCode: 'DEMO-5000',
           qrUrl,
           serverIp: 'localhost'
         }
@@ -821,6 +792,7 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
         nickname: formattedPhone,
         email: null,
         coupon_balance: 0,
+        onboarding_done: 0,
         role: 'tourist',
         created_at: new Date().toISOString()
       };
@@ -840,12 +812,26 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
     };
   }
 
+  if (pathname === '/auth/onboarding-complete' && m === 'POST') {
+    const uid = Number(localStorage.getItem('ongjin_mock_current_user_id') || 1);
+    const user = db.users.find(u => Number(u.id) === uid);
+    if (user) {
+      user.onboarding_done = 1;
+      saveDb(db);
+    }
+    return {
+      status: 200,
+      data: { success: true }
+    };
+  }
+
   if (pathname === '/auth/me' && m === 'GET') {
     const uid = Number(localStorage.getItem('ongjin_mock_current_user_id') || 1);
     const user = db.users.find(u => Number(u.id) === uid) || db.users[0] || {
       id: 1,
       nickname: localStorage.getItem('ongjin_user_phone') || '010-1234-5678',
       provider_id: localStorage.getItem('ongjin_user_phone') || '010-1234-5678',
+      onboarding_done: 0,
       role: 'tourist'
     };
     const myAvail = db.coupons.filter(c => Number(c.issued_to) === Number(user.id) && c.status === 'available');
@@ -857,6 +843,7 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
         user: {
           ...user,
           phone: user.provider_id || user.nickname,
+          onboarding_done: Number(user.onboarding_done || 0),
           coupon_balance: balance
         }
       }
@@ -873,8 +860,10 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
     const issuedAtIso = decoded?.iat || new Date().toISOString();
     const expiresAtIso = decoded?.exp || getOneYearLaterIso(issuedAtIso);
 
-    // 1) 같은 브라우저에서 발급된 세션 쿠폰이 있으면 귀속
-    const sessionMatches = kioskSessionId
+    const isIntroDemo = kioskSessionId === 'intro_demo' || String(kioskSessionId || '').startsWith('demo_');
+
+    // 1) 같은 브라우저에서 발급된 세션 쿠폰이 있으면 귀속 (인트로 체험 QR은 매번 신규 발급)
+    const sessionMatches = (kioskSessionId && !isIntroDemo)
       ? db.coupons.filter(c => c.kiosk_session_id === kioskSessionId && c.status === 'available' && !c.issued_to)
       : [];
 
@@ -918,7 +907,7 @@ export async function handleMockApiRequest(method, rawPath, bodyObj = null) {
         issued_at: issuedAtIso,
         expires_at: expiresAtIso,
         used_at: null,
-        kiosk_session_id: kioskSessionId || decoded?.sid || `ks_${Date.now()}`,
+        kiosk_session_id: isIntroDemo ? `demo_${Date.now()}_${randomHex(3)}` : (kioskSessionId || decoded?.sid || `ks_${Date.now()}`),
         tourist_phone: userPhone,
         issuer_name: issuerName,
         issuer_phone: '032-899-3300',

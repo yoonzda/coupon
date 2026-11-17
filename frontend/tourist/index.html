@@ -338,8 +338,25 @@
 
     // 소셜 로그인 실패 시 에러 토스트 처리 및 QR 스캔 파라미터 추출
     const urlParams = new URLSearchParams(window.location.search);
-    const qrToken = urlParams.get('token');
-    const kioskSessionId = urlParams.get('kioskSessionId');
+    let qrToken = urlParams.get('token');
+    let kioskSessionId = urlParams.get('kioskSessionId');
+
+    if (qrToken) {
+      sessionStorage.setItem('ongjin_pending_qr', JSON.stringify({ token: qrToken, kioskSessionId: kioskSessionId || '' }));
+    } else {
+      try {
+        const savedQr = JSON.parse(sessionStorage.getItem('ongjin_pending_qr') || 'null');
+        if (savedQr && savedQr.token) {
+          qrToken = savedQr.token;
+          kioskSessionId = savedQr.kioskSessionId || null;
+        }
+      } catch (_) {}
+    }
+
+    // 인트로 페이지의 체험용 QR(intro_demo)로 진입한 경우, 이전 로그인 세션을 비우고 휴대폰 번호 입력부터 바로 체험하도록 처리
+    if (urlParams.get('kioskSessionId') === 'intro_demo') {
+      clearTokens();
+    }
     const errorParam = urlParams.get('error') || urlParams.get('notice');
     if (errorParam) {
       if (errorParam.includes('kakao') || errorParam.includes('naver') || errorParam.includes('google')) {
@@ -364,25 +381,19 @@
       if (qrToken) {
         (async () => {
           try {
-            const issueRes = await api.post('/coupon/issue-by-qr', {
+            await api.post('/coupon/issue-by-qr', {
               token: qrToken,
               kioskSessionId
             });
-            if (issueRes && issueRes.success) {
-              showToast(issueRes.message || '쿠폰이 지갑에 자동 등록되었습니다.', 'info');
-            }
-            setTimeout(() => {
-              window.location.href = './mypage.html';
-            }, 350);
+            sessionStorage.removeItem('ongjin_pending_qr');
+            window.location.href = './mypage.html';
           } catch (err) {
             if (err.status === 401 || err.status === 403 || (err.message && err.message.includes('인증'))) {
               // 만료된 로그인 토큰이면 비우고 현재 로그인 화면에서 인증 후 자동 등록 진행
               clearTokens();
             } else {
-              showToast(err.message || '이미 수령되었거나 만료된 쿠폰입니다.', 'error');
-              setTimeout(() => {
-                window.location.href = './mypage.html';
-              }, 700);
+              sessionStorage.removeItem('ongjin_pending_qr');
+              window.location.href = './mypage.html';
             }
           }
         })();
@@ -596,28 +607,18 @@
           setTokens(res.token, res.refresh);
           localStorage.setItem('ongjin_user_phone', phoneInput.value);
 
-          // QR 스캔을 통해 로그인 페이지로 들어온 경우 로그인 즉시 쿠폰 자동 등록 연동
+          // QR 스캔을 통해 로그인 페이지로 들어온 경우 로그인 즉시 쿠폰 자동 등록 후 바로 지갑으로 이동
           if (qrToken) {
             try {
-              const issueRes = await api.post('/coupon/issue-by-qr', {
+              await api.post('/coupon/issue-by-qr', {
                 token: qrToken,
                 kioskSessionId
               });
-              if (issueRes && issueRes.success) {
-                showToast(issueRes.message || '인증 및 쿠폰 등록 완료! 지갑으로 이동합니다.', 'info');
-              } else {
-                showToast('인증 완료! 쿠폰 지갑으로 이동합니다.', 'info');
-              }
-            } catch (issueErr) {
-              showToast(issueErr.message || '인증 완료! 쿠폰 지갑으로 이동합니다.', 'info');
-            }
-          } else {
-            showToast('인증 완료! 쿠폰 지갑으로 이동합니다.', 'info');
+            } catch (_) {}
+            sessionStorage.removeItem('ongjin_pending_qr');
           }
 
-          setTimeout(() => {
-            window.location.href = './mypage.html';
-          }, 400);
+          window.location.href = './mypage.html';
         } else {
           showToast(res.message || (Array.isArray(res.errors) && res.errors[0]?.msg) || '인증번호가 일치하지 않습니다.', 'error');
         }
